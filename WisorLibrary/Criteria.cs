@@ -25,7 +25,7 @@ namespace WisorLib
 
         public int GetIndexOf(string fieldName)
         {
-            int index = 0;
+            int index = -1;
             CriteriaField cf = this.Find(CriteriaFieldPredicate(new CriteriaField(fieldName)));
             if (null != cf)
                 index = cf.index;
@@ -44,6 +44,7 @@ namespace WisorLib
         public bool legal { get; set; }
         public int min { get; set; }
         public int max { get; set; }
+        public bool isMandatory { get; set; }
 
         public string toString()
         {
@@ -52,7 +53,7 @@ namespace WisorLib
 
         // constructor
         public CriteriaField(string id = "", int index = MiscConstants.UNDEFINED_INT, string value = "",
-            int min = MiscConstants.UNDEFINED_INT, int max = MiscConstants.UNDEFINED_INT)
+            int min = MiscConstants.UNDEFINED_INT, int max = MiscConstants.UNDEFINED_INT, bool isMandatory = false)
         {
             this.ID = id;
             this.index = index;
@@ -61,9 +62,25 @@ namespace WisorLib
             this.status = true;
             this.min = min;
             this.max = max;
+            this.isMandatory = isMandatory;
         }
 
     }
+
+    //// Define the mandatory cretiria which shoild be defined while using the calculation
+    //public class MandatoryCriteriaFieldList : FieldList
+    //{
+    //    public MandatoryCriteriaFieldList() {
+    //        int index = 1;
+    //        Add(new CriteriaField(MiscConstants.LOAN_AMOUNT, index++));
+    //        Add(new CriteriaField(MiscConstants.MONTHLY_PAYMENT, index++));
+    //        Add(new CriteriaField(MiscConstants.PROPERTY_VALUE, index++));
+    //        Add(new CriteriaField(MiscConstants.YEARLY_INCOME, index++));
+    //        Add(new CriteriaField(MiscConstants.AGE, index++));
+    //    }
+
+
+    //}
 
 
 

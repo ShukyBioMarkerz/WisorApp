@@ -1,26 +1,52 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace WisorLib
 {
+
     public class CheckInfo
     {
         // Time Software Opened and closed
-        public static DateTime calculationStartTime;
-        public static DateTime calculationEndTime;
-        public static DateTime softwareOpenTime;
-        public static DateTime searchStartTime;
-        public static DateTime softwareCloseTime;
+        public DateTime calculationStartTime;
+        public DateTime calculationEndTime;
+        public DateTime softwareOpenTime { get; set; }
+        public DateTime searchStartTime;
+        public DateTime softwareCloseTime;
 
         // Execution Information
-        public static double startTimeToMeasure = new DateTime(2014, 1, 1).Ticks;
-        public static string fastCheckID = "";
-        public static string orderID = "";
-        public static double resultsID = 0;
+        public double startTimeToMeasure;
+        public string fastCheckID;
+        public string orderID { get; }
+        public double resultsID;
+
+        public CheckInfo(string orderid)
+        {
+            orderID = orderid;
+            startTimeToMeasure = new DateTime(2014, 1, 1).Ticks;
+            // Define Execution ID
+            fastCheckID = (softwareOpenTime.Ticks - startTimeToMeasure).ToString();
+        }
     }
+
+    //public class CheckInfo
+    //{
+    //    // Time Software Opened and closed
+    //    public static DateTime calculationStartTime;
+    //    public static DateTime calculationEndTime;
+    //    public static DateTime softwareOpenTime;
+    //    public static DateTime searchStartTime;
+    //    public static DateTime softwareCloseTime;
+
+    //    // Execution Information
+    //    public static double startTimeToMeasure = new DateTime(2014, 1, 1).Ticks;
+    //    public static string fastCheckID = "";
+    //    public static string orderID = "";
+    //    public static double resultsID = 0;
+    //}
 
 
 
@@ -69,46 +95,101 @@ namespace WisorLib
 
 
 
-
-
     public class CalculationParameters
     {
         // Loan Amount Wanted - Inserted by Admin Once
-        public static double loanAmtWanted = -1;
+        public double loanAmtWanted;
 
         // Monthly Payment Wanted - Inserted by Admin Once
-        public static double monthlyPmtWanted = -1;
+        public double monthlyPmtWanted;
 
         // Income
-        public static uint income = 0;
+        public uint income;
 
         // Property value
-        public static uint propertyValue = 0;
+        public uint propertyValue;
 
         // Youngest lender age
-        public static uint youngestLenderAge = 0;
+        public uint youngestLenderAge;
 
         // Loan to Value (LTV)
-        public static double ltv = -1;
+        public double ltv;
 
         // Payment to Income (PTI)
-        public static double pti = -1;
+        public double pti;
 
         // Time restriction from age of youngest lender
-        public static uint maximumTimeForLoan = 360;
+        public uint maximumTimeForLoan = 360;
 
         // Option Types Chosen for calculation
-        public static OptionTypes optTypes = null;
+        public OptionTypes optTypes = null;
 
         // Minimum Amounts possible for every Option (Option X, Option Y, Option Z)
-        public static double[] minAmts = { CalculationConstants.optionMinimumAmount, 
-                                            CalculationConstants.optionMinimumAmount, 
-                                            CalculationConstants.optionMinimumAmount };
+        public double[] minAmts;
 
         // Maximum Amounts possible for every Option (Option X, Option Y, Option Z)
-        public static double[] maxAmts = { -1, -1, -1 };
+        public double[] maxAmts;
+
+        public CalculationParameters(double loanAmtWante, double monthlyPmtWante,
+                uint propertyValu, uint incom, uint youngestLenderAg)
+        {
+            loanAmtWanted = loanAmtWante;
+            monthlyPmtWanted = monthlyPmtWante;
+            propertyValue = propertyValu;
+            income = incom;
+            youngestLenderAge = youngestLenderAg;
+            ltv = (loanAmtWanted / propertyValue);
+            pti = (monthlyPmtWanted / income);
+
+            minAmts = new double[] {CalculationConstants.optionMinimumAmount,
+                              CalculationConstants.optionMinimumAmount,
+                              CalculationConstants.optionMinimumAmount };
+
+            maxAmts = new double[] { -1, -1, -1 };
+        }
 
     }
+
+
+
+    //public class CalculationParameters
+    //{
+    //    // Loan Amount Wanted - Inserted by Admin Once
+    //    public static double loanAmtWanted = -1;
+
+    //    // Monthly Payment Wanted - Inserted by Admin Once
+    //    public static double monthlyPmtWanted = -1;
+
+    //    // Income
+    //    public static uint income = 0;
+
+    //    // Property value
+    //    public static uint propertyValue = 0;
+
+    //    // Youngest lender age
+    //    public static uint youngestLenderAge = 0;
+
+    //    // Loan to Value (LTV)
+    //    public static double ltv = -1;
+
+    //    // Payment to Income (PTI)
+    //    public static double pti = -1;
+
+    //    // Time restriction from age of youngest lender
+    //    public static uint maximumTimeForLoan = 360;
+
+    //    // Option Types Chosen for calculation
+    //    public static OptionTypes optTypes = null;
+
+    //    // Minimum Amounts possible for every Option (Option X, Option Y, Option Z)
+    //    public static double[] minAmts = { CalculationConstants.optionMinimumAmount, 
+    //                                        CalculationConstants.optionMinimumAmount, 
+    //                                        CalculationConstants.optionMinimumAmount };
+
+    //    // Maximum Amounts possible for every Option (Option X, Option Y, Option Z)
+    //    public static double[] maxAmts = { -1, -1, -1 };
+
+    //}
 
 
 
@@ -155,26 +236,51 @@ namespace WisorLib
     }
 
 
-
-
-
-    class PrintOptions
+    public class PrintOptions
     {
         // Print main function text - without internal functions
-        public const bool printMainInConsole = true;
+        public bool printMainInConsole;
 
         // Print as program runs on console or not
-        public const bool printFunctionsInConsole = false;
+        public bool printFunctionsInConsole;
 
         // Print sub functions on console
-        public const bool printSubFunctionsInConsole = false;
-        
+        public bool printSubFunctionsInConsole;
+
         // Print percentage done
-        public const bool printPercentageDone = true;
+        public bool printPercentageDone;
 
         // Print saved matches to output file or not
-        public const bool printToOutputFile = true;
+        public bool printToOutputFile;
+
+        public PrintOptions()
+        {
+            printMainInConsole = true;
+            printFunctionsInConsole = false;
+            printSubFunctionsInConsole = false;
+            printPercentageDone = true;
+            printToOutputFile = true;
+        }
     }
+
+
+    //class PrintOptions
+    //{
+    //    // Print main function text - without internal functions
+    //    public const bool printMainInConsole = true;
+
+    //    // Print as program runs on console or not
+    //    public const bool printFunctionsInConsole = false;
+
+    //    // Print sub functions on console
+    //    public const bool printSubFunctionsInConsole = false;
+
+    //    // Print percentage done
+    //    public const bool printPercentageDone = true;
+
+    //    // Print saved matches to output file or not
+    //    public const bool printToOutputFile = true;
+    //}
 
 
 
@@ -198,23 +304,23 @@ namespace WisorLib
 
 
 
-    class OutputConstants
-    {
+    //class OutputConstants
+    //{
 
-        public static OutputFile outputFile = null;
+    //    public static OutputFile outputFile = null;
         
-        // Lenovo
-        // public const string filePath = "C:\\Business\\Software\\Test Runs\\FastThreeOptionSearchV3_2_1\\";
-        public const string filePath = ".\\output\\";
+    //    // Lenovo
+    //    // public const string filePath = "C:\\Business\\Software\\Test Runs\\FastThreeOptionSearchV3_2_1\\";
+    //    public const string filePath = ".\\output\\";
 
-        // Desktop       
-        //public const string filePath = "C:\\Optimmizer Software\\Three Options\\Test Runs\\ExperimentThree\\";
+    //    // Desktop       
+    //    //public const string filePath = "C:\\Optimmizer Software\\Three Options\\Test Runs\\ExperimentThree\\";
 
-        // Amit Marzel Laptop
-        //public const string filePath = "C:\\Users\\Amitma\\Desktop\\Wisor\\Orders\\Optimization Results\\";
+    //    // Amit Marzel Laptop
+    //    //public const string filePath = "C:\\Users\\Amitma\\Desktop\\Wisor\\Orders\\Optimization Results\\";
 
-    }
+    //}
 
-
+  
 
 }

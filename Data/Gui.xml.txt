@@ -4,21 +4,25 @@
 		<type>TextBox</type>
 		<name>Loan amount</name>
 		<default>1000000</default>
+		<mandatory>yes</mandatory>
 	</item>
 	<item>
 		<type>TextBox</type>
 		<name>Desired monthly payment</name>
 		<default>2000</default>
+		<mandatory>yes</mandatory>
 	</item>
 	<item>
 		<type>TextBox</type>
 		<name>Property value</name>
 		<default>2000000</default>
+		<mandatory>yes</mandatory>
 	</item>
 	<item>
 		<type>TextBox</type>
 		<name>Yearly income</name>
 		<default>85000</default>
+		<mandatory>yes</mandatory>
 	</item>
 	<item>
 		<type>TextBox</type>
@@ -26,6 +30,7 @@
 		<ToCheck>min=35</ToCheck>
 		<ToCheck>max=55</ToCheck>
 		<default>35</default>
+		<mandatory>yes</mandatory>
 	</item>
 
 	<item>

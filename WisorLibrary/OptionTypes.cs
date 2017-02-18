@@ -136,13 +136,13 @@ namespace WisorLib
         
         
 
-        public OptionTypes(uint optXType, uint optYType, uint optZType)
+        public OptionTypes(uint optXType, uint optYType, uint optZType, RunEnvironment env)
         {
             optionTypes[(int)Options.options.OPTX] = new OneOptType(optXType);
             optionTypes[(int)Options.options.OPTY] = new OneOptType(optYType);
             optionTypes[(int)Options.options.OPTZ] = new OneOptType(optZType);
-            GetAgeRestriction();
-            GetMaxAmountsForThreeOptions();
+            GetAgeRestriction(env);
+            GetMaxAmountsForThreeOptions(env);
         }
 
 
@@ -151,17 +151,17 @@ namespace WisorLib
 
         // ***************************************************** Age Restriction ****************************************************** //
 
-        public void GetAgeRestriction()
+        public void GetAgeRestriction(RunEnvironment env)
         {
-            if (CalculationParameters.youngestLenderAge >= 18)
+            if (env.CalculationParameters.youngestLenderAge >= 18)
             {
-                if (CalculationParameters.youngestLenderAge <= 45)
+                if (env.CalculationParameters.youngestLenderAge <= 45)
                 {
-                    CalculationParameters.maximumTimeForLoan = 360;
+                    env.CalculationParameters.maximumTimeForLoan = 360;
                 }
                 else
                 {
-                    CalculationParameters.maximumTimeForLoan = ((75 - CalculationParameters.youngestLenderAge) * 12);
+                    env.CalculationParameters.maximumTimeForLoan = ((75 - env.CalculationParameters.youngestLenderAge) * 12);
                 }
             }
             else
@@ -169,13 +169,13 @@ namespace WisorLib
                 // Shouldnt happen - input should be 18-71
             }
 
-            if (PrintOptions.printSubFunctionsInConsole == true)
+            if (env.PrintOptions.printSubFunctionsInConsole == true)
             {
-                Console.WriteLine("\nMaximum time possible = " + (CalculationParameters.maximumTimeForLoan / 12));
+                Console.WriteLine("\nMaximum time possible = " + (env.CalculationParameters.maximumTimeForLoan / 12));
             }
-            GetAgeRestrictionOneOption(optionTypes[(int)Options.options.OPTX]);
-            GetAgeRestrictionOneOption(optionTypes[(int)Options.options.OPTY]);
-            GetAgeRestrictionOneOption(optionTypes[(int)Options.options.OPTZ]);
+            GetAgeRestrictionOneOption(optionTypes[(int)Options.options.OPTX], env);
+            GetAgeRestrictionOneOption(optionTypes[(int)Options.options.OPTY], env);
+            GetAgeRestrictionOneOption(optionTypes[(int)Options.options.OPTZ], env);
         }
 
 
@@ -184,16 +184,16 @@ namespace WisorLib
 
         // ******************************************** Get Maximum Time For One Option *********************************************** //
 
-        private static void GetAgeRestrictionOneOption(OneOptType optTypeForCheck)
+        private static void GetAgeRestrictionOneOption(OneOptType optTypeForCheck, RunEnvironment env)
         {
             //Console.WriteLine("Option type = " + optTypeForCheck.typeId);
             //Console.ReadKey();
-            uint remainingTimePossible = CalculationParameters.maximumTimeForLoan - (CalculationParameters.maximumTimeForLoan % optTypeForCheck.jump);
+            uint remainingTimePossible = env.CalculationParameters.maximumTimeForLoan - (env.CalculationParameters.maximumTimeForLoan % optTypeForCheck.jump);
 
-            if (PrintOptions.printSubFunctionsInConsole == true)
+            if (env.PrintOptions.printSubFunctionsInConsole == true)
             {
                 Console.WriteLine("Option Type = " + optTypeForCheck.optName + "\nMaximum time for option type = " + optTypeForCheck.maxTime
-                                    + "\nMaximum time possible for loaner = " + CalculationParameters.maximumTimeForLoan
+                                    + "\nMaximum time possible for loaner = " + env.CalculationParameters.maximumTimeForLoan
                                     + "\nNew maximum time for option type = " + remainingTimePossible);
             }
 
@@ -208,13 +208,13 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ***************************************** Finding Maximum Amounts For All Options ****************************************** //
 
-        private void GetMaxAmountsForThreeOptions()
+        private void GetMaxAmountsForThreeOptions(RunEnvironment env)
         {
-            CalculationParameters.maxAmts[(int)Options.options.OPTX] = FindMaxAmount(CalculationParameters.loanAmtWanted,
+            env.CalculationParameters.maxAmts[(int)Options.options.OPTX] = FindMaxAmount(env.CalculationParameters.loanAmtWanted,
                                                                 optionTypes[(int)Options.options.OPTX].typeId);
-            CalculationParameters.maxAmts[(int)Options.options.OPTY] = FindMaxAmount(CalculationParameters.loanAmtWanted,
+            env.CalculationParameters.maxAmts[(int)Options.options.OPTY] = FindMaxAmount(env.CalculationParameters.loanAmtWanted,
                                                                             optionTypes[(int)Options.options.OPTY].typeId);
-            CalculationParameters.maxAmts[(int)Options.options.OPTZ] = FindMaxAmount(CalculationParameters.loanAmtWanted,
+            env.CalculationParameters.maxAmts[(int)Options.options.OPTZ] = FindMaxAmount(env.CalculationParameters.loanAmtWanted,
                                                                             optionTypes[(int)Options.options.OPTZ].typeId);          
         }
 

@@ -30,11 +30,12 @@ namespace WisorLib
 
 
 
-        public OneColumnForSearch(double targetTwoOptPmt, int columnNumber, Option[] startPointForCheck, Option[] limitPointForCheck)
+        public OneColumnForSearch(double targetTwoOptPmt, int columnNumber, Option[] startPointForCheck, 
+            Option[] limitPointForCheck, RunEnvironment env)
         {
             columnNum = columnNumber;
             startingPoint = startPointForCheck;
-            printOrNo = PrintOptions.printFunctionsInConsole;
+            printOrNo = env.PrintOptions.printFunctionsInConsole;
             targetTwoOptionPmt = targetTwoOptPmt;
             limitPoint = limitPointForCheck;
 
@@ -46,8 +47,8 @@ namespace WisorLib
                                     + "\nStarting Point Y = " + startingPoint[(int)Options.options.OPTY].ToString() + "\n");
             }
 
-            nextColumnStart = SearchOneColumn(startingPoint);
-            SavePointForNextColumn();
+            nextColumnStart = SearchOneColumn(startingPoint, env);
+            SavePointForNextColumn(env);
 
         }
         
@@ -94,7 +95,7 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ***************************************** PRIVATE - Search Down One Single Column ****************************************** //
 
-        private Option[] SearchOneColumn(Option[] startingPoint)
+        private Option[] SearchOneColumn(Option[] startingPoint, RunEnvironment env)
         {
             int pmtChecker = ChecKPmt(startingPoint[(int)Options.options.OPTX], startingPoint[(int)Options.options.OPTY]);
 
@@ -125,8 +126,8 @@ namespace WisorLib
                             startingPoint[(int)Options.options.OPTY] = new Option(startingPoint[(int)Options.options.OPTY].optType,
                                                                 startingPoint[(int)Options.options.OPTY].optAmt,
                                                                 (startingPoint[(int)Options.options.OPTY].optTime
-                                                                + CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].jump));
-                            return SearchOneColumn(startingPoint);
+                                                                + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].jump));
+                            return SearchOneColumn(startingPoint, env);
                         }
                         else
                         {
@@ -149,8 +150,8 @@ namespace WisorLib
                             startingPoint[(int)Options.options.OPTY] = new Option(startingPoint[(int)Options.options.OPTY].optType,
                                                                 startingPoint[(int)Options.options.OPTY].optAmt,
                                                                 (startingPoint[(int)Options.options.OPTY].optTime
-                                                                + CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].jump));
-                            return SearchOneColumn(startingPoint);
+                                                                + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].jump));
+                            return SearchOneColumn(startingPoint, env);
                         }
                         else
                         {
@@ -190,21 +191,21 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ************************************************* Save Point For Next Column *********************************************** //
 
-        private void SavePointForNextColumn()
+        private void SavePointForNextColumn(RunEnvironment env)
         {
             if (nextColumnStart[(int)Options.options.OPTX].optTime > limitPoint[(int)Options.options.OPTX].optTime)
             {
                 if (printOrNo == true)
                 {
                     Console.WriteLine("Time X for next column = " + nextColumnStart[(int)Options.options.OPTX].optTime
-                        + " - " + CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].jump
+                        + " - " + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].jump
                         + " = " + (nextColumnStart[(int)Options.options.OPTX].optTime -
-                        CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].jump).ToString() + "\n");                      
+                        env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].jump).ToString() + "\n");                      
                 }
                 nextColumnStart[(int)Options.options.OPTX] = new Option(nextColumnStart[(int)Options.options.OPTX].optType,
                                                                     nextColumnStart[(int)Options.options.OPTX].optAmt,
                                                                     (startingPoint[(int)Options.options.OPTX].optTime
-                                                                    - CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].jump));
+                                                                    - env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].jump));
                 nextColumnStart[(int)Options.options.OPTY] = nextTimeY;
                 if (printOrNo == true)
                 {

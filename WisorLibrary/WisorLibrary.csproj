@@ -73,9 +73,12 @@
     <Compile Include="PmtLimits.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rates.cs" />
+    <Compile Include="RunEnvironment.cs" />
+    <Compile Include="RunLoanDetails.cs" />
     <Compile Include="SavedCompositions.cs" />
     <Compile Include="SavedMatchesBeforeCheck.cs" />
     <Compile Include="SearchAreaInPlane.cs" />
+    <Compile Include="Share.cs" />
     <Compile Include="SinglePlane.cs" />
     <Compile Include="ThreeOptionSearch.cs" />
     <Compile Include="Utilities.cs" />

@@ -63,9 +63,9 @@ namespace WisorLib
 
 
 
-        public BorrowerProfile()
+        public BorrowerProfile(RunEnvironment env)
         {
-            GetBorrowerProfile();
+            GetBorrowerProfile(env);
             InsertRatesToProfile(borrowerProfile);
         }
 
@@ -76,15 +76,15 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ************************************ Getting Borrower Profile According to LTV and PTI ************************************* //
 
-        private void GetBorrowerProfile()
+        private void GetBorrowerProfile(RunEnvironment env)
         {
             int ltvCounter = 0;
             int ptiCounter = 0;
             while (borrowerProfile == (int)CalculationConstants.borrowerProfiles.NOTSET)
             {
-                if (CalculationParameters.pti <= ptiRatios[ptiCounter])
+                if (env.CalculationParameters.pti <= ptiRatios[ptiCounter])
                 {
-                    if (CalculationParameters.ltv <= ltvRatios[ltvCounter])
+                    if (env.CalculationParameters.ltv <= ltvRatios[ltvCounter])
                     {
                         borrowerProfile = profileMatrix[ptiCounter, ltvCounter];
                     }
@@ -113,8 +113,8 @@ namespace WisorLib
                 }
             }
             Console.WriteLine("Matrix Index [" + (ptiCounter + 1) + "," + (ltvCounter + 1) + "] = " + borrowerProfile
-                                                + "\nLTV = " + Math.Round(CalculationParameters.ltv * 100, 2) + "%\nPTI = "
-                                                + Math.Round(CalculationParameters.pti * 100, 2)
+                                                + "\nLTV = " + Math.Round(env.CalculationParameters.ltv * 100, 2) + "%\nPTI = "
+                                                + Math.Round(env.CalculationParameters.pti * 100, 2)
                                                 + "%\nProfile = " + CalculationConstants.profiles[borrowerProfile]);
         }
 

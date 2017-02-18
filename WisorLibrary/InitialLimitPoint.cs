@@ -30,18 +30,18 @@ namespace WisorLib
 
 
 
-        public InitialLimitPoint(uint pointLetter, PmtLimits planePmtLimits, double targetPmtTwoOptions)
+        public InitialLimitPoint(uint pointLetter, PmtLimits planePmtLimits, double targetPmtTwoOptions, RunEnvironment env)
         {
             letter = pointLetter;
             pmtLimits = planePmtLimits;
             targetTwoOptionPmt = targetPmtTwoOptions;
-            printOrNo = PrintOptions.printFunctionsInConsole;
+            printOrNo = env.PrintOptions.printFunctionsInConsole;
 
 
-            GetInitialPoint((int)Options.limitPointsNumbers.ONE);
+            GetInitialPoint((int)Options.limitPointsNumbers.ONE, env);
             if (matchMarker == (int)Options.binarySearchResults.TOOSMALL)
             {
-                GetInitialPoint((int)Options.limitPointsNumbers.TWO);
+                GetInitialPoint((int)Options.limitPointsNumbers.TWO, env);
                 if (matchMarker == (int)Options.binarySearchResults.TOOSMALL)
                 {
                     opts[(int)Options.options.OPTX] = null;
@@ -67,7 +67,7 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ************************************************ Get Initial Limit Point *************************************************** //
 
-        private void GetInitialPoint(uint numberForCheck)
+        private void GetInitialPoint(uint numberForCheck, RunEnvironment env)
         {
             if (printOrNo == true)
             {
@@ -75,7 +75,7 @@ namespace WisorLib
                                     + " for target Pmt = " + targetTwoOptionPmt + "\n");
             }
 
-            InsertOptionsAccordingToLetterAndNumber(numberForCheck);
+            InsertOptionsAccordingToLetterAndNumber(numberForCheck, env);
             FindTargetPmtForCheckedOption(numberForCheck);
             savedTime = PerformBinarySearch(optForCheck.times[(int)Options.pmtLimits.MINTIME].optTime,
                                                 optForCheck.times[(int)Options.pmtLimits.MAXTIME].optTime);
@@ -90,13 +90,13 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // *************************************** Insert Options for search according to Letter ************************************** //
 
-        private void InsertOptionsAccordingToLetterAndNumber(uint numberForCheck)
+        private void InsertOptionsAccordingToLetterAndNumber(uint numberForCheck, RunEnvironment env)
         {
             if (((letter == (int)Options.limitPointsLetters.A) && (numberForCheck == (int)Options.limitPointsNumbers.ONE)) ||
                     ((letter == (int)Options.limitPointsLetters.B) && (numberForCheck == (int)Options.limitPointsNumbers.TWO)))
             {
                 fixedOpt = pmtLimits.opts[(int)Options.options.OPTX];
-                optForCheckType = CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY];
+                optForCheckType = env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY];
                 optForCheck = pmtLimits.opts[(int)Options.options.OPTY];
                 optForCheckAmt = pmtLimits.amts[(int)Options.options.OPTY];
             }
@@ -104,7 +104,7 @@ namespace WisorLib
                     ((letter == (int)Options.limitPointsLetters.A) && (numberForCheck == (int)Options.limitPointsNumbers.TWO)))
             {
                 fixedOpt = pmtLimits.opts[(int)Options.options.OPTY];
-                optForCheckType = CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX];
+                optForCheckType = env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX];
                 optForCheck = pmtLimits.opts[(int)Options.options.OPTX];
                 optForCheckAmt = pmtLimits.amts[(int)Options.options.OPTX];
             }

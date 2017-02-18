@@ -39,17 +39,17 @@ namespace WisorLib
 
 
 
-        public SearchAreaInPlane(FinalLimitPoint[] finalPoints)
+        public SearchAreaInPlane(FinalLimitPoint[] finalPoints, RunEnvironment env)
         {
             limitPoints[(int)Options.limitPointsLetters.A] = finalPoints[(int)Options.limitPointsLetters.A];
             limitPoints[(int)Options.limitPointsLetters.B] = finalPoints[(int)Options.limitPointsLetters.B];
             targetTwoOptionPmt = finalPoints[(int)Options.options.OPTX].targetTwoOptionPmt;
 
-            printOrNo = PrintOptions.printFunctionsInConsole;
+            printOrNo = env.PrintOptions.printFunctionsInConsole;
           
 
-            cornerAMaxTimeXMinTimeY = FindCornerAPointMaxTimeXMinTimeY();
-            cornerBMinTimeXMaxTimeY = FindCornerBPointMinTimeXMaxTimeY();
+            cornerAMaxTimeXMinTimeY = FindCornerAPointMaxTimeXMinTimeY(env);
+            cornerBMinTimeXMaxTimeY = FindCornerBPointMinTimeXMaxTimeY(env);
 
             
             if ((cornerBMinTimeXMaxTimeY[(int)Options.options.OPTY].optTime - 
@@ -59,10 +59,10 @@ namespace WisorLib
             {
                 numOfLines = ((cornerBMinTimeXMaxTimeY[(int)Options.options.OPTY].optTime -
                                 cornerAMaxTimeXMinTimeY[(int)Options.options.OPTY].optTime) /
-                                CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].jump) + 1;
+                                env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].jump) + 1;
                 numOfColumns = ((cornerAMaxTimeXMinTimeY[(int)Options.options.OPTX].optTime -
                                 cornerBMinTimeXMaxTimeY[(int)Options.options.OPTX].optTime) /
-                                CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].jump) + 1;
+                                env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].jump) + 1;
                 numOfCells = numOfLines * numOfColumns;
                 columns = new OneColumnForSearch[numOfColumns];
                 columnsChecked = new bool[numOfColumns];
@@ -198,7 +198,7 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ***************************************** Find Corner Point A(maxTimeX, minTimeY) ****************************************** //
 
-        private Option[] FindCornerAPointMaxTimeXMinTimeY()
+        private Option[] FindCornerAPointMaxTimeXMinTimeY(RunEnvironment env)
         {
             optsA[(int)Options.options.OPTX] = limitPoints[(int)Options.limitPointsLetters.A].opts[(int)Options.options.OPTX];
             optsA[(int)Options.options.OPTY] = limitPoints[(int)Options.limitPointsLetters.A].opts[(int)Options.options.OPTY];
@@ -230,7 +230,7 @@ namespace WisorLib
                                     new Option(limitPoints[(int)Options.limitPointsLetters.A].opts[(int)Options.options.OPTX].optType,
                                         limitPoints[(int)Options.limitPointsLetters.A].opts[(int)Options.options.OPTX].optAmt,
                                         (limitPoints[(int)Options.limitPointsLetters.A].opts[(int)Options.options.OPTX].optTime -
-                                        CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].jump));
+                                        env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].jump));
                                 if (printOrNo == true)
                                 {
                                     Console.WriteLine("Moving corner to cell with smaller timeX\nNew timeX = "
@@ -257,7 +257,7 @@ namespace WisorLib
                                     new Option(limitPoints[(int)Options.limitPointsLetters.A].opts[(int)Options.options.OPTY].optType,
                                         limitPoints[(int)Options.limitPointsLetters.A].opts[(int)Options.options.OPTY].optAmt,
                                         (limitPoints[(int)Options.limitPointsLetters.A].opts[(int)Options.options.OPTY].optTime +
-                                        CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].jump));
+                                        env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].jump));
                                 if (printOrNo == true)
                                 {
                                     Console.WriteLine("Moving corner to cell with larger timeY\nNew timeY = "
@@ -301,7 +301,7 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ***************************************** Find Corner Point B(minTimeX, maxTimeY) ****************************************** //
 
-        private Option[] FindCornerBPointMinTimeXMaxTimeY()
+        private Option[] FindCornerBPointMinTimeXMaxTimeY(RunEnvironment env)
         {
             optsB[(int)Options.options.OPTX] = limitPoints[(int)Options.limitPointsLetters.B].opts[(int)Options.options.OPTX];
             optsB[(int)Options.options.OPTY] = limitPoints[(int)Options.limitPointsLetters.B].opts[(int)Options.options.OPTY];
@@ -331,7 +331,7 @@ namespace WisorLib
                                     new Option(limitPoints[(int)Options.limitPointsLetters.B].opts[(int)Options.options.OPTY].optType,
                                         limitPoints[(int)Options.limitPointsLetters.B].opts[(int)Options.options.OPTY].optAmt,
                                         (limitPoints[(int)Options.limitPointsLetters.B].opts[(int)Options.options.OPTY].optTime -
-                                        CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].jump));
+                                        env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].jump));
                                 if (printOrNo == true)
                                 {
                                     Console.WriteLine("Moving corner to cell with smaller timeY\nNew timeY = "
@@ -358,7 +358,7 @@ namespace WisorLib
                                     new Option(limitPoints[(int)Options.limitPointsLetters.B].opts[(int)Options.options.OPTX].optType,
                                         limitPoints[(int)Options.limitPointsLetters.B].opts[(int)Options.options.OPTX].optAmt,
                                         (limitPoints[(int)Options.limitPointsLetters.B].opts[(int)Options.options.OPTX].optTime +
-                                        CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].jump));
+                                        env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].jump));
                                 if (printOrNo == true)
                                 {
                                     Console.WriteLine("Moving corner to cell with larger timeX\nNew timeX = "
@@ -401,21 +401,21 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ********************************************* Search One Column and Update Counters **************************************** //
 
-        public void SearchOneColumnAndUpdateCounters(int columnIndex)
+        public void SearchOneColumnAndUpdateCounters(int columnIndex, RunEnvironment env)
         {
             if (columnsChecked[columnIndex] == false)
             {
                 if (columnIndex == 0)
                 {
                     columns[columnIndex] = new OneColumnForSearch(targetTwoOptionPmt, columnIndex,
-                                                    cornerAMaxTimeXMinTimeY, cornerBMinTimeXMaxTimeY);
+                                                    cornerAMaxTimeXMinTimeY, cornerBMinTimeXMaxTimeY, env);
 
                 }
                 else
                 {
                     
                     columns[columnIndex] = new OneColumnForSearch(targetTwoOptionPmt, columnIndex,
-                                                    columns[columnIndex - 1].nextColumnStart, cornerBMinTimeXMaxTimeY);
+                                                    columns[columnIndex - 1].nextColumnStart, cornerBMinTimeXMaxTimeY, env);
                 }
                 savedMatches.InsertListOfMatches(columns[columnIndex].savedMatches);
                 columnsChecked[columnIndex] = true;

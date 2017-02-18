@@ -25,21 +25,21 @@ namespace WisorLib
 
 
 
-        public ThreeOptionSearch(double minAmountOptX, double maxAmountOptX)
+        public ThreeOptionSearch(double minAmountOptX, double maxAmountOptX, RunEnvironment env)
         {
             //minAmtOptX = CalculationParameters.minAmts[(int)Options.options.OPTX];
             //maxAmtOptX = CalculationParameters.maxAmts[(int)Options.options.OPTX];
             minAmtOptX = maxAmountOptX;
             maxAmtOptX = maxAmountOptX;
-            minAmtOptY = CalculationParameters.minAmts[(int)Options.options.OPTY];
-            maxAmtOptY = CalculationParameters.maxAmts[(int)Options.options.OPTY];
-            minAmtOptZ = CalculationParameters.minAmts[(int)Options.options.OPTZ];
-            maxAmtOptZ = CalculationParameters.maxAmts[(int)Options.options.OPTZ];
-            if (PrintOptions.printFunctionsInConsole == true)
+            minAmtOptY = env.CalculationParameters.minAmts[(int)Options.options.OPTY];
+            maxAmtOptY = env.CalculationParameters.maxAmts[(int)Options.options.OPTY];
+            minAmtOptZ = env.CalculationParameters.minAmts[(int)Options.options.OPTZ];
+            maxAmtOptZ = env.CalculationParameters.maxAmts[(int)Options.options.OPTZ];
+            if (env.PrintOptions.printFunctionsInConsole == true)
             {
                 Console.WriteLine("\nPerforming three option search ...\n");
             }
-            PerformFullThreeOptionSearch();
+            PerformFullThreeOptionSearch(env);
 
 
         }
@@ -52,7 +52,7 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ***************** PRIVATE - Performs Full Search for Three Options According to Limit Amounts for Option X ***************** //
 
-        private void PerformFullThreeOptionSearch()
+        private void PerformFullThreeOptionSearch(RunEnvironment env)
         {
             DateTime tStart = DateTime.Now;
 
@@ -67,7 +67,7 @@ namespace WisorLib
                 for (double opt2Amt = minAmtOptY; opt2Amt <= maxAmtOptY; opt2Amt += CalculationConstants.jumpBetweenAmounts)
                 {
                     // Show progress and  calculate remaining time
-                    if (PrintOptions.printPercentageDone == true)
+                    if (env.PrintOptions.printPercentageDone == true)
                     {
                         amtYCounter++;
                         TimeSpan tLoop = DateTime.Now - tStart;
@@ -78,12 +78,12 @@ namespace WisorLib
                                             + opt1Amt + " ( " + percentDone + " % done ) - took " + tLoop);
                     }
 
-                    if (((CalculationParameters.loanAmtWanted - opt1Amt - opt2Amt) >= minAmtOptZ) &&
-                            ((CalculationParameters.loanAmtWanted - opt1Amt - opt2Amt) <= maxAmtOptZ))
+                    if (((env.CalculationParameters.loanAmtWanted - opt1Amt - opt2Amt) >= minAmtOptZ) &&
+                            ((env.CalculationParameters.loanAmtWanted - opt1Amt - opt2Amt) <= maxAmtOptZ))
                     {
-                        double opt3Amt = CalculationParameters.loanAmtWanted - opt1Amt - opt2Amt;
+                        double opt3Amt = env.CalculationParameters.loanAmtWanted - opt1Amt - opt2Amt;
                         // Perform main thing here ...
-                        searchOneDivisionOfAmounts = new OneDivisionOfAmounts(opt1Amt, opt2Amt, opt3Amt);
+                        searchOneDivisionOfAmounts = new OneDivisionOfAmounts(opt1Amt, opt2Amt, opt3Amt, env);
                     }
                 }
             }

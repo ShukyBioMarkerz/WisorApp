@@ -25,7 +25,12 @@ namespace WisorLib
         public static string    EQUAL_STR = "=";
         public static char      SEERATOR_STR = ';';
         public static char      DOT_STR = '.';
+        public static string    CRITERIA_FILENAME = "criteria.txt";
+        public static string    OUTPUT_DIR = "Output";
+        public static char      NAME_SEP_CHAR = '-';
+        public static string    CSV_EXT = ".csv";
 
+        // TBD: either read it from file
         public static int GetLoanID()
         {
             Random random = new Random();
@@ -33,5 +38,5 @@ namespace WisorLib
             return randomNumber;
         }
     }
-  
+
 }

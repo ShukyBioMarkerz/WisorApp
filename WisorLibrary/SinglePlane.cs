@@ -11,7 +11,7 @@ namespace WisorLib
         // General Parameters
         public Option fixedOptZ = null;
         private PmtLimits pmtLimits = null;
-        private bool printOrNo = PrintOptions.printFunctionsInConsole;
+        private bool printOrNo;
         private double targetTwoOptionPmt = -1;
         private InitialLimitPoint[] initialLimitPoints = { null, null };
         private FinalLimitPoint[] finalLimitPoints = { null, null };
@@ -31,16 +31,17 @@ namespace WisorLib
         public int totalLimitPointNotExists = 0;
 
 
-        public SinglePlane(PmtLimits planePmtLimits, Option optZ0)
+        public SinglePlane(PmtLimits planePmtLimits, Option optZ0, RunEnvironment env)
         {
             pmtLimits = planePmtLimits;
             fixedOptZ = optZ0;
+            printOrNo = env.PrintOptions.printFunctionsInConsole;
 
             // 1 - Calculate target Pmt for two Option X and Option Y for limit point search
-            targetTwoOptionPmt = CalculationParameters.monthlyPmtWanted - fixedOptZ.optPmt;
+            targetTwoOptionPmt = env.CalculationParameters.monthlyPmtWanted - fixedOptZ.optPmt;
 
             // 2 - Get Initial Limit Points
-            FindInitialLimitPointsForSearchArea();
+            FindInitialLimitPointsForSearchArea(env);
             //Console.ReadKey();
 
             if (initialLimitPoints[(int)Options.options.OPTX].opts[(int)Options.options.OPTX] != null)
@@ -54,15 +55,15 @@ namespace WisorLib
                 totalLimitPointExists++;
 
                 // 3 - Get Final Limit Points
-                FindFinalExtendedLimitPointsForSearchArea();
+                FindFinalExtendedLimitPointsForSearchArea(env);
                 //Console.ReadKey();
 
                 // 4 - Create final search Area
-                FindFinalSearchArea();
+                FindFinalSearchArea(env);
                 //Console.ReadKey();
 
                 // 5 - Perform column search in final search area 
-                SearchAllColumnsInFinalSearchArea();
+                SearchAllColumnsInFinalSearchArea(env);
                 //Console.ReadKey();
             }
             else
@@ -84,13 +85,13 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ****************************************** Find Initial Limit Points A and B *********************************************** //
 
-        private void FindInitialLimitPointsForSearchArea()
+        private void FindInitialLimitPointsForSearchArea(RunEnvironment env)
         {
             // 1 - Getting Initial Points
             initialLimitPoints[(int)Options.limitPointsLetters.A] = new InitialLimitPoint((int)Options.limitPointsLetters.A,
-                                                                                        pmtLimits, targetTwoOptionPmt);
+                                                                                        pmtLimits, targetTwoOptionPmt, env);
             initialLimitPoints[(int)Options.limitPointsLetters.B] = new InitialLimitPoint((int)Options.limitPointsLetters.B,
-                                                                                        pmtLimits, targetTwoOptionPmt);
+                                                                                        pmtLimits, targetTwoOptionPmt, env);
 
             if (printOrNo == true)
             {
@@ -104,10 +105,10 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // *************************************** Find Final Extended Limit Points A and B ******************************************* //
 
-        private void FindFinalExtendedLimitPointsForSearchArea()
+        private void FindFinalExtendedLimitPointsForSearchArea(RunEnvironment env)
         {
-            finalLimitPoints[(int)Options.limitPointsLetters.A] = new FinalLimitPoint(initialLimitPoints[(int)Options.limitPointsLetters.A]);
-            finalLimitPoints[(int)Options.limitPointsLetters.B] = new FinalLimitPoint(initialLimitPoints[(int)Options.limitPointsLetters.B]);
+            finalLimitPoints[(int)Options.limitPointsLetters.A] = new FinalLimitPoint(initialLimitPoints[(int)Options.limitPointsLetters.A], env);
+            finalLimitPoints[(int)Options.limitPointsLetters.B] = new FinalLimitPoint(initialLimitPoints[(int)Options.limitPointsLetters.B], env);
 
             savedMatches.InsertListOfMatches(finalLimitPoints[(int)Options.limitPointsLetters.A].savedMatches);
             savedMatches.InsertListOfMatches(finalLimitPoints[(int)Options.limitPointsLetters.B].savedMatches);
@@ -127,9 +128,9 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ************************************************ Create Final Search Area ************************************************** //
 
-        private void FindFinalSearchArea()
+        private void FindFinalSearchArea(RunEnvironment env)
         {
-            searchArea = new SearchAreaInPlane(finalLimitPoints);
+            searchArea = new SearchAreaInPlane(finalLimitPoints, env);
 
             if (printOrNo == true)
             {
@@ -145,7 +146,7 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // **************************************** Search All Colomns In Final Search Area ******************************************* //
 
-        private void SearchAllColumnsInFinalSearchArea()
+        private void SearchAllColumnsInFinalSearchArea(RunEnvironment env)
         {
             // 1 - Perform search in final search area
             if (searchArea.columns != null)     // There are columns to check - search area is at least 1X1
@@ -156,7 +157,7 @@ namespace WisorLib
                     {
                         Console.WriteLine("Searching column " + i);
                     }
-                    searchArea.SearchOneColumnAndUpdateCounters(i);
+                    searchArea.SearchOneColumnAndUpdateCounters(i, env);
                 }
                 savedMatches.InsertListOfMatches(searchArea.savedMatches);
             }

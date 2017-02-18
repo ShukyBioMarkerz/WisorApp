@@ -28,10 +28,10 @@ namespace WisorLib
 
 
 
-        public FinalLimitPoint(InitialLimitPoint initialLimitPoint)
+        public FinalLimitPoint(InitialLimitPoint initialLimitPoint, RunEnvironment env)
         {
             initialPoint = initialLimitPoint;
-            printOrNo = PrintOptions.printFunctionsInConsole;
+            printOrNo = env.PrintOptions.printFunctionsInConsole;
             letter = initialPoint.letter;
             number = initialPoint.number;
             targetTwoOptionPmt = initialLimitPoint.targetTwoOptionPmt;
@@ -41,7 +41,7 @@ namespace WisorLib
                 savedMatches.InsertMatchToList(initialPoint.opts[(int)Options.options.OPTX],
                                                             initialPoint.opts[(int)Options.options.OPTY]);
             }
-            InsertOptionsAccordingToLetter();
+            InsertOptionsAccordingToLetter(env);
 
             if (printOrNo == true)
             {
@@ -64,19 +64,19 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // *************************************** Insert Options for search according to Letter ************************************** //
 
-        private void InsertOptionsAccordingToLetter()
+        private void InsertOptionsAccordingToLetter(RunEnvironment env)
         {
             if (letter == (int)Options.limitPointsLetters.A)
             {
-                optTypes[(int)Options.options.OPTX] = CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX];
-                optTypes[(int)Options.options.OPTY] = CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY];
+                optTypes[(int)Options.options.OPTX] = env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX];
+                optTypes[(int)Options.options.OPTY] = env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY];
                 expandingOpts[(int)Options.options.OPTX] = initialPoint.opts[(int)Options.options.OPTX];
                 expandingOpts[(int)Options.options.OPTY] = initialPoint.opts[(int)Options.options.OPTY];
             }
             else if (letter == (int)Options.limitPointsLetters.B)
             {
-                optTypes[(int)Options.options.OPTX] = CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY];
-                optTypes[(int)Options.options.OPTY] = CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX];
+                optTypes[(int)Options.options.OPTX] = env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY];
+                optTypes[(int)Options.options.OPTY] = env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX];
                 expandingOpts[(int)Options.options.OPTX] = initialPoint.opts[(int)Options.options.OPTY];
                 expandingOpts[(int)Options.options.OPTY] = initialPoint.opts[(int)Options.options.OPTX];
             }

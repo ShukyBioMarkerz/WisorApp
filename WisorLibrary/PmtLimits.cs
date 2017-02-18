@@ -25,17 +25,17 @@ namespace WisorLib
         public double[] amts = { -1, -1, -1 };
         public OneOption[] opts = { null, null, null };
 
-        public PmtLimits(double n_optXAmt, double n_optYAmt, double n_optZAmt)
+        public PmtLimits(double n_optXAmt, double n_optYAmt, double n_optZAmt, RunEnvironment env)
         {
             amts[(int)Options.options.OPTX] = n_optXAmt;
             amts[(int)Options.options.OPTY] = n_optYAmt;
             amts[(int)Options.options.OPTZ] = n_optZAmt;
 
-            opts[(int)Options.options.OPTX] = new OneOption(CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX],
+            opts[(int)Options.options.OPTX] = new OneOption(env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX],
                                                 amts[(int)Options.options.OPTX]);
-            opts[(int)Options.options.OPTY] = new OneOption(CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY],
+            opts[(int)Options.options.OPTY] = new OneOption(env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY],
                                                 amts[(int)Options.options.OPTY]);
-            opts[(int)Options.options.OPTZ] = new OneOption(CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ],
+            opts[(int)Options.options.OPTZ] = new OneOption(env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ],
                                                 amts[(int)Options.options.OPTZ]);
         }
 

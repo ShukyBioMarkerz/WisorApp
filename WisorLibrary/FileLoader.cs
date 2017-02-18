@@ -35,6 +35,9 @@ namespace WisorLib
                     string type = item.Element("type").Value;
                     string id = item.Element("name").Value;
                     string defaultValue = null != item.Element("default") ? item.Element("default").Value : id;
+                    string mandatoryValue = null != item.Element("mandatory") ? item.Element("mandatory").Value : "no";
+                    bool isMandatory = "yes" == mandatoryValue; 
+                    // <mandatory>yes</mandatory>
                     string value = null != defaultValue ? defaultValue : item.Element("name").Value;
                     int min = MiscConstants.UNDEFINED_INT, max = MiscConstants.UNDEFINED_INT;
 
@@ -52,7 +55,7 @@ namespace WisorLib
                     }
 
                     // add to the memory
-                    fields.Add(new CriteriaField(id, index++, value, min, max));
+                    fields.Add(new CriteriaField(id, index++, value, min, max, isMandatory));
                 }
 
             }
@@ -77,65 +80,91 @@ namespace WisorLib
         {
             LoanList loans = new LoanList();
 
-            if (File.Exists(filename))
+            try
             {
-                var file = new FileInfo(filename);
-                var stream = new FileStream(filename, FileMode.Open);
-                IExcelDataReader excelReader = null;
-
-                if (file.Extension == ".xls")
+                if (File.Exists(filename))
                 {
-                    excelReader = ExcelReaderFactory.CreateBinaryReader(stream);
-                }
-                else if (file.Extension == ".xlsx")
-                {
-                    excelReader = ExcelReaderFactory.CreateOpenXmlReader(stream);
-                }
+                    var file = new FileInfo(filename);
+                    var stream = new FileStream(filename, FileMode.Open);
+                    IExcelDataReader excelReader = null;
 
-                if (excelReader == null)
-                    return loans;
-
-                excelReader.IsFirstRowAsColumnNames = true;
-                DataSet ds = excelReader.AsDataSet();
-
-                List<string> data = ReadAllData(ds);
-
-                // id should be retrived by some logic
-                int id = MiscConstants.GetLoanID();
-                int loanAmountIndex = fieldsDef.GetIndexOf(MiscConstants.LOAN_AMOUNT);
-                int monthlyPaymentIndex = fieldsDef.GetIndexOf(MiscConstants.MONTHLY_PAYMENT);
-                int propertyValueIndex = fieldsDef.GetIndexOf(MiscConstants.PROPERTY_VALUE);
-                int yearlyIncomeIndex = fieldsDef.GetIndexOf(MiscConstants.YEARLY_INCOME);
-                int ageIndex = fieldsDef.GetIndexOf(MiscConstants.AGE);
-
-
-                // add to the memory
-                foreach (string line in data)
-                {
-                    // skip the header
-                    if (!line.ToLower().Contains(MiscConstants.LOAN_AMOUNT.ToLower()))
+                    if (file.Extension == ".xls")
                     {
-                        string[] entities = line.Split(MiscConstants.SEERATOR_STR);
-                        uint uloanAmountIndexV = Convert.ToUInt32(entities[loanAmountIndex]);
-                        uint umonthlyPaymentIndexV = Convert.ToUInt32(entities[monthlyPaymentIndex]);
-                        uint upropertyValueIndexV = Convert.ToUInt32(entities[propertyValueIndex]);
-                        uint uyearlyIncomeIndexV = Convert.ToUInt32(entities[yearlyIncomeIndex]);
-                        uint uageIndexV = Convert.ToUInt32(entities[ageIndex]);
-
-                        loans.Add(new loanDetails(id.ToString(),
-                            uloanAmountIndexV, umonthlyPaymentIndexV, upropertyValueIndexV, uyearlyIncomeIndexV, uageIndexV));
-                        id++;
+                        excelReader = ExcelReaderFactory.CreateBinaryReader(stream);
                     }
+                    else if (file.Extension == ".xlsx")
+                    {
+                        excelReader = ExcelReaderFactory.CreateOpenXmlReader(stream);
+                    }
+
+                    if (excelReader == null)
+                        return loans;
+
+                    excelReader.IsFirstRowAsColumnNames = true;
+                    DataSet ds = excelReader.AsDataSet();
+
+                    List<string> data = ReadAllData(ds);
+
+                    // id should be retrived by some logic
+                    int id = MiscConstants.GetLoanID();
+                    int loanAmountIndex = fieldsDef.GetIndexOf(MiscConstants.LOAN_AMOUNT);
+                    int monthlyPaymentIndex = fieldsDef.GetIndexOf(MiscConstants.MONTHLY_PAYMENT);
+                    int propertyValueIndex = fieldsDef.GetIndexOf(MiscConstants.PROPERTY_VALUE);
+                    int yearlyIncomeIndex = fieldsDef.GetIndexOf(MiscConstants.YEARLY_INCOME);
+                    int ageIndex = fieldsDef.GetIndexOf(MiscConstants.AGE);
+
+                    if (0 <= loanAmountIndex && 0 <= monthlyPaymentIndex && 0 <= propertyValueIndex &&
+                        0 <= yearlyIncomeIndex && 0 <= ageIndex)
+                    {
+                        // add to the memory
+                        foreach (string line in data)
+                        {
+                            // skip the header
+                            if (!line.ToLower().Contains(MiscConstants.LOAN_AMOUNT.ToLower()))
+                            {
+                                string[] entities = line.Split(MiscConstants.SEERATOR_STR);
+                                uint uloanAmountIndexV = Convert.ToUInt32(entities[loanAmountIndex]);
+                                uint umonthlyPaymentIndexV = Convert.ToUInt32(entities[monthlyPaymentIndex]);
+                                uint upropertyValueIndexV = Convert.ToUInt32(entities[propertyValueIndex]);
+                                uint uyearlyIncomeIndexV = Convert.ToUInt32(entities[yearlyIncomeIndex]);
+                                uint uageIndexV = Convert.ToUInt32(entities[ageIndex]);
+
+                                loans.Add(new loanDetails(id.ToString(),
+                                    uloanAmountIndexV, umonthlyPaymentIndexV, upropertyValueIndexV, uyearlyIncomeIndexV, uageIndexV));
+                                id++;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        string err = null;
+                        if (0 > loanAmountIndex)
+                            err += " illegal loanAmountIndex value: " + loanAmountIndex.ToString();
+                        if (0 > monthlyPaymentIndex)
+                            err += " illegal monthlyPaymentIndex value: " + monthlyPaymentIndex.ToString();
+                        if (0 > propertyValueIndex)
+                            err += " illegal propertyValueIndex value: " + propertyValueIndex.ToString();
+                        if (0 > yearlyIncomeIndex)
+                            err += " illegal yearlyIncomeIndex value: " + yearlyIncomeIndex.ToString();
+                        if (0 > ageIndex)
+                            err += " illegal ageIndex value: " + ageIndex.ToString();
+
+                        Console.WriteLine("NOTICE: LoadCSVFileData file: illegal index of the mandatory parameters. Probably missing some cretiria. " + err);
+                    }
+
+
+                    // Free resources (IExcelDataReader is IDisposable)
+                    excelReader.Close();
+
                 }
-
-
-                // Free resources (IExcelDataReader is IDisposable)
-                excelReader.Close();
-
+                else
+                {
+                    Console.WriteLine("LoadCSVFileData file: {0} does not exists!!!", filename);
+                }
             }
-            else
+            catch (Exception e)
             {
-                Console.WriteLine("LoadCSVFileData file: {0} does not exists!!!", filename);
+                Console.WriteLine("ERROR: LoadCSVFileData got Exception: " + e.ToString());
             }
 
             return loans;
