@@ -83,4 +83,10 @@
 		<options>exelent</options>
 		<default>medium</default>
 	</item>
+	
+		<item>
+		<type>TextBox</type>
+		<name>Moyshalach</name>
+		<default>1000000</default>
+	</item>
 </employees>  

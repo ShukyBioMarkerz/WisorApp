@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WisorLibrary", "WisorLibrary\WisorLibrary.csproj", "{64AFDBC4-F866-4B5E-AE27-395DAD70F732}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WisorAppWpf", "WisorAppWpf\WisorAppWpf.csproj", "{524BBCE5-47E4-43C7-823F-5957D9ADE3EE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{64AFDBC4-F866-4B5E-AE27-395DAD70F732} = {64AFDBC4-F866-4B5E-AE27-395DAD70F732}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
