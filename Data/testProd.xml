@@ -1,0 +1,20 @@
+<MortgageProducts>  									
+	<Product>
+		<market>ISRAEL</market>
+		<name>Makam</name>
+		<typeId>MakamIsrael</typeId>
+
+		<indexUsedFirstTimePeriod>MAKAM</indexUsedFirstTimePeriod>
+		<indexUsedSecondTimePeriod>MAKAM</indexUsedSecondTimePeriod>
+		
+		<indexJumpFirstTimePeriod>1</indexJumpFirstTimePeriod>
+		<indexJumpSecondTimePeriod>1</indexJumpSecondTimePeriod>
+
+		<minTime>48</minTime>
+		<maxTime>360</maxTime>
+		<timeJump>12</timeJump>
+		
+		<firstTimePeriod>0</firstTimePeriod>
+	</Product>
+	
+</MortgageProducts>  
