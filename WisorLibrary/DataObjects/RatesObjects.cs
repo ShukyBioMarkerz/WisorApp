@@ -31,10 +31,13 @@ namespace WisorLibrary.DataObjects
         public RateLine(string[] val, int startingIndex)
         {
             value = new double[val.Length];
+            string curr = MiscConstants.UNDEFINED_STRING;
+
             try
             {
                 for (int i = 0; i < val.Length - startingIndex; i++)
                 {
+                    curr = val[startingIndex + i];
                     if (!String.IsNullOrEmpty(val[startingIndex + i]))
                         value[i] = Convert.ToDouble(val[startingIndex + i]);
                     else
@@ -43,7 +46,7 @@ namespace WisorLibrary.DataObjects
             }
             catch (Exception e)
             {
-                Console.WriteLine("ERROR: RateLine got Exception: " + e.ToString());
+                Console.WriteLine("ERROR: RateLine got Exception: " + e.ToString() + ". Current: " + curr);
             }
         }
 

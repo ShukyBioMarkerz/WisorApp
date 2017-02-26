@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static WisorLib.GenericProduct;
 using static WisorLib.MiscConstants;
 
 namespace WisorLib
@@ -26,6 +27,9 @@ namespace WisorLib
 
 
         public static SelectionType theSelectionType { get; set; }
+
+
+        public static markets theMarket { get; set; }
 
         // Once the user select the order, update the loaded list accordingly
         public static void OrderTheCriteriaFields()

@@ -45,6 +45,11 @@ namespace WisorLib
             LoanAmount = loanAmount;
             BorrowerAge = borrowerAge;
             YearlyIncome = yearlyIncome;
+
+            if (MiscConstants.UNDEFINED_UINT == DesiredMonthlyPayment)
+            {
+
+            }
             //    MortgageType = mortgageType;
             //    PaymentType = paymentType;
             //    DateTaken = (DateTime) dateTaken;
@@ -60,7 +65,15 @@ namespace WisorLib
                 ", propertyValue: " + this.PropertyValue + ", income: " + this.YearlyIncome + ", age: " + this.BorrowerAge);
         }
 
-      
+        public static uint CalculateDesireMonthlyPayment(uint loanAmount, uint propertyValue, uint yearlyIncome, uint borrowerAge)
+        {
+            uint monthlyPayment = MiscConstants.UNDEFINED_UINT;
+
+            // TBD - rule of thumb: 30% of the income
+            monthlyPayment = (MiscConstants.DEFAULT_PERCANTAGE_OF_MONTHLY_PAYMENT / 100 * yearlyIncome);
+            return monthlyPayment;
+
+        }
     }
 
 }

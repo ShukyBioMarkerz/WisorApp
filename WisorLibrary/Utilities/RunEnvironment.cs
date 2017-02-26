@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static WisorLib.GenericProduct;
 
 namespace WisorLib
 {
@@ -45,6 +46,25 @@ namespace WisorLib
                 OutputFile = new OutputFile(orderid, loanAmtWanted, monthlyPmtWanted, CheckInfo);
             }
         }
+
+        public static bool SetMarket(markets market)
+        {
+            bool rc = false;
+            Share.theMarket = market;
+            // ensure there are combination for this market
+            string[,] combination = CalculationConstants.GetCombination(market);
+
+            if (null == combination || 0 == combination.Length)
+            {
+                WindowsUtilities.loggerMethod("ERROR: no combination founded for market: " + market.ToString());
+            }
+            else
+                rc = true;
+            return rc;
+        }
+
+        
+
 
     }
 

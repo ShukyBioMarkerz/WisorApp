@@ -106,6 +106,7 @@ namespace WisorLib
         public static LoanList LoadCSVFileData(string filename, FieldList fieldsDef)
         {
             LoanList loans = new LoanList();
+            string currLine = MiscConstants.UNDEFINED_STRING;
 
             try
             {
@@ -135,11 +136,11 @@ namespace WisorLib
 
                     // id should be retrived by some logic
                     int id = MiscConstants.GetLoanID();
-                    int loanAmountIndex = fieldsDef.GetIndexOf(MiscConstants.LOAN_AMOUNT) + INDEX_ADD; // there is a index in the excel file
-                    int monthlyPaymentIndex = fieldsDef.GetIndexOf(MiscConstants.MONTHLY_PAYMENT) + INDEX_ADD;
-                    int propertyValueIndex = fieldsDef.GetIndexOf(MiscConstants.PROPERTY_VALUE) + INDEX_ADD;
-                    int yearlyIncomeIndex = fieldsDef.GetIndexOf(MiscConstants.YEARLY_INCOME) + INDEX_ADD;
-                    int ageIndex = fieldsDef.GetIndexOf(MiscConstants.AGE) + INDEX_ADD;
+                    int loanAmountIndex = fieldsDef.GetIndexOf(MiscConstants.LOAN_AMOUNT); // // there is a index in the excel file
+                    int monthlyPaymentIndex = fieldsDef.GetIndexOf(MiscConstants.MONTHLY_PAYMENT); // + INDEX_ADD;
+                    int propertyValueIndex = fieldsDef.GetIndexOf(MiscConstants.PROPERTY_VALUE); // + INDEX_ADD;
+                    int yearlyIncomeIndex = fieldsDef.GetIndexOf(MiscConstants.YEARLY_INCOME); // + INDEX_ADD;
+                    int ageIndex = fieldsDef.GetIndexOf(MiscConstants.AGE); // + INDEX_ADD;
 
                     if (INDEX_ADD <= loanAmountIndex && INDEX_ADD <= monthlyPaymentIndex && INDEX_ADD <= propertyValueIndex &&
                         INDEX_ADD <= yearlyIncomeIndex /*&& INDEX_ADD <= ageIndex*/)
@@ -147,10 +148,12 @@ namespace WisorLib
                         // add to the memory
                         foreach (string line in data)
                         {
+                            currLine = line;
                             // skip the header
                             if (!line.ToLower().Contains(MiscConstants.LOAN_AMOUNT.ToLower()))
                             {
                                 string[] entities = line.Split(MiscConstants.SEERATOR_STR);
+                                // be prapared for missing data: skip that entry
                                 uint uloanAmountIndexV = Convert.ToUInt32(entities[loanAmountIndex]);
                                 uint umonthlyPaymentIndexV = Convert.ToUInt32(entities[monthlyPaymentIndex]);
                                 uint upropertyValueIndexV = Convert.ToUInt32(entities[propertyValueIndex]);
@@ -194,7 +197,7 @@ namespace WisorLib
             }
             catch (Exception e)
             {
-                WindowsUtilities.loggerMethod("ERROR: LoadCSVFileData got Exception: " + e.ToString());
+                WindowsUtilities.loggerMethod("ERROR: LoadCSVFileData got Exception: " + e.ToString() + ". line: " + currLine);
             }
 
             return loans;

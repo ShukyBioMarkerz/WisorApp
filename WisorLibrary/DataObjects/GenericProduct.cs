@@ -99,8 +99,8 @@ namespace WisorLib
                         //string optName = product.Element("optName").Value;
                         uint firstTimePeriod = Convert.ToUInt32(product.Element("firstTimePeriod").Value);
                         double maxPercentageLoan = MiscConstants.UNDEFINED_DOUBLE; 
-                        if (null != product.Element("MaxPercentageOfLoan"))
-                            maxPercentageLoan = Convert.ToDouble(product.Element("MaxPercentageOfLoan").Value);
+                        if (null != product.Element("maxPercentageOfLoan"))
+                            maxPercentageLoan = Convert.ToDouble(product.Element("maxPercentageOfLoan").Value);
                         
                         // add to the memory
                         products.Add(new GenericProduct(typeId /*ID*/, market /*localMarket*/, name, 

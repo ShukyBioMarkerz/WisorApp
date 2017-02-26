@@ -153,7 +153,15 @@ namespace WisorLib
             if (minTimeValue <= maxTimeValue)
             {
                 matchMarker = (int)Options.binarySearchResults.INRANGE;
-                numOfCells = ((maxTimeValue - minTimeValue) / optForCheckType.product.timeJump) + 1;
+                // TBD
+                if (0 == optForCheckType.product.timeJump)
+                {
+                    numOfCells = 1;
+                }
+                else
+                {
+                    numOfCells = ((maxTimeValue - minTimeValue) / optForCheckType.product.timeJump) + 1;
+                }
                 if (printOrNo == true)
                 {
                     Console.WriteLine("\nMinValue = " + minTimeValue + " | MaxValue = " + maxTimeValue

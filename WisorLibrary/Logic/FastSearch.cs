@@ -75,18 +75,18 @@ namespace WisorLib
                     if (env.PrintOptions.printMainInConsole == true)
                     {
                         Console.WriteLine("\nLoan Amount = " + env.CalculationParameters.loanAmtWanted + "\nTarget monthly payment = "
-                                            + env.CalculationParameters.monthlyPmtWanted + "\n\nThere are " + (CalculationConstants.combinations.GetUpperBound(0) + 1)
+                                            + env.CalculationParameters.monthlyPmtWanted + "\n\nThere are " + (CalculationConstants.GetCombination(Share.theMarket).GetUpperBound(0) + 1)
                                             + " combinations possible :");
-                        for (int i = 0; i <= CalculationConstants.combinations.GetUpperBound(0); i++)
+                        for (int i = 0; i <= CalculationConstants.GetCombination(Share.theMarket).GetUpperBound(0); i++)
                         {
-                            Console.WriteLine((i + 1) + " : " + CalculationConstants.combinations[i, 0] + CalculationConstants.combinations[i, 1]
-                                            + CalculationConstants.combinations[i, 2]);
+                            Console.WriteLine((i + 1) + " : " + CalculationConstants.GetCombination(Share.theMarket)[i, 0] + ", " + CalculationConstants.GetCombination(Share.theMarket)[i, 1]
+                                            + ", "  + CalculationConstants.GetCombination(Share.theMarket)[i, 2]);
                         }
                     }
                     env.CheckInfo.searchStartTime = DateTime.Now;
 
                     // Run through each combination possible for three options
-                    for (uint combinationCounter = 0; combinationCounter <= CalculationConstants.combinations.GetUpperBound(0); combinationCounter++)
+                    for (uint combinationCounter = 0; combinationCounter <= CalculationConstants.GetCombination(Share.theMarket).GetUpperBound(0); combinationCounter++)
                     {
                         // Perform three option search for one combination of option types
                         env.CheckInfo.calculationStartTime = DateTime.Now;
@@ -101,9 +101,9 @@ namespace WisorLib
                         if (env.PrintOptions.printMainInConsole == true)
                         {
                             Console.WriteLine("\nDone checking combination - " + 
-                                CalculationConstants.combinations[combinationCounter, 0] + " " +
-                                CalculationConstants.combinations[combinationCounter, 1] + " " +
-                                CalculationConstants.combinations[combinationCounter, 2] + " :");
+                                CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 0] + " " +
+                                CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 1] + " " +
+                                CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 2] + " :");
                             if (ResultsOutput.bestCompositionSoFar != null)
                             {
                                 Console.WriteLine("\nBest composition so far :\n" + ResultsOutput.bestCompositionSoFar.ToString());
@@ -136,9 +136,9 @@ namespace WisorLib
                             }
                             else
                             {
-                                summaryToFile += (CalculationConstants.combinations[combinationCounter, 0] + 4)
-                                                    + "," + "," + "," + "," + "," + (CalculationConstants.combinations[combinationCounter, 1] + 4)
-                                                    + "," + "," + "," + "," + "," + (CalculationConstants.combinations[combinationCounter, 2] + 4);
+                                summaryToFile += (CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 0] + 4)
+                                                    + "," + "," + "," + "," + "," + (CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 1] + 4)
+                                                    + "," + "," + "," + "," + "," + (CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 2] + 4);
                             }
                             env.OutputFile.WriteNewLineInSummaryFile(summaryToFile);
                         }
@@ -201,9 +201,9 @@ namespace WisorLib
 
         private void DefineOptionTypes(uint combinationToDefine, RunEnvironment env)
         {
-            env.CalculationParameters.optTypes = new OptionTypes(CalculationConstants.combinations[combinationToDefine, 0],
-                                                                CalculationConstants.combinations[combinationToDefine, 1],
-                                                                    CalculationConstants.combinations[combinationToDefine, 2], env);
+            env.CalculationParameters.optTypes = new OptionTypes(CalculationConstants.GetCombination(Share.theMarket)[combinationToDefine, 0],
+                                                                CalculationConstants.GetCombination(Share.theMarket)[combinationToDefine, 1],
+                                                                    CalculationConstants.GetCombination(Share.theMarket)[combinationToDefine, 2], env);
 
 
             //CalculationParameters.optTypes = new OptionTypes((combinationToDefine / 100), ((combinationToDefine - 100) / 10),

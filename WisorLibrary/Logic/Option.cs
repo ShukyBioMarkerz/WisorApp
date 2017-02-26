@@ -37,16 +37,16 @@ namespace WisorLib
 
         public Option(/*uint optionType*/ string optionType, double optionAmount, uint optionTime)
         {
-              // TBD: what is the unique ID of the product???
+            optType = optionType;
+            optAmt = optionAmount;
+            optTime = optionTime;
+
+            // TBD: what is the unique ID of the product???
             product = MiscConstants.GetProduct(optionType);
             //inflation = GetInflationForOption();
             // Shuky TBD
             //inflation = 0;
             bool rc = GetInflationsForOption(optType);
-
-            optType = optionType;
-            optAmt = optionAmount;
-            optTime = optionTime;
 
             optRateFirstPeriod = FindInterestRate();
             if (-1 == optRateFirstPeriod)
@@ -229,11 +229,11 @@ namespace WisorLib
         {
             double currInterest = MiscConstants.UNDEFINED_DOUBLE; 
 
-            if ((String.IsNullOrEmpty(optType) /*optType > Options.typesList.EMPTY*/) && (amtForCalc > 0) && (timeForCalc > 0))                                          
+            if ((! String.IsNullOrEmpty(optType) /*optType > Options.typesList.EMPTY*/) && (amtForCalc > 0) && (timeForCalc > 0))                                          
             {
-                if ((amtForCalc == optAmt) && (timeForCalc == optTime))
+                if ((amtForCalc > 0) && (timeForCalc > 0))
                 {
-                    if (product.firstTimePeriod >= timeForCalc)
+                    if (product.firstTimePeriod <= timeForCalc)
                     {
                         currInterest = optRateFirstPeriod = FindInterestRate();
                     }

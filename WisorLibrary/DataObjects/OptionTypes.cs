@@ -198,7 +198,20 @@ namespace WisorLib
         {
             //Console.WriteLine("Option type = " + optTypeForCheck.typeId);
             //Console.ReadKey();
-            uint remainingTimePossible = env.CalculationParameters.maximumTimeForLoan - (env.CalculationParameters.maximumTimeForLoan % optTypeForCheck.product.timeJump);
+
+            uint remainingTimePossible;
+            if (0 < optTypeForCheck.product.timeJump)
+            {
+                remainingTimePossible = env.CalculationParameters.maximumTimeForLoan - (env.CalculationParameters.maximumTimeForLoan % optTypeForCheck.product.timeJump);
+
+            }
+            else
+            {
+                remainingTimePossible = env.CalculationParameters.maximumTimeForLoan;
+            }
+
+            if (remainingTimePossible <= optTypeForCheck.product.maxTime)
+                optTypeForCheck.product.maxTime = remainingTimePossible;
 
             if (env.PrintOptions.printSubFunctionsInConsole == true)
             {
@@ -207,7 +220,7 @@ namespace WisorLib
                                     + "\nNew maximum time for option type = " + remainingTimePossible);
             }
 
-            optTypeForCheck.product.maxTime = remainingTimePossible;
+            //optTypeForCheck.product.maxTime = remainingTimePossible;
 
         }
 
@@ -258,20 +271,19 @@ namespace WisorLib
             int numOfFixedOptions = 2;
             double result = MiscConstants.UNDEFINED_DOUBLE;
 
-            result = ((((loanAmount * 3 / 10 / 100) - ((loanAmount * 3 / 10 / 100) % 1)) - 1) * 100);
 
             // Omri - need the maxPercentageOfLoan value
-            //if (optTypeForTest.product.maxPercentageOfLoan < 100)
-            //{
-            //    if ((((loanAmount * optTypeForTest.product.maxPercentageOfLoan) / 100) - (((loanAmount * optTypeForTest.product.maxPercentageOfLoan) / 100) % 1)) % 2 == 1)
-            //        result = ((((loanAmount * optTypeForTest.product.maxPercentageOfLoan / 100) - ((loanAmount * optTypeForTest.product.maxPercentageOfLoan / 100) % 1)) - 1) * 100);
-            //    else
-            //        result = (((loanAmount * optTypeForTest.product.maxPercentageOfLoan / 100) - ((loanAmount * optTypeForTest.product.maxPercentageOfLoan / 100) % 1)) * 100);
-            //}
-            //else
-            //{
-            //    result = ((loanAmount - (numOfFixedOptions * CalculationConstants.optionMinimumAmount)));
-            //}
+            if (optTypeForTest.product.maxPercentageOfLoan < 100)
+            {
+                if ((((loanAmount * optTypeForTest.product.maxPercentageOfLoan / 100) / 100) - (((loanAmount * optTypeForTest.product.maxPercentageOfLoan / 100) / 100) % 1)) % 2 == 1)
+                    result = ((((loanAmount * optTypeForTest.product.maxPercentageOfLoan / 100 / 100) - ((loanAmount * optTypeForTest.product.maxPercentageOfLoan / 100 / 100) % 1)) - 1) * 100);
+                else
+                    result = (((loanAmount * optTypeForTest.product.maxPercentageOfLoan / 100 / 100) - ((loanAmount * optTypeForTest.product.maxPercentageOfLoan / 100 / 100) % 1)) * 100);
+            }
+            else
+            {
+                result = ((loanAmount - (numOfFixedOptions * CalculationConstants.optionMinimumAmount)));
+            }
 
             return result;
         }

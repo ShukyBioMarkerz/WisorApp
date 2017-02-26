@@ -64,7 +64,8 @@ operatorUsedSecondTimePeriod
 		<maxTime>360</maxTime>
 		<timeJump>0</timeJump>
 		
-		<firstTimePeriod>0</firstTimePeriod>		
+		<firstTimePeriod>0</firstTimePeriod>	
+		<maxPercentageOfLoan>100</maxPercentageOfLoan>		
 	</Product>
 
 	<Product>
@@ -83,6 +84,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>0</timeJump>
 		
 		<firstTimePeriod>0</firstTimePeriod>
+		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
 	</Product>
 
 	<Product>
@@ -104,6 +106,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>0</timeJump>
 		
 		<firstTimePeriod>0</firstTimePeriod>
+		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
 	</Product>
 
 	<Product>
@@ -122,6 +125,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>0</timeJump>
 		
 		<firstTimePeriod>0</firstTimePeriod>
+		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
 	</Product>
 
 	<Product>
@@ -140,6 +144,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>0</timeJump>
 		
 		<firstTimePeriod>0</firstTimePeriod>
+		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
 	</Product>
 
 	<Product>
@@ -158,6 +163,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>0</timeJump>
 		
 		<firstTimePeriod>0</firstTimePeriod>
+		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
 	</Product>
 	
 	// ADJUSTABLE RATE PRODUCTS (ARM)
@@ -178,6 +184,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>12</timeJump>
 		
 		<firstTimePeriod>60</firstTimePeriod>
+		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
 	</Product>
 
 	<Product>
@@ -196,6 +203,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>12</timeJump>
 		
 		<firstTimePeriod>84</firstTimePeriod>
+		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
 	</Product>
 
 	// UK ONLY
@@ -220,6 +228,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>12</timeJump>
 		
 		<firstTimePeriod>24</firstTimePeriod>
+		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
 	</Product>
 
 	<Product>
@@ -238,6 +247,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>12</timeJump>
 		
 		<firstTimePeriod>36</firstTimePeriod>
+		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
 	</Product>
 
 	<Product>
@@ -256,6 +266,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>12</timeJump>
 		
 		<firstTimePeriod>60</firstTimePeriod>
+		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
 	</Product>
 
 	<Product>
@@ -274,6 +285,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>12</timeJump>
 		
 		<firstTimePeriod>84</firstTimePeriod>
+		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
 	</Product>
 
 	<Product>
@@ -292,6 +304,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>12</timeJump>
 		
 		<firstTimePeriod>120</firstTimePeriod>
+		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
 	</Product>
 	
 	// ISRAEL ONLY
@@ -314,6 +327,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>12</timeJump>
 		
 		<firstTimePeriod>0</firstTimePeriod>
+		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
 	</Product>
 	
 	<Product>
@@ -332,6 +346,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>12</timeJump>
 		
 		<firstTimePeriod>0</firstTimePeriod>
+		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
 	</Product>
 		
 	<Product>
@@ -350,6 +365,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>12</timeJump>
 		
 		<firstTimePeriod>0</firstTimePeriod>
+		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
 	</Product>
 			
 	<Product>
@@ -368,6 +384,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>12</timeJump>
 		
 		<firstTimePeriod>0</firstTimePeriod>
+		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
 	</Product>
 		
 	// ADJUSTABLE RATE PRODUCTS
@@ -388,6 +405,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>12</timeJump>
 		
 		<firstTimePeriod>0</firstTimePeriod>
+		<maxPercentageOfLoan>30</maxPercentageOfLoan>	
 	</Product>
 		
 	<Product>
@@ -406,6 +424,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>12</timeJump>
 		
 		<firstTimePeriod>24</firstTimePeriod>
+		<maxPercentageOfLoan>30</maxPercentageOfLoan>	
 	</Product>
 			
 	<Product>
@@ -424,6 +443,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>30</timeJump>
 		
 		<firstTimePeriod>30</firstTimePeriod>
+		<maxPercentageOfLoan>30</maxPercentageOfLoan>	
 	</Product>
 				
 	<Product>
@@ -442,6 +462,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>60</timeJump>
 		
 		<firstTimePeriod>60</firstTimePeriod>
+		<maxPercentageOfLoan>30</maxPercentageOfLoan>	
 	</Product>
 					
 	<Product>
@@ -460,6 +481,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>60</timeJump>
 		
 		<firstTimePeriod>60</firstTimePeriod>
+		<maxPercentageOfLoan>30</maxPercentageOfLoan>	
 	</Product>
 						
 	<Product>
@@ -478,6 +500,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>84</timeJump>
 		
 		<firstTimePeriod>84</firstTimePeriod>
+		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
 	</Product>
 							
 	<Product>
@@ -496,6 +519,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>120</timeJump>
 		
 		<firstTimePeriod>120</firstTimePeriod>
+		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
 	</Product>
 								
 	<Product>
@@ -514,6 +538,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>12</timeJump>
 		
 		<firstTimePeriod>0</firstTimePeriod>
+		<maxPercentageOfLoan>30</maxPercentageOfLoan>	
 	</Product>
 									
 	<Product>
@@ -532,6 +557,7 @@ operatorUsedSecondTimePeriod
 		<timeJump>12</timeJump>
 		
 		<firstTimePeriod>0</firstTimePeriod>
+		<maxPercentageOfLoan>30</maxPercentageOfLoan>	
 	</Product>
 	
 </MortgageProducts>  

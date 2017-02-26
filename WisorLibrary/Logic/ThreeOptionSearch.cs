@@ -29,8 +29,8 @@ namespace WisorLib
         {
             //minAmtOptX = CalculationParameters.minAmts[(int)Options.options.OPTX];
             //maxAmtOptX = CalculationParameters.maxAmts[(int)Options.options.OPTX];
-            minAmtOptX = maxAmountOptX;
-            maxAmtOptX = maxAmountOptX;
+            minAmtOptX = env.CalculationParameters.minAmts[(int)Options.options.OPTX];
+            maxAmtOptX = env.CalculationParameters.maxAmts[(int)Options.options.OPTX]; 
             minAmtOptY = env.CalculationParameters.minAmts[(int)Options.options.OPTY];
             maxAmtOptY = env.CalculationParameters.maxAmts[(int)Options.options.OPTY];
             minAmtOptZ = env.CalculationParameters.minAmts[(int)Options.options.OPTZ];

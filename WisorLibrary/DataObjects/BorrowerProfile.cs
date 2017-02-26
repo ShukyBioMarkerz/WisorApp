@@ -66,7 +66,7 @@ namespace WisorLib
         public BorrowerProfile(RunEnvironment env)
         {
             GetBorrowerProfile(env);
-            InsertRatesToProfile_OLD_DONT_USE_IT_ANYMORE(borrowerProfile);
+            //InsertRatesToProfile_OLD_DONT_USE_IT_ANYMORE(borrowerProfile);
         }
 
 

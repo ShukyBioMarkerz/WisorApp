@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static WisorLib.GenericProduct;
 
 namespace WisorLib
 {
@@ -235,14 +236,41 @@ namespace WisorLib
         // Omri: define the other markets
         // Should be outside the code
         //public static readonly uint[,] combinations = { { 1, 4, 9 }, { 1, 4, 8 }, { 1, 3, 9 }, { 1, 3, 8 }, { 1, 4, 4 }, { 1, 3, 3 }, { 1, 4, 3 } };
-        public static readonly string[,] combinations = { { "PrimeIsrael", "FixedNoTsamudIsrael", "Alt60NoTsamudIsrael" },
+        private static readonly string[,] combinationsIsrael = { { "PrimeIsrael", "FixedNoTsamudIsrael", "Alt60NoTsamudIsrael" },
                                                         { "PrimeIsrael", "FixedNoTsamudIsrael", "Alt60TsamudIsrael" }, 
                                                         { "PrimeIsrael", "FixedTsamudIsrael", "Alt60NoTsamudIsrael" }, 
                                                         { "PrimeIsrael", "FixedTsamudIsrael", "Alt60TsamudIsrael" }, 
                                                         { "PrimeIsrael", "FixedNoTsamudIsrael", "FixedNoTsamudIsrael" },
                                                         { "PrimeIsrael", "FixedTsamudIsrael", "FixedTsamudIsrael" },
                                                         { "PrimeIsrael", "FixedNoTsamudIsrael", "FixedTsamudIsrael" } };
+        
 
+
+        private static readonly string[,] combinationsUSA = { { "Fixed30yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" } };
+
+
+        // enum markets { USA, UK, ISRAEL, OTHER , NONE}
+        public static string[,] GetCombination(markets market)
+        {
+            string[,] combination = { { } };
+
+            switch (market)
+            {
+                case markets.ISRAEL:
+                    combination = combinationsIsrael;
+                    break;
+                case markets.UK:
+                    //combination = combinationsIsrael;
+                    break;
+                case markets.USA:
+                    combination = combinationsUSA;
+                    break;
+                default:
+                    WindowsUtilities.loggerMethod("ERROR: no combination founded for market: " + market.ToString());
+                    break;
+            }
+            return combination;
+        }
 
     }
 
@@ -267,10 +295,11 @@ namespace WisorLib
         public PrintOptions()
         {
             printMainInConsole = true;
-            printFunctionsInConsole = true;
-            printSubFunctionsInConsole = true;
-            printPercentageDone = true;
             printToOutputFile = true;
+
+            printFunctionsInConsole = false;
+            printSubFunctionsInConsole = false;
+            printPercentageDone = false;
         }
     }
 

@@ -62,9 +62,10 @@ namespace WisorLibrary.Logic
 
         public bool LoadRates()
         {
-            rates = LoadRatesFile(filename);
+            if (null == rates || 0 < rates.Count)
+                rates = LoadRatesCSVFile(filename);
             WindowsUtilities.loggerMethod("NOTICE LoadRates succesfully load: " + rates.Count + " entries.");
-            return (null != rates);
+            return (null != rates && 0 < rates.Count);
         }
 
         public RateLine FindRatesForKey(RatesKey key)
@@ -81,19 +82,39 @@ namespace WisorLibrary.Logic
             RateLine rate;
             double result = MiscConstants.UNDEFINED_DOUBLE;
 
-            if (!rates.TryGetValue(key, out rate))
-                rate = null;
-            if (null != rate)
-                if (index <= rate.Length())
-                result = rate[index];
+            if (0 < rates.Count)
+            {
+                if (!rates.TryGetValue(key, out rate))
+                    rate = null;
+                if (null != rate)
+                    if (index <= rate.Length())
+                        result = rate[index];
+            }
+            else
+            {
+                Console.WriteLine("ERROR: no rates where loaded");
+                WindowsUtilities.loggerMethod("ERROR: no rates where loaded");
+            }
+
+            if (0 > result)
+            {
+                Console.WriteLine("ERROR: illegal rate: " + result);
+                WindowsUtilities.loggerMethod("ERROR:  illegal rate: " + result);
+                // TBD
+                //result = 0.015;
+            }
+
+
             return result;
         }
 
 
-        private Dictionary<RatesKey, RateLine> LoadRatesFile(string filename)
+        private Dictionary<RatesKey, RateLine> LoadRatesCSVFile(string filename)
         {
             Dictionary<RatesKey, RateLine> dic = new Dictionary<RatesKey, RateLine>();
-  
+            string curr = MiscConstants.UNDEFINED_STRING;
+            string[] entities;
+
             try
             {
                 if (File.Exists(filename))
@@ -105,6 +126,7 @@ namespace WisorLibrary.Logic
                     do
                     {
                         line = fileReader.ReadLine();
+                        curr = line;
                         if (String.IsNullOrEmpty(line))
                             continue;
 
@@ -113,7 +135,12 @@ namespace WisorLibrary.Logic
                         if (1 == lineNumber++)
                             continue;
 
-                        string[] entities = line.Split(',');
+                        entities = line.Split(',');
+
+                        if (String.IsNullOrEmpty(entities[0]))
+                        {
+                            continue;
+                        }
 
                         // ensure the line correctness
                         // TBD: should define properly the index with no hard coding...
@@ -136,7 +163,7 @@ namespace WisorLibrary.Logic
             }
             catch (Exception e)
             {
-                Console.WriteLine("ERROR: LoadRatesFile got Exception: " + e.ToString());
+                Console.WriteLine("ERROR: LoadRatesFile got Exception: " + e.ToString() + ". Curr: " + curr);
             }
 
             return dic;

@@ -39,8 +39,10 @@ namespace WisorLib
         public const string PAYMENT_TYPE = "Payment type";
         public const string MORTGAGE_PRODUCT = "Mortgage product";
 
+        public static uint DEFAULT_PERCANTAGE_OF_MONTHLY_PAYMENT = 30;
+
         // type of the selection window
-        public enum SelectionType { ReadLoans = 0, ReadProducts };
+        public enum SelectionType { ReadLoans = 0, ReadProducts , ReadRates };
 
         // TBD: either read it from file
         public static int GetLoanID()
