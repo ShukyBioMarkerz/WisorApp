@@ -60,6 +60,7 @@ namespace WisorLib
                 ", propertyValue: " + this.PropertyValue + ", income: " + this.YearlyIncome + ", age: " + this.BorrowerAge);
         }
 
+      
     }
 
 }

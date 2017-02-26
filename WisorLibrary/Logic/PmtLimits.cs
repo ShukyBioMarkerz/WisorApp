@@ -13,8 +13,8 @@ namespace WisorLib
 
         public OneOption(OneOptType optType, double optAmt)
         {
-            times[(int)Options.pmtLimits.MAXTIME] = new Option(optType.typeId, optAmt, optType.maxTime);
-            times[(int)Options.pmtLimits.MINTIME] = new Option(optType.typeId, optAmt, optType.minTime);
+            times[(int)Options.pmtLimits.MAXTIME] = new Option(optType.product.ID, optAmt, optType.product.maxTime);
+            times[(int)Options.pmtLimits.MINTIME] = new Option(optType.product.ID, optAmt, optType.product.minTime);
         }
     }
 

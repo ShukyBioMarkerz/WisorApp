@@ -19,7 +19,7 @@ namespace WisorLib
             CanRunCalculation = false;
             env = Env;
 
-            if ("" == env.CheckInfo.orderID || 0 >= env.CalculationParameters.loanAmtWanted || 
+            if (MiscConstants.UNDEFINED_STRING == env.CheckInfo.orderID || 0 >= env.CalculationParameters.loanAmtWanted || 
                 0 >= env.CalculationParameters.monthlyPmtWanted || 0 >= env.CalculationParameters.propertyValue || 
                 0 >= env.CalculationParameters.income || 0 >= env.CalculationParameters.youngestLenderAge)
             {
@@ -48,7 +48,7 @@ namespace WisorLib
    
                 // Set borrower risk profile for choosing interest rates
                 BorrowerProfile bp = new BorrowerProfile(env);
-
+                
                 // TBD: Shuky - whay to pause??
                 // Console.ReadKey();
 
@@ -100,9 +100,10 @@ namespace WisorLib
                         // Print summary to console
                         if (env.PrintOptions.printMainInConsole == true)
                         {
-                            Console.WriteLine("\nDone checking combination - " + CalculationConstants.combinations[combinationCounter, 0]
-                                                    + CalculationConstants.combinations[combinationCounter, 1]
-                                                    + CalculationConstants.combinations[combinationCounter, 2] + " :");
+                            Console.WriteLine("\nDone checking combination - " + 
+                                CalculationConstants.combinations[combinationCounter, 0] + " " +
+                                CalculationConstants.combinations[combinationCounter, 1] + " " +
+                                CalculationConstants.combinations[combinationCounter, 2] + " :");
                             if (ResultsOutput.bestCompositionSoFar != null)
                             {
                                 Console.WriteLine("\nBest composition so far :\n" + ResultsOutput.bestCompositionSoFar.ToString());
@@ -210,9 +211,9 @@ namespace WisorLib
             if (env.PrintOptions.printFunctionsInConsole == true)
             {
                 Console.WriteLine("\nDefining combination for check - "  
-                + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].typeId.ToString()
-                + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].typeId.ToString()
-                + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].typeId.ToString() + " :\n");
+                + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].product.ID + " "
+                + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].product.ID + " "
+                + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.ID + " :\n");
             }
         }
 

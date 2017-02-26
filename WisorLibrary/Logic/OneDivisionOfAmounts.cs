@@ -34,25 +34,25 @@ namespace WisorLib
 
             pmtLimits = new PmtLimits(amtOptX, amtOptY, amtOptZ, env);
             fixedOptZ0 = FindZ0(env.CalculationParameters.optTypes, pmtLimits,
-                                    env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].minTime, env);
+                                    env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.minTime, env);
             if (fixedOptZ0 != null)
             {
                 while ((fixedOptZ0 != null) && 
-                            (fixedOptZ0.optTime <= env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].maxTime))
+                            (fixedOptZ0.optTime <= env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.maxTime))
                 {
 
                     plane = new SinglePlane(pmtLimits, fixedOptZ0, env);
                     
                     savedCompositionsForFile = new SavedCompositions(fixedOptZ0, plane.savedMatches);
                     
-                    if (fixedOptZ0.optTime == env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].maxTime)
+                    if (fixedOptZ0.optTime == env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.maxTime)
                     {
                         fixedOptZ0 = null;
                     }
                     else
                     {
                         fixedOptZ0 = FindZ0(env.CalculationParameters.optTypes, pmtLimits,
-                                        (fixedOptZ0.optTime + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].jump), env);
+                                        (fixedOptZ0.optTime + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.timeJump), env);
                     }
                 }
             }
@@ -109,7 +109,7 @@ namespace WisorLib
             }
             else
             {
-                optionZ0 = new Option(env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].typeId,
+                optionZ0 = new Option(env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.ID,
                                             pmtLimits.amts[(int)Options.options.OPTZ], timeZ);
                 double ttlPMTmaxTime = pmtLimits.opts[(int)Options.options.OPTX].times[(int)Options.pmtLimits.MAXTIME].optPmt
                                         + pmtLimits.opts[(int)Options.options.OPTY].times[(int)Options.pmtLimits.MAXTIME].optPmt
@@ -120,13 +120,13 @@ namespace WisorLib
                 if (printOrNo == true)
                 {
                     Console.WriteLine("\nTotal PMT for inserted TimeZ = " + timeZ + " ...\n");
-                    Console.WriteLine("(X,Y,Z) = (" + (optTypes.optionTypes[(int)Options.options.OPTX].maxTime / 12) + ","
-                                        + (optTypes.optionTypes[(int)Options.options.OPTY].maxTime / 12) + "," + (timeZ / 12).ToString()
+                    Console.WriteLine("(X,Y,Z) = (" + (optTypes.optionTypes[(int)Options.options.OPTX].product.maxTime / 12) + ","
+                                        + (optTypes.optionTypes[(int)Options.options.OPTY].product.maxTime / 12) + "," + (timeZ / 12).ToString()
                                         + ") = " + pmtLimits.opts[(int)Options.options.OPTX].times[(int)Options.pmtLimits.MAXTIME].optPmt
                                         + " + " + pmtLimits.opts[(int)Options.options.OPTY].times[(int)Options.pmtLimits.MAXTIME].optPmt
                                         + " + " + optionZ0.optPmt + " = " + ttlPMTmaxTime);
-                    Console.WriteLine("(X,Y,Z) = (" + (optTypes.optionTypes[(int)Options.options.OPTX].minTime / 12) + ","
-                                        + (optTypes.optionTypes[(int)Options.options.OPTY].minTime / 12) + "," + (timeZ / 12).ToString()
+                    Console.WriteLine("(X,Y,Z) = (" + (optTypes.optionTypes[(int)Options.options.OPTX].product.minTime / 12) + ","
+                                        + (optTypes.optionTypes[(int)Options.options.OPTY].product.minTime / 12) + "," + (timeZ / 12).ToString()
                                         + ") = " + pmtLimits.opts[(int)Options.options.OPTX].times[(int)Options.pmtLimits.MINTIME].optPmt
                                         + " + " + pmtLimits.opts[(int)Options.options.OPTY].times[(int)Options.pmtLimits.MINTIME].optPmt
                                         + " + " + optionZ0.optPmt + " = " + ttlPMTminTime);                                        
@@ -142,12 +142,12 @@ namespace WisorLib
                             Console.WriteLine(env.CalculationParameters.monthlyPmtWanted.ToString() + " < " + ttlPMTmaxTime.ToString()
                                                 + "Total PMT (max,max," + (timeZ / 12) + ") is too large.");
                         }
-                        if (timeZ == optTypes.optionTypes[(int)Options.options.OPTZ].maxTime)
+                        if (timeZ == optTypes.optionTypes[(int)Options.options.OPTZ].product.maxTime)
                         {
                             if (printOrNo == true)
                             {
-                                Console.WriteLine("(X,Y,Z) = (" + (optTypes.optionTypes[(int)Options.options.OPTX].maxTime / 12)
-                                                    + "," + (optTypes.optionTypes[(int)Options.options.OPTY].maxTime / 12) + ","
+                                Console.WriteLine("(X,Y,Z) = (" + (optTypes.optionTypes[(int)Options.options.OPTX].product.maxTime / 12)
+                                                    + "," + (optTypes.optionTypes[(int)Options.options.OPTY].product.maxTime / 12) + ","
                                                     + (timeZ / 12) + ") -> too large - no matches can be found. End.");
                             }
                             optionZ0 = null;
@@ -157,12 +157,12 @@ namespace WisorLib
                         {
                             if (printOrNo == true)
                             {
-                                Console.WriteLine("(X,Y,Z) = (" + (optTypes.optionTypes[(int)Options.options.OPTX].maxTime / 12)
-                                                    + "," + (optTypes.optionTypes[(int)Options.options.OPTY].maxTime / 12) + ","
+                                Console.WriteLine("(X,Y,Z) = (" + (optTypes.optionTypes[(int)Options.options.OPTX].product.maxTime / 12)
+                                                    + "," + (optTypes.optionTypes[(int)Options.options.OPTY].product.maxTime / 12) + ","
                                                     + (timeZ / 12) + ") -> too large.\nZ < max -> need to make Z longer ..."
-                                                    + "\nNew timeZ for check = " + (timeZ + optTypes.optionTypes[(int)Options.options.OPTZ].jump));
+                                                    + "\nNew timeZ for check = " + (timeZ + optTypes.optionTypes[(int)Options.options.OPTZ].product.timeJump));
                             }
-                            return FindZ0(optTypes, pmtLimits, (timeZ + optTypes.optionTypes[(int)Options.options.OPTZ].jump), env);
+                            return FindZ0(optTypes, pmtLimits, (timeZ + optTypes.optionTypes[(int)Options.options.OPTZ].product.timeJump), env);
                         }
                     }
                     else if (ttlPMTminTime < env.CalculationParameters.monthlyPmtWanted - CalculationConstants.largeDev)
@@ -171,8 +171,8 @@ namespace WisorLib
                         {
                             Console.WriteLine(ttlPMTminTime.ToString() + " < " + env.CalculationParameters.monthlyPmtWanted.ToString()
                                                 + "Total PMT (min,min," + (timeZ / 12) + ") is too small.\n"
-                                                + "(X,Y,Z) = (" + (optTypes.optionTypes[(int)Options.options.OPTX].minTime / 12)
-                                                + "," + (optTypes.optionTypes[(int)Options.options.OPTY].minTime / 12) + ","
+                                                + "(X,Y,Z) = (" + (optTypes.optionTypes[(int)Options.options.OPTX].product.minTime / 12)
+                                                + "," + (optTypes.optionTypes[(int)Options.options.OPTY].product.minTime / 12) + ","
                                                 + (timeZ / 12) + ") -> too small - no matches can be found. End.");
                         }
                         optionZ0 = null;
@@ -185,11 +185,11 @@ namespace WisorLib
                     {
                         Console.WriteLine(ttlPMTminTime.ToString() + " >= " + env.CalculationParameters.monthlyPmtWanted.ToString()
                                             + " >= " + ttlPMTmaxTime.ToString() + "(X,Y,Z) = ("
-                                            + (optTypes.optionTypes[(int)Options.options.OPTY].minTime / 12)
-                                            + "," + (optTypes.optionTypes[(int)Options.options.OPTY].minTime / 12) + ","
+                                            + (optTypes.optionTypes[(int)Options.options.OPTY].product.minTime / 12)
+                                            + "," + (optTypes.optionTypes[(int)Options.options.OPTY].product.minTime / 12) + ","
                                             + (timeZ / 12).ToString() + ") => Target Payment => (X,Y,Z) = ("
-                                            + (optTypes.optionTypes[(int)Options.options.OPTX].maxTime / 12)
-                                            + "," + (optTypes.optionTypes[(int)Options.options.OPTY].maxTime / 12)
+                                            + (optTypes.optionTypes[(int)Options.options.OPTX].product.maxTime / 12)
+                                            + "," + (optTypes.optionTypes[(int)Options.options.OPTY].product.maxTime / 12)
                                             + "," + (timeZ / 12).ToString() + ")");
                     }
                     return optionZ0;

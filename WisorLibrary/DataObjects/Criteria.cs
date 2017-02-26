@@ -31,6 +31,11 @@ namespace WisorLib
                 index = cf.index;
             return index;
         }
+
+        public CriteriaField GetField(string fieldName)
+        {
+           return this.Find(CriteriaFieldPredicate(new CriteriaField(fieldName)));
+        }
     }
 
 
@@ -45,6 +50,8 @@ namespace WisorLib
         public int min { get; set; }
         public int max { get; set; }
         public bool isMandatory { get; set; }
+        public string type { get; set; }
+        public List<string> options { get; set; }
 
         public string toString()
         {
@@ -53,7 +60,8 @@ namespace WisorLib
 
         // constructor
         public CriteriaField(string id = "", int index = MiscConstants.UNDEFINED_INT, string value = "",
-            int min = MiscConstants.UNDEFINED_INT, int max = MiscConstants.UNDEFINED_INT, bool isMandatory = false)
+            int min = MiscConstants.UNDEFINED_INT, int max = MiscConstants.UNDEFINED_INT, bool isMandatory = false,
+            string type = "", List<string> options = null)
         {
             this.ID = id;
             this.index = index;
@@ -63,6 +71,8 @@ namespace WisorLib
             this.min = min;
             this.max = max;
             this.isMandatory = isMandatory;
+            this.type = type;
+            this.options = options;
         }
 
     }

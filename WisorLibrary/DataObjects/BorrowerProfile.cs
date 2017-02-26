@@ -66,7 +66,7 @@ namespace WisorLib
         public BorrowerProfile(RunEnvironment env)
         {
             GetBorrowerProfile(env);
-            InsertRatesToProfile(borrowerProfile);
+            InsertRatesToProfile_OLD_DONT_USE_IT_ANYMORE(borrowerProfile);
         }
 
 
@@ -124,11 +124,11 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // *********************************** Inserting Interest Rates According to Borrower Profile ********************************* //
         
-        private void InsertRatesToProfile(int profileToApply)
+        private void InsertRatesToProfile_OLD_DONT_USE_IT_ANYMORE(int profileToApply)
         {
             if ((Rates.fixedNoTsamudRates == null) || (Rates.fixedTsamudRates == null) || (Rates.alternateRates == null))
             {
-                Rates.ReadInterestRateFileAndUpdateRatesInSoftware(profileToApply);
+                Rates.ReadInterestRateFileAndUpdateRatesInSoftware_OLD_DONT_USE_IT_ANYMORE(profileToApply);
                 //Rates.InsertRatesAccordingToProfile(profileToApply);
             }
         }

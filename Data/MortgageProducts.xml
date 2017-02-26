@@ -27,35 +27,38 @@ operatorUsedSecondTimePeriod
 
         public double rateFormulaFirstTimePeriod;   // If product is completely fixed rate then rateFormulaFirstTimePeriod is not relevant
         public double rateFormulaSecondTimePeriod;  // If product is completely fixed rate then rateFormulaSecondTimePeriod is not relevant
+		
+				How to calculate the Luch Silukin and Monthly payment 
+			(indexUsedFirstTimePeriod) + (operatorUsedFirstTimePeriod) + rateAdditionFirstTimePeriod
 
+	NO NEED ANY MORE:
+		<operatorUsedFirstTimePeriod>PLUS</operatorUsedFirstTimePeriod>
+		<operatorUsedSecondTimePeriod>MINUS</operatorUsedSecondTimePeriod>
+		<rateFormulaFirstTimePeriod>number</rateFormulaFirstTimePeriod>
+		<rateFormulaSecondTimePeriod>number</rateFormulaSecondTimePeriod>
+
+		<secondTimePeriod>number</secondTimePeriod> 
+		
+	
 -->
+
 <MortgageProducts>
 	<Product>
 		<market>UK</market>
 		<name>Unique Name or can be drived from market and plans</name>
-		
+		<typeId>some typeId</typeId>
+		<optName>some name or is it the same as the above name field?</optName>
+	
 		<indexUsedFirstTimePeriod>PRIME</indexUsedFirstTimePeriod>
 		<indexUsedSecondTimePeriod>LIBOR</indexUsedSecondTimePeriod>
 		
 		<indexJumpFirstTimePeriod>MONTHS1</indexJumpFirstTimePeriod>
 		<indexJumpSecondTimePeriod>MONTHS12</indexJumpSecondTimePeriod>
-		
-		<operatorUsedFirstTimePeriod>PLUS</operatorUsedFirstTimePeriod>
-		<operatorUsedSecondTimePeriod>MINUS</operatorUsedSecondTimePeriod>
-
-		<typeId>some typeId</typeId>
+			
 		<minTime>number</minTime>
 		<maxTime>number</maxTime>
 		<timeJump>number</timeJump>
-		<optName>some name or is it the same as the above name field?</optName>
 		
 		<firstTimePeriod>number</firstTimePeriod>
-		<secondTimePeriod>number</secondTimePeriod>
-		
-		<rateFormulaFirstTimePeriod>number</rateFormulaFirstTimePeriod>
-		<rateFormulaSecondTimePeriod>number</rateFormulaSecondTimePeriod>
 	</Product>
-	
-
-
 </MortgageProducts>  

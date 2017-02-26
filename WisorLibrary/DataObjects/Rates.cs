@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WisorLibrary.DataObjects;
+using WisorLibrary.Logic;
 
 namespace WisorLib
 {
@@ -20,10 +22,11 @@ namespace WisorLib
         public enum alternatingRates { PRIME, MTH60NOINF, MTH12, MTH24, MTH30, MTH60YESINF, MTH84, MTH120 };
 
         // Interest rates list for software import
-        private static double[,] ratesForInput = new double[18, 27];
+        //private static double[,] ratesForInput = new double[18, 27];
         public static double[] fixedNoTsamudRates;
         public static double[] fixedTsamudRates;
         public static double[] alternateRates;
+        public static double[][] ratesMatrix;
 
 
 
@@ -47,9 +50,23 @@ namespace WisorLib
         public static void SetRatesFile(string filename)
         {
             ratesFilename = filename;
+            RateUtilities.SetFilename(filename);
         }
 
-        public static void ReadInterestRateFileAndUpdateRatesInSoftware(int profileOfBorrower)
+        public static double FindRateForKey(string productID, int profile, int index)
+        {
+            double rate = RateUtilities.Instance.FindRateForKey(new WisorLibrary.DataObjects.RatesKey(productID, profile), index);
+            return rate;
+        }
+
+        public static RateLine FindRatesForKey(string productID, int profile)
+        {
+            // RateLine : double[] value
+            RateLine rate = RateUtilities.Instance.FindRatesForKey(new RatesKey(productID, profile));
+            return rate;
+        }
+
+        public static void ReadInterestRateFileAndUpdateRatesInSoftware_OLD_DONT_USE_IT_ANYMORE(int profileOfBorrower)
         {
             int tsamudNum = profileOfBorrower;
             int noTsamudNum = tsamudNum + 6;

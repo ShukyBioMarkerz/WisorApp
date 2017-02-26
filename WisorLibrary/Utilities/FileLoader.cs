@@ -20,61 +20,7 @@ namespace WisorLib
     public class FileUtils
     {
 
-        
-        public static ProductsList LoadXMLProductsFile(string filename)
-        {
-            XDocument doc = null;
-            ProductsList products = new ProductsList();
-
-            if (File.Exists(filename))
-            {
-                doc = XDocument.Load(filename);
-                int index = 1;
-
-                // loop all the items in the document
-                foreach (XElement product in from p in doc.Descendants("Product") select p)
-                {
-                    string market = product.Element("market").Value;
-                    markets m = (markets)Enum.Parse(typeof(markets), market, true);
-                    string name = product.Element("name").Value;
-                    string indexUsedFirstTimePeriod = product.Element("indexUsedFirstTimePeriod").Value;
-                    indices iftp = (indices)Enum.Parse(typeof(indices), indexUsedFirstTimePeriod, true);
-                    string indexUsedSecondTimePeriod = product.Element("indexUsedSecondTimePeriod").Value;
-                    indices istp = (indices)Enum.Parse(typeof(indices), indexUsedSecondTimePeriod, true);
-                    string indexJumpFirstTimePeriod = product.Element("indexJumpFirstTimePeriod").Value;
-                    indexJumps ijftp = (indexJumps)Enum.Parse(typeof(indexJumps), indexJumpFirstTimePeriod, true);
-                    string indexJumpSecondTimePeriod = product.Element("indexJumpSecondTimePeriod").Value;
-                    indexJumps ijstp = (indexJumps)Enum.Parse(typeof(indexJumps), indexJumpSecondTimePeriod, true);
-                    string operatorUsedFirstTimePeriod = product.Element("operatorUsedFirstTimePeriod").Value;
-                    operators oftp = (operators)Enum.Parse(typeof(operators), operatorUsedFirstTimePeriod, true);
-                    string operatorUsedSecondTimePeriod = product.Element("operatorUsedSecondTimePeriod").Value;
-                    operators ostp = (operators)Enum.Parse(typeof(operators), operatorUsedSecondTimePeriod, true);
-                    string minTime = product.Element("minTime").Value;
-                    string maxTime = product.Element("maxTime").Value;
-                    string timeJump = product.Element("timeJump").Value;
-                    string optName = product.Element("optName").Value;
-                    string firstTimePeriod = product.Element("firstTimePeriod").Value;
-                    string secondTimePeriod = product.Element("secondTimePeriod").Value;
-                    string rateFormulaFirstTimePeriod = product.Element("rateFormulaFirstTimePeriod").Value;
-                    string rateFormulaSecondTimePeriod = product.Element("rateFormulaSecondTimePeriod").Value;
-
-                    // add to the memory
-                    products.Add(new GenericProduct(name /*ID*/, m /*localMarket*/,
-                        iftp /*indices*/, istp /*indices*/,
-                        ijftp /*indexJumps*/, ijstp /*indexJumps*/,
-                        oftp /*operators*/, ostp /*operators*/));
-                    
-                }
-
-            }
-            else
-            {
-                WindowsUtilities.GetLogger()("LoadXMLProductsFile file: " + filename + " does not exists!!!");
-            }
-
-            return products;
-        }
-
+    
 
         public static FieldList LoadXMLFileData(string filename)
         {
@@ -92,10 +38,18 @@ namespace WisorLib
                     string type = item.Element("type").Value;
                     string id = item.Element("name").Value;
                     string defaultValue = null != item.Element("default") ? item.Element("default").Value : id;
+                    // <mandatory>yes</mandatory>
                     string mandatoryValue = null != item.Element("mandatory") ? item.Element("mandatory").Value : "no";
                     bool isMandatory = "yes" == mandatoryValue; 
-                    // <mandatory>yes</mandatory>
                     string value = null != defaultValue ? defaultValue : item.Element("name").Value;
+
+                    // loop the options
+                    List<string> options = new List<string>();
+                    foreach (string st in from s in item.Descendants("options") select s)
+                    {
+                        options.Add(st);
+                    }
+
                     int min = MiscConstants.UNDEFINED_INT, max = MiscConstants.UNDEFINED_INT;
 
                     // loop all the range values within the item
@@ -112,15 +66,31 @@ namespace WisorLib
                     }
 
                     // add to the memory
-                    fields.Add(new CriteriaField(id, index++, value, min, max, isMandatory));
+                    fields.Add(new CriteriaField(id, index++, value, min, max, isMandatory, type, options));
                 }
 
             }
             else
             {
-                WindowsUtilities.GetLogger()("LoadFileData file: " + filename + " does not exists!!!");
+                WindowsUtilities.loggerMethod("LoadFileData file: " + filename + " does not exists!!!");
             }
 
+            // if no user involve, make sure to set all the mandatory criteria
+            if (! Share.shouldShowCriteriaSelectionWindow)
+            {
+                FieldList fl = new FieldList();
+                foreach (CriteriaField c in fields)
+                {
+                    if (c.isMandatory)
+                        fl.Add(c);
+                    //criteriaList.Add(dg.ID);
+                }
+                Share.theSelectedCriteriaFields = fl;
+            }
+
+            Share.theLoadedCriteriaFields = fields;
+            // Reorder the cretiria data
+            
             return fields;
         }
 
@@ -209,7 +179,7 @@ namespace WisorLib
                         if (INDEX_ADD > ageIndex)
                             err += " illegal ageIndex value: " + ageIndex.ToString();
 
-                        WindowsUtilities.GetLogger()("NOTICE: LoadCSVFileData file: illegal index of the mandatory parameters. Probably missing some cretiria. " + err);
+                        WindowsUtilities.loggerMethod("NOTICE: LoadCSVFileData file: illegal index of the mandatory parameters. Probably missing some cretiria. " + err);
                     }
 
 
@@ -219,12 +189,12 @@ namespace WisorLib
                 }
                 else
                 {
-                    WindowsUtilities.GetLogger()("LoadCSVFileData file: " + filename + " does not exists!!!");
+                    WindowsUtilities.loggerMethod("LoadCSVFileData file: " + filename + " does not exists!!!");
                 }
             }
             catch (Exception e)
             {
-                WindowsUtilities.GetLogger()("ERROR: LoadCSVFileData got Exception: " + e.ToString());
+                WindowsUtilities.loggerMethod("ERROR: LoadCSVFileData got Exception: " + e.ToString());
             }
 
             return loans;

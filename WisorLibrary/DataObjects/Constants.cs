@@ -64,10 +64,13 @@ namespace WisorLib
         // 1        2       3           4           5       6    7       8         9           10     11        12      13              14
 
         // Type list as inserted in website admin
-        public enum typesList {  EMPTY, PRIME, MAKAM, FIXTSAMUD, FIXNOTSAMUD, ALT12, ALT24, ALT30, ALT60, 
-                                    ALT60NOTSAMUD, ALT84, ALT120, ZAKAUT, NORATETSAMUD, NORATENOTSAMUD };
-        public static string[] optionTypes = { "EMPTY", "PRIME", "MAKAM", "FIXTSAMUD", "FIXNOTSAMUD", "ALT12", "ALT24", "ALT30", "ALT60", 
-                                                    "ALT60NOTSAMUD", "ALT84", "ALT120", "ZAKAUT", "NORATETSAMUD", "NORATENOTSAMUD" };
+
+        // Shuky TBD
+        // The typesList shoyld be defined in thre xml typeId 
+        //public enum typesList {  EMPTY, PRIME, MAKAM, FIXTSAMUD, FIXNOTSAMUD, ALT12, ALT24, ALT30, ALT60, 
+        //                            ALT60NOTSAMUD, ALT84, ALT120, ZAKAUT, NORATETSAMUD, NORATENOTSAMUD };
+        //public static string[] optionTypes = { "EMPTY", "PRIME", "MAKAM", "FIXTSAMUD", "FIXNOTSAMUD", "ALT12", "ALT24", "ALT30", "ALT60", 
+        //                                            "ALT60NOTSAMUD", "ALT84", "ALT120", "ZAKAUT", "NORATETSAMUD", "NORATENOTSAMUD" };
 
 
         // Option Names For Calculation
@@ -230,7 +233,15 @@ namespace WisorLib
         //public static readonly uint[,] combinations = { { 4, 4, 4 }, { 3, 3, 3 } };
 
         // Omri: define the other markets
-        public static readonly uint[,] combinations = { { 1, 4, 9 }, { 1, 4, 8 }, { 1, 3, 9 }, { 1, 3, 8 }, { 1, 4, 4 }, { 1, 3, 3 }, { 1, 4, 3 } };
+        // Should be outside the code
+        //public static readonly uint[,] combinations = { { 1, 4, 9 }, { 1, 4, 8 }, { 1, 3, 9 }, { 1, 3, 8 }, { 1, 4, 4 }, { 1, 3, 3 }, { 1, 4, 3 } };
+        public static readonly string[,] combinations = { { "PrimeIsrael", "FixedNoTsamudIsrael", "Alt60NoTsamudIsrael" },
+                                                        { "PrimeIsrael", "FixedNoTsamudIsrael", "Alt60TsamudIsrael" }, 
+                                                        { "PrimeIsrael", "FixedTsamudIsrael", "Alt60NoTsamudIsrael" }, 
+                                                        { "PrimeIsrael", "FixedTsamudIsrael", "Alt60TsamudIsrael" }, 
+                                                        { "PrimeIsrael", "FixedNoTsamudIsrael", "FixedNoTsamudIsrael" },
+                                                        { "PrimeIsrael", "FixedTsamudIsrael", "FixedTsamudIsrael" },
+                                                        { "PrimeIsrael", "FixedNoTsamudIsrael", "FixedTsamudIsrael" } };
 
 
     }
@@ -256,8 +267,8 @@ namespace WisorLib
         public PrintOptions()
         {
             printMainInConsole = true;
-            printFunctionsInConsole = false;
-            printSubFunctionsInConsole = false;
+            printFunctionsInConsole = true;
+            printSubFunctionsInConsole = true;
             printPercentageDone = true;
             printToOutputFile = true;
         }

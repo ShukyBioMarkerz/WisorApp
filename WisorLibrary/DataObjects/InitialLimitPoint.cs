@@ -153,7 +153,7 @@ namespace WisorLib
             if (minTimeValue <= maxTimeValue)
             {
                 matchMarker = (int)Options.binarySearchResults.INRANGE;
-                numOfCells = ((maxTimeValue - minTimeValue) / optForCheckType.jump) + 1;
+                numOfCells = ((maxTimeValue - minTimeValue) / optForCheckType.product.timeJump) + 1;
                 if (printOrNo == true)
                 {
                     Console.WriteLine("\nMinValue = " + minTimeValue + " | MaxValue = " + maxTimeValue
@@ -167,8 +167,8 @@ namespace WisorLib
                 {
                     midCell = (numOfCells - 1) / 2;
                 }
-                midValue = minTimeValue + (midCell * optForCheckType.jump);
-                Option opt = new Option(optForCheckType.typeId, optForCheckAmt, midValue);
+                midValue = minTimeValue + (midCell * optForCheckType.product.timeJump);
+                Option opt = new Option(optForCheckType.product.ID, optForCheckAmt, midValue);
                 double midPmt = opt.optPmt;
                 if (printOrNo == true)
                 {
@@ -184,9 +184,9 @@ namespace WisorLib
                     if (printOrNo == true)
                     {
                         Console.WriteLine("\nPMT(" + midValue + ") = " + midPmt + " -> Too Small - Cutting array\n"
-                                            + "\nnew MinValue = " + minTimeValue + " | new MaxValue = " + (midValue - optForCheckType.jump));
+                                            + "\nnew MinValue = " + minTimeValue + " | new MaxValue = " + (midValue - optForCheckType.product.timeJump));
                     }
-                    return PerformBinarySearch(minTimeValue, (midValue - optForCheckType.jump));                    
+                    return PerformBinarySearch(minTimeValue, (midValue - optForCheckType.product.timeJump));                    
                 }
                 else if (midPmt > (targetOneOptPmt + CalculationConstants.smallDev)) // No exact match, time saved is middle cell
                 {
@@ -195,9 +195,9 @@ namespace WisorLib
                     if (printOrNo == true)
                     {
                         Console.WriteLine("\nPMT(" + midValue + ") = " + midPmt + " -> Too Large - Cutting array\n"
-                                            + "\nnew MinValue = " + (midValue + optForCheckType.jump) + " | new MaxValue = " + maxTimeValue);
+                                            + "\nnew MinValue = " + (midValue + optForCheckType.product.timeJump) + " | new MaxValue = " + maxTimeValue);
                     }
-                    return PerformBinarySearch((midValue + optForCheckType.jump), maxTimeValue);
+                    return PerformBinarySearch((midValue + optForCheckType.product.timeJump), maxTimeValue);
                 }
                 else
                 {
@@ -218,14 +218,14 @@ namespace WisorLib
                 {
                     Console.WriteLine("\nBinary search ended. No match found\nMinTime = " + minTimeValue + " MaxTime = " + maxTimeValue + "\n");
                 }
-                if (minTimeValue > optForCheckType.maxTime)
+                if (minTimeValue > optForCheckType.product.maxTime)
                 {
                     //matchMarker = (int)Options.binarySearchResults.OUTOFRANGE;
                     matchMarker = (int)Options.binarySearchResults.TOOSMALL;
                     matchOrNo = false;
                     timeForSave = maxTimeValue;
                 }
-                else if (maxTimeValue < optForCheckType.minTime)
+                else if (maxTimeValue < optForCheckType.product.minTime)
                 {
                     //matchMarker = (int)Options.binarySearchResults.TOOSMALL;
                     matchMarker = (int)Options.binarySearchResults.TOOLARGE;
@@ -258,24 +258,24 @@ namespace WisorLib
             if ((letter == (int)Options.limitPointsLetters.A) && (numberForSave == (int)Options.limitPointsNumbers.ONE))
             {
                 opts[(int)Options.options.OPTX] = fixedOpt.times[(int)Options.pmtLimits.MAXTIME];
-                opts[(int)Options.options.OPTY] = new Option(optForCheckType.typeId, optForCheckAmt, savedTime);
+                opts[(int)Options.options.OPTY] = new Option(optForCheckType.product.ID, optForCheckAmt, savedTime);
             }
             else if ((letter == (int)Options.limitPointsLetters.A) && (numberForSave == (int)Options.limitPointsNumbers.TWO))
             {
-                opts[(int)Options.options.OPTX] = new Option(optForCheckType.typeId, optForCheckAmt, savedTime);
+                opts[(int)Options.options.OPTX] = new Option(optForCheckType.product.ID, optForCheckAmt, savedTime);
                 opts[(int)Options.options.OPTY] = fixedOpt.times[(int)Options.pmtLimits.MINTIME];
 
             }
             else if ((letter == (int)Options.limitPointsLetters.B) && (numberForSave == (int)Options.limitPointsNumbers.ONE))
             {
-                opts[(int)Options.options.OPTX] = new Option(optForCheckType.typeId, optForCheckAmt, savedTime);
+                opts[(int)Options.options.OPTX] = new Option(optForCheckType.product.ID, optForCheckAmt, savedTime);
                 opts[(int)Options.options.OPTY] = fixedOpt.times[(int)Options.pmtLimits.MAXTIME];
 
             }
             else if ((letter == (int)Options.limitPointsLetters.B) && (numberForSave == (int)Options.limitPointsNumbers.TWO))
             {
                 opts[(int)Options.options.OPTX] = fixedOpt.times[(int)Options.pmtLimits.MINTIME];
-                opts[(int)Options.options.OPTY] = new Option(optForCheckType.typeId, optForCheckAmt, savedTime);
+                opts[(int)Options.options.OPTY] = new Option(optForCheckType.product.ID, optForCheckAmt, savedTime);
             }
             number = numberForSave;
         }

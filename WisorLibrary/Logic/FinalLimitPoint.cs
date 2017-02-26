@@ -47,8 +47,8 @@ namespace WisorLib
             {
                 Console.WriteLine("Looking for expanded point " + Options.letters[(int)letter] + Options.numbers[(int)number]
                                     + " (Match = " + initialPoint.matchOrNo + ")\nOptX Type = "
-                                    + optTypes[(int)Options.options.OPTX].typeId + "\nOptY Type = "
-                                    + optTypes[(int)Options.options.OPTY].typeId + "\nOptX = " + expandingOpts[(int)Options.options.OPTX].ToString()
+                                    + optTypes[(int)Options.options.OPTX].product.ID + "\nOptY Type = "
+                                    + optTypes[(int)Options.options.OPTY].product.ID + "\nOptX = " + expandingOpts[(int)Options.options.OPTX].ToString()
                                     + "\nOptY = " + expandingOpts[(int)Options.options.OPTY].ToString() + "\n");
             }
             InsertOptionsForSavedPoint(ExpandPoint(optTypes[(int)Options.options.OPTX], optTypes[(int)Options.options.OPTY],
@@ -138,7 +138,7 @@ namespace WisorLib
                 Console.WriteLine("Starting point for check : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ")");
             }
 
-            if (optionY.optTime == optTypes[(int)Options.options.OPTY].minTime)
+            if (optionY.optTime == optTypes[(int)Options.options.OPTY].product.minTime)
             {
                 if (printOrNo == true)
                 {
@@ -146,9 +146,9 @@ namespace WisorLib
                 }
                 return expandingOpts;
             }
-            else if (optionY.optTime > optTypes[(int)Options.options.OPTY].minTime)
+            else if (optionY.optTime > optTypes[(int)Options.options.OPTY].product.minTime)
             {
-                optionY = new Option(optionY.optType, optionY.optAmt, (optionY.optTime - optTypes[(int)Options.options.OPTY].jump));
+                optionY = new Option(optionY.optType, optionY.optAmt, (optionY.optTime - optTypes[(int)Options.options.OPTY].product.timeJump));
                 if (printOrNo == true)
                 {
                     Console.WriteLine("New Point for check : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ")");
@@ -192,7 +192,7 @@ namespace WisorLib
             {
                 Console.WriteLine("Starting point for check : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ")");
             }
-            if (optionX.optTime == optTypes[(int)Options.options.OPTX].maxTime)
+            if (optionX.optTime == optTypes[(int)Options.options.OPTX].product.maxTime)
             {
                 if (printOrNo == true)
                 {
@@ -200,9 +200,9 @@ namespace WisorLib
                 }
                 return expandingOpts;
             }
-            else if (optionX.optTime < optTypes[(int)Options.options.OPTX].maxTime)
+            else if (optionX.optTime < optTypes[(int)Options.options.OPTX].product.maxTime)
             {
-                optionX = new Option(optionX.optType, optionX.optAmt, (optionX.optTime + optTypes[(int)Options.options.OPTX].jump));
+                optionX = new Option(optionX.optType, optionX.optAmt, (optionX.optTime + optTypes[(int)Options.options.OPTX].product.timeJump));
                 if (printOrNo == true)
                 {
                     Console.WriteLine("New Point for check : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ")");
@@ -250,7 +250,7 @@ namespace WisorLib
             {
                 Console.WriteLine("Starting point for check : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ")");
             }
-            if (optionX.optTime == optTypes[(int)Options.options.OPTX].minTime)
+            if (optionX.optTime == optTypes[(int)Options.options.OPTX].product.minTime)
             {
                 if (printOrNo == true)
                 {
@@ -258,9 +258,9 @@ namespace WisorLib
                 }
                 return expandingOpts;
             }
-            else if (optionX.optTime > optTypes[(int)Options.options.OPTX].minTime)
+            else if (optionX.optTime > optTypes[(int)Options.options.OPTX].product.minTime)
             {
-                optionX = new Option(optionX.optType, optionX.optAmt, (optionX.optTime - optTypes[(int)Options.options.OPTX].jump));
+                optionX = new Option(optionX.optType, optionX.optAmt, (optionX.optTime - optTypes[(int)Options.options.OPTX].product.timeJump));
                 if (printOrNo == true)
                 {
                     Console.WriteLine("New Point for check : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ")");
@@ -308,7 +308,7 @@ namespace WisorLib
             expandingOpts[(int)Options.options.OPTY] = optionY;
 
             //  Step 1 - Move 1 - X Axis
-            if (optionX.optTime == optTypes[(int)Options.options.OPTX].minTime)
+            if (optionX.optTime == optTypes[(int)Options.options.OPTX].product.minTime)
             {
                 a2b2NoMatchBool = false;
                 if (printOrNo == true)
@@ -317,16 +317,16 @@ namespace WisorLib
                 }
                 return expandingOpts;
             }
-            else if (optionX.optTime > optTypes[(int)Options.options.OPTX].minTime)
+            else if (optionX.optTime > optTypes[(int)Options.options.OPTX].product.minTime)
             {
                 if (a2b2NoMatchBool == true)
                 {
-                    optionX = new Option(optionX.optType, optionX.optAmt, (optionX.optTime - optTypes[(int)Options.options.OPTX].jump));
+                    optionX = new Option(optionX.optType, optionX.optAmt, (optionX.optTime - optTypes[(int)Options.options.OPTX].product.timeJump));
                     a2b2NoMatchBool = false;
                 }
 
                 //  Step 2 - Move 2 - Y Axis
-                if (optionY.optTime == optTypes[(int)Options.options.OPTY].maxTime)
+                if (optionY.optTime == optTypes[(int)Options.options.OPTY].product.maxTime)
                 {
                     if (printOrNo == true)
                     {
@@ -334,10 +334,10 @@ namespace WisorLib
                     }
                     return expandingOpts;
                 }
-                else if (optionY.optTime < optTypes[(int)Options.options.OPTY].maxTime)
+                else if (optionY.optTime < optTypes[(int)Options.options.OPTY].product.maxTime)
                 {
                     optionX = expandingOpts[(int)Options.options.OPTX];
-                    optionY = new Option(optionY.optType, optionY.optAmt, (optionY.optTime + optTypes[(int)Options.options.OPTY].jump));
+                    optionY = new Option(optionY.optType, optionY.optAmt, (optionY.optTime + optTypes[(int)Options.options.OPTY].product.timeJump));
                     if (printOrNo == true)
                     {
                         Console.WriteLine("New Point for check : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ")");
