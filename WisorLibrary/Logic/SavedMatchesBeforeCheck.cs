@@ -63,6 +63,7 @@ namespace WisorLib
             {
                 savedMatchesList.Add(listToAdd.savedMatchesList[i]);
                 numOfMatches++;
+                //Share.numOfMatchesGlobal++;
             }
         }
 

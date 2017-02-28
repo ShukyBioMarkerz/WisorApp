@@ -21,43 +21,43 @@ namespace WisorLib
 
         // Omri: define the other markets
 
-        private readonly int[,] profileMatrix = new int[5,5] {
-                                                                {   
-                                                                    (int)CalculationConstants.borrowerProfiles.BEST,
-                                                                    (int)CalculationConstants.borrowerProfiles.VERY_GOOD,
-                                                                    (int)CalculationConstants.borrowerProfiles.VERY_GOOD,
-                                                                    (int)CalculationConstants.borrowerProfiles.GOOD,
-                                                                    (int)CalculationConstants.borrowerProfiles.AVERAGE
-                                                                }, 
-                                                                {   
-                                                                    (int)CalculationConstants.borrowerProfiles.VERY_GOOD,
-                                                                    (int)CalculationConstants.borrowerProfiles.VERY_GOOD,
-                                                                    (int)CalculationConstants.borrowerProfiles.GOOD,
-                                                                    (int)CalculationConstants.borrowerProfiles.AVERAGE,
-                                                                    (int)CalculationConstants.borrowerProfiles.NOT_SO_GOOD 
-                                                                }, 
-                                                                {   
-                                                                    (int)CalculationConstants.borrowerProfiles.VERY_GOOD,
-                                                                    (int)CalculationConstants.borrowerProfiles.GOOD,
-                                                                    (int)CalculationConstants.borrowerProfiles.AVERAGE,
-                                                                    (int)CalculationConstants.borrowerProfiles.NOT_SO_GOOD,
-                                                                    (int)CalculationConstants.borrowerProfiles.NOT_SO_GOOD 
-                                                                }, 
-                                                                {                                           
-                                                                    (int)CalculationConstants.borrowerProfiles.GOOD,
-                                                                    (int)CalculationConstants.borrowerProfiles.AVERAGE,
-                                                                    (int)CalculationConstants.borrowerProfiles.NOT_SO_GOOD,
-                                                                    (int)CalculationConstants.borrowerProfiles.NOT_SO_GOOD,
-                                                                    (int)CalculationConstants.borrowerProfiles.BAD,
-                                                                },
-                                                                {                                          
-                                                                    (int)CalculationConstants.borrowerProfiles.AVERAGE,
-                                                                    (int)CalculationConstants.borrowerProfiles.NOT_SO_GOOD,
-                                                                    (int)CalculationConstants.borrowerProfiles.NOT_SO_GOOD,
-                                                                    (int)CalculationConstants.borrowerProfiles.BAD,
-                                                                    (int)CalculationConstants.borrowerProfiles.NOTOK
-                                                                }
-                                        };
+        //private readonly int[,] profileMatrix = new int[5,5] {
+        //                                                        {   
+        //                                                            (int)CalculationConstants.borrowerProfiles.BEST,
+        //                                                            (int)CalculationConstants.borrowerProfiles.VERY_GOOD,
+        //                                                            (int)CalculationConstants.borrowerProfiles.VERY_GOOD,
+        //                                                            (int)CalculationConstants.borrowerProfiles.GOOD,
+        //                                                            (int)CalculationConstants.borrowerProfiles.AVERAGE
+        //                                                        }, 
+        //                                                        {   
+        //                                                            (int)CalculationConstants.borrowerProfiles.VERY_GOOD,
+        //                                                            (int)CalculationConstants.borrowerProfiles.VERY_GOOD,
+        //                                                            (int)CalculationConstants.borrowerProfiles.GOOD,
+        //                                                            (int)CalculationConstants.borrowerProfiles.AVERAGE,
+        //                                                            (int)CalculationConstants.borrowerProfiles.NOT_SO_GOOD 
+        //                                                        }, 
+        //                                                        {   
+        //                                                            (int)CalculationConstants.borrowerProfiles.VERY_GOOD,
+        //                                                            (int)CalculationConstants.borrowerProfiles.GOOD,
+        //                                                            (int)CalculationConstants.borrowerProfiles.AVERAGE,
+        //                                                            (int)CalculationConstants.borrowerProfiles.NOT_SO_GOOD,
+        //                                                            (int)CalculationConstants.borrowerProfiles.NOT_SO_GOOD 
+        //                                                        }, 
+        //                                                        {                                           
+        //                                                            (int)CalculationConstants.borrowerProfiles.GOOD,
+        //                                                            (int)CalculationConstants.borrowerProfiles.AVERAGE,
+        //                                                            (int)CalculationConstants.borrowerProfiles.NOT_SO_GOOD,
+        //                                                            (int)CalculationConstants.borrowerProfiles.NOT_SO_GOOD,
+        //                                                            (int)CalculationConstants.borrowerProfiles.BAD,
+        //                                                        },
+        //                                                        {                                          
+        //                                                            (int)CalculationConstants.borrowerProfiles.AVERAGE,
+        //                                                            (int)CalculationConstants.borrowerProfiles.NOT_SO_GOOD,
+        //                                                            (int)CalculationConstants.borrowerProfiles.NOT_SO_GOOD,
+        //                                                            (int)CalculationConstants.borrowerProfiles.BAD,
+        //                                                            (int)CalculationConstants.borrowerProfiles.NOTOK
+        //                                                        }
+        //                                };
 
 
 
@@ -65,58 +65,81 @@ namespace WisorLib
 
         public BorrowerProfile(RunEnvironment env)
         {
-            GetBorrowerProfile(env);
+            // get the profile from the fico store
+            uint ficoScore = env.CalculationParameters.fico;
+            if ((0 < ficoScore) && (550 >= ficoScore))
+            {
+                borrowerProfile = (int)CalculationConstants.borrowerProfiles.AVERAGE;
+            }
+            else if ((550 < ficoScore) && (650 >= ficoScore))
+            {
+                borrowerProfile = (int)CalculationConstants.borrowerProfiles.GOOD;
+            }
+            else if ((650 < ficoScore) && (750 >= ficoScore))
+            {
+                borrowerProfile = (int)CalculationConstants.borrowerProfiles.VERY_GOOD;
+            }
+            else if ((750 < ficoScore) && (850 >= ficoScore))
+            {
+                borrowerProfile = (int)CalculationConstants.borrowerProfiles.BEST;
+            }
+            else
+            {
+                // Should happen...
+                borrowerProfile = (int)CalculationConstants.borrowerProfiles.NOTOK;
+            }
+            // borrowerProfile = (int)CalculationConstants.borrowerProfiles.BEST;
+            //GetBorrowerProfile(env);
             //InsertRatesToProfile_OLD_DONT_USE_IT_ANYMORE(borrowerProfile);
         }
 
 
 
 
+            // **************************************************************************************************************************** //
+            // ************************************ Getting Borrower Profile According to LTV and PTI ************************************* //
 
-        // **************************************************************************************************************************** //
-        // ************************************ Getting Borrower Profile According to LTV and PTI ************************************* //
-
-        private void GetBorrowerProfile(RunEnvironment env)
-        {
-            int ltvCounter = 0;
-            int ptiCounter = 0;
-            while (borrowerProfile == (int)CalculationConstants.borrowerProfiles.NOTSET)
-            {
-                if (env.CalculationParameters.pti <= ptiRatios[ptiCounter])
-                {
-                    if (env.CalculationParameters.ltv <= ltvRatios[ltvCounter])
-                    {
-                        borrowerProfile = profileMatrix[ptiCounter, ltvCounter];
-                    }
-                    else
-                    {
-                        if (ltvCounter == (ltvRatios.Length - 1))
-                        {
-                            borrowerProfile = (int)CalculationConstants.borrowerProfiles.NOTOK;
-                        }
-                        else
-                        {
-                            ltvCounter++;
-                        }
-                    }
-                }
-                else
-                {
-                    if (ptiCounter == (ptiRatios.Length - 1))
-                    {
-                        borrowerProfile = (int)CalculationConstants.borrowerProfiles.NOTOK;
-                    }
-                    else
-                    {
-                        ptiCounter++;
-                    }
-                }
-            }
-            Console.WriteLine("Matrix Index [" + (ptiCounter + 1) + "," + (ltvCounter + 1) + "] = " + borrowerProfile
-                                                + "\nLTV = " + Math.Round(env.CalculationParameters.ltv * 100, 2) + "%\nPTI = "
-                                                + Math.Round(env.CalculationParameters.pti * 100, 2)
-                                                + "%\nProfile = " + CalculationConstants.profiles[borrowerProfile]);
-        }
+        //private void GetBorrowerProfile(RunEnvironment env)
+        //{
+        //    int ltvCounter = 0;
+        //    int ptiCounter = 0;
+        //    while (borrowerProfile == (int)CalculationConstants.borrowerProfiles.NOTSET)
+        //    {
+        //        if (env.CalculationParameters.pti <= ptiRatios[ptiCounter])
+        //        {
+        //            if (env.CalculationParameters.ltv <= ltvRatios[ltvCounter])
+        //            {
+        //                borrowerProfile = profileMatrix[ptiCounter, ltvCounter];
+        //            }
+        //            else
+        //            {
+        //                if (ltvCounter == (ltvRatios.Length - 1))
+        //                {
+        //                    borrowerProfile = (int)CalculationConstants.borrowerProfiles.NOTOK;
+        //                }
+        //                else
+        //                {
+        //                    ltvCounter++;
+        //                }
+        //            }
+        //        }
+        //        else
+        //        {
+        //            if (ptiCounter == (ptiRatios.Length - 1))
+        //            {
+        //                borrowerProfile = (int)CalculationConstants.borrowerProfiles.NOTOK;
+        //            }
+        //            else
+        //            {
+        //                ptiCounter++;
+        //            }
+        //        }
+        //    }
+        //    Console.WriteLine("Matrix Index [" + (ptiCounter + 1) + "," + (ltvCounter + 1) + "] = " + borrowerProfile
+        //                                        + "\nLTV = " + Math.Round(env.CalculationParameters.ltv * 100, 2) + "%\nPTI = "
+        //                                        + Math.Round(env.CalculationParameters.pti * 100, 2)
+        //                                        + "%\nProfile = " + CalculationConstants.profiles[borrowerProfile]);
+        //}
 
 
 
@@ -124,14 +147,14 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // *********************************** Inserting Interest Rates According to Borrower Profile ********************************* //
         
-        private void InsertRatesToProfile_OLD_DONT_USE_IT_ANYMORE(int profileToApply)
-        {
-            if ((Rates.fixedNoTsamudRates == null) || (Rates.fixedTsamudRates == null) || (Rates.alternateRates == null))
-            {
-                Rates.ReadInterestRateFileAndUpdateRatesInSoftware_OLD_DONT_USE_IT_ANYMORE(profileToApply);
-                //Rates.InsertRatesAccordingToProfile(profileToApply);
-            }
-        }
+        //private void InsertRatesToProfile_OLD_DONT_USE_IT_ANYMORE(int profileToApply)
+        //{
+        //    if ((Rates.fixedNoTsamudRates == null) || (Rates.fixedTsamudRates == null) || (Rates.alternateRates == null))
+        //    {
+        //        Rates.ReadInterestRateFileAndUpdateRatesInSoftware_OLD_DONT_USE_IT_ANYMORE(profileToApply);
+        //        //Rates.InsertRatesAccordingToProfile(profileToApply);
+        //    }
+        //}
 
 
 

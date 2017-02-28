@@ -23,6 +23,7 @@ namespace WisorLib
         public uint DesiredMonthlyPayment { get; set; }
         public uint LoanAmount { get; set; }
         public PaymentType PaymentType { get; set; }
+        public uint fico { get; set; }
         public DateTime DateTaken { get; set; }
         public MortgagProduct MortgagProduct { get; set; }
         public double InterestRate { get; set; }
@@ -32,7 +33,7 @@ namespace WisorLib
         public CreditClass CreditClass { get; set; }
 
         public loanDetails(string id, uint loanAmount, uint desiredMonthlyPayment, uint propertyValue,
-            uint yearlyIncome, uint borrowerAge)
+            uint yearlyIncome, uint borrowerAge, uint fic)
         //,
         //// optional
         //MortgageType mortgageType = MortgageType.None, PaymentType paymentType = PaymentType.None, DateTime? dateTaken = null,
@@ -45,10 +46,12 @@ namespace WisorLib
             LoanAmount = loanAmount;
             BorrowerAge = borrowerAge;
             YearlyIncome = yearlyIncome;
+            fico = fic;
 
+            // DesiredMonthlyPayment can be undefined, calculate it
             if (MiscConstants.UNDEFINED_UINT == DesiredMonthlyPayment)
             {
-
+                DesiredMonthlyPayment = MiscConstants.CalculateMonthlyPayment(loanAmount, propertyValue, yearlyIncome, borrowerAge);
             }
             //    MortgageType = mortgageType;
             //    PaymentType = paymentType;
@@ -62,7 +65,7 @@ namespace WisorLib
         public override string ToString()
         {
             return ("Loan data ID: " + this.ID + ", amount: " + this.LoanAmount + ", monthly payment: " + this.DesiredMonthlyPayment +
-                ", propertyValue: " + this.PropertyValue + ", income: " + this.YearlyIncome + ", age: " + this.BorrowerAge);
+                ", propertyValue: " + this.PropertyValue + ", income: " + this.YearlyIncome + ", age: " + this.BorrowerAge + ", fico: " + this.fico);
         }
 
         public static uint CalculateDesireMonthlyPayment(uint loanAmount, uint propertyValue, uint yearlyIncome, uint borrowerAge)

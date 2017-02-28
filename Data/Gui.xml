@@ -3,36 +3,53 @@
 	<item>
 		<type>TextBox</type>
 		<name>Loan amount</name>
-		<default>400000</default>
+		<default>199200</default>
 		<mandatory>yes</mandatory>
 	</item>
-	<item>
+<!-- 	<item>
 		<type>TextBox</type>
 		<name>Desired monthly payment</name>
 		<default>3000</default>
 		<mandatory>yes</mandatory>
 	</item>
-	<item>
+ -->	<item>
 		<type>TextBox</type>
 		<name>Property value</name>
-		<default>1000000</default>
+		<default>249000</default>
 		<mandatory>yes</mandatory>
 	</item>
 	<item>
 		<type>TextBox</type>
 		<name>Yearly income</name>
-		<default>12000</default>
+		<default>17714</default>
 		<mandatory>yes</mandatory>
 	</item>
 	<item>
 		<type>TextBox</type>
 		<name>Borrower age</name>
 		<ToCheck>min=35</ToCheck>
-		<ToCheck>max=55</ToCheck>
-		<default>35</default>
+		<ToCheck>max=100</ToCheck>
+		<default>60</default>
+		<mandatory>yes</mandatory>
+	</item>
+ 	<item>
+		<type>TextBox</type>
+		<name>Desired monthly payment</name>
+		<default>1300</default>
+		<mandatory>yes</mandatory>
+	</item>
+	<item>
+		<type>TextBox</type>
+		<name>FICO</name>
+		<default>785</default>
 		<mandatory>yes</mandatory>
 	</item>
 
+	
+	
+	
+	
+	
 	<item>
 		<type>ComboBox</type>
 		<name>Mortgage type</name>

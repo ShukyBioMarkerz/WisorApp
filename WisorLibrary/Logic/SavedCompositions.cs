@@ -16,6 +16,7 @@ namespace WisorLib
         private double ttlPayForCheck = -1;
         private enum ttlPayRange { SMALLER, EQUAL, LARGER };
 
+ 
         // List of saved compositions after calculation
         //private Composition compositionToSave = null;
 
@@ -73,13 +74,33 @@ namespace WisorLib
             Option tempOptY = matchingPoint[(int)Options.options.OPTY];
             tempOptX.GetTtlPay();
             tempOptY.GetTtlPay();
-            ttlPayForCheck = tempOptX.optTtlPay + tempOptY.optTtlPay + fixedOptZ.optTtlPay;   
+            ttlPayForCheck = tempOptX.optTtlPay + tempOptY.optTtlPay + fixedOptZ.optTtlPay;
+
+            // Print to file
+            // tempOptX.toString, tempOptY.tostring, fixedOptZ.ToString, 
+            // tempOptX.optTtlPay.toString, tempOptY.optTtlPay.tostring, fixedOptZ.optTtlPay.ToString,
+            // ttlPayForCheck
+
+            // truncate the numbers
+            string[] msg2write = { "X: " + tempOptX.ToString(), "Y: " + tempOptY.ToString(),
+                "Z: " + fixedOptZ.ToString(),
+                "X_pmt: " + tempOptX.optPmt.ToString(),
+                "Y_pmt: " + tempOptY.optPmt.ToString(),
+                "Z_pmt: " + fixedOptZ.optPmt.ToString(),
+                "Ttl_pmt: " + Convert.ToInt32(tempOptX.optPmt + tempOptY.optPmt + fixedOptZ.optPmt).ToString(),
+                "X_Ttl: " + Convert.ToInt32(tempOptX.optTtlPay).ToString(),
+                "Y_Ttl: " + Convert.ToInt32(tempOptY.optTtlPay).ToString(),
+                "Z_Ttl: " + Convert.ToInt32(fixedOptZ.optTtlPay).ToString(),
+                "ttlPay: " + Convert.ToInt32(ttlPayForCheck).ToString()
+            };
+            //Share.PrintLog2CSV(msg2write);
 
             // 2 - Check total pay if smaller than the lowest so far
             int ttlPayChecker = CheckTotalPay(ttlPayForCheck);
             
             if (ttlPayChecker == (int)ttlPayRange.SMALLER)
             {
+                //Share.counterOfCompositions++;
                 ResultsOutput.bestCompositionSoFar = new Composition(matchingPoint[(int)Options.options.OPTX],
                                                                         matchingPoint[(int)Options.options.OPTY], fixedOptZ);
             }

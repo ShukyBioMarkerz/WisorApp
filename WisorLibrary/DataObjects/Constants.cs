@@ -122,6 +122,9 @@ namespace WisorLib
         // Payment to Income (PTI)
         public double pti;
 
+        // Credit score (FICO)
+        public uint fico;
+
         // Time restriction from age of youngest lender
         public uint maximumTimeForLoan = 360;
 
@@ -135,7 +138,7 @@ namespace WisorLib
         public double[] maxAmts;
 
         public CalculationParameters(double loanAmtWante, double monthlyPmtWante,
-                uint propertyValu, uint incom, uint youngestLenderAg)
+                uint propertyValu, uint incom, uint youngestLenderAg, uint fic)
         {
             loanAmtWanted = loanAmtWante;
             monthlyPmtWanted = monthlyPmtWante;
@@ -144,6 +147,7 @@ namespace WisorLib
             youngestLenderAge = youngestLenderAg;
             ltv = (loanAmtWanted / propertyValue);
             pti = (monthlyPmtWanted / income);
+            fico = fic;
 
             minAmts = new double[] {CalculationConstants.optionMinimumAmount,
                               CalculationConstants.optionMinimumAmount,
@@ -246,7 +250,25 @@ namespace WisorLib
         
 
 
-        private static readonly string[,] combinationsUSA = { { "Fixed30yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" } };
+        private static readonly string[,] combinationsUSA = {
+            { "Fixed30yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" },
+            { "Fixed30yrsUSA", "Fixed20yrsUSA", "5.1ARMUSA" },
+            { "Fixed30yrsUSA", "Fixed10yrsUSA", "5.1ARMUSA" },
+
+            { "Fixed30yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" },
+            { "Fixed30yrsUSA", "Fixed20yrsUSA", "7.1ARMUSA" },
+            { "Fixed30yrsUSA", "Fixed10yrsUSA", "7.1ARMUSA" },
+
+            { "Fixed30yrsUSA", "Fixed20yrsUSA", "Fixed15yrsUSA" },
+            { "Fixed30yrsUSA", "Fixed20yrsUSA", "Fixed10yrsUSA" },
+            { "Fixed30yrsUSA", "Fixed15yrsUSA", "Fixed10yrsUSA" },
+
+            { "Fixed20yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" },
+            { "Fixed20yrsUSA", "Fixed10yrsUSA", "5.1ARMUSA" },
+
+            { "Fixed20yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" },
+            { "Fixed20yrsUSA", "Fixed10yrsUSA", "7.1ARMUSA" }
+        };
 
 
         // enum markets { USA, UK, ISRAEL, OTHER , NONE}

@@ -37,6 +37,8 @@ namespace WisorLib
 
         public Option(/*uint optionType*/ string optionType, double optionAmount, uint optionTime)
         {
+            //Console.WriteLine("Option ctor optionType: " + optionType + ", optionAmount: " + optionAmount + ", optionTime: " + optionTime);
+
             optType = optionType;
             optAmt = optionAmount;
             optTime = optionTime;
@@ -128,52 +130,22 @@ namespace WisorLib
         {
             double rate = MiscConstants.UNDEFINED_DOUBLE;
 
-            if (/*(optType > (int)Options.typesList.EMPTY)*/ 
-                ! String.IsNullOrEmpty(optType ) && (optTime >= CalculationConstants.minimumTimeForLoan))
+            if (! String.IsNullOrEmpty(optType ) && (optTime >= CalculationConstants.minimumTimeForLoan))
             {
                 // Instead of looking for product in local class -> lookup via xml
                 // Go to local Rates class, lookup value and plug in
-                // TBD: define the all types in the xml like Options.typesList.PRIME
-                // Omri 
-                // TBD - fix the -4 constant 
-                rate = Rates.FindRateForKey(product.ID, BorrowerProfile.borrowerProfile, (int)optTime/12-4);
-              
-                //switch (optType)
-                //{
-                //    // TBD Omri - we should solve this
-                //    case ((int)Options.typesList.PRIME):
-                //                                    return Rates.alternateRates[(int)Rates.alternatingRates.PRIME];
-                //    case ((int)Options.typesList.FIXNOTSAMUD):
-                //                                    return Rates.fixedNoTsamudRates[(optTime / 12) - 4];
-                //    case ((int)Options.typesList.ALT60NOTSAMUD):
-                //                                    return Rates.alternateRates[(int)Rates.alternatingRates.MTH60NOINF];
-                //    case ((int)Options.typesList.FIXTSAMUD):
-                //                                    return Rates.fixedTsamudRates[(optTime / 12) - 4];
-                //    case ((int)Options.typesList.ALT12):
-                //                                    return Rates.alternateRates[(int)Rates.alternatingRates.MTH12];
-                //    case ((int)Options.typesList.ALT24):
-                //                                    return Rates.alternateRates[(int)Rates.alternatingRates.MTH24];
-                //    case ((int)Options.typesList.ALT30):
-                //                                    return Rates.alternateRates[(int)Rates.alternatingRates.MTH30];
-                //    case ((int)Options.typesList.ALT60):
-                //                                    return Rates.alternateRates[(int)Rates.alternatingRates.MTH60YESINF];
-                //    case ((int)Options.typesList.ALT84):
-                //                                    return Rates.alternateRates[(int)Rates.alternatingRates.MTH84];
-                //    case ((int)Options.typesList.ALT120):
-                //                                    return Rates.alternateRates[(int)Rates.alternatingRates.MTH120];
-                //    default: return -1;
-                //}
+                 rate = Rates.FindRateForKey(product.ID, BorrowerProfile.borrowerProfile, (int)optTime/12-4);
             }
             else
             {
-                if (String.IsNullOrEmpty(optType) /*optType == (int)Options.typesList.EMPTY*/)
+                if (String.IsNullOrEmpty(optType))
                 {
-                    throw new System.ArgumentOutOfRangeException("Option Type Out of Range");
+                    throw new System.ArgumentOutOfRangeException("Option Type Out of Range. optType: " + optType);
 
                 }
                 else
                 {
-                    throw new System.ArgumentOutOfRangeException("Option Time Out of Range");
+                    throw new System.ArgumentOutOfRangeException("Option Time Out of Range. optTime: " + optTime.ToString());
                 }
             }
 
@@ -227,8 +199,9 @@ namespace WisorLib
 
         public double CalculatePmt(double amtForCalc, uint timeForCalc, double interestRateForCalc)
         {
-            double currInterest = MiscConstants.UNDEFINED_DOUBLE; 
+            double currInterest = MiscConstants.UNDEFINED_DOUBLE;
 
+            //Console.WriteLine("CalculatePmt amtForCalc: " + amtForCalc + ", timeForCalc: " + timeForCalc + ", interestRateForCalc: " + interestRateForCalc);
             if ((! String.IsNullOrEmpty(optType) /*optType > Options.typesList.EMPTY*/) && (amtForCalc > 0) && (timeForCalc > 0))                                          
             {
                 if ((amtForCalc > 0) && (timeForCalc > 0))
@@ -308,6 +281,8 @@ namespace WisorLib
 
         private void CalculateLuahSilukin()
         {
+            //Console.WriteLine("CalculateLuahSilukin product.firstTimePeriod: " + product.firstTimePeriod);
+
             if (product.firstTimePeriod == 0)
             {
                 if (product.indexUsedFirstTimePeriod == 0)

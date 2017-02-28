@@ -62,7 +62,7 @@ operatorUsedSecondTimePeriod
 		
 		<minTime>360</minTime>
 		<maxTime>360</maxTime>
-		<timeJump>0</timeJump>
+		<timeJump>12</timeJump>
 		
 		<firstTimePeriod>0</firstTimePeriod>	
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>		
@@ -81,7 +81,7 @@ operatorUsedSecondTimePeriod
 
 		<minTime>300</minTime>
 		<maxTime>300</maxTime>
-		<timeJump>0</timeJump>
+		<timeJump>12</timeJump>
 		
 		<firstTimePeriod>0</firstTimePeriod>
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
@@ -103,7 +103,7 @@ operatorUsedSecondTimePeriod
 
 		<minTime>240</minTime>
 		<maxTime>240</maxTime>
-		<timeJump>0</timeJump>
+		<timeJump>12</timeJump>
 		
 		<firstTimePeriod>0</firstTimePeriod>
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
@@ -122,7 +122,7 @@ operatorUsedSecondTimePeriod
 
 		<minTime>180</minTime>
 		<maxTime>180</maxTime>
-		<timeJump>0</timeJump>
+		<timeJump>12</timeJump>
 		
 		<firstTimePeriod>0</firstTimePeriod>
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
@@ -141,7 +141,7 @@ operatorUsedSecondTimePeriod
 
 		<minTime>120</minTime>
 		<maxTime>120</maxTime>
-		<timeJump>0</timeJump>
+		<timeJump>12</timeJump>
 		
 		<firstTimePeriod>0</firstTimePeriod>
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
@@ -160,7 +160,7 @@ operatorUsedSecondTimePeriod
 		
 		<minTime>60</minTime>
 		<maxTime>60</maxTime>
-		<timeJump>0</timeJump>
+		<timeJump>12</timeJump>
 		
 		<firstTimePeriod>0</firstTimePeriod>
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>	

@@ -33,13 +33,13 @@ namespace WisorLib
 
         // Hold the entire running environment data
         public RunEnvironment(string orderid, double loanAmtWanted, double monthlyPmtWanted,
-                    uint propertyValue, uint income, uint youngestLenderAge)
+                    uint propertyValue, uint income, uint youngestLenderAge, uint fico)
         {
             OrderID = orderid;
             //OutputFilename = CreateOutputFilename(orderid, loanAmtWanted, monthlyPmtWanted);
             CheckInfo = new CheckInfo(OrderID);
             CalculationParameters = new CalculationParameters(loanAmtWanted, monthlyPmtWanted,
-                    propertyValue, income, youngestLenderAge);
+                    propertyValue, income, youngestLenderAge, fico);
             PrintOptions = new PrintOptions();
             if (PrintOptions.printToOutputFile == true)
             {
@@ -60,6 +60,8 @@ namespace WisorLib
             }
             else
                 rc = true;
+            WindowsUtilities.loggerMethod("NOTICE: running for market: " + market.ToString() + ", #of combination: " + combination.Length);
+            Console.WriteLine("NOTICE: running for market: " + market.ToString() + ", #of combination: " + combination.Length);
             return rc;
         }
 

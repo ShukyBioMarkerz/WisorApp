@@ -23,7 +23,9 @@ namespace WisorLib
         public static string    MAX_STR = "max";
         public static string    EQUAL_STR = "=";
         public static char      SEERATOR_STR = ';';
+        public static char      COMMA_SEERATOR_STR = ',';
         public static char      DOT_STR = '.';
+        public static char      PERCANTAGE_STR = '%';
         public static string    CRITERIA_FILENAME = "criteria.txt";
         public static string    OUTPUT_DIR = "Output";
         public static char      NAME_SEP_CHAR = '-';
@@ -38,11 +40,12 @@ namespace WisorLib
         public const string MORTGAGE_TYPE = "Mortgage type"; // First time buyer, 
         public const string PAYMENT_TYPE = "Payment type";
         public const string MORTGAGE_PRODUCT = "Mortgage product";
+        public const string LOAN_FICO = "FICO";
 
         public static uint DEFAULT_PERCANTAGE_OF_MONTHLY_PAYMENT = 30;
 
         // type of the selection window
-        public enum SelectionType { ReadLoans = 0, ReadProducts , ReadRates };
+        public enum SelectionType { ReadCretiria = 0, ReadProducts , ReadRates , ReadLoansFile};
 
         // TBD: either read it from file
         public static int GetLoanID()
@@ -55,11 +58,11 @@ namespace WisorLib
         // TBD - shuky
         public enum indices { MADAD, PRIME, CPI, FED, LIBOR, EUROBOR, BBBR, MAKAM, OTHER, NONE }; // Are the options in the code or pulled from outside DB?
 
-        public static uint CalculateMonthlyPayment(uint loanAmount, uint propertyValue,
-            uint yearlyIncome, uint borrowerAge)
+        public static uint CalculateMonthlyPayment(uint loanAmount, uint propertyValue, uint yearlyIncome, uint borrowerAge)
         {
             uint desiredMonthlyPayment = 0;
 
+            desiredMonthlyPayment = (uint)yearlyIncome / 3;
             return desiredMonthlyPayment;
         }
 

@@ -96,7 +96,7 @@ namespace WisorLib
                     if (i == tsamudNum)
                     {
                         //string[] lineValues = lineInput.Split(',');
-                        lineValues = lineInput.Split(',');
+                        lineValues = lineInput.Split(MiscConstants.COMMA_SEERATOR_STR);
                         for (int j = 2; j < lineValues.Length; j++)
                         {
                             finalTsamudRates[j - 2] = double.Parse(lineValues[j]);
@@ -115,7 +115,7 @@ namespace WisorLib
                     if (i == alternateNum)
                     {
                         //string[] lineValues = lineInput.Split(',');
-                        lineValues = lineInput.Split(',');
+                        lineValues = lineInput.Split(MiscConstants.COMMA_SEERATOR_STR);
                         for (int j = 2; j < 10; j++)
                         {
                             finalAlternateRates[j - 2] = double.Parse(lineValues[j]);

@@ -183,9 +183,9 @@ namespace WisorLib
             {
                 Console.WriteLine("\nMaximum time possible = " + (env.CalculationParameters.maximumTimeForLoan / 12));
             }
-            GetAgeRestrictionOneOption(optionTypes[(int)Options.options.OPTX], env);
-            GetAgeRestrictionOneOption(optionTypes[(int)Options.options.OPTY], env);
-            GetAgeRestrictionOneOption(optionTypes[(int)Options.options.OPTZ], env);
+            //GetAgeRestrictionOneOption(optionTypes[(int)Options.options.OPTX], env);
+            //GetAgeRestrictionOneOption(optionTypes[(int)Options.options.OPTY], env);
+            //GetAgeRestrictionOneOption(optionTypes[(int)Options.options.OPTZ], env);
         }
 
 
@@ -194,35 +194,39 @@ namespace WisorLib
 
         // ******************************************** Get Maximum Time For One Option *********************************************** //
 
-        private static void GetAgeRestrictionOneOption(OneOptType optTypeForCheck, RunEnvironment env)
-        {
-            //Console.WriteLine("Option type = " + optTypeForCheck.typeId);
-            //Console.ReadKey();
+        //private static void GetAgeRestrictionOneOption(OneOptType optTypeForCheck, RunEnvironment env)
+        //{
+        //    //Console.WriteLine("Option type = " + optTypeForCheck.typeId);
+        //    //Console.ReadKey();
 
-            uint remainingTimePossible;
-            if (0 < optTypeForCheck.product.timeJump)
-            {
-                remainingTimePossible = env.CalculationParameters.maximumTimeForLoan - (env.CalculationParameters.maximumTimeForLoan % optTypeForCheck.product.timeJump);
+        //    uint remainingTimePossible;
+        //    if (0 < optTypeForCheck.product.timeJump)
+        //    {
+        //        remainingTimePossible = env.CalculationParameters.maximumTimeForLoan - (env.CalculationParameters.maximumTimeForLoan % optTypeForCheck.product.timeJump);
+        //    }
+        //    else
+        //    {
+        //        remainingTimePossible = env.CalculationParameters.maximumTimeForLoan;
+        //    }
 
-            }
-            else
-            {
-                remainingTimePossible = env.CalculationParameters.maximumTimeForLoan;
-            }
+        //    if (optTypeForCheck.product.maxTime > optTypeForCheck.product.minTime)
+        //    {
+        //        if (remainingTimePossible >= optTypeForCheck.product.maxTime)
+        //            optTypeForCheck.product.maxTime = remainingTimePossible;
+        //    }
 
-            if (remainingTimePossible <= optTypeForCheck.product.maxTime)
-                optTypeForCheck.product.maxTime = remainingTimePossible;
 
-            if (env.PrintOptions.printSubFunctionsInConsole == true)
-            {
-                Console.WriteLine("Option Type = " + optTypeForCheck.product.name + "\nMaximum time for option type = " + optTypeForCheck.product.maxTime
-                                    + "\nMaximum time possible for loaner = " + env.CalculationParameters.maximumTimeForLoan
-                                    + "\nNew maximum time for option type = " + remainingTimePossible);
-            }
 
-            //optTypeForCheck.product.maxTime = remainingTimePossible;
+        //    if (env.PrintOptions.printSubFunctionsInConsole == true)
+        //    {
+        //        Console.WriteLine("Option Type = " + optTypeForCheck.product.name + "\nMaximum time for option type = " + optTypeForCheck.product.maxTime
+        //                            + "\nMaximum time possible for loaner = " + env.CalculationParameters.maximumTimeForLoan
+        //                            + "\nNew maximum time for option type = " + remainingTimePossible);
+        //    }
 
-        }
+        //    //optTypeForCheck.product.maxTime = remainingTimePossible;
+
+        //}
 
 
 

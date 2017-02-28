@@ -30,7 +30,7 @@ namespace WisorLib
             if (File.Exists(filename))
             {
                 doc = XDocument.Load(filename);
-                int index = 1;
+                int index = 0;
 
                 // loop all the items in the document
                 foreach (XElement item in from c in doc.Descendants("item") select c)
@@ -103,105 +103,109 @@ namespace WisorLib
         public enum CreditClass { None = 0, Exelent = 1, Good = 2, medium = 3, low = 4 };
 
 
-        public static LoanList LoadCSVFileData(string filename, FieldList fieldsDef)
-        {
-            LoanList loans = new LoanList();
-            string currLine = MiscConstants.UNDEFINED_STRING;
+        //public static LoanList LoadExcelFileDataOLD(string filename, FieldList fieldsDef)
+        //{
+        //    LoanList loans = new LoanList();
+        //    string currLine = MiscConstants.UNDEFINED_STRING;
 
-            try
-            {
-                if (File.Exists(filename))
-                {
-                    var file = new FileInfo(filename);
-                    var stream = new FileStream(filename, FileMode.Open);
-                    IExcelDataReader excelReader = null;
+        //    try
+        //    {
+        //        if (File.Exists(filename))
+        //        {
+        //            var file = new FileInfo(filename);
+        //            var stream = new FileStream(filename, FileMode.Open);
+        //            IExcelDataReader excelReader = null;
 
-                    if (file.Extension == ".xls")
-                    {
-                        excelReader = ExcelReaderFactory.CreateBinaryReader(stream);
-                    }
-                    else if (file.Extension == ".xlsx")
-                    {
-                        excelReader = ExcelReaderFactory.CreateOpenXmlReader(stream);
-                    }
+        //            if (file.Extension == ".xls")
+        //            {
+        //                excelReader = ExcelReaderFactory.CreateBinaryReader(stream);
+        //            }
+        //            else if (file.Extension == ".xlsx")
+        //            {
+        //                excelReader = ExcelReaderFactory.CreateOpenXmlReader(stream);
+        //            }
 
-                    if (excelReader == null)
-                        return loans;
+        //            if (excelReader == null)
+        //                return loans;
 
-                    excelReader.IsFirstRowAsColumnNames = true;
-                    DataSet ds = excelReader.AsDataSet();
+        //            excelReader.IsFirstRowAsColumnNames = true;
+        //            DataSet ds = excelReader.AsDataSet();
 
-                    List<string> data = ReadAllData(ds);
-                    const int INDEX_ADD = 1;
+        //            List<string> data = ReadAllData(ds);
+        //            const int INDEX_ADD = 1;
 
-                    // id should be retrived by some logic
-                    int id = MiscConstants.GetLoanID();
-                    int loanAmountIndex = fieldsDef.GetIndexOf(MiscConstants.LOAN_AMOUNT); // // there is a index in the excel file
-                    int monthlyPaymentIndex = fieldsDef.GetIndexOf(MiscConstants.MONTHLY_PAYMENT); // + INDEX_ADD;
-                    int propertyValueIndex = fieldsDef.GetIndexOf(MiscConstants.PROPERTY_VALUE); // + INDEX_ADD;
-                    int yearlyIncomeIndex = fieldsDef.GetIndexOf(MiscConstants.YEARLY_INCOME); // + INDEX_ADD;
-                    int ageIndex = fieldsDef.GetIndexOf(MiscConstants.AGE); // + INDEX_ADD;
+        //            // id should be retrived by some logic
+        //            int id = MiscConstants.GetLoanID();
+        //            int loanAmountIndex = fieldsDef.GetIndexOf(MiscConstants.LOAN_AMOUNT); // // there is a index in the excel file
+        //            int monthlyPaymentIndex = fieldsDef.GetIndexOf(MiscConstants.MONTHLY_PAYMENT); // + INDEX_ADD;
+        //            int propertyValueIndex = fieldsDef.GetIndexOf(MiscConstants.PROPERTY_VALUE); // + INDEX_ADD;
+        //            int yearlyIncomeIndex = fieldsDef.GetIndexOf(MiscConstants.YEARLY_INCOME); // + INDEX_ADD;
+        //            int ageIndex = fieldsDef.GetIndexOf(MiscConstants.AGE); // + INDEX_ADD;
+        //            int ficoIndex = fieldsDef.GetIndexOf(MiscConstants.LOAN_FICO);
+                                        
+        //            if (INDEX_ADD < loanAmountIndex && INDEX_ADD < monthlyPaymentIndex && INDEX_ADD < propertyValueIndex &&
+        //                INDEX_ADD < yearlyIncomeIndex && INDEX_ADD < ficoIndex /*&& INDEX_ADD <= ageIndex*/)
+        //            {
+        //                // add to the memory
+        //                foreach (string line in data)
+        //                {
+        //                    currLine = line;
+        //                    // skip the header
+        //                    if (!line.ToLower().Contains(MiscConstants.LOAN_AMOUNT.ToLower()))
+        //                    {
+        //                        string[] entities = line.Split(MiscConstants.SEERATOR_STR);
+        //                        // be prapared for missing data: skip that entry
+        //                        uint uloanAmountIndexV = Convert.ToUInt32(entities[loanAmountIndex]);
+        //                        uint umonthlyPaymentIndexV = Convert.ToUInt32(entities[monthlyPaymentIndex]);
+        //                        uint upropertyValueIndexV = Convert.ToUInt32(entities[propertyValueIndex]);
+        //                        uint uyearlyIncomeIndexV = Convert.ToUInt32(entities[yearlyIncomeIndex]);
+        //                        // age is not mandatory
 
-                    if (INDEX_ADD <= loanAmountIndex && INDEX_ADD <= monthlyPaymentIndex && INDEX_ADD <= propertyValueIndex &&
-                        INDEX_ADD <= yearlyIncomeIndex /*&& INDEX_ADD <= ageIndex*/)
-                    {
-                        // add to the memory
-                        foreach (string line in data)
-                        {
-                            currLine = line;
-                            // skip the header
-                            if (!line.ToLower().Contains(MiscConstants.LOAN_AMOUNT.ToLower()))
-                            {
-                                string[] entities = line.Split(MiscConstants.SEERATOR_STR);
-                                // be prapared for missing data: skip that entry
-                                uint uloanAmountIndexV = Convert.ToUInt32(entities[loanAmountIndex]);
-                                uint umonthlyPaymentIndexV = Convert.ToUInt32(entities[monthlyPaymentIndex]);
-                                uint upropertyValueIndexV = Convert.ToUInt32(entities[propertyValueIndex]);
-                                uint uyearlyIncomeIndexV = Convert.ToUInt32(entities[yearlyIncomeIndex]);
-                                // age is not mandatory
+        //                        //uint uageIndexV = Convert.ToUInt32(entities[ageIndex]);
+        //                        uint uageIndexV = INDEX_ADD > ageIndex ? 0 : Convert.ToUInt32(entities[ageIndex]);
+        //                        uint ficoIndexV = Convert.ToUInt32(entities[ficoIndex]);
+                                
+        //                        loans.Add(new loanDetails(id.ToString(),
+        //                            uloanAmountIndexV, umonthlyPaymentIndexV, upropertyValueIndexV, 
+        //                            uyearlyIncomeIndexV, uageIndexV, ficoIndexV));
+        //                        id++;
+        //                    }
+        //                }
+        //            }
+        //            else
+        //            {
+        //                string err = null;
+        //                if (INDEX_ADD > loanAmountIndex)
+        //                    err += " illegal loanAmountIndex value: " + loanAmountIndex.ToString();
+        //                if (INDEX_ADD > monthlyPaymentIndex)
+        //                    err += " illegal monthlyPaymentIndex value: " + monthlyPaymentIndex.ToString();
+        //                if (INDEX_ADD > propertyValueIndex)
+        //                    err += " illegal propertyValueIndex value: " + propertyValueIndex.ToString();
+        //                if (INDEX_ADD > yearlyIncomeIndex)
+        //                    err += " illegal yearlyIncomeIndex value: " + yearlyIncomeIndex.ToString();
+        //                if (INDEX_ADD > ageIndex)
+        //                    err += " illegal ageIndex value: " + ageIndex.ToString();
 
-                                //uint uageIndexV = Convert.ToUInt32(entities[ageIndex]);
-                                uint uageIndexV = INDEX_ADD > ageIndex ? 0 : Convert.ToUInt32(entities[ageIndex]);
-                                loans.Add(new loanDetails(id.ToString(),
-                                    uloanAmountIndexV, umonthlyPaymentIndexV, upropertyValueIndexV, uyearlyIncomeIndexV, uageIndexV));
-                                id++;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        string err = null;
-                        if (INDEX_ADD > loanAmountIndex)
-                            err += " illegal loanAmountIndex value: " + loanAmountIndex.ToString();
-                        if (INDEX_ADD > monthlyPaymentIndex)
-                            err += " illegal monthlyPaymentIndex value: " + monthlyPaymentIndex.ToString();
-                        if (INDEX_ADD > propertyValueIndex)
-                            err += " illegal propertyValueIndex value: " + propertyValueIndex.ToString();
-                        if (INDEX_ADD > yearlyIncomeIndex)
-                            err += " illegal yearlyIncomeIndex value: " + yearlyIncomeIndex.ToString();
-                        if (INDEX_ADD > ageIndex)
-                            err += " illegal ageIndex value: " + ageIndex.ToString();
-
-                        WindowsUtilities.loggerMethod("NOTICE: LoadCSVFileData file: illegal index of the mandatory parameters. Probably missing some cretiria. " + err);
-                    }
+        //                WindowsUtilities.loggerMethod("NOTICE: LoadCSVFileData file: illegal index of the mandatory parameters. Probably missing some cretiria. " + err);
+        //            }
 
 
-                    // Free resources (IExcelDataReader is IDisposable)
-                    excelReader.Close();
+        //            // Free resources (IExcelDataReader is IDisposable)
+        //            excelReader.Close();
 
-                }
-                else
-                {
-                    WindowsUtilities.loggerMethod("LoadCSVFileData file: " + filename + " does not exists!!!");
-                }
-            }
-            catch (Exception e)
-            {
-                WindowsUtilities.loggerMethod("ERROR: LoadCSVFileData got Exception: " + e.ToString() + ". line: " + currLine);
-            }
+        //        }
+        //        else
+        //        {
+        //            WindowsUtilities.loggerMethod("LoadCSVFileData file: " + filename + " does not exists!!!");
+        //        }
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        WindowsUtilities.loggerMethod("ERROR: LoadCSVFileData got Exception: " + e.ToString() + ". line: " + currLine);
+        //    }
 
-            return loans;
-        }
+        //    return loans;
+        //}
 
         private static List<string> ReadAllData(DataSet dataset)
         {
@@ -237,6 +241,118 @@ namespace WisorLib
             return lines;
         }
 
+
+        public static LoanList LoadCSVFileData(string filename, FieldList fieldsDef)
+        {
+            LoanList loans = new LoanList();
+            string currLine = MiscConstants.UNDEFINED_STRING;
+
+            string curr = MiscConstants.UNDEFINED_STRING;
+            string[] entities;
+            // id should be retrived by some logic
+            int id = MiscConstants.GetLoanID();
+
+            try
+            {
+                if (File.Exists(filename))
+                {
+                    var file = new FileInfo(filename);
+                    StreamReader fileReader = new System.IO.StreamReader(filename);
+                    string line;
+                    int lineNumber = 1;
+                    do
+                    {
+                        line = fileReader.ReadLine();
+                        curr = line;
+                        if (String.IsNullOrEmpty(line))
+                            continue;
+
+                        // skip the first line
+                        // TBD: should read the headers and relate to it
+                        if (1 == lineNumber++)
+                            continue;
+
+                        entities = line.Split(MiscConstants.COMMA_SEERATOR_STR);
+
+                        if (String.IsNullOrEmpty(entities[0]))
+                        {
+                            continue;
+                        }
+
+                        // ensure the line correctness
+                        const int INDEX_ADD = 1;
+
+                        int loanAmountIndex = fieldsDef.GetIndexOf(MiscConstants.LOAN_AMOUNT); // // there is a index in the excel file
+                        int monthlyPaymentIndex = fieldsDef.GetIndexOf(MiscConstants.MONTHLY_PAYMENT); // + INDEX_ADD;
+                        int propertyValueIndex = fieldsDef.GetIndexOf(MiscConstants.PROPERTY_VALUE); // + INDEX_ADD;
+                        int yearlyIncomeIndex = fieldsDef.GetIndexOf(MiscConstants.YEARLY_INCOME); // + INDEX_ADD;
+                        int ageIndex = fieldsDef.GetIndexOf(MiscConstants.AGE); // + INDEX_ADD;
+                        int ficoIndex = fieldsDef.GetIndexOf(MiscConstants.LOAN_FICO);
+
+                        if (MiscConstants.UNDEFINED_INT < loanAmountIndex /*&& INDEX_ADD <= monthlyPaymentIndex*/ && MiscConstants.UNDEFINED_INT < propertyValueIndex &&
+                            MiscConstants.UNDEFINED_INT < yearlyIncomeIndex && INDEX_ADD < ficoIndex)
+                        {
+                            currLine = line;
+                            // skip the header
+                            if (!line.ToLower().Contains(MiscConstants.LOAN_AMOUNT.ToLower()))
+                            {
+                                // be prapared for missing data: skip that entry
+                                uint umonthlyPaymentIndexV = MiscConstants.UNDEFINED_UINT;
+                                uint uloanAmountIndexV = Convert.ToUInt32(entities[loanAmountIndex]);
+                                if (MiscConstants.UNDEFINED_INT != monthlyPaymentIndex)
+                                    umonthlyPaymentIndexV = Convert.ToUInt32(entities[monthlyPaymentIndex]);
+                                // be ready to non define proiprty value
+                                if (String.IsNullOrEmpty(entities[propertyValueIndex]))
+                                    continue;
+                                uint upropertyValueIndexV = Convert.ToUInt32(entities[propertyValueIndex]);
+                                int index = entities[yearlyIncomeIndex].IndexOf(MiscConstants.DOT_STR);
+                                string trimed = (0 < index) ? entities[yearlyIncomeIndex].Remove(index) : entities[yearlyIncomeIndex];
+                                uint uyearlyIncomeIndexV = Convert.ToUInt32(trimed);
+                                // age is not mandatory
+
+                                //uint uageIndexV = Convert.ToUInt32(entities[ageIndex]);
+                                uint uageIndexV = INDEX_ADD > ageIndex ? 0 : Convert.ToUInt32(entities[ageIndex]);
+                                uint ficoIndexV = Convert.ToUInt32(entities[ficoIndex]);
+
+                                loans.Add(new loanDetails(id.ToString(),
+                                    uloanAmountIndexV, umonthlyPaymentIndexV, upropertyValueIndexV, uyearlyIncomeIndexV, uageIndexV, ficoIndexV));
+                                id++;
+                            }
+                        }
+                        else
+                        {
+                            string err = null;
+                            if (INDEX_ADD > loanAmountIndex)
+                                err += " illegal loanAmountIndex value: " + loanAmountIndex.ToString();
+                            if (INDEX_ADD > monthlyPaymentIndex)
+                                err += " illegal monthlyPaymentIndex value: " + monthlyPaymentIndex.ToString();
+                            if (INDEX_ADD > propertyValueIndex)
+                                err += " illegal propertyValueIndex value: " + propertyValueIndex.ToString();
+                            if (INDEX_ADD > yearlyIncomeIndex)
+                                err += " illegal yearlyIncomeIndex value: " + yearlyIncomeIndex.ToString();
+                            if (INDEX_ADD > ageIndex)
+                                err += " illegal ageIndex value: " + ageIndex.ToString();
+
+                            WindowsUtilities.loggerMethod("NOTICE: LoadCSVFileData file: illegal index of the mandatory parameters. Probably missing some cretiria. " + err);
+                        }
+                    }
+                    while (!System.String.IsNullOrEmpty(line));
+
+                }
+                else
+                {
+                    Console.WriteLine("ERROR: LoadCSVFileData file: " + filename + " does not exists!!!");
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("ERROR: LoadCSVFileData got Exception: " + e.ToString() + ". Curr: " + curr);
+            }
+
+        return loans;
+        }
+
+  
 
     }
 }

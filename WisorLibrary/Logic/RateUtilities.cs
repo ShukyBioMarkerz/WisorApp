@@ -98,10 +98,10 @@ namespace WisorLibrary.Logic
 
             if (0 > result)
             {
-                Console.WriteLine("ERROR: illegal rate: " + result);
-                WindowsUtilities.loggerMethod("ERROR:  illegal rate: " + result);
+                Console.WriteLine("ERROR: illegal rate for key: " + key.ToString() + " and index: " + index);
+                //WindowsUtilities.loggerMethod("ERROR: illegal rate for key: " + key.ToString() + " and index: " + index);
                 // TBD
-                //result = 0.015;
+                result = 0.015;
             }
 
 
@@ -135,13 +135,20 @@ namespace WisorLibrary.Logic
                         if (1 == lineNumber++)
                             continue;
 
-                        entities = line.Split(',');
-
+                        entities = line.Split(MiscConstants.COMMA_SEERATOR_STR);
                         if (String.IsNullOrEmpty(entities[0]))
                         {
                             continue;
                         }
 
+                        // clean all redundant chars e.g. %
+                        for (int i = 0; i < entities.Length; i++)
+                        {
+                            int index = entities[i].IndexOf(MiscConstants.PERCANTAGE_STR);
+                            string trimed = (0 < index) ? entities[i].Remove(index) : entities[i];
+                            entities[i] = trimed;
+                        }
+                
                         // ensure the line correctness
                         // TBD: should define properly the index with no hard coding...
                         if (3 < entities.Length)
