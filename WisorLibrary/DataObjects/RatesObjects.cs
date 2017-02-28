@@ -96,14 +96,14 @@ namespace WisorLibrary.DataObjects
 
         public override int GetHashCode()
         {
-            return (this.productID + this.profile).GetHashCode();
+             // TBD - Performance: should handle properly
+            //return (productID + 23 * profile).GetHashCode();
+            // performance wise. try to ease the cpu time
+            int h = 0;
+            for (int i = 0; i < productID.Length; i++)
+                h += productID[i] * profile ^ productID.Length - (i + 1);
+            return h;
         }
     }
-
-
-
-    /// <summary>
-    /// ///////////////////////
-    /// </summary>
 
 }

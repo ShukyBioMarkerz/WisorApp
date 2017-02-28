@@ -103,7 +103,7 @@ namespace WisorLib
                             maxPercentageLoan = Convert.ToDouble(product.Element("maxPercentageOfLoan").Value);
                         
                         // add to the memory
-                        products.Add(new GenericProduct(typeId /*ID*/, market /*localMarket*/, name, 
+                        products.Add(typeId, new GenericProduct(typeId /*ID*/, market /*localMarket*/, name, 
                             iftp /*indices*/, istp /*indices*/,
                             ijftp /*indexJumps*/, ijstp /*indexJumps*/,
                             minTime, maxTime, timeJump, firstTimePeriod, maxPercentageLoan));
@@ -127,28 +127,35 @@ namespace WisorLib
     }
 
 
-    public class ProductsList : List<GenericProduct>
-    {
-        public static Predicate<GenericProduct> ProductPredicate(GenericProduct gp)
-        {
-            return delegate (GenericProduct p)
-            {
-                return p.ID.ToLower() == gp.ID.ToLower();
-            };
-        }
+    //public class ProductsList : List<GenericProduct>
+    //{
+    //    public static Predicate<GenericProduct> ProductPredicate(GenericProduct gp)
+    //    {
+    //        return delegate (GenericProduct p)
+    //        {
+    //            //return p.ID.ToLower() == gp.ID.ToLower();
+    //            // performance ease
+    //            return p.ID == gp.ID;
+    //        };
+    //    }
 
+    //    public GenericProduct GetProduct(string id)
+    //    {
+    //        return this.Find(ProductPredicate(new GenericProduct(id)));
+    //    }
+    //}
+
+    public class ProductsList : Dictionary<string, GenericProduct>
+    {
+       
         public GenericProduct GetProduct(string id)
         {
-            return this.Find(ProductPredicate(new GenericProduct(id)));
-        }
+            GenericProduct gp;
 
-        //public int GetIndexOf(string id)
-        //{
-        //    int index = -1;
-        //    GenericProduct gp = this.Find(ProductPredicate(new GenericProduct(id)));
-        //    if (null != gp)
-        //        index = gp.index;
-        //    return index;
-        //}
+            if (!this.TryGetValue(id, out gp))
+                gp = null;
+            return gp;
+            //return this.Find(ProductPredicate(new GenericProduct(id)));
+        }
     }
 }
