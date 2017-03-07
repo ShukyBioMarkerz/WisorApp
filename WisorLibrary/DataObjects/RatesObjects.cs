@@ -68,10 +68,10 @@ namespace WisorLibrary.DataObjects
 
     public class RatesKey
     {
-        string productID;
-        int profile;
+        public int productID;
+        public int profile;
 
-        public RatesKey(string id, int p)
+        public RatesKey(int id, int p)
         {
             productID = id;
             profile = p;
@@ -79,7 +79,7 @@ namespace WisorLibrary.DataObjects
 
         public override string ToString()
         {
-            return "productID: " + productID + ", profile: " + profile;
+            return "productID: " + GenericProduct.GetProductName(productID).ToString() + ", profile: " + profile;
         }
 
         public override bool Equals(object obj)
@@ -96,13 +96,13 @@ namespace WisorLibrary.DataObjects
 
         public override int GetHashCode()
         {
-             // TBD - Performance: should handle properly
-            //return (productID + 23 * profile).GetHashCode();
+            // TBD - Performance: should handle properly
+            return (productID + 23 * profile).GetHashCode();
             // performance wise. try to ease the cpu time
-            int h = 0;
-            for (int i = 0; i < productID.Length; i++)
-                h += productID[i] * profile ^ productID.Length - (i + 1);
-            return h;
+            //int h = 0;
+            //for (int i = 0; i < productID.Length; i++)
+            //    h += productID[i] * profile ^ productID.Length - (i + 1);
+            //return h;
         }
     }
 

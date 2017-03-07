@@ -47,8 +47,8 @@ namespace WisorLib
             {
                 Console.WriteLine("Looking for expanded point " + Options.letters[(int)letter] + Options.numbers[(int)number]
                                     + " (Match = " + initialPoint.matchOrNo + ")\nOptX Type = "
-                                    + optTypes[(int)Options.options.OPTX].product.ID + "\nOptY Type = "
-                                    + optTypes[(int)Options.options.OPTY].product.ID + "\nOptX = " + expandingOpts[(int)Options.options.OPTX].ToString()
+                                    + optTypes[(int)Options.options.OPTX].product.productID.numberID + "\nOptY Type = "
+                                    + optTypes[(int)Options.options.OPTY].product.productID.numberID + "\nOptX = " + expandingOpts[(int)Options.options.OPTX].ToString()
                                     + "\nOptY = " + expandingOpts[(int)Options.options.OPTY].ToString() + "\n");
             }
             InsertOptionsForSavedPoint(ExpandPoint(optTypes[(int)Options.options.OPTX], optTypes[(int)Options.options.OPTY],

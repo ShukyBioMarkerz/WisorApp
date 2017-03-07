@@ -5,14 +5,28 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using WisorLib;
+using WisorLibrary.Logic;
 using static WisorLib.MiscConstants;
 
 namespace WisorLib
 {
+    public class ProductID {
+        public int numberID { get; set; } 
+        public string stringTypeId { get; set; }
+
+        public ProductID(int numberID, string stringTypeId)
+        {
+            this.numberID = numberID;
+            this.stringTypeId = stringTypeId;
+        }
+    }
+
+
     public class GenericProduct
     {
-        public string ID { get; set; } // unique identifier
-
+        public ProductID productID { get; set; } // unique identifier
+  
         // Identify which local market is used
         public enum markets { USA, UK, ISRAEL, OTHER , NONE}; // Are the options in the code or pulled from outside DB?
         public markets localMarket;
@@ -51,7 +65,7 @@ namespace WisorLib
 
         public double maxPercentageOfLoan;
 
-        public GenericProduct(string ID, markets localMarket = markets.NONE, // USA, UK, ISRAEL, OTHER
+        public GenericProduct(ProductID productID, markets localMarket = markets.NONE, // USA, UK, ISRAEL, OTHER
             string name = MiscConstants.UNDEFINED_STRING, 
             indices indexUsedFirstTimePeriod = indices.NONE, indices indexUsedSecondTimePeriod = indices.NONE, // PRIME, FED, LIBOR, EUROBOR, BBBR, OTHER, NONE
             indexJumps indexJumpFirstTimePeriod = indexJumps.NONE, indexJumps indexJumpSecondTimePeriod = indexJumps.NONE, // AY, WEEK, MONTHS1, MONTHS3, MONTHS6, MONTHS12, MONTHS24, MONTHS30, MONTHS36, MONTHS60, MONTHS84, MONTHS120, OTHER
@@ -59,7 +73,7 @@ namespace WisorLib
             uint timeJump = MiscConstants.UNDEFINED_UINT, uint firstTimePeriod = MiscConstants.UNDEFINED_UINT,
             double maxPercentageOfLoan = MiscConstants.UNDEFINED_DOUBLE) 
         {
-            this.ID = ID;
+            this.productID = productID;
             this.localMarket = localMarket;
             this.name = name;
             this.indexUsedFirstTimePeriod = indexUsedFirstTimePeriod;
@@ -78,6 +92,7 @@ namespace WisorLib
         {
             ProductsList products = new ProductsList();
 
+            // Load only th nneded products according to the combination definition
             try {
                 if (File.Exists(filename))
                 {
@@ -101,12 +116,18 @@ namespace WisorLib
                         double maxPercentageLoan = MiscConstants.UNDEFINED_DOUBLE; 
                         if (null != product.Element("maxPercentageOfLoan"))
                             maxPercentageLoan = Convert.ToDouble(product.Element("maxPercentageOfLoan").Value);
-                        
-                        // add to the memory
-                        products.Add(typeId, new GenericProduct(typeId /*ID*/, market /*localMarket*/, name, 
+
+                        // ensure the product is needed
+                        int index = GenericProduct.GetProductIndex(typeId);
+                        if (MiscConstants.UNDEFINED_INT < index)
+                        {
+                            ProductID productID = new ProductID(index, typeId);
+                            products.Add(index, new GenericProduct(productID /*ID*/, market /*localMarket*/, name,
                             iftp /*indices*/, istp /*indices*/,
                             ijftp /*indexJumps*/, ijstp /*indexJumps*/,
                             minTime, maxTime, timeJump, firstTimePeriod, maxPercentageLoan));
+                        }
+
                     }
                 }
                 else
@@ -124,6 +145,50 @@ namespace WisorLib
             return products;
         }
 
+        public static int GetProductIndex(string productName)
+        {
+            if (null != Share.theProductsNames && 0 < Share.theProductsNames.Length)
+            {
+                int ind = Array.IndexOf(Share.theProductsNames, productName);
+                if (MiscConstants.UNDEFINED_INT > ind)
+                {
+                    Console.WriteLine("ERROR: GetProductIndex failed to find index for product: " + productName);
+                    return MiscConstants.UNDEFINED_INT;
+                }
+                else
+                {
+                    return ind;
+                }
+            }
+            else
+            {
+                Console.WriteLine("ERROR: GetProductIndex theProductsNames is empty");
+                return MiscConstants.UNDEFINED_INT;
+            }
+        }
+
+        public static string GetProductName(int productIndex)
+        {
+            string productName = MiscConstants.UNDEFINED_STRING;
+
+            if (null != Share.theProductsNames && 0 < Share.theProductsNames.Length)
+            {
+                if (MiscConstants.UNDEFINED_INT < productIndex && productIndex < Share.theProductsNames.Length)
+                {
+                    productName = Share.theProductsNames[productIndex];
+               }
+                else
+                {
+                    Console.WriteLine("ERROR: GetProductIndex failed to find index for product: " + productName);
+                }
+            }
+            else
+            {
+                Console.WriteLine("ERROR: GetProductIndex theProductsNames is empty");
+            }
+
+            return productName;
+        }
     }
 
 
@@ -145,10 +210,10 @@ namespace WisorLib
     //    }
     //}
 
-    public class ProductsList : Dictionary<string, GenericProduct>
+    public class ProductsList : Dictionary<int, GenericProduct>
     {
-       
-        public GenericProduct GetProduct(string id)
+
+        public GenericProduct GetProduct(int id)
         {
             GenericProduct gp;
 
@@ -158,4 +223,6 @@ namespace WisorLib
             //return this.Find(ProductPredicate(new GenericProduct(id)));
         }
     }
+
+
 }

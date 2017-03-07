@@ -43,7 +43,7 @@ namespace WisorLib
 
                     plane = new SinglePlane(pmtLimits, fixedOptZ0, env);
                     
-                    savedCompositionsForFile = new SavedCompositions(fixedOptZ0, plane.savedMatches);
+                    savedCompositionsForFile = new SavedCompositions(fixedOptZ0, plane.savedMatches, env);
                     
                     if (fixedOptZ0.optTime == env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.maxTime)
                     {
@@ -111,7 +111,7 @@ namespace WisorLib
             }
             else
             {
-                optionZ0 = new Option(env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.ID,
+                optionZ0 = new Option(env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.productID.numberID,
                                             pmtLimits.amts[(int)Options.options.OPTZ], timeZ);
                 double ttlPMTmaxTime = pmtLimits.opts[(int)Options.options.OPTX].times[(int)Options.pmtLimits.MAXTIME].optPmt
                                         + pmtLimits.opts[(int)Options.options.OPTY].times[(int)Options.pmtLimits.MAXTIME].optPmt

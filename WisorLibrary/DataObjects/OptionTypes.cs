@@ -44,7 +44,7 @@ namespace WisorLib
         // Omri: define the other markets
         // TBD - all arrive from the xml product file
 
-        public OneOptType(string optionType)
+        public OneOptType(int optionType)
         {
             product = MiscConstants.GetProduct(optionType);
             if (null == product)
@@ -146,7 +146,7 @@ namespace WisorLib
         public OneOptType[] optionTypes = { null, null, null };
   
 
-        public OptionTypes(/*uint*/ string optXType, /*uint*/ string optYType, /*uint*/ string optZType, RunEnvironment env)
+        public OptionTypes(int optXType, int optYType, int optZType, RunEnvironment env)
         {
             optionTypes[(int)Options.options.OPTX] = new OneOptType(optXType);
             optionTypes[(int)Options.options.OPTY] = new OneOptType(optYType);

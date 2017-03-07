@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Xml.Linq;
 using WisorLib;
 //using System.Windows.Forms;
@@ -30,6 +31,7 @@ namespace WisorLib
         public static string    OUTPUT_DIR = "Output";
         public static char      NAME_SEP_CHAR = '-';
         public static string    CSV_EXT = ".csv";
+        public static string    DOTS_STR = ":";
 
         // Loan parameter
         public const string LOAN_AMOUNT = "Loan amount";
@@ -44,9 +46,14 @@ namespace WisorLib
 
         public static uint DEFAULT_PERCANTAGE_OF_MONTHLY_PAYMENT = 30;
 
+        public const int NumberOfProfiles = 6;
+        public const int NumberOfYearsFrProduct = 27;
+
+        public static double BANK_RATE = 0.005;
+
         // type of the selection window
         public enum SelectionType { ReadCretiria = 0, ReadProducts , ReadRates , ReadLoansFile};
-
+        
         // TBD: either read it from file
         public static int GetLoanID()
         {
@@ -81,7 +88,7 @@ namespace WisorLib
         }
 
         // function to get the product by the unique id
-        public static GenericProduct GetProduct(string id)
+        public static GenericProduct GetProduct(int id)
         {
             GenericProduct product = null;
             if (null != Share.theLoadedProducts)
@@ -119,9 +126,13 @@ namespace WisorLib
         //    return product;
         //}
 
-        
+        // spend some time .....
+        public static void FakeFunctionality()
+        {
+            Thread.Sleep(12345);
+        }
 
-     
+
     }
 
 }

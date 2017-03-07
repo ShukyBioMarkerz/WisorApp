@@ -176,7 +176,7 @@ namespace WisorLib
                     midCell = (numOfCells - 1) / 2;
                 }
                 midValue = minTimeValue + (midCell * optForCheckType.product.timeJump);
-                Option opt = new Option(optForCheckType.product.ID, optForCheckAmt, midValue);
+                Option opt = new Option(optForCheckType.product.productID.numberID, optForCheckAmt, midValue);
                 double midPmt = opt.optPmt;
                 if (printOrNo == true)
                 {
@@ -266,24 +266,24 @@ namespace WisorLib
             if ((letter == (int)Options.limitPointsLetters.A) && (numberForSave == (int)Options.limitPointsNumbers.ONE))
             {
                 opts[(int)Options.options.OPTX] = fixedOpt.times[(int)Options.pmtLimits.MAXTIME];
-                opts[(int)Options.options.OPTY] = new Option(optForCheckType.product.ID, optForCheckAmt, savedTime);
+                opts[(int)Options.options.OPTY] = new Option(optForCheckType.product.productID.numberID, optForCheckAmt, savedTime);
             }
             else if ((letter == (int)Options.limitPointsLetters.A) && (numberForSave == (int)Options.limitPointsNumbers.TWO))
             {
-                opts[(int)Options.options.OPTX] = new Option(optForCheckType.product.ID, optForCheckAmt, savedTime);
+                opts[(int)Options.options.OPTX] = new Option(optForCheckType.product.productID.numberID, optForCheckAmt, savedTime);
                 opts[(int)Options.options.OPTY] = fixedOpt.times[(int)Options.pmtLimits.MINTIME];
 
             }
             else if ((letter == (int)Options.limitPointsLetters.B) && (numberForSave == (int)Options.limitPointsNumbers.ONE))
             {
-                opts[(int)Options.options.OPTX] = new Option(optForCheckType.product.ID, optForCheckAmt, savedTime);
+                opts[(int)Options.options.OPTX] = new Option(optForCheckType.product.productID.numberID, optForCheckAmt, savedTime);
                 opts[(int)Options.options.OPTY] = fixedOpt.times[(int)Options.pmtLimits.MAXTIME];
 
             }
             else if ((letter == (int)Options.limitPointsLetters.B) && (numberForSave == (int)Options.limitPointsNumbers.TWO))
             {
                 opts[(int)Options.options.OPTX] = fixedOpt.times[(int)Options.pmtLimits.MINTIME];
-                opts[(int)Options.options.OPTY] = new Option(optForCheckType.product.ID, optForCheckAmt, savedTime);
+                opts[(int)Options.options.OPTY] = new Option(optForCheckType.product.productID.numberID, optForCheckAmt, savedTime);
             }
             number = numberForSave;
         }

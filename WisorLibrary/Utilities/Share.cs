@@ -30,48 +30,20 @@ namespace WisorLib
 
         public static SelectionType theSelectionType { get; set; }
 
-        //public static uint counterOfCompositions { get; set; }
-        //public static uint numOfMatchesGlobal { get; set; }
+        public static bool shouldRunFake { get; set; }
+        public static bool shouldPrintResultsInList { get; set; }
 
-        //static StreamWriter fileStream;
+        public static int[,] combinations4market;
+        public static string[,] combinationsAsString;
+        public static string[] theProductsNames { get; set; }
+        public static double[] theProductsRates;
 
-        //public static void PrepareLog2CSV()
-        //{
-        //    fileStream = null;
-        //    string filename = AppDomain.CurrentDomain.BaseDirectory // + Path.DirectorySeparatorChar
-        //        + MiscConstants.OUTPUT_DIR + Path.DirectorySeparatorChar +
-        //        /*orderid*/ MiscConstants.GetLoanID() +
-        //        MiscConstants.NAME_SEP_CHAR + "Logger" + MiscConstants.NAME_SEP_CHAR +
-        //        DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT;
+        /// <summary>
+        /// Print the selected combination to excel file
+        /// </summary>
+        public static uint counterOfCompositions { get; set; }
+        public static uint numOfMatchesGlobal { get; set; }
 
-
-        //    // TBD: Shuky - ensure the directory realy exists
-        //    if (!Directory.Exists(Path.GetDirectoryName(filename)))
-        //        Directory.CreateDirectory(Path.GetDirectoryName(filename));
-
-        //    fileStream = new StreamWriter(filename);
-
-        //}
-
-        //public static void PrintLog2CSV(string[] msg)
-        //    //str1, string str2, string str3, string str4, string str5, string str6, string str7)
-        //{
-        //    try
-        //    {
-                
-        //        string msg2write = null;
-        //        for (int i = 0; i < msg.Length; i++)
-        //        {
-        //            msg2write += msg[i] + COMMA_SEERATOR_STR;
-        //        }
-           
-        //        fileStream.WriteLine(msg2write);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Console.WriteLine("ERROR: PrintLog2CSV got Exception: " + e.ToString());
-        //    }
-        //}
 
         public static markets theMarket { get; set; }
 
@@ -103,6 +75,11 @@ namespace WisorLib
             //    theNewList.Add(gp);
             //}
             //theSelectedProducts = theNewList;
+        }
+
+        public static double GetBankRate()
+        {
+            return MiscConstants.BANK_RATE;
         }
     }
 }

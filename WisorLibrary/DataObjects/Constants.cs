@@ -54,26 +54,7 @@ namespace WisorLib
 
     class Options
     {
-        // List of Options as inserted in website admin
-        // PRIME, MAKAM, FIXTSAMUD, FIXNOTSAMUD, ALT12 , ALT24, ALT30, ALT60, ALT60NOTSAMUD, ALT84, ALT120, ZAKAUT, NORATETSAMUD, NORATENOTSAMUD
-        // 5        6       7           8           9       10    11     12         13         14     15        16      17              18
-        // List of Options as inserted in original code
-        // PRIME, FIXNOTSAMUD, ALT60NOTSAMUD, FIXTSAMUD, ALT12, ALT24, ALT30, ALT60, ALT84, ALT120
-        //  1           2           3           4           5       6   7       8       9       10
-        // List of Options as inserted in code to correlate with website
-        // PRIME, MAKAM, FIXTSAMUD, FIXNOTSAMUD, ALT12 , ALT24, ALT30, ALT60, ALT60NOTSAMUD, ALT84, ALT120, ZAKAUT, NORATETSAMUD, NORATENOTSAMUD
-        // 1        2       3           4           5       6    7       8         9           10     11        12      13              14
-
-        // Type list as inserted in website admin
-
-        // Shuky TBD
-        // The typesList shoyld be defined in thre xml typeId 
-        //public enum typesList {  EMPTY, PRIME, MAKAM, FIXTSAMUD, FIXNOTSAMUD, ALT12, ALT24, ALT30, ALT60, 
-        //                            ALT60NOTSAMUD, ALT84, ALT120, ZAKAUT, NORATETSAMUD, NORATENOTSAMUD };
-        //public static string[] optionTypes = { "EMPTY", "PRIME", "MAKAM", "FIXTSAMUD", "FIXNOTSAMUD", "ALT12", "ALT24", "ALT30", "ALT60", 
-        //                                            "ALT60NOTSAMUD", "ALT84", "ALT120", "ZAKAUT", "NORATETSAMUD", "NORATENOTSAMUD" };
-
-
+        
         // Option Names For Calculation
         public enum options { OPTX, OPTY, OPTZ };
 
@@ -160,46 +141,6 @@ namespace WisorLib
 
 
 
-    //public class CalculationParameters
-    //{
-    //    // Loan Amount Wanted - Inserted by Admin Once
-    //    public static double loanAmtWanted = -1;
-
-    //    // Monthly Payment Wanted - Inserted by Admin Once
-    //    public static double monthlyPmtWanted = -1;
-
-    //    // Income
-    //    public static uint income = 0;
-
-    //    // Property value
-    //    public static uint propertyValue = 0;
-
-    //    // Youngest lender age
-    //    public static uint youngestLenderAge = 0;
-
-    //    // Loan to Value (LTV)
-    //    public static double ltv = -1;
-
-    //    // Payment to Income (PTI)
-    //    public static double pti = -1;
-
-    //    // Time restriction from age of youngest lender
-    //    public static uint maximumTimeForLoan = 360;
-
-    //    // Option Types Chosen for calculation
-    //    public static OptionTypes optTypes = null;
-
-    //    // Minimum Amounts possible for every Option (Option X, Option Y, Option Z)
-    //    public static double[] minAmts = { CalculationConstants.optionMinimumAmount, 
-    //                                        CalculationConstants.optionMinimumAmount, 
-    //                                        CalculationConstants.optionMinimumAmount };
-
-    //    // Maximum Amounts possible for every Option (Option X, Option Y, Option Z)
-    //    public static double[] maxAmts = { -1, -1, -1 };
-
-    //}
-
-
 
     class CalculationConstants
     {
@@ -251,23 +192,18 @@ namespace WisorLib
 
 
         private static readonly string[,] combinationsUSA = {
-            { "Fixed30yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" },
+            { "Fixed30yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" } /*,
+            { "Fixed30yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" } ,
             { "Fixed30yrsUSA", "Fixed20yrsUSA", "5.1ARMUSA" },
-            { "Fixed30yrsUSA", "Fixed10yrsUSA", "5.1ARMUSA" },
-
-            { "Fixed30yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" },
             { "Fixed30yrsUSA", "Fixed20yrsUSA", "7.1ARMUSA" },
+            { "Fixed30yrsUSA", "Fixed10yrsUSA", "5.1ARMUSA" },
             { "Fixed30yrsUSA", "Fixed10yrsUSA", "7.1ARMUSA" },
-
             { "Fixed30yrsUSA", "Fixed20yrsUSA", "Fixed15yrsUSA" },
-            { "Fixed30yrsUSA", "Fixed20yrsUSA", "Fixed10yrsUSA" },
+            { "Fixed30yrsUSA", "Fixed20yrsUSA", "Fixed10yrsUSA" } ,
+            { "Fixed20yrsUSA", "Fixed15yrsUSA", "Fixed10yrsUSA" },
             { "Fixed30yrsUSA", "Fixed15yrsUSA", "Fixed10yrsUSA" },
-
             { "Fixed20yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" },
-            { "Fixed20yrsUSA", "Fixed10yrsUSA", "5.1ARMUSA" },
-
-            { "Fixed20yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" },
-            { "Fixed20yrsUSA", "Fixed10yrsUSA", "7.1ARMUSA" }
+            { "Fixed20yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" } */
         };
 
 

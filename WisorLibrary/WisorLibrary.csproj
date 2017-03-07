@@ -60,6 +60,7 @@
     <Compile Include="DataObjects\Constants.cs" />
     <Compile Include="DataObjects\Criteria.cs" />
     <Compile Include="DataObjects\RatesObjects.cs" />
+    <Compile Include="Logic\Calculations.cs" />
     <Compile Include="Logic\FastSearch.cs" />
     <Compile Include="Logic\RateUtilities.cs" />
     <Compile Include="Utilities\FileLoader.cs" />

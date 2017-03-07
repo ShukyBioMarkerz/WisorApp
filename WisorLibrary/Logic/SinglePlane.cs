@@ -110,9 +110,16 @@ namespace WisorLib
             finalLimitPoints[(int)Options.limitPointsLetters.A] = new FinalLimitPoint(initialLimitPoints[(int)Options.limitPointsLetters.A], env);
             finalLimitPoints[(int)Options.limitPointsLetters.B] = new FinalLimitPoint(initialLimitPoints[(int)Options.limitPointsLetters.B], env);
 
-            savedMatches.InsertListOfMatches(finalLimitPoints[(int)Options.limitPointsLetters.A].savedMatches);
-            savedMatches.InsertListOfMatches(finalLimitPoints[(int)Options.limitPointsLetters.B].savedMatches);
-
+            if ((finalLimitPoints[(int)Options.limitPointsLetters.A].savedMatches.numOfMatches == 1) &&
+                 (finalLimitPoints[(int)Options.limitPointsLetters.B].savedMatches.numOfMatches == 1))
+            {
+                savedMatches.InsertListOfMatches(finalLimitPoints[(int)Options.limitPointsLetters.A].savedMatches);
+            }
+            else
+            {
+                savedMatches.InsertListOfMatches(finalLimitPoints[(int)Options.limitPointsLetters.A].savedMatches);
+                savedMatches.InsertListOfMatches(finalLimitPoints[(int)Options.limitPointsLetters.B].savedMatches);
+            }
 
             if (printOrNo == true)
             {
@@ -122,13 +129,10 @@ namespace WisorLib
         }
 
 
+    // **************************************************************************************************************************** //
+    // ************************************************ Create Final Search Area ************************************************** //
 
-
-
-        // **************************************************************************************************************************** //
-        // ************************************************ Create Final Search Area ************************************************** //
-
-        private void FindFinalSearchArea(RunEnvironment env)
+    private void FindFinalSearchArea(RunEnvironment env)
         {
             searchArea = new SearchAreaInPlane(finalLimitPoints, env);
 

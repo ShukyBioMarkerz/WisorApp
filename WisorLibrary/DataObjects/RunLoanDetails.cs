@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,5 +28,6 @@ namespace WisorLib
             return "The load details: id: " + ID + ", Status: " + Status + ", epalse time: " + ElapsedMilliseconds +
                 ", outfilename: " + Outfilename;
         }
+
     }
 }

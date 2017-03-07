@@ -53,101 +53,21 @@ namespace WisorLib
             RateUtilities.SetFilename(filename);
         }
 
-        public static double FindRateForKey(string productID, int profile, int index)
+        public static double FindRateForKey(int productID, int profile, int index)
         {
-            double rate = RateUtilities.Instance.FindRateForKey(new WisorLibrary.DataObjects.RatesKey(productID, profile), index);
+            //double rate = RateUtilities.Instance.FindRateForKey(new WisorLibrary.DataObjects.RatesKey(productID, profile), index);
+            double rate = RateUtilities.Instance.FindRateForKeyAsNumber(new WisorLibrary.DataObjects.RatesKey(productID, profile), index);
             return rate;
         }
 
-        public static RateLine FindRatesForKey(string productID, int profile)
-        {
-            // RateLine : double[] value
-            RateLine rate = RateUtilities.Instance.FindRatesForKey(new RatesKey(productID, profile));
-            return rate;
-        }
+        //public static RateLine FindRatesForKey(string productID, int profile)
+        //{
+        //    // RateLine : double[] value
+        //    RateLine rate = RateUtilities.Instance.FindRatesForKey(new RatesKey(productID, profile));
+        //    return rate;
+        //}
 
-        public static void ReadInterestRateFileAndUpdateRatesInSoftware_OLD_DONT_USE_IT_ANYMORE(int profileOfBorrower)
-        {
-            int tsamudNum = profileOfBorrower;
-            int noTsamudNum = tsamudNum + 6;
-            int alternateNum = noTsamudNum + 6;
-
-            double[] finalTsamudRates = new double[27];
-            double[] finalNoTsamudRates = new double[27];
-            double[] finalAlternateRates = new double[8];
-            string lineInput = "";
-            
-            if (! File.Exists(ratesFilename))
-            {
-                Console.WriteLine("NOTICE: ReadInterestRateFileAndUpdateRatesInSoftware file: {0} does not exists!!!", ratesFilename);
-                throw new System.InvalidOperationException("NOTICE: ReadInterestRateFileAndUpdateRatesInSoftware file: " + ratesFilename + " does not exists!!!");
-                //return;
-            }
-
-
-            System.IO.StreamReader fileReader = new System.IO.StreamReader(ratesFilename);
-            Console.WriteLine("Borrower Profile : " + profileOfBorrower);
-            string[] lineValues = null;
-            try
-            {
-                for (int i = 0; i <= alternateNum; i++)
-                {
-                    lineInput = fileReader.ReadLine();
-                    if (i == tsamudNum)
-                    {
-                        //string[] lineValues = lineInput.Split(',');
-                        lineValues = lineInput.Split(MiscConstants.COMMA_SEERATOR_STR);
-                        for (int j = 2; j < lineValues.Length; j++)
-                        {
-                            finalTsamudRates[j - 2] = double.Parse(lineValues[j]);
-                        }
-                    }
-                    
-                    if (i == noTsamudNum)
-                    {
-                        //string[] lineValues = lineInput.Split(',');
-                        lineValues = lineInput.Split(',');
-                        for (int j = 2; j < lineValues.Length; j++)
-                        {
-                            finalNoTsamudRates[j - 2] = double.Parse(lineValues[j]);
-                        }
-                    }
-                    if (i == alternateNum)
-                    {
-                        //string[] lineValues = lineInput.Split(',');
-                        lineValues = lineInput.Split(MiscConstants.COMMA_SEERATOR_STR);
-                        for (int j = 2; j < 10; j++)
-                        {
-                            finalAlternateRates[j - 2] = double.Parse(lineValues[j]);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("ERROR ReadInterestRateFileAndUpdateRatesInSoftware. lineValues[j]: " + lineValues.ToString());
-            }
-
-            fixedTsamudRates = finalTsamudRates;
-            fixedNoTsamudRates = finalNoTsamudRates;
-            alternateRates = finalAlternateRates;
-
-            for (int i = 0; i < fixedTsamudRates.Length; i++)
-            {
-                Console.Write(fixedTsamudRates[i] + " ");
-            }
-            Console.WriteLine();
-            for (int i = 0; i < fixedNoTsamudRates.Length; i++)
-            {
-                Console.Write(fixedNoTsamudRates[i] + " ");
-            }
-            Console.WriteLine();
-            for (int i = 0; i < alternateRates.Length; i++)
-            {
-                Console.Write(alternateRates[i] + " ");
-            }
-        }
-
+        
 
 
 

@@ -48,12 +48,6 @@ namespace WisorLib
    
                 // Set borrower risk profile for choosing interest rates
                 BorrowerProfile bp = new BorrowerProfile(env);
-                
-                // TBD: Shuky - whay to pause??
-                // Console.ReadKey();
-
-                // Shuky - measure the elapse time. Start
-                var watch = System.Diagnostics.Stopwatch.StartNew();
 
                 if (bp.ShowBorrowerProfile() == (int)CalculationConstants.borrowerProfiles.NOTOK)
                 {
@@ -61,17 +55,6 @@ namespace WisorLib
                 }
                 else
                 {
-                    //Rates.ReadInterestRateFileAndUpdateRatesInSoftware(3);
-
-                    //Rates.ExportRatesToCSVFile();
-                    //Rates.AddToInterestRatesOnce("NOTSAMUD", -0.46);
-                    //Rates.AddToInterestRatesOnce("TSAMUD", +0.14);
-
-                    //if (env.PrintOptions.printToOutputFile == true)
-                    //{
-                    //    OutputConstants.outputFile = new OutputFile();
-                    //}
-                    // Print input and parameters
                     if (env.PrintOptions.printMainInConsole == true)
                     {
                         Console.WriteLine("\nLoan Amount = " + env.CalculationParameters.loanAmtWanted + "\nTarget monthly payment = "
@@ -182,16 +165,14 @@ namespace WisorLib
 
                 }
 
-                // Shuky - measure the elapse time. Stop
-                watch.Stop();
-                elapsedMs = watch.ElapsedMilliseconds;
-                Console.WriteLine("\n*** Calculation time in milliseconds*** {0}", elapsedMs);
-
             } // CanRunCalculation
             else
             {
                 Console.WriteLine("NOTICE: can't run the calculation. CanRunCalculation falge is: " + CanRunCalculation);
             }
+
+            // order the composition list
+            List<ChosenComposition> orderList = env.OrderCompositionListByBorrower();
 
             return new RunLoanDetails(env.CheckInfo.orderID, Convert.ToInt32(CanRunCalculation), elapsedMs, env.OutputFile.OutputFilename);
         } 
@@ -201,19 +182,17 @@ namespace WisorLib
 
         private void DefineOptionTypes(uint combinationToDefine, RunEnvironment env)
         {
-            env.CalculationParameters.optTypes = new OptionTypes(CalculationConstants.GetCombination(Share.theMarket)[combinationToDefine, 0],
-                                                                CalculationConstants.GetCombination(Share.theMarket)[combinationToDefine, 1],
-                                                                    CalculationConstants.GetCombination(Share.theMarket)[combinationToDefine, 2], env);
+            env.CalculationParameters.optTypes = new OptionTypes(
+                Share.combinations4market[combinationToDefine, 0],
+                Share.combinations4market[combinationToDefine, 1],
+                Share.combinations4market[combinationToDefine, 2], env);
 
-
-            //CalculationParameters.optTypes = new OptionTypes((combinationToDefine / 100), ((combinationToDefine - 100) / 10),
-            //                       (combinationToDefine - 100 - (10 * ((combinationToDefine - 100) / 10))));
             if (env.PrintOptions.printFunctionsInConsole == true)
             {
                 Console.WriteLine("\nDefining combination for check - "  
-                + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].product.ID + " "
-                + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].product.ID + " "
-                + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.ID + " :\n");
+                + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].product.productID.numberID + " "
+                + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].product.productID.numberID + " "
+                + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.productID.numberID + " :\n");
             }
         }
 

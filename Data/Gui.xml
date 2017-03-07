@@ -29,7 +29,7 @@
 		<name>Borrower age</name>
 		<ToCheck>min=35</ToCheck>
 		<ToCheck>max=100</ToCheck>
-		<default>60</default>
+		<default>35</default>
 		<mandatory>yes</mandatory>
 	</item>
  	<item>

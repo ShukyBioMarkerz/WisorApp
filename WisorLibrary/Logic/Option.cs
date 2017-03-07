@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WisorLibrary.Logic;
 using static WisorLib.MiscConstants;
 
 namespace WisorLib
 {
-    class Option
+    public class Option
     {
 
         // General Parameters
-        public string optType;
+        public int optType;
         public double optAmt = 0;
         public uint optTime = 0;
         public double optPmt = -1;
@@ -21,21 +22,23 @@ namespace WisorLib
         public double optTtlRatePay = 0;
         public double optTtlPrincipalPay = 0;
         private bool printOrNo = false;
-
-        private string inflationStr = "";
-
+        
         //private double optRate = -1;
-        private double optRateFirstPeriod = -1;
-        private double optRateSecondPeriod = -1;
+        public double optRateFirstPeriod = -1;
+        public double optRateSecondPeriod = -1;
 
         // Shuky changes:
         //public double inflation = -1;
         public double indexFirstPeriod { get; set; }
         public double indexSecondPeriod { get; set; }
 
-        private GenericProduct product;
+        private double optBankRateFirstPeriod = -1;
+        private double optBankRateSecondPeriod = -1;
+        public double optBankTtlPay = 0;
 
-        public Option(/*uint optionType*/ string optionType, double optionAmount, uint optionTime)
+        public GenericProduct product;
+
+        public Option(int optionType, double optionAmount, uint optionTime)
         {
             //Console.WriteLine("Option ctor optionType: " + optionType + ", optionAmount: " + optionAmount + ", optionTime: " + optionTime);
 
@@ -43,11 +46,7 @@ namespace WisorLib
             optAmt = optionAmount;
             optTime = optionTime;
 
-            // TBD: what is the unique ID of the product???
             product = MiscConstants.GetProduct(optionType);
-            //inflation = GetInflationForOption();
-            // Shuky TBD
-            //inflation = 0;
             bool rc = GetInflationsForOption(optType);
 
             optRateFirstPeriod = FindInterestRate();
@@ -58,35 +57,7 @@ namespace WisorLib
             optPmt = CalculatePmt(optAmt, optTime, optRateFirstPeriod);
         }
 
-        //private void InsertRatesInListForCalculation()
-        //{
-        //    if ((optType > (int)Options.typesList.EMPTY) &&
-        //            (optAmt >= CalculationConstants.optionMinimumAmount) &&
-        //                (optTime >= CalculationConstants.minimumTimeForLoan))                                                      
-        //    {
-        //        for (int i = 0; i < optRateList.Length; i++ )
-        //        {
-        //            optRateList[i] = optRate;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        if (optType == (int)Options.typesList.EMPTY)
-        //        {
-        //            throw new System.ArgumentOutOfRangeException("Option Type Out of Range");
-        //        }
-        //        else if (optAmt <= CalculationConstants.optionMinimumAmount)
-        //        {
-        //            throw new System.ArgumentOutOfRangeException("Option Amount Out of Range");
-        //        }
-        //        else
-        //        {
-        //            throw new System.ArgumentOutOfRangeException("Option Time Out of Range");
-        //        }
-        //    }
-
-        //}
-
+   
 
 
 
@@ -99,7 +70,7 @@ namespace WisorLib
         // according to the Product -> typeId
         //indices { MADAD, PRIME, CPI, FED, LIBOR, EUROBOR, BBBR, OTHER, NONE
 
-        private bool GetInflationsForOption(string id)
+        private bool GetInflationsForOption(int id)
         {
             bool rc = false;
             GenericProduct product = GetProduct(id);
@@ -130,15 +101,15 @@ namespace WisorLib
         {
             double rate = MiscConstants.UNDEFINED_DOUBLE;
 
-            if (! String.IsNullOrEmpty(optType ) && (optTime >= CalculationConstants.minimumTimeForLoan))
+            if ((MiscConstants.UNDEFINED_INT != optType ) && (optTime >= CalculationConstants.minimumTimeForLoan))
             {
                 // Instead of looking for product in local class -> lookup via xml
                 // Go to local Rates class, lookup value and plug in
-                 rate = Rates.FindRateForKey(product.ID, BorrowerProfile.borrowerProfile, (int)optTime/12-4);
+                 rate = Rates.FindRateForKey(product.productID.numberID, BorrowerProfile.borrowerProfile, (int)optTime/12-4);
             }
             else
             {
-                if (String.IsNullOrEmpty(optType))
+                if (MiscConstants.UNDEFINED_INT == optType)
                 {
                     throw new System.ArgumentOutOfRangeException("Option Type Out of Range. optType: " + optType);
 
@@ -161,7 +132,7 @@ namespace WisorLib
 
         public double ShowRate()
         {
-            if ((optTime >= CalculationConstants.minimumTimeForLoan) && (! String.IsNullOrEmpty(optType) /*> (int)Options.typesList.EMPTY*/))
+            if ((optTime >= CalculationConstants.minimumTimeForLoan) && (MiscConstants.UNDEFINED_INT != optType))
             {
                 if (optRateFirstPeriod == -1)
                 {
@@ -179,7 +150,7 @@ namespace WisorLib
             }
             else
             {
-                if (String.IsNullOrEmpty(optType))
+                if (MiscConstants.UNDEFINED_INT == optType)
                 {
                     throw new System.ArgumentOutOfRangeException("Option Type Out of Range");
                 }
@@ -202,17 +173,17 @@ namespace WisorLib
             double currInterest = MiscConstants.UNDEFINED_DOUBLE;
 
             //Console.WriteLine("CalculatePmt amtForCalc: " + amtForCalc + ", timeForCalc: " + timeForCalc + ", interestRateForCalc: " + interestRateForCalc);
-            if ((! String.IsNullOrEmpty(optType) /*optType > Options.typesList.EMPTY*/) && (amtForCalc > 0) && (timeForCalc > 0))                                          
+            if ((MiscConstants.UNDEFINED_INT != optType) && (amtForCalc > 0) && (timeForCalc > 0))                                          
             {
                 if ((amtForCalc > 0) && (timeForCalc > 0))
                 {
                     if (product.firstTimePeriod <= timeForCalc)
                     {
-                        currInterest = optRateFirstPeriod = FindInterestRate();
+                        currInterest = optRateFirstPeriod = interestRateForCalc; //  FindInterestRate();
                     }
                     else
                     {
-                        currInterest = optRateSecondPeriod = FindInterestRate();
+                        currInterest = optRateSecondPeriod = interestRateForCalc; //  FindInterestRate();
                     }
                 }
                 if (printOrNo == true)
@@ -257,7 +228,7 @@ namespace WisorLib
             }
             else
             {
-                if (String.IsNullOrEmpty(optType) /*optType == (int)Options.typesList.EMPTY*/)
+                if (MiscConstants.UNDEFINED_INT == optType)
                 {
                     throw new System.ArgumentOutOfRangeException("Option Type Out of Range");
                 }
@@ -278,22 +249,23 @@ namespace WisorLib
 
         // **************************************************************************************************************************** //
         // ********************************** PRIVATE - Calculating full luah silukin for option ************************************** //
-
-        private void CalculateLuahSilukin()
+        
+        private void CalculateLuahSilukin(double rateFirstPeriod, double rateSecondPeriod, out double ttlPay)
         {
             //Console.WriteLine("CalculateLuahSilukin product.firstTimePeriod: " + product.firstTimePeriod);
+            ttlPay = 0;
 
             if (product.firstTimePeriod == 0)
             {
                 if (product.indexUsedFirstTimePeriod == 0)
                 {
                     optTtlPrincipalPay = optAmt;
-                    optTtlPay = optTime * Math.Round(optPmt, 2);
-                    optTtlRatePay = optTtlPay - optTtlPrincipalPay;
+                    ttlPay = optTime * Math.Round(optPmt, 2);
+                    optTtlRatePay = ttlPay - optTtlPrincipalPay;
                 }
                 else
                 {
-                    double r = ((optRateFirstPeriod / 12 * 100000000) - ((optRateFirstPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
+                    double r = ((rateFirstPeriod / 12 * 100000000) - ((rateFirstPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
                     double i = ((indexFirstPeriod / 12 * 100000000) - ((indexFirstPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
 
                     double monthlyPmt = Math.Round(optPmt, 2);
@@ -305,23 +277,23 @@ namespace WisorLib
                         double principalPmt = monthlyPmt - ratePmt;
                         optTtlPrincipalPay += principalPmt;
                         optTtlRatePay += ratePmt;
-                        optTtlPay += monthlyPmt;
+                        ttlPay += monthlyPmt;
                         startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
                         if (months < optTime)
                         {
-                            monthlyPmt = Math.Round(CalculatePmt(startingAmount, (optTime - months), optRateFirstPeriod), 2);
+                            monthlyPmt = Math.Round(CalculatePmt(startingAmount, (optTime - months), rateFirstPeriod), 2);
                         }
                     }
                 }
             }
             else
             {
-                double r = ((optRateFirstPeriod / 12 * 100000000) - ((optRateFirstPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
+                double r = ((rateFirstPeriod / 12 * 100000000) - ((rateFirstPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
                 double i = ((indexFirstPeriod / 12 * 100000000) - ((indexFirstPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
 
                 double monthlyPmt = Math.Round(optPmt, 2);
                 double startingAmount = optAmt;
-                optRateSecondPeriod = optRateFirstPeriod;
+                rateSecondPeriod = rateFirstPeriod;
                 // TBD Omri
                 //optRateSecondPeriod = CalculateInterestRate4SecondPeriod()
 
@@ -331,14 +303,14 @@ namespace WisorLib
                     double principalPmt = monthlyPmt - ratePmt;
                     optTtlPrincipalPay += principalPmt;
                     optTtlRatePay += ratePmt;
-                    optTtlPay += monthlyPmt;
+                    ttlPay += monthlyPmt;
                     startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
                     if (months < optTime)
                     {
-                        monthlyPmt = Math.Round(CalculatePmt(startingAmount, (optTime - months), optRateFirstPeriod), 2);
+                        monthlyPmt = Math.Round(CalculatePmt(startingAmount, (optTime - months), rateFirstPeriod), 2);
                     }
                 }
-                r = ((optRateSecondPeriod / 12 * 100000000) - ((optRateSecondPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
+                r = ((rateSecondPeriod / 12 * 100000000) - ((rateSecondPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
                 i = ((indexSecondPeriod / 12 * 100000000) - ((indexSecondPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
                 for (uint months = product.firstTimePeriod + 1; months <= optTime; months++)
                 {
@@ -346,11 +318,11 @@ namespace WisorLib
                     double principalPmt = monthlyPmt - ratePmt;
                     optTtlPrincipalPay += principalPmt;
                     optTtlRatePay += ratePmt;
-                    optTtlPay += monthlyPmt;
+                    ttlPay += monthlyPmt;
                     startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
                     if (months < optTime)
                     {
-                        monthlyPmt = Math.Round(CalculatePmt(startingAmount, (optTime - months), optRateSecondPeriod), 2);
+                        monthlyPmt = Math.Round(CalculatePmt(startingAmount, (optTime - months), rateSecondPeriod), 2);
                     }
                 }
             }
@@ -371,11 +343,25 @@ namespace WisorLib
             }
             else
             {
-                CalculateLuahSilukin();
+                CalculateLuahSilukin(optRateFirstPeriod, optRateSecondPeriod, out optTtlPay);
                 return optTtlPay;
             }
         }
+        
+        public void SetBankRate(double margin)
+        {
+            optBankRateFirstPeriod = optRateFirstPeriod - margin;
+            optBankRateSecondPeriod = optRateSecondPeriod - margin;
+        }
 
+        public double GetBankTtlPay()
+        {
+           return Calculations.CalculateLuahSilukin2(optBankRateFirstPeriod, optBankRateSecondPeriod,
+                (int) product.firstTimePeriod, product.indexUsedFirstTimePeriod,
+                optAmt, (int) optTime, optPmt,
+                indexFirstPeriod, indexSecondPeriod, optType, printOrNo);
+         }
+        
 
 
 
@@ -392,9 +378,17 @@ namespace WisorLib
             
             //return (optType + 4).ToString() + "," + optAmt + "," + optTime + "," + inflationStr + "," + optRate
             //            + "," + (int)optPmt + "," + (int)optTtlPay;
-            return (optType + 4).ToString() + "," + optAmt + "," + optTime + "," + inflationStr + "," + optRateFirstPeriod;
+            return (optType + 4).ToString() + "," + optAmt + "," + optTime + "," + optRateFirstPeriod;
         }
 
+        public string ToString2()
+        {
+            //return "(" + optType + "," + optAmt + "," + optTime + "," + optRate + "," + optPmt + ")";
+
+            //return (optType + 4).ToString() + "," + optAmt + "," + optTime + "," + inflationStr + "," + optRate
+            //            + "," + (int)optPmt + "," + (int)optTtlPay;
+            return (optType + 4).ToString() + ":" + optAmt + ":" + optTime + ":" + optRateFirstPeriod;
+        }
 
 
     }
