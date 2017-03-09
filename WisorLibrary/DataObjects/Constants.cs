@@ -192,7 +192,10 @@ namespace WisorLib
 
 
         private static readonly string[,] combinationsUSA = {
-            { "Fixed30yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" } /*,
+            //{ "Fixed30yrsUSA", "Fixed15yrsUSA" },
+            //{"Fixed20yrsUSA", "7.1ARMUSA" },
+            //{ "Fixed20yrsUSA", "Fixed15yrsUSA" }
+            { "Fixed30yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" } /* ,
             { "Fixed30yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" } ,
             { "Fixed30yrsUSA", "Fixed20yrsUSA", "5.1ARMUSA" },
             { "Fixed30yrsUSA", "Fixed20yrsUSA", "7.1ARMUSA" },
@@ -230,6 +233,23 @@ namespace WisorLib
             return combination;
         }
 
+        public static void PrintCombination(markets theMarket)
+        {
+            string msg = MiscConstants.UNDEFINED_STRING;
+            string[,] com = CalculationConstants.GetCombination(theMarket);
+
+            for (int i = 0; i <= com.GetUpperBound(0); i++)
+            {
+                msg += (i + 1) + " : ";
+                for (int j = 0; j < Share.numberOfOption; j++)
+                {
+                    msg += com[i, j] + ", ";
+                }
+                msg += "\n";
+             }
+            Console.WriteLine(msg);
+            //return msg;
+        }
     }
 
 

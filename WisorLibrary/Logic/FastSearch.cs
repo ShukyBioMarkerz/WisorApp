@@ -60,11 +60,9 @@ namespace WisorLib
                         Console.WriteLine("\nLoan Amount = " + env.CalculationParameters.loanAmtWanted + "\nTarget monthly payment = "
                                             + env.CalculationParameters.monthlyPmtWanted + "\n\nThere are " + (CalculationConstants.GetCombination(Share.theMarket).GetUpperBound(0) + 1)
                                             + " combinations possible :");
-                        for (int i = 0; i <= CalculationConstants.GetCombination(Share.theMarket).GetUpperBound(0); i++)
-                        {
-                            Console.WriteLine((i + 1) + " : " + CalculationConstants.GetCombination(Share.theMarket)[i, 0] + ", " + CalculationConstants.GetCombination(Share.theMarket)[i, 1]
-                                            + ", "  + CalculationConstants.GetCombination(Share.theMarket)[i, 2]);
-                        }
+
+                        CalculationConstants.PrintCombination(Share.theMarket);
+                        
                     }
                     env.CheckInfo.searchStartTime = DateTime.Now;
 
@@ -170,10 +168,6 @@ namespace WisorLib
             {
                 Console.WriteLine("NOTICE: can't run the calculation. CanRunCalculation falge is: " + CanRunCalculation);
             }
-
-            // order the composition list
-            List<ChosenComposition> orderList = env.OrderCompositionListByBorrower();
-
             return new RunLoanDetails(env.CheckInfo.orderID, Convert.ToInt32(CanRunCalculation), elapsedMs, env.OutputFile.OutputFilename);
         } 
 

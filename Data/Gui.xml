@@ -6,13 +6,7 @@
 		<default>199200</default>
 		<mandatory>yes</mandatory>
 	</item>
-<!-- 	<item>
-		<type>TextBox</type>
-		<name>Desired monthly payment</name>
-		<default>3000</default>
-		<mandatory>yes</mandatory>
-	</item>
- -->	<item>
+	<item>
 		<type>TextBox</type>
 		<name>Property value</name>
 		<default>249000</default>
@@ -45,10 +39,6 @@
 		<mandatory>yes</mandatory>
 	</item>
 
-	
-	
-	
-	
 	
 	<item>
 		<type>ComboBox</type>

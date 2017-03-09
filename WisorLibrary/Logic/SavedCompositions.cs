@@ -116,6 +116,7 @@ namespace WisorLib
             }        
         }
 
+ 
         private void CalcTheBankProfit(Option optX, Option optY, Option optZ, RunEnvironment env)
         {
             // Checking lender profit
@@ -127,8 +128,8 @@ namespace WisorLib
             double optYBankTtlPay = optY.GetBankTtlPay();
             optZ.SetBankRate(bankRate);
             double optZBankTtlPay = optZ.GetBankTtlPay();
-            double ttlBankPayPayk = optX.optTtlPay + optY.optTtlPay + optZ.optTtlPay;
-            double ttlPayForCheck = optX.optTtlPay + optY.optTtlPay + optZ.optTtlPay;
+            int ttlBankPayPayk = Convert.ToInt32(optXBankTtlPay + optYBankTtlPay + optZBankTtlPay);
+            int ttlPayForCheck = Convert.ToInt32(optX.optTtlPay + optY.optTtlPay + optZ.optTtlPay);
 
             // truncate the numbers
             string[] msg2write = {
@@ -146,52 +147,60 @@ namespace WisorLib
                 /*"X_TtlBank: " +*/ Convert.ToInt32(optXBankTtlPay).ToString() + ":" +
                 /*"Y_TtlBank: " +*/ Convert.ToInt32(optYBankTtlPay).ToString() + ":" +
                 /*"Z_TtlBank: " +*/ Convert.ToInt32(optZBankTtlPay).ToString(),
-                /*"ttlPayBank: " +*/ Convert.ToInt32(optXBankTtlPay + optYBankTtlPay + optZBankTtlPay).ToString()
+                /*"ttlPayBank: " +*/ Convert.ToInt32(ttlBankPayPayk).ToString()
             };
             env.PrintLog2CSV(msg2write);
 
-            //if (Share.shouldPrintResultsInList)
-            //{
-            //    (optType + 4).ToString() + "," + optAmt + "," + optTime + "," + optRateFirstPeriod;
-            //    ttlPayForCheck: optXBankTtlPay + optYBankTtlPay + optZBankTtlPay
-            //    string productNameX = GenericProduct.GetProductName(optX.optType);
-            //    string resultX = productNameX + MiscConstants.DOTS_STR + optX.optAmt +
-            //        MiscConstants.DOTS_STR + optX.optTime + MiscConstants.DOTS_STR + optX.optRateFirstPeriod;
-            //    string productNameY = GenericProduct.GetProductName(optY.optType);
-            //    string resultY = productNameY + MiscConstants.DOTS_STR + optY.optAmt +
-            //        MiscConstants.DOTS_STR + optY.optTime + MiscConstants.DOTS_STR + optY.optRateFirstPeriod;
-            //    string productNameZ = GenericProduct.GetProductName(optZ.optType);
-            //    string resultZ = productNameZ + MiscConstants.DOTS_STR + optZ.optAmt +
-            //        MiscConstants.DOTS_STR + optZ.optTime + MiscConstants.DOTS_STR + optZ.optRateFirstPeriod;
-            //    string totalBorrower = Convert.ToInt32(ttlPayForCheck).ToString();
-            //    string totalBank = Convert.ToInt32(optXBankTtlPay + optYBankTtlPay + optZBankTtlPay).ToString();
-            //    string diff = Convert.ToInt32(optXBankTtlPay + optYBankTtlPay + optZBankTtlPay - ttlPayForCheck).ToString();
+            if (0 < Share.numberOfPrintResultsInList)
+            {
+                string productNameX = GenericProduct.GetProductName(optX.optType);
+                string resultX = productNameX + MiscConstants.DOTS_STR + optX.optAmt +
+                    MiscConstants.DOTS_STR + optX.optTime + MiscConstants.DOTS_STR + optX.optRateFirstPeriod;
+                string productNameY = GenericProduct.GetProductName(optY.optType);
+                string resultY = productNameY + MiscConstants.DOTS_STR + optY.optAmt +
+                    MiscConstants.DOTS_STR + optY.optTime + MiscConstants.DOTS_STR + optY.optRateFirstPeriod;
+                string productNameZ = GenericProduct.GetProductName(optZ.optType);
+                string resultZ = productNameZ + MiscConstants.DOTS_STR + optZ.optAmt +
+                    MiscConstants.DOTS_STR + optZ.optTime + MiscConstants.DOTS_STR + optZ.optRateFirstPeriod;
+                string totalBorrower = Convert.ToInt32(ttlPayForCheck).ToString();
+                string totalBank = Convert.ToInt32(ttlBankPayPayk).ToString();
+                string diff = Convert.ToInt32(ttlPayForCheck - ttlBankPayPayk).ToString();
 
-            //    add the result to the oredered list
-            //   ChosenComposition comp = new ChosenComposition(optX, optY, optZ);
-            //    comp.SetBorrowerPay(ttlPayForCheck);
-            //    comp.SetBankPay(ttlBankPayPayk);
+                //add the result to the oredered list
+                ChosenComposition comp = new ChosenComposition()
+                    { resultX, resultY, resultZ, totalBorrower, totalBank, diff };
+                comp.SetBorrowerPay(ttlPayForCheck);
+                comp.SetBankPay(ttlBankPayPayk);
+                comp.SetBankProfit(Convert.ToInt32(ttlPayForCheck - ttlBankPayPayk));
 
-            //    env.listOfSelectedCompositions.Add(comp);
-            //}
+                env.listOfSelectedCompositions.Add(comp);
+                if (env.MaxProfit < Convert.ToInt32(diff))
+                    env.MaxProfit = Convert.ToInt32(diff);
+                if (env.MaxBankPay < Convert.ToInt32(totalBank))
+                    env.MaxBankPay = Convert.ToInt32(totalBank);
+                if (0 >= env.MinBorrowerPay)
+                    env.MinBorrowerPay = Convert.ToInt32(totalBorrower);
+                else if (env.MinBorrowerPay > Convert.ToInt32(totalBorrower))
+                    env.MinBorrowerPay = Convert.ToInt32(totalBorrower);
+            }
         }
 
 
     }
 
   
-    public class ChosenComposition
+    public class ChosenComposition : List<string>
     {
-        Option[]        chosenCombination;
-        public double   borrowerPay, bankPay;
+        //Option[]        chosenCombination;
+        public double borrowerPay, bankPay, profit;
 
-        public ChosenComposition(Option combinationX, Option combinationY, Option combinationZ)
-        {
-            chosenCombination = new Option[3];
-            chosenCombination[(int)options.OPTX] = combinationX;
-            chosenCombination[(int)options.OPTY] = combinationY;
-            chosenCombination[(int)options.OPTZ] = combinationZ;
-        }
+        //public ChosenComposition(Option combinationX, Option combinationY, Option combinationZ)
+        //{
+        //    chosenCombination = new Option[3];
+        //    chosenCombination[(int)options.OPTX] = combinationX;
+        //    chosenCombination[(int)options.OPTY] = combinationY;
+        //    chosenCombination[(int)options.OPTZ] = combinationZ;
+        //}
 
         public void SetBorrowerPay(double borrowerPay)
         {
@@ -201,6 +210,10 @@ namespace WisorLib
         public void SetBankPay(double bankPay)
         {
             this.bankPay = bankPay;
+        }
+        public void SetBankProfit(double profit)
+        {
+            this.profit = profit;
         }
     }
 }

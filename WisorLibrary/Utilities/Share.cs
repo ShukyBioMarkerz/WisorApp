@@ -29,15 +29,16 @@ namespace WisorLib
         public static bool shouldShowLoansSelectionWindow { get; set; }
 
         public static SelectionType theSelectionType { get; set; }
+        public static int numberOfOption { get; set; }
 
         public static bool shouldRunFake { get; set; }
-        public static bool shouldPrintResultsInList { get; set; }
+        public static int numberOfPrintResultsInList { get; set; }
 
         public static int[,] combinations4market;
         public static string[,] combinationsAsString;
         public static string[] theProductsNames { get; set; }
         public static double[] theProductsRates;
-
+    
         /// <summary>
         /// Print the selected combination to excel file
         /// </summary>

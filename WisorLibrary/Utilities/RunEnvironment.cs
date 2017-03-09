@@ -21,6 +21,12 @@ namespace WisorLib
 
         public OutputFile OutputFile { get; }
         public List<ChosenComposition> listOfSelectedCompositions { get; set; }
+        public List<string> headerOfListOfSelectedCompositions  {  get; }
+
+        public int MaxProfit { get; set; }
+        public int MaxBankPay { get; set; }
+        public int MinBorrowerPay { get; set; }
+
 
         public static string CreateOutputFilename(string orderid, double loanAmtWanted, double monthlyPmtWanted)
         {
@@ -47,6 +53,12 @@ namespace WisorLib
                 OutputFile = new OutputFile(orderid, loanAmtWanted, monthlyPmtWanted, CheckInfo);
             }
             listOfSelectedCompositions = new List<ChosenComposition>();
+            headerOfListOfSelectedCompositions = new List<string>()
+            {
+                "ProductX", "ProductY", "ProductZ", "Borrower pay", "Bank amount", "Profit"
+            };
+            MaxProfit = MaxBankPay = MinBorrowerPay = 0;
+
         }
 
         public static bool SetMarket(markets market)
@@ -67,19 +79,7 @@ namespace WisorLib
             return rc;
         }
 
-        public List<ChosenComposition> OrderCompositionListByBorrower()
-        {
-            List<ChosenComposition> SortedSelectedCompositions =
-                listOfSelectedCompositions.OrderBy(o => o.borrowerPay).ToList();
-            return SortedSelectedCompositions;
-        }
-
-        public List<ChosenComposition> OrderCompositionListByBank()
-        {
-            List<ChosenComposition> SortedSelectedCompositions =
-                listOfSelectedCompositions.OrderBy(o => o.bankPay).ToList();
-            return SortedSelectedCompositions;
-        }
+     
 
 
         /// <summary>
@@ -127,10 +127,6 @@ namespace WisorLib
         {
             fileStream.Close();
         }
-
-
-
-
 
     }
 

@@ -149,7 +149,7 @@ namespace WisorLibrary.Logic
         {
             // load only the needed rates
             HashSet<string> products = new HashSet<string>();
-            int numOfOptions2Check = Enum.GetValues(typeof(options)).Length;
+            int numOfOptions2Check = Share.numberOfOption; //Enum.GetValues(typeof(options)).Length;
             string[,] combinations = CalculationConstants.GetCombination(Share.theMarket);
             int combinationsUpperBound = combinations.GetUpperBound(0);
             for (int i = 0; i <= combinationsUpperBound; i++)

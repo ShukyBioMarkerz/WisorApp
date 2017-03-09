@@ -11,17 +11,9 @@ using static WisorLib.GenericProduct;
 
 namespace WisorLib
 {
-
-    /// <summary>
-    /// ///////////////////////
-    /// </summary>
-
-
     public class FileUtils
     {
-
-    
-
+        
         public static FieldList LoadXMLFileData(string filename)
         {
             XDocument doc = null;
@@ -93,9 +85,6 @@ namespace WisorLib
             
             return fields;
         }
-
-        //string orderID = "", double loanAmtWanted = 0, double monthlyPmtWanted = 0,
-        //        uint propertyValue = 0, uint income = 0, uint youngestLenderAge = 0
 
         public enum MortgageType { None = 0, FirstTimeBuyer = 1, Reordering = 2, Other = 3 };
         public enum PaymentType { None = 0, FullAmortizatio = 1, InterestOnly = 2, Ballon = 3 };
