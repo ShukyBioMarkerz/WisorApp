@@ -116,14 +116,14 @@ namespace WisorLibrary.Logic
         // the forula for geting the rate:
         //      Product-index * MiscConstants.NumberOfProfiles * MiscConstants.NumberOfYearsFrProduct +
         //      profile * MiscConstants.NumberOfYearsFrProduct + year
-        public double FindRateForKeyAsNumber(RatesKey key, int index)
+        public double FindRateForKeyAsNumber(/*RatesKey key*/int productID, int profile, int index)
         {
            //Console.WriteLine("--- FindRateForKeyAsNumber key: " + key.ToString() + ",index: " + index);
 
            double result = MiscConstants.UNDEFINED_DOUBLE;
-            int indexInRatesArray = key.productID * MiscConstants.NumberOfProfiles
+            int indexInRatesArray = /*key.*/productID * MiscConstants.NumberOfProfiles
                  * MiscConstants.NumberOfYearsFrProduct +
-                 (key.profile - 1) * MiscConstants.NumberOfYearsFrProduct + index;
+                 (/*key.*/profile - 1) * MiscConstants.NumberOfYearsFrProduct + index;
             if (Share.theProductsRates.Length > indexInRatesArray)
             {
                 result = Share.theProductsRates[indexInRatesArray];
@@ -136,7 +136,7 @@ namespace WisorLibrary.Logic
 
             if (0 > result)
             {
-                Console.WriteLine("ERROR: FindRateForKeyAsNumber illegal rate for key: " + key.ToString() + " and index: " + index + ", indexInRatesArray: " + indexInRatesArray);
+                Console.WriteLine("ERROR: FindRateForKeyAsNumber illegal rate for key: " + /*key.*/productID.ToString() + " and index: " + index + ", indexInRatesArray: " + indexInRatesArray);
                 //WindowsUtilities.loggerMethod("ERROR: FindRateForKeyAsNumber illegal rate for key: " + key.ToString() + " and index: " + index);
                 // TBD
                 result = 0.015;
