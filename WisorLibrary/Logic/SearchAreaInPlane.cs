@@ -230,7 +230,7 @@ namespace WisorLib
                                     new Option(limitPoints[(int)Options.limitPointsLetters.A].opts[(int)Options.options.OPTX].optType,
                                         limitPoints[(int)Options.limitPointsLetters.A].opts[(int)Options.options.OPTX].optAmt,
                                         (limitPoints[(int)Options.limitPointsLetters.A].opts[(int)Options.options.OPTX].optTime -
-                                        env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].product.timeJump));
+                                        env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].product.timeJump), env);
                                 if (printOrNo == true)
                                 {
                                     Console.WriteLine("Moving corner to cell with smaller timeX\nNew timeX = "
@@ -257,7 +257,7 @@ namespace WisorLib
                                     new Option(limitPoints[(int)Options.limitPointsLetters.A].opts[(int)Options.options.OPTY].optType,
                                         limitPoints[(int)Options.limitPointsLetters.A].opts[(int)Options.options.OPTY].optAmt,
                                         (limitPoints[(int)Options.limitPointsLetters.A].opts[(int)Options.options.OPTY].optTime +
-                                        env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].product.timeJump));
+                                        env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].product.timeJump), env);
                                 if (printOrNo == true)
                                 {
                                     Console.WriteLine("Moving corner to cell with larger timeY\nNew timeY = "
@@ -331,7 +331,7 @@ namespace WisorLib
                                     new Option(limitPoints[(int)Options.limitPointsLetters.B].opts[(int)Options.options.OPTY].optType,
                                         limitPoints[(int)Options.limitPointsLetters.B].opts[(int)Options.options.OPTY].optAmt,
                                         (limitPoints[(int)Options.limitPointsLetters.B].opts[(int)Options.options.OPTY].optTime -
-                                        env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].product.timeJump));
+                                        env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].product.timeJump), env);
                                 if (printOrNo == true)
                                 {
                                     Console.WriteLine("Moving corner to cell with smaller timeY\nNew timeY = "
@@ -358,7 +358,7 @@ namespace WisorLib
                                     new Option(limitPoints[(int)Options.limitPointsLetters.B].opts[(int)Options.options.OPTX].optType,
                                         limitPoints[(int)Options.limitPointsLetters.B].opts[(int)Options.options.OPTX].optAmt,
                                         (limitPoints[(int)Options.limitPointsLetters.B].opts[(int)Options.options.OPTX].optTime +
-                                        env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].product.timeJump));
+                                        env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].product.timeJump), env);
                                 if (printOrNo == true)
                                 {
                                     Console.WriteLine("Moving corner to cell with larger timeX\nNew timeX = "

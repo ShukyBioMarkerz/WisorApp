@@ -168,6 +168,12 @@ namespace WisorLib
             {
                 Console.WriteLine("NOTICE: can't run the calculation. CanRunCalculation falge is: " + CanRunCalculation);
             }
+
+            Console.WriteLine("\n>>>> OneDivisionLoopCounter: " + env.OneDivisionLoopCounter +
+                ", CalculateLuahSilukinCounter: " + String.Format("{0:#,###,###}", env.CalculateLuahSilukinCounter) +
+                ", CalculatePmtCounter: " + String.Format("{0:#,###,###}", env.CalculatePmtCounter) +
+                ", RateCounter: " + String.Format("{0:#,###,###}", env.RateCounter));
+
             return new RunLoanDetails(env.CheckInfo.orderID, Convert.ToInt32(CanRunCalculation), elapsedMs, env.OutputFile.OutputFilename);
         } 
 

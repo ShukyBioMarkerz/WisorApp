@@ -39,20 +39,11 @@ namespace WisorLib
             WriteToOutputFile("Start time : " + CheckInfo.softwareOpenTime);
 
             // Shuky - add the header line 
-            /*
-             * "" + opts[(int)Options.options.OPTX]
-                    + "," + opts[(int)Options.options.OPTY]
-                        + "," + opts[(int)Options.options.OPTZ]
-                        + "," + (int)opts[(int)Options.options.OPTX].optPmt
-                        + "," + (int)opts[(int)Options.options.OPTY].optPmt
-                        + "," + (int)opts[(int)Options.options.OPTZ].optPmt
-                        + "," + (int)ttlPmt
-                        + "," + (int)opts[(int)Options.options.OPTX].optTtlPay
-                        + "," + (int)opts[(int)Options.options.OPTY].optTtlPay
-                        + "," + (int)opts[(int)Options.options.OPTZ].optTtlPay                        
-                        + "," + (int)ttlPay;
-             */
-            WriteToOutputFile("OPTX" + "," + "OPTY" + "," + "OPTZ" + "," + "OPTX-optPmt" + "," + "OPTY-optPmt" + "," + "OPTZ-optPmt"
+            WriteToOutputFile("Ticks" + "," + "OrderID" + "," + "Time" + "," +
+                "X:optType" + "," + "X:optAmt" + "," + "X:optTime" + "," + "X:RateFirstPeriod" + "," +
+                "Y:optType" + "," + "Y:optAmt" + "," + "Y:optTime" + "," + "Y:RateFirstPeriod" + "," +
+                "Z:optType" + "," + "Z:optAmt" + "," + "Z:optTime" + "," + "Z:RateFirstPeriod" + "," +
+                "OPTX-optPmt" + "," + "OPTY-optPmt" + "," + "OPTZ-optPmt"
                 + "," + "ttlPmt" + "," + "OPTX-optTtlPay" + "," + "OPTY-optTtlPay" + "," + "OPTZ-optTtlPay" + "," + "ttlPay");
 
         }

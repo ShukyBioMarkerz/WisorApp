@@ -126,7 +126,7 @@ namespace WisorLib
                             startingPoint[(int)Options.options.OPTY] = new Option(startingPoint[(int)Options.options.OPTY].optType,
                                                                 startingPoint[(int)Options.options.OPTY].optAmt,
                                                                 (startingPoint[(int)Options.options.OPTY].optTime
-                                                                + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].product.timeJump));
+                                                                + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].product.timeJump), env);
                             return SearchOneColumn(startingPoint, env);
                         }
                         else
@@ -150,7 +150,7 @@ namespace WisorLib
                             startingPoint[(int)Options.options.OPTY] = new Option(startingPoint[(int)Options.options.OPTY].optType,
                                                                 startingPoint[(int)Options.options.OPTY].optAmt,
                                                                 (startingPoint[(int)Options.options.OPTY].optTime
-                                                                + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].product.timeJump));
+                                                                + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].product.timeJump), env);
                             return SearchOneColumn(startingPoint, env);
                         }
                         else
@@ -205,7 +205,7 @@ namespace WisorLib
                 nextColumnStart[(int)Options.options.OPTX] = new Option(nextColumnStart[(int)Options.options.OPTX].optType,
                                                                     nextColumnStart[(int)Options.options.OPTX].optAmt,
                                                                     (startingPoint[(int)Options.options.OPTX].optTime
-                                                                    - env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].product.timeJump));
+                                                                    - env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].product.timeJump), env);
                 nextColumnStart[(int)Options.options.OPTY] = nextTimeY;
                 if (printOrNo == true)
                 {

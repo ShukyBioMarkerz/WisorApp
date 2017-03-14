@@ -52,7 +52,7 @@ namespace WisorLib
                                     + "\nOptY = " + expandingOpts[(int)Options.options.OPTY].ToString() + "\n");
             }
             InsertOptionsForSavedPoint(ExpandPoint(optTypes[(int)Options.options.OPTX], optTypes[(int)Options.options.OPTY],
-                                        expandingOpts[(int)Options.options.OPTX], expandingOpts[(int)Options.options.OPTY]));
+                                        expandingOpts[(int)Options.options.OPTX], expandingOpts[(int)Options.options.OPTY], env));
 
         }
 
@@ -127,7 +127,8 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ***************************** Expand Initial Limit Point - A1 or B1 - Exact Match in Binary Search ************************* //
 
-        private Option[] ExpandPointExactMatchA1B1(OneOptType optionXType, OneOptType optionYType, Option optionX, Option optionY)
+        private Option[] ExpandPointExactMatchA1B1(OneOptType optionXType, OneOptType optionYType, Option optionX, Option optionY,
+            RunEnvironment env)
         {
 
             expandingOpts[(int)Options.options.OPTX] = optionX;
@@ -148,7 +149,7 @@ namespace WisorLib
             }
             else if (optionY.optTime > optTypes[(int)Options.options.OPTY].product.minTime)
             {
-                optionY = new Option(optionY.optType, optionY.optAmt, (optionY.optTime - optTypes[(int)Options.options.OPTY].product.timeJump));
+                optionY = new Option(optionY.optType, optionY.optAmt, (optionY.optTime - optTypes[(int)Options.options.OPTY].product.timeJump), env);
                 if (printOrNo == true)
                 {
                     Console.WriteLine("New Point for check : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ")");
@@ -158,7 +159,7 @@ namespace WisorLib
                 {
                     // Add - Save Point as composition for future calculation of total payment
                     savedMatches.InsertMatchToList(optionX, optionY);                                                                            
-                    return ExpandPointExactMatchA1B1(optTypes[(int)Options.options.OPTX], optTypes[(int)Options.options.OPTY], optionX, optionY);
+                    return ExpandPointExactMatchA1B1(optTypes[(int)Options.options.OPTX], optTypes[(int)Options.options.OPTY], optionX, optionY, env);
                 }
                 else
                 {
@@ -183,7 +184,8 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ***************************** Expand Initial Limit Point - A2 or B2 - Exact Match in Binary Search ************************* //
 
-        private Option[] ExpandPointExactMatchA2B2(OneOptType optionXType, OneOptType optionYType, Option optionX, Option optionY)
+        private Option[] ExpandPointExactMatchA2B2(OneOptType optionXType, OneOptType optionYType, Option optionX, Option optionY, 
+            RunEnvironment env)
         {
             expandingOpts[(int)Options.options.OPTX] = optionX;
             expandingOpts[(int)Options.options.OPTY] = optionY;
@@ -202,7 +204,7 @@ namespace WisorLib
             }
             else if (optionX.optTime < optTypes[(int)Options.options.OPTX].product.maxTime)
             {
-                optionX = new Option(optionX.optType, optionX.optAmt, (optionX.optTime + optTypes[(int)Options.options.OPTX].product.timeJump));
+                optionX = new Option(optionX.optType, optionX.optAmt, (optionX.optTime + optTypes[(int)Options.options.OPTX].product.timeJump), env);
                 if (printOrNo == true)
                 {
                     Console.WriteLine("New Point for check : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ")");
@@ -212,7 +214,7 @@ namespace WisorLib
                 {
                     // Add - Save Point as composition for future calculation of total payment
                     savedMatches.InsertMatchToList(optionX, optionY);      
-                    return ExpandPointExactMatchA2B2(optTypes[(int)Options.options.OPTX], optTypes[(int)Options.options.OPTY], optionX, optionY);
+                    return ExpandPointExactMatchA2B2(optTypes[(int)Options.options.OPTX], optTypes[(int)Options.options.OPTY], optionX, optionY, env);
                 }
                 else
                 {
@@ -241,7 +243,7 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ************************** Expand Initial Limit Point - A1 or B1 - No Exact Match in Binary Search ************************* //
 
-        private Option[] ExpandPointNoMatchA1B1(OneOptType optionXType, OneOptType optionYType, Option optionX, Option optionY)
+        private Option[] ExpandPointNoMatchA1B1(OneOptType optionXType, OneOptType optionYType, Option optionX, Option optionY, RunEnvironment env)
         {
             expandingOpts[(int)Options.options.OPTX] = optionX;
             expandingOpts[(int)Options.options.OPTY] = optionY;
@@ -260,7 +262,7 @@ namespace WisorLib
             }
             else if (optionX.optTime > optTypes[(int)Options.options.OPTX].product.minTime)
             {
-                optionX = new Option(optionX.optType, optionX.optAmt, (optionX.optTime - optTypes[(int)Options.options.OPTX].product.timeJump));
+                optionX = new Option(optionX.optType, optionX.optAmt, (optionX.optTime - optTypes[(int)Options.options.OPTX].product.timeJump), env);
                 if (printOrNo == true)
                 {
                     Console.WriteLine("New Point for check : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ")");
@@ -276,7 +278,7 @@ namespace WisorLib
                 }
                 else if (pmtChecker == (int)Options.pmtRange.TOOSMALL)
                 {
-                    return ExpandPointNoMatchA1B1(optTypes[(int)Options.options.OPTX], optTypes[(int)Options.options.OPTY], optionX, optionY);
+                    return ExpandPointNoMatchA1B1(optTypes[(int)Options.options.OPTX], optTypes[(int)Options.options.OPTY], optionX, optionY, env);
                 }
                 else
                 {
@@ -302,7 +304,7 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ************************** Expand Initial Limit Point - A2 or B2 - No Exact Match in Binary Search ************************* //
 
-        private Option[] ExpandPointNoMatchA2B2(OneOptType optionXType, OneOptType optionYType, Option optionX, Option optionY)                                                
+        private Option[] ExpandPointNoMatchA2B2(OneOptType optionXType, OneOptType optionYType, Option optionX, Option optionY, RunEnvironment env)                                                
         {
             expandingOpts[(int)Options.options.OPTX] = optionX;
             expandingOpts[(int)Options.options.OPTY] = optionY;
@@ -321,7 +323,7 @@ namespace WisorLib
             {
                 if (a2b2NoMatchBool == true)
                 {
-                    optionX = new Option(optionX.optType, optionX.optAmt, (optionX.optTime - optTypes[(int)Options.options.OPTX].product.timeJump));
+                    optionX = new Option(optionX.optType, optionX.optAmt, (optionX.optTime - optTypes[(int)Options.options.OPTX].product.timeJump), env);
                     a2b2NoMatchBool = false;
                 }
 
@@ -337,7 +339,7 @@ namespace WisorLib
                 else if (optionY.optTime < optTypes[(int)Options.options.OPTY].product.maxTime)
                 {
                     optionX = expandingOpts[(int)Options.options.OPTX];
-                    optionY = new Option(optionY.optType, optionY.optAmt, (optionY.optTime + optTypes[(int)Options.options.OPTY].product.timeJump));
+                    optionY = new Option(optionY.optType, optionY.optAmt, (optionY.optTime + optTypes[(int)Options.options.OPTY].product.timeJump), env);
                     if (printOrNo == true)
                     {
                         Console.WriteLine("New Point for check : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ")");
@@ -353,7 +355,7 @@ namespace WisorLib
                     }
                     else if (pmtChecker == (int)Options.pmtRange.TOOLARGE)
                     {
-                        return ExpandPointNoMatchA2B2(optTypes[(int)Options.options.OPTX], optTypes[(int)Options.options.OPTY], optionX, optionY);                                                            
+                        return ExpandPointNoMatchA2B2(optTypes[(int)Options.options.OPTX], optTypes[(int)Options.options.OPTY], optionX, optionY, env);                                                            
                     }
                     else
                     {
@@ -391,7 +393,7 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // *************************************** Expand Initial Limit Point - General Function ************************************** //
 
-        private Option[] ExpandPoint(OneOptType optionXType, OneOptType optionYType, Option optionX, Option optionY)
+        private Option[] ExpandPoint(OneOptType optionXType, OneOptType optionYType, Option optionX, Option optionY, RunEnvironment env)
 
         {
             if (initialPoint.matchOrNo == true)
@@ -399,12 +401,12 @@ namespace WisorLib
                 if (number == (int)Options.limitPointsNumbers.ONE)
                 {
                     // Expand Point - Exact Match - A1/B1
-                    return ExpandPointExactMatchA1B1(optionXType, optionYType, optionX, optionY);
+                    return ExpandPointExactMatchA1B1(optionXType, optionYType, optionX, optionY, env);
                 }
                 else if (number == (int)Options.limitPointsNumbers.TWO)
                 {
                     // Expand Point - Exact Match - A2/B2
-                    return ExpandPointExactMatchA2B2(optionXType, optionYType, optionX, optionY);
+                    return ExpandPointExactMatchA2B2(optionXType, optionYType, optionX, optionY, env);
                 }
                 else
                 {
@@ -418,12 +420,12 @@ namespace WisorLib
                 if (number == (int)Options.limitPointsNumbers.ONE)
                 {
                     // Expand Point - No Match - A1/B1
-                    return ExpandPointNoMatchA1B1(optionXType, optionYType, optionX, optionY);
+                    return ExpandPointNoMatchA1B1(optionXType, optionYType, optionX, optionY, env);
                 }
                 else if (number == (int)Options.limitPointsNumbers.TWO)
                 {
                     // Expand Point - No Match - A2/B2                   
-                    return ExpandPointNoMatchA2B2(optionXType, optionYType, optionX, optionY);
+                    return ExpandPointNoMatchA2B2(optionXType, optionYType, optionX, optionY, env);
                 }
                 else
                 {

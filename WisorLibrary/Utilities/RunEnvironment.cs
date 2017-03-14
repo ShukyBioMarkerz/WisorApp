@@ -26,8 +26,12 @@ namespace WisorLib
         public int MaxProfit { get; set; }
         public int MaxBankPay { get; set; }
         public int MinBorrowerPay { get; set; }
+        public int OneDivisionLoopCounter { get; internal set; }
+        public int CalculatePmtCounter { get; internal set; }
+        public int CalculateLuahSilukinCounter { get; internal set; }
 
-
+        public int RateCounter { get; internal set; }
+ 
         public static string CreateOutputFilename(string orderid, double loanAmtWanted, double monthlyPmtWanted)
         {
             string fn = AppDomain.CurrentDomain.BaseDirectory // + Path.DirectorySeparatorChar
@@ -58,6 +62,7 @@ namespace WisorLib
                 "ProductX", "ProductY", "ProductZ", "Borrower pay", "Bank amount", "Profit"
             };
             MaxProfit = MaxBankPay = MinBorrowerPay = 0;
+            OneDivisionLoopCounter = CalculatePmtCounter = CalculateLuahSilukinCounter = RateCounter = 0;
 
         }
 

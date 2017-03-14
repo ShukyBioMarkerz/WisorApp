@@ -38,7 +38,7 @@ namespace WisorLib
 
         public GenericProduct product;
 
-        public Option(int optionType, double optionAmount, uint optionTime)
+        public Option(int optionType, double optionAmount, uint optionTime, RunEnvironment env)
         {
             //Console.WriteLine("Option ctor optionType: " + optionType + ", optionAmount: " + optionAmount + ", optionTime: " + optionTime);
 
@@ -49,12 +49,13 @@ namespace WisorLib
             product = MiscConstants.GetProduct(optionType);
             bool rc = GetInflationsForOption(optType);
 
+            env.RateCounter++;
             optRateFirstPeriod = FindInterestRate();
             if (-1 == optRateFirstPeriod)
             {
                 // TBD: Uston we have a problem
             }
-            optPmt = CalculatePmt(optAmt, optTime, optRateFirstPeriod);
+            optPmt = CalculatePmt(optAmt, optTime, optRateFirstPeriod, env);
         }
 
    
@@ -168,10 +169,13 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ******************************* Calculating PMT According to Option Type and Time and Rate ********************************* //
 
-        public double CalculatePmt(double amtForCalc, uint timeForCalc, double interestRateForCalc)
+        public double CalculatePmt(double amtForCalc, uint timeForCalc, double interestRateForCalc,
+            RunEnvironment env)
         {
             double currInterest = MiscConstants.UNDEFINED_DOUBLE;
 
+            env.CalculatePmtCounter++;
+ 
             //Console.WriteLine("CalculatePmt amtForCalc: " + amtForCalc + ", timeForCalc: " + timeForCalc + ", interestRateForCalc: " + interestRateForCalc);
             if ((MiscConstants.UNDEFINED_INT != optType) && (amtForCalc > 0) && (timeForCalc > 0))                                          
             {
@@ -250,10 +254,11 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ********************************** PRIVATE - Calculating full luah silukin for option ************************************** //
         
-        private void CalculateLuahSilukin(double rateFirstPeriod, double rateSecondPeriod, out double ttlPay)
+        private void CalculateLuahSilukin(double rateFirstPeriod, double rateSecondPeriod, out double ttlPay, RunEnvironment env)
         {
             //Console.WriteLine("CalculateLuahSilukin product.firstTimePeriod: " + product.firstTimePeriod);
             ttlPay = 0;
+            env.CalculateLuahSilukinCounter++;
 
             if (product.firstTimePeriod == 0)
             {
@@ -281,7 +286,7 @@ namespace WisorLib
                         startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
                         if (months < optTime)
                         {
-                            monthlyPmt = Math.Round(CalculatePmt(startingAmount, (optTime - months), rateFirstPeriod), 2);
+                            monthlyPmt = Math.Round(CalculatePmt(startingAmount, (optTime - months), rateFirstPeriod, env), 2);
                         }
                     }
                 }
@@ -307,7 +312,7 @@ namespace WisorLib
                     startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
                     if (months < optTime)
                     {
-                        monthlyPmt = Math.Round(CalculatePmt(startingAmount, (optTime - months), rateFirstPeriod), 2);
+                        monthlyPmt = Math.Round(CalculatePmt(startingAmount, (optTime - months), rateFirstPeriod, env), 2);
                     }
                 }
                 r = ((rateSecondPeriod / 12 * 100000000) - ((rateSecondPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
@@ -322,7 +327,7 @@ namespace WisorLib
                     startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
                     if (months < optTime)
                     {
-                        monthlyPmt = Math.Round(CalculatePmt(startingAmount, (optTime - months), rateSecondPeriod), 2);
+                        monthlyPmt = Math.Round(CalculatePmt(startingAmount, (optTime - months), rateSecondPeriod, env), 2);
                     }
                 }
             }
@@ -335,7 +340,7 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ************************************* PUBLIC - Calculating full luah silukin for option ************************************ //
 
-        public double GetTtlPay()
+        public double GetTtlPay(RunEnvironment env)
         {
             if (optTtlPay > 0)
             {
@@ -343,7 +348,7 @@ namespace WisorLib
             }
             else
             {
-                CalculateLuahSilukin(optRateFirstPeriod, optRateSecondPeriod, out optTtlPay);
+                CalculateLuahSilukin(optRateFirstPeriod, optRateSecondPeriod, out optTtlPay, env);
                 return optTtlPay;
             }
         }

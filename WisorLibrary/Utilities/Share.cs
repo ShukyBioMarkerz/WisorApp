@@ -27,6 +27,11 @@ namespace WisorLib
         public static bool shouldShowProductSelectionContinue { get; set; }
 
         public static bool shouldShowLoansSelectionWindow { get; set; }
+        public static bool ShouldCalcTheBankProfit { get; set; }
+
+        public static bool shouldRunSync { get; set; }
+        public static bool shouldRunLogicSync { get; set; }
+
 
         public static SelectionType theSelectionType { get; set; }
         public static int numberOfOption { get; set; }

@@ -83,12 +83,52 @@ namespace WisorLib
                     {
                         double opt3Amt = env.CalculationParameters.loanAmtWanted - opt1Amt - opt2Amt;
                         // Perform main thing here ...
-                        searchOneDivisionOfAmounts = new OneDivisionOfAmounts(opt1Amt, opt2Amt, opt3Amt, env);
+                        // Probably the right place to run in different task here
+                        if (Share.shouldRunLogicSync)
+                        {
+                            // Omri - what do we do with the searchOneDivisionOfAmounts object?
+                            searchOneDivisionOfAmounts = new OneDivisionOfAmounts(opt1Amt, opt2Amt, opt3Amt, env);
+                        }
+                        else
+                        {
+                            ManageASync(opt1Amt, opt2Amt, opt3Amt, env);
+                            //Console.WriteLine("RETURN DoComputeASync searchOneDivisionOfAmounts: " + searchOneDivisionOfAmounts.plane.totalColumnSearchChecks);
+                        }
+                        env.OneDivisionLoopCounter++;
                     }
                 }
             }
+
+            Task.WaitAll(TaskList.ToArray());
         }
-                
+
+        /// <summary>
+        /// Manage the logic calculation async
+        /// </summary>
+        /// <returns></returns>
+
+
+        List<Task> TaskList = new List<Task>();
+
+        private async Task ManageASync(double opt1Amt, double opt2Amt, double opt3Amt, RunEnvironment env)
+        {
+            TaskList.Add(DoComputeASync2(opt1Amt, opt2Amt, opt3Amt, env));
+            //Console.WriteLine("BEFORRRR TaskList contain: " + TaskList.Count);
+
+            //Task.WaitAll(TaskList.ToArray());
+            ////Console.WriteLine("AFTERRRRR TaskList.ToArray ");
+        }
+       
+
+        private async Task DoComputeASync2(double opt1Amt, double opt2Amt, double opt3Amt, RunEnvironment env)
+        {
+            //Console.WriteLine("BEFORE DoComputeASync2 ");
+            var result =  await Task.Run(() => /*searchOneDivisionOfAmounts = */new OneDivisionOfAmounts(opt1Amt, opt2Amt, opt3Amt, env));
+            //return searchOneDivisionOfAmounts;
+            //Console.WriteLine("AFTER DoComputeASync2 ");
+        }
+
+   
 
     }
 }

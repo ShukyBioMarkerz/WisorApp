@@ -49,12 +49,12 @@ namespace WisorLib
                 }
                 else
                 {
-                    SaveInitialLimitPoint((int)Options.limitPointsNumbers.TWO);
+                    SaveInitialLimitPoint((int)Options.limitPointsNumbers.TWO, env);
                 }
             }
             else
             {
-                SaveInitialLimitPoint((int)Options.limitPointsNumbers.ONE);
+                SaveInitialLimitPoint((int)Options.limitPointsNumbers.ONE, env);
             }
 
 
@@ -78,7 +78,7 @@ namespace WisorLib
             InsertOptionsAccordingToLetterAndNumber(numberForCheck, env);
             FindTargetPmtForCheckedOption(numberForCheck);
             savedTime = PerformBinarySearch(optForCheck.times[(int)Options.pmtLimits.MINTIME].optTime,
-                                                optForCheck.times[(int)Options.pmtLimits.MAXTIME].optTime);
+                                                optForCheck.times[(int)Options.pmtLimits.MAXTIME].optTime, env);
         }
 
 
@@ -142,7 +142,7 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ***************************************************** Perform Binary Search ************************************************ //
 
-        private uint PerformBinarySearch(uint minTimeValue, uint maxTimeValue)
+        private uint PerformBinarySearch(uint minTimeValue, uint maxTimeValue, RunEnvironment env)
         {
             uint timeForSave = 0;
             uint midValue = 0, midCell = 0, numOfCells = 0;
@@ -176,7 +176,7 @@ namespace WisorLib
                     midCell = (numOfCells - 1) / 2;
                 }
                 midValue = minTimeValue + (midCell * optForCheckType.product.timeJump);
-                Option opt = new Option(optForCheckType.product.productID.numberID, optForCheckAmt, midValue);
+                Option opt = new Option(optForCheckType.product.productID.numberID, optForCheckAmt, midValue, env);
                 double midPmt = opt.optPmt;
                 if (printOrNo == true)
                 {
@@ -194,7 +194,7 @@ namespace WisorLib
                         Console.WriteLine("\nPMT(" + midValue + ") = " + midPmt + " -> Too Small - Cutting array\n"
                                             + "\nnew MinValue = " + minTimeValue + " | new MaxValue = " + (midValue - optForCheckType.product.timeJump));
                     }
-                    return PerformBinarySearch(minTimeValue, (midValue - optForCheckType.product.timeJump));                    
+                    return PerformBinarySearch(minTimeValue, (midValue - optForCheckType.product.timeJump), env);                    
                 }
                 else if (midPmt > (targetOneOptPmt + CalculationConstants.smallDev)) // No exact match, time saved is middle cell
                 {
@@ -205,7 +205,7 @@ namespace WisorLib
                         Console.WriteLine("\nPMT(" + midValue + ") = " + midPmt + " -> Too Large - Cutting array\n"
                                             + "\nnew MinValue = " + (midValue + optForCheckType.product.timeJump) + " | new MaxValue = " + maxTimeValue);
                     }
-                    return PerformBinarySearch((midValue + optForCheckType.product.timeJump), maxTimeValue);
+                    return PerformBinarySearch((midValue + optForCheckType.product.timeJump), maxTimeValue, env);
                 }
                 else
                 {
@@ -261,29 +261,29 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ************************************************ Save Initial Limit Point (X,Y) ******************************************** //
 
-        private void SaveInitialLimitPoint(uint numberForSave)
+        private void SaveInitialLimitPoint(uint numberForSave, RunEnvironment env)
         {
             if ((letter == (int)Options.limitPointsLetters.A) && (numberForSave == (int)Options.limitPointsNumbers.ONE))
             {
                 opts[(int)Options.options.OPTX] = fixedOpt.times[(int)Options.pmtLimits.MAXTIME];
-                opts[(int)Options.options.OPTY] = new Option(optForCheckType.product.productID.numberID, optForCheckAmt, savedTime);
+                opts[(int)Options.options.OPTY] = new Option(optForCheckType.product.productID.numberID, optForCheckAmt, savedTime, env);
             }
             else if ((letter == (int)Options.limitPointsLetters.A) && (numberForSave == (int)Options.limitPointsNumbers.TWO))
             {
-                opts[(int)Options.options.OPTX] = new Option(optForCheckType.product.productID.numberID, optForCheckAmt, savedTime);
+                opts[(int)Options.options.OPTX] = new Option(optForCheckType.product.productID.numberID, optForCheckAmt, savedTime, env);
                 opts[(int)Options.options.OPTY] = fixedOpt.times[(int)Options.pmtLimits.MINTIME];
 
             }
             else if ((letter == (int)Options.limitPointsLetters.B) && (numberForSave == (int)Options.limitPointsNumbers.ONE))
             {
-                opts[(int)Options.options.OPTX] = new Option(optForCheckType.product.productID.numberID, optForCheckAmt, savedTime);
+                opts[(int)Options.options.OPTX] = new Option(optForCheckType.product.productID.numberID, optForCheckAmt, savedTime, env);
                 opts[(int)Options.options.OPTY] = fixedOpt.times[(int)Options.pmtLimits.MAXTIME];
 
             }
             else if ((letter == (int)Options.limitPointsLetters.B) && (numberForSave == (int)Options.limitPointsNumbers.TWO))
             {
                 opts[(int)Options.options.OPTX] = fixedOpt.times[(int)Options.pmtLimits.MINTIME];
-                opts[(int)Options.options.OPTY] = new Option(optForCheckType.product.productID.numberID, optForCheckAmt, savedTime);
+                opts[(int)Options.options.OPTY] = new Option(optForCheckType.product.productID.numberID, optForCheckAmt, savedTime, env);
             }
             number = numberForSave;
         }

@@ -40,7 +40,7 @@ namespace WisorLib
                 while ((fixedOptZ0 != null) && 
                             (fixedOptZ0.optTime <= env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.maxTime))
                 {
-
+                    // Omri - when this loop is ended?
                     plane = new SinglePlane(pmtLimits, fixedOptZ0, env);
                     
                     savedCompositionsForFile = new SavedCompositions(fixedOptZ0, plane.savedMatches, env);
@@ -112,7 +112,7 @@ namespace WisorLib
             else
             {
                 optionZ0 = new Option(env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.productID.numberID,
-                                            pmtLimits.amts[(int)Options.options.OPTZ], timeZ);
+                                            pmtLimits.amts[(int)Options.options.OPTZ], timeZ, env);
                 double ttlPMTmaxTime = pmtLimits.opts[(int)Options.options.OPTX].times[(int)Options.pmtLimits.MAXTIME].optPmt
                                         + pmtLimits.opts[(int)Options.options.OPTY].times[(int)Options.pmtLimits.MAXTIME].optPmt
                                         + optionZ0.optPmt;

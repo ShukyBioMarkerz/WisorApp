@@ -11,16 +11,16 @@ namespace WisorLib
         // General Parameters
         public Option[] times = { null, null };
 
-        public OneOption(OneOptType optType, double optAmt)
+        public OneOption(OneOptType optType, double optAmt, RunEnvironment env)
         {
-            times[(int)Options.pmtLimits.MAXTIME] = new Option(optType.product.productID.numberID, optAmt, optType.product.maxTime);
+            times[(int)Options.pmtLimits.MAXTIME] = new Option(optType.product.productID.numberID, optAmt, optType.product.maxTime, env);
             if (optType.product.maxTime == optType.product.minTime)
             {
                 times[(int)Options.pmtLimits.MINTIME] = times[(int)Options.pmtLimits.MAXTIME];
             }
             else
             {
-                times[(int)Options.pmtLimits.MINTIME] = new Option(optType.product.productID.numberID, optAmt, optType.product.minTime);
+                times[(int)Options.pmtLimits.MINTIME] = new Option(optType.product.productID.numberID, optAmt, optType.product.minTime, env);
             }
         }
     }
@@ -39,11 +39,11 @@ namespace WisorLib
             amts[(int)Options.options.OPTZ] = n_optZAmt;
 
             opts[(int)Options.options.OPTX] = new OneOption(env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX],
-                                                amts[(int)Options.options.OPTX]);
+                                                amts[(int)Options.options.OPTX], env);
             opts[(int)Options.options.OPTY] = new OneOption(env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY],
-                                                amts[(int)Options.options.OPTY]);
+                                                amts[(int)Options.options.OPTY], env);
             opts[(int)Options.options.OPTZ] = new OneOption(env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ],
-                                                amts[(int)Options.options.OPTZ]);
+                                                amts[(int)Options.options.OPTZ], env);
         }
 
 
