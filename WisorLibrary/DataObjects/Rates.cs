@@ -56,7 +56,8 @@ namespace WisorLib
         public static double FindRateForKey(int productID, int profile, int index)
         {
             //double rate = RateUtilities.Instance.FindRateForKey(new WisorLibrary.DataObjects.RatesKey(productID, profile), index);
-            double rate = RateUtilities.Instance.FindRateForKeyAsNumber(new WisorLibrary.DataObjects.RatesKey(productID, profile), index);
+            double rate = RateUtilities.Instance.FindRateForKeyAsNumber(/*new WisorLibrary.DataObjects.RatesKey(productID, profile),*/
+                productID, profile, index);
             return rate;
         }
 
