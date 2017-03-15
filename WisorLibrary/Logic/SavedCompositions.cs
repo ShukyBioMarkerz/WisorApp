@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using static WisorLib.Options;
 
@@ -28,6 +29,8 @@ namespace WisorLib
         public SavedCompositions(Option fixedOptionZ, SavedMatchesBeforeCheck savedMatchesListForOnePlane,
             RunEnvironment env)
         {
+            Interlocked.Add(ref Share.SavedCompositionsCounter, 1);
+
             this.env = env;
             fixedOptZ = fixedOptionZ;
             savedListForCheck = savedMatchesListForOnePlane;
@@ -73,10 +76,7 @@ namespace WisorLib
 
         public void CheckMatch(Option[] matchingPoint, RunEnvironment env)
         {
-            // count the composition number
-            Share.counterOfCompositions++;
-
-            // 1 - Calculate total pay for Option X and Option Y of matching point for check
+             // 1 - Calculate total pay for Option X and Option Y of matching point for check
 
             Option tempOptX = matchingPoint[(int)Options.options.OPTX];
             Option tempOptY = matchingPoint[(int)Options.options.OPTY];
@@ -119,7 +119,7 @@ namespace WisorLib
  
         private void CalcTheBankProfit(Option optX, Option optY, Option optZ, RunEnvironment env)
         {
-            if (Share.ShouldCalcTheBankProfit)
+            if (0 < Share.numberOfPrintResultsInList)
             {
                 // Checking lender profit
                 // get the Bank interset value

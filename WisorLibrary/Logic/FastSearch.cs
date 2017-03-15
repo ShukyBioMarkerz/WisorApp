@@ -168,11 +168,19 @@ namespace WisorLib
             {
                 Console.WriteLine("NOTICE: can't run the calculation. CanRunCalculation falge is: " + CanRunCalculation);
             }
-
-            Console.WriteLine("\n>>>> OneDivisionLoopCounter: " + env.OneDivisionLoopCounter +
-                ", CalculateLuahSilukinCounter: " + String.Format("{0:#,###,###}", env.CalculateLuahSilukinCounter) +
-                ", CalculatePmtCounter: " + String.Format("{0:#,###,###}", env.CalculatePmtCounter) +
-                ", RateCounter: " + String.Format("{0:#,###,###}", env.RateCounter));
+            if (Share.shouldPrintCounters)
+            {
+                Console.WriteLine("\nSavedCompositionsCounter: " + String.Format("{0:#,###,###}", Share.SavedCompositionsCounter) +
+                    "\n, CalculateLuahSilukinCounter: " + String.Format("{0:#,###,###}", Share.CalculateLuahSilukinCounter) +
+                    "\n, CalculatePmtCounter: " + String.Format("{0:#,###,###}", Share.CalculatePmtCounter) +
+                    "\n, CalculatePmtFromCalculateLuahSilukinCounter: " + String.Format("{0:#,###,###}", Share.CalculatePmtFromCalculateLuahSilukinCounter) +
+                    "\n, CalculateLuahSilukinCounterNOTInFirstTimePeriod: " + String.Format("{0:#,###,###}", Share.CalculateLuahSilukinCounterNOTInFirstTimePeriod) +
+                    "\n, CalculateLuahSilukinCounterInFirstTimePeriod: " + String.Format("{0:#,###,###}", Share.CalculateLuahSilukinCounterInFirstTimePeriod) +
+                    "\n, CalculateLuahSilukinCounterIndexUsedFirstTimePeriod: " + String.Format("{0:#,###,###}", Share.CalculateLuahSilukinCounterIndexUsedFirstTimePeriod) +
+                    "\n, RateCounter: " + String.Format("{0:#,###,###}", Share.RateCounter) +
+                    "\n, counterOfOneDivisionOfAmounts: " + String.Format("{0:#,###,###}", Share.counterOfOneDivisionOfAmounts) +
+                    "\n, OptionObjectCounter: " + String.Format("{0:#,###,###}", Share.OptionObjectCounter));
+            }
 
             return new RunLoanDetails(env.CheckInfo.orderID, Convert.ToInt32(CanRunCalculation), elapsedMs, env.OutputFile.OutputFilename);
         } 

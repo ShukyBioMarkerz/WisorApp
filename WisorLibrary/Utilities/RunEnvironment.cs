@@ -26,16 +26,13 @@ namespace WisorLib
         public int MaxProfit { get; set; }
         public int MaxBankPay { get; set; }
         public int MinBorrowerPay { get; set; }
-        public int OneDivisionLoopCounter { get; internal set; }
-        public int CalculatePmtCounter { get; internal set; }
-        public int CalculateLuahSilukinCounter { get; internal set; }
-
-        public int RateCounter { get; internal set; }
- 
+       
         public static string CreateOutputFilename(string orderid, double loanAmtWanted, double monthlyPmtWanted)
         {
+            string customer = (String.IsNullOrEmpty(Share.CustomerName)) ? "" : (Share.CustomerName + MiscConstants.NAME_SEP_CHAR);
             string fn = AppDomain.CurrentDomain.BaseDirectory // + Path.DirectorySeparatorChar
-                + MiscConstants.OUTPUT_DIR + Path.DirectorySeparatorChar + orderid +
+                + MiscConstants.OUTPUT_DIR + Path.DirectorySeparatorChar +
+                customer + orderid +
                 MiscConstants.NAME_SEP_CHAR + loanAmtWanted.ToString() + MiscConstants.NAME_SEP_CHAR +
                 monthlyPmtWanted.ToString() + MiscConstants.NAME_SEP_CHAR + DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT;
 
@@ -62,8 +59,7 @@ namespace WisorLib
                 "ProductX", "ProductY", "ProductZ", "Borrower pay", "Bank amount", "Profit"
             };
             MaxProfit = MaxBankPay = MinBorrowerPay = 0;
-            OneDivisionLoopCounter = CalculatePmtCounter = CalculateLuahSilukinCounter = RateCounter = 0;
-
+  
         }
 
         public static bool SetMarket(markets market)

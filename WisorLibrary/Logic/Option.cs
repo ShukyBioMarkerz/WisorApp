@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using WisorLibrary.Logic;
 using static WisorLib.MiscConstants;
@@ -41,6 +42,7 @@ namespace WisorLib
         public Option(int optionType, double optionAmount, uint optionTime, RunEnvironment env)
         {
             //Console.WriteLine("Option ctor optionType: " + optionType + ", optionAmount: " + optionAmount + ", optionTime: " + optionTime);
+            Interlocked.Add(ref Share.OptionObjectCounter, 1);
 
             optType = optionType;
             optAmt = optionAmount;
@@ -49,7 +51,6 @@ namespace WisorLib
             product = MiscConstants.GetProduct(optionType);
             bool rc = GetInflationsForOption(optType);
 
-            env.RateCounter++;
             optRateFirstPeriod = FindInterestRate();
             if (-1 == optRateFirstPeriod)
             {
@@ -174,8 +175,17 @@ namespace WisorLib
         {
             double currInterest = MiscConstants.UNDEFINED_DOUBLE;
 
-            env.CalculatePmtCounter++;
- 
+            Interlocked.Add(ref Share.CalculatePmtCounter, 1);
+            //env.CalculatePmtCounter++;
+
+            if (false) // fake the calculation examine the performance
+            {
+                double i2 = ((indexFirstPeriod /*inflation*/ / 12 * 100000000) - ((indexFirstPeriod /*inflation*/ / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
+                double monthlyPmt2 = ((amtForCalc * (1 + i2)) / timeForCalc);
+                monthlyPmt2 = ((monthlyPmt2 * 100000) - ((monthlyPmt2 * 100000) % 1)) / 100000; // Instead of Math.Round
+                return monthlyPmt2;
+            }
+
             //Console.WriteLine("CalculatePmt amtForCalc: " + amtForCalc + ", timeForCalc: " + timeForCalc + ", interestRateForCalc: " + interestRateForCalc);
             if ((MiscConstants.UNDEFINED_INT != optType) && (amtForCalc > 0) && (timeForCalc > 0))                                          
             {
@@ -253,20 +263,24 @@ namespace WisorLib
 
         // **************************************************************************************************************************** //
         // ********************************** PRIVATE - Calculating full luah silukin for option ************************************** //
-        
+
+  
         private void CalculateLuahSilukin(double rateFirstPeriod, double rateSecondPeriod, out double ttlPay, RunEnvironment env)
         {
             //Console.WriteLine("CalculateLuahSilukin product.firstTimePeriod: " + product.firstTimePeriod);
             ttlPay = 0;
-            env.CalculateLuahSilukinCounter++;
+            Interlocked.Add(ref Share.CalculateLuahSilukinCounter, 1);
+            //env.CalculateLuahSilukinCounter++;
 
             if (product.firstTimePeriod == 0)
             {
+                Interlocked.Add(ref Share.CalculateLuahSilukinCounterInFirstTimePeriod, 1);
                 if (product.indexUsedFirstTimePeriod == 0)
                 {
                     optTtlPrincipalPay = optAmt;
                     ttlPay = optTime * Math.Round(optPmt, 2);
                     optTtlRatePay = ttlPay - optTtlPrincipalPay;
+                    Interlocked.Add(ref Share.CalculateLuahSilukinCounterIndexUsedFirstTimePeriod, 1);
                 }
                 else
                 {
@@ -286,6 +300,7 @@ namespace WisorLib
                         startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
                         if (months < optTime)
                         {
+                            Interlocked.Add(ref Share.CalculatePmtFromCalculateLuahSilukinCounter, 1);
                             monthlyPmt = Math.Round(CalculatePmt(startingAmount, (optTime - months), rateFirstPeriod, env), 2);
                         }
                     }
@@ -293,6 +308,8 @@ namespace WisorLib
             }
             else
             {
+                Interlocked.Add(ref Share.CalculateLuahSilukinCounterNOTInFirstTimePeriod, 1);
+
                 double r = ((rateFirstPeriod / 12 * 100000000) - ((rateFirstPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
                 double i = ((indexFirstPeriod / 12 * 100000000) - ((indexFirstPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
 
@@ -312,6 +329,7 @@ namespace WisorLib
                     startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
                     if (months < optTime)
                     {
+                        Interlocked.Add(ref Share.CalculatePmtFromCalculateLuahSilukinCounter, 1);
                         monthlyPmt = Math.Round(CalculatePmt(startingAmount, (optTime - months), rateFirstPeriod, env), 2);
                     }
                 }
@@ -327,6 +345,7 @@ namespace WisorLib
                     startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
                     if (months < optTime)
                     {
+                        Interlocked.Add(ref Share.CalculatePmtFromCalculateLuahSilukinCounter, 1);
                         monthlyPmt = Math.Round(CalculatePmt(startingAmount, (optTime - months), rateSecondPeriod, env), 2);
                     }
                 }

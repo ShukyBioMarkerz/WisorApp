@@ -43,6 +43,7 @@ namespace WisorLib
         public const string PAYMENT_TYPE = "Payment type";
         public const string MORTGAGE_PRODUCT = "Mortgage product";
         public const string LOAN_FICO = "FICO";
+        public const string CUSTOMER_NAME = "Customer name";
 
         public static uint DEFAULT_PERCANTAGE_OF_MONTHLY_PAYMENT = 30;
 

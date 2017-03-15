@@ -27,29 +27,40 @@ namespace WisorLib
         public static bool shouldShowProductSelectionContinue { get; set; }
 
         public static bool shouldShowLoansSelectionWindow { get; set; }
-        public static bool ShouldCalcTheBankProfit { get; set; }
-
+       
         public static bool shouldRunSync { get; set; }
         public static bool shouldRunLogicSync { get; set; }
 
 
         public static SelectionType theSelectionType { get; set; }
-        public static int numberOfOption { get; set; }
-
+       
         public static bool shouldRunFake { get; set; }
         public static int numberOfPrintResultsInList { get; set; }
+        public static int numberOfOption { get; set; }
+
 
         public static int[,] combinations4market;
         public static string[,] combinationsAsString;
         public static string[] theProductsNames { get; set; }
         public static double[] theProductsRates;
-    
-        /// <summary>
-        /// Print the selected combination to excel file
-        /// </summary>
-        public static uint counterOfCompositions { get; set; }
-        public static uint numOfMatchesGlobal { get; set; }
 
+        /// <summary>
+        /// Print some counters for performance benchmark
+        /// </summary>
+        public static bool shouldPrintCounters { get; set; }
+
+        public static long counterOfOneDivisionOfAmounts;
+        public static long SavedCompositionsCounter;
+        public static long CalculatePmtCounter;
+        public static long CalculateLuahSilukinCounter;
+        public static long RateCounter;
+        public static long OptionObjectCounter;
+        public static long CalculatePmtFromCalculateLuahSilukinCounter;
+        public static long CalculateLuahSilukinCounterNOTInFirstTimePeriod;
+        public static long CalculateLuahSilukinCounterInFirstTimePeriod;
+        public static long CalculateLuahSilukinCounterIndexUsedFirstTimePeriod;
+
+        public static string CustomerName { get; set; }
 
         public static markets theMarket { get; set; }
 

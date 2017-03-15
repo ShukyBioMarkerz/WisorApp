@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using WisorLib;
 using WisorLibrary.DataObjects;
@@ -118,9 +119,11 @@ namespace WisorLibrary.Logic
         //      profile * MiscConstants.NumberOfYearsFrProduct + year
         public double FindRateForKeyAsNumber(/*RatesKey key*/int productID, int profile, int index)
         {
-           //Console.WriteLine("--- FindRateForKeyAsNumber key: " + key.ToString() + ",index: " + index);
+            //Console.WriteLine("--- FindRateForKeyAsNumber key: " + key.ToString() + ",index: " + index);
+            Interlocked.Add(ref Share.RateCounter, 1);
+            //env.RateCounter++;
 
-           double result = MiscConstants.UNDEFINED_DOUBLE;
+            double result = MiscConstants.UNDEFINED_DOUBLE;
             int indexInRatesArray = /*key.*/productID * MiscConstants.NumberOfProfiles
                  * MiscConstants.NumberOfYearsFrProduct +
                  (/*key.*/profile - 1) * MiscConstants.NumberOfYearsFrProduct + index;

@@ -195,8 +195,8 @@ namespace WisorLib
             //{ "Fixed30yrsUSA", "Fixed15yrsUSA" },
             //{"Fixed20yrsUSA", "7.1ARMUSA" },
             //{ "Fixed20yrsUSA", "Fixed15yrsUSA" }
-            { "Fixed30yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" } /* ,
-            { "Fixed30yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" } ,
+            /*{ "Fixed30yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" }  , */
+            { "Fixed30yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" } /*,
             { "Fixed30yrsUSA", "Fixed20yrsUSA", "5.1ARMUSA" },
             { "Fixed30yrsUSA", "Fixed20yrsUSA", "7.1ARMUSA" },
             { "Fixed30yrsUSA", "Fixed10yrsUSA", "5.1ARMUSA" },

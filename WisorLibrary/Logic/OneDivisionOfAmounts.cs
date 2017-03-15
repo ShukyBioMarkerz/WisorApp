@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace WisorLib
@@ -26,6 +27,8 @@ namespace WisorLib
 
         public OneDivisionOfAmounts(double amtOpt1, double amtOpt2, double amtOpt3, RunEnvironment env)
         {
+            Interlocked.Add(ref Share.counterOfOneDivisionOfAmounts, 1);
+
             printOrNo = env.PrintOptions.printFunctionsInConsole;
 
             amtOptX = amtOpt1;

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Threading;
 
 namespace WisorLib
 {
@@ -94,7 +95,7 @@ namespace WisorLib
                             ManageASync(opt1Amt, opt2Amt, opt3Amt, env);
                             //Console.WriteLine("RETURN DoComputeASync searchOneDivisionOfAmounts: " + searchOneDivisionOfAmounts.plane.totalColumnSearchChecks);
                         }
-                        env.OneDivisionLoopCounter++;
+             
                     }
                 }
             }
