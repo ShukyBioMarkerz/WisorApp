@@ -27,7 +27,9 @@ namespace WisorLib
         public static bool shouldShowProductSelectionContinue { get; set; }
 
         public static bool shouldShowLoansSelectionWindow { get; set; }
-       
+        //public static bool ShouldCalcTheBankProfit { get; set; }
+        public static bool ShouldStoreAllCombinations { get; set; }
+
         public static bool shouldRunSync { get; set; }
         public static bool shouldRunLogicSync { get; set; }
 
@@ -43,6 +45,8 @@ namespace WisorLib
         public static string[,] combinationsAsString;
         public static string[] theProductsNames { get; set; }
         public static double[] theProductsRates;
+        // bank rates
+        public static double[] theBankRates;
 
         /// <summary>
         /// Print some counters for performance benchmark
@@ -94,9 +98,6 @@ namespace WisorLib
             //theSelectedProducts = theNewList;
         }
 
-        public static double GetBankRate()
-        {
-            return MiscConstants.BANK_RATE;
-        }
+        
     }
 }

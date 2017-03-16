@@ -17,13 +17,13 @@ namespace WisorLibrary.Logic
         // make the class singltone
         private static RateUtilities instance;
 
-        public static RateUtilities SetFilename(string filename)
+        public static RateUtilities SetFilename(string filename, string bankFilename)
         {
             //get
             //{
             if (null == instance)
             {
-                    instance = new RateUtilities(filename);
+                    instance = new RateUtilities(filename, bankFilename);
                 }
                 return instance;
             //}
@@ -42,20 +42,24 @@ namespace WisorLibrary.Logic
         }
 
         //Dictionary<RatesKey, RateLine> rates;
-        double[] rates;
-        string filename;
+         string filename, bankFilename;
 
-        private RateUtilities(string filename = "")
+        private RateUtilities(string filename = "", string bankFilename = "")
         {
             bool rc = false;
 
-            if (!String.IsNullOrEmpty(filename))
+            if (!String.IsNullOrEmpty(filename) && !String.IsNullOrEmpty(bankFilename))
             {
                 setFilename(filename);
+                setBankFilename(bankFilename);
                 rc = LoadRates();
+                rc = LoadBankRates();
             }
             else
+            {
                 WindowsUtilities.loggerMethod("NOTICE RateUtilities without setting the rates file name");
+                Console.WriteLine("NOTICE RateUtilities without setting the rates file name");
+            }
         }
 
         private void setFilename(string fn)
@@ -63,12 +67,25 @@ namespace WisorLibrary.Logic
             filename = fn;
         }
 
+        private void setBankFilename(string fn)
+        {
+            bankFilename = fn;
+        }
+
         public bool LoadRates()
         {
-            if (null == rates || 0 >= rates.Length)
-                rates = LoadRatesCSVFile(filename);
-            WindowsUtilities.loggerMethod("NOTICE LoadRates succesfully load: " + rates.Length + " entries.");
-            return (null != rates && 0 < rates.Length);
+            if (null == Share.theProductsRates || 0 >= Share.theProductsRates.Length)
+                Share.theProductsRates = LoadRatesCSVFile(filename);
+            WindowsUtilities.loggerMethod("NOTICE LoadRates succesfully load: " + Share.theProductsRates.Length + " entries.");
+            return (null != Share.theProductsRates && 0 < Share.theProductsRates.Length);
+        }
+
+        public bool LoadBankRates()
+        {
+            if (null == Share.theBankRates || 0 >= Share.theBankRates.Length)
+                Share.theBankRates = LoadRatesCSVFile(bankFilename);
+            WindowsUtilities.loggerMethod("NOTICE LoadBankRates succesfully load: " + Share.theBankRates.Length + " entries.");
+            return (null != Share.theBankRates && 0 < Share.theBankRates.Length);
         }
 
         //public RateLine FindRatesForKey(RatesKey key)
@@ -193,7 +210,7 @@ namespace WisorLibrary.Logic
         }
         
 
-        private double[] /*Dictionary<RatesKey, RateLine>*/ LoadRatesCSVFile(string filename)
+        private double[] LoadRatesCSVFile(string filename)
         {
             string[] uniqueProducts4market = GetProductsFromCombinations();
 
@@ -282,13 +299,47 @@ namespace WisorLibrary.Logic
                 Console.WriteLine("ERROR: LoadRatesFile got Exception: " + e.ToString() + ". Curr: " + curr);
             }
 
-            //return dic;
-            string[] productNames = products.ToArray();
-            Share.theProductsNames = productNames;
-            ConvertProductsNaming();
-            Share.theProductsRates = ratesArray;
+            if (null == Share.theProductsNames || 0 >= Share.theProductsNames.Length)
+            {
+                string[] productNames = products.ToArray();
+                Share.theProductsNames = productNames;
+                ConvertProductsNaming();
+            }
             return ratesArray;
         }
+
+
+        /// <summary>
+        /// ///////////
+        /// Bank rates
+        /// <returns></returns>
+ 
+        public static double GetBankRate(int productID, int profile, int index)
+        {
+            //return MiscConstants.BANK_RATE;
+
+            double result = MiscConstants.UNDEFINED_DOUBLE;
+            int indexInRatesArray = productID * MiscConstants.NumberOfProfiles
+                 * MiscConstants.NumberOfYearsFrProduct +
+                 (profile - 1) * MiscConstants.NumberOfYearsFrProduct + index;
+            if (Share.theBankRates.Length > indexInRatesArray)
+            {
+                result = Share.theBankRates[indexInRatesArray];
+            }
+            else
+            {
+                Console.WriteLine("ERROR: GetBankRate illegal indexInRatesArray: " + indexInRatesArray + " while theProductsRates include: " + Share.theProductsRates.Length);
+            }
+
+            if (0 > result)
+            {
+                Console.WriteLine("ERROR: GetBankRate illegal rate for key: " + /*key.*/productID.ToString() + " and index: " + index + ", indexInRatesArray: " + indexInRatesArray);
+                result = MiscConstants.BANK_RATE;
+            }
+
+            return result;
+        }
+
 
     }
 }

@@ -193,7 +193,156 @@ namespace WisorLibrary.Logic
             return currInterest;
         }
 
+        /// <summary>
+        /// Calculate the remaing amount once the load have been started already
+        /// </summary>
+        /// <param name="dateTaken"></param>
+        /// <param name="originalProduct"></param>
+        /// <param name="originalRate"></param>
+        /// <param name="originalTime"></param>
+        /// <returns></returns>
+    
+        public static double CalculateRemainingAmount(double originalLoanAmount, uint originalLoanTime, /*int optionType,*/
+             uint monthOfDateLoanTaken, uint yearOfDateLoanTaken, double originalRate,
+             double originalInflation, double interestPaidSoFar, double totalPaidSoFar,
+             double principalPaidSoFar, out uint remaingLoanTime)
+         {
 
+            //Option optionForCheck = new Option(optionType, originalLoanAmount, originalLoanTime);
+            //optionForCheck.optRateForRemainingAmount = originalRate;
+
+            double firstMonthlyPMT = CalculateMonthlyPmt(originalLoanAmount, originalLoanTime,
+                /*optionForCheck.optRateForRemainingAmount,*/ originalRate, originalInflation);
+ 
+            double remeaingAmount = CalculateLuahSilukinSoFar(
+                originalRate, originalInflation,
+                originalLoanAmount, originalLoanTime,
+                monthOfDateLoanTaken, yearOfDateLoanTaken,
+                interestPaidSoFar, totalPaidSoFar,
+                firstMonthlyPMT, principalPaidSoFar, out remaingLoanTime);
+            return remeaingAmount;
+        }
+        
+        // **************************************************************************************************************************** //
+        // **************************************** Getting Inflation According to Option Type **************************************** //
+
+        private static string PresentPastOrFuture(uint mm, uint yy)
+        {
+            string resultToReturn = "";
+
+            if (yy < DateTime.Today.Year)
+            {
+                resultToReturn = "P";
+            }
+            else if (yy == DateTime.Today.Year)
+            {
+                if (mm < DateTime.Today.Month)
+                {
+                    resultToReturn = "P";
+                }
+                else if (mm == DateTime.Today.Month)
+                {
+                    resultToReturn = "N";
+                }
+                else
+                {
+                    resultToReturn = "F";
+                }
+            }
+            else
+            {
+                resultToReturn = "F";
+            }
+            return resultToReturn;
+        }
+        
+        // **************************************************************************************************************************** //
+        // ******************************* Calculating PMT According to Option Type and Time and Rate ********************************* //
+
+        public static double CalculateMonthlyPmt(double amtForCalc, uint timeForCalc, /*double interestRateForCalc,*/
+            double originalRate, double originalInflation)
+        {
+            double i = ((originalInflation / 12 * 100000000) - ((originalInflation / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
+
+            if (originalRate == 0)
+            {
+                double monthlyPmt = ((amtForCalc * (1 + i)) / timeForCalc);
+                monthlyPmt = ((monthlyPmt * 100000) - ((monthlyPmt * 100000) % 1)) / 100000; // Instead of Math.Round
+
+                return monthlyPmt;
+            }
+            else if (originalRate > 0)
+            {
+                double r = ((originalRate / 12 * 100000000) - ((originalRate / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
+                double calcPow = Math.Pow((1 + r), timeForCalc);
+                double monthlyPmt = ((amtForCalc * (1 + i)) * (r * calcPow) / (calcPow - 1));
+                monthlyPmt = ((monthlyPmt * 100000) - ((monthlyPmt * 100000) % 1)) / 100000; // Instead of Math.Round
+
+                return monthlyPmt;
+            }
+            else
+            {
+                throw new System.ArgumentOutOfRangeException("Rate Out of Range");
+            }
+        }
+        
+
+        // **************************************************************************************************************************** //
+        // ********************************** PRIVATE - Calculating full luah silukin for option ************************************** //
+
+        private static double CalculateLuahSilukinSoFar(
+            double originalRate, double originalInflation,
+            double originalLoanAmount, uint originalLoanTime,
+            uint monthOfDateLoanTaken, uint yearOfDateLoanTaken,
+            double interestPaidSoFar, double totalPaidSoFar,
+            double firstMonthlyPMT, double principalPaidSoFar, out uint remaingLoanTime)
+        {
+
+            double r = ((originalRate / 12 * 100000000) - ((originalRate / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
+            double i = ((originalInflation / 12 * 100000000) - ((originalInflation / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
+
+            double monthlyPmt = Math.Round(firstMonthlyPMT, 2);
+            double startingAmount = originalLoanAmount;
+
+            string timeString = PresentPastOrFuture(monthOfDateLoanTaken, yearOfDateLoanTaken);
+            uint timeCounter = 1;
+            uint monthCounter = monthOfDateLoanTaken;
+            uint yearCounter = yearOfDateLoanTaken;
+            
+            remaingLoanTime = originalLoanTime;
+
+            while (timeString != "F")
+            {
+                remaingLoanTime--;
+                double ratePmt = Math.Round((startingAmount * (1 + i) * r), 2);
+                double principalPmt = monthlyPmt - ratePmt;
+                principalPaidSoFar += principalPmt;
+                interestPaidSoFar += ratePmt;
+                totalPaidSoFar += monthlyPmt;
+                startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
+                
+                if (timeCounter < originalLoanTime)
+                {
+                    monthlyPmt = Math.Round(CalculateMonthlyPmt(startingAmount, (originalLoanTime - timeCounter),
+                        /*originalRate,*/ originalRate, originalInflation), 2);
+                    timeCounter++;
+                }
+
+                if (monthCounter == 12)
+                {
+                    monthCounter = 1;
+                    yearCounter++;
+                }
+                else
+                {
+                    monthCounter++;
+                }
+                timeString = PresentPastOrFuture(monthCounter, yearCounter);
+             }
+
+            return startingAmount;
+
+        }
 
     }
 }

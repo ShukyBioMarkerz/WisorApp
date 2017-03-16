@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WisorLibrary.Logic;
 using static WisorLib.FileUtils;
 
 namespace WisorLib
@@ -18,35 +19,69 @@ namespace WisorLib
     {
         public string ID { get; set; }
 
-        public MortgageType MortgageType { get; set; }
         public uint PropertyValue { get; set; }
         public uint DesiredMonthlyPayment { get; set; }
         public uint LoanAmount { get; set; }
-        public PaymentType PaymentType { get; set; }
+        public uint OriginalLoanAmount { get; set; }
         public uint fico { get; set; }
         public DateTime DateTaken { get; set; }
-        public MortgagProduct MortgagProduct { get; set; }
-        public double InterestRate { get; set; }
-        public uint TermInYears { get; set; }
+        public uint DesireTerminationMonth { get; set; }
         public uint BorrowerAge { get; set; }
         public uint YearlyIncome { get; set; }
-        public CreditClass CreditClass { get; set; }
+        public uint SequentialNumber { get; set; }
+        //string OriginalProduct { get; set; }
+
+        double OriginalRate { get; set; }
+        uint OriginalTime { get; set; }
+
+        public double RemaingLoanAmount { get; set; }
+        public uint RemaingLoanTime { get; set; }
+
+        //public CreditClass CreditClass { get; set; }
+        //public MortgageType MortgageType { get; set; }
+        //public MortgagProduct MortgagProduct { get; set; }
+        //public double InterestRate { get; set; }
+        //public PaymentType PaymentType { get; set; }
+
 
         public loanDetails(string id, uint loanAmount, uint desiredMonthlyPayment, uint propertyValue,
-            uint yearlyIncome, uint borrowerAge, uint fic)
-        //,
-        //// optional
-        //MortgageType mortgageType = MortgageType.None, PaymentType paymentType = PaymentType.None, DateTime? dateTaken = null,
-        //MortgagProduct mortgagProduct = MortgagProduct.None, double interestRate = MiscConstants.UNDEFINED_INT,
-        //uint termInYears = MiscConstants.UNDEFINED_UINT, CreditClass creditClass = CreditClass.None)
-        {
+            uint yearlyIncome, uint borrowerAge, uint fic,
+            // optional parameters
+            DateTime dateTaken,
+            //string originalProduct = MiscConstants.UNDEFINED_STRING, 
+            double originalRate = MiscConstants.UNDEFINED_DOUBLE, uint originalTime = MiscConstants.UNDEFINED_UINT,
+            uint desireTerminationMonth = MiscConstants.UNDEFINED_UINT,
+            uint sequentialNumber = MiscConstants.UNDEFINED_UINT)
+         {
             ID = id;
             PropertyValue = propertyValue;
             DesiredMonthlyPayment = desiredMonthlyPayment;
-            LoanAmount = loanAmount;
+            OriginalLoanAmount = LoanAmount = loanAmount;
             BorrowerAge = borrowerAge;
             YearlyIncome = yearlyIncome;
             fico = fic;
+            DateTaken = dateTaken;
+            DesireTerminationMonth = desireTerminationMonth;
+            SequentialNumber = (MiscConstants.UNDEFINED_UINT == sequentialNumber) ? MiscUtilities.GetSequenceID() : sequentialNumber;
+
+            //OriginalProduct = originalProduct;
+            OriginalRate = originalRate;
+            OriginalTime = originalTime;
+
+            int monthOfDateLoanTaken = DateTaken.Month;
+            int yearOfDateLoanTaken = DateTaken.Year;
+            //int optionType = GenericProduct.GetProductIndex(OriginalProduct);
+
+            uint remaingLoanTime;
+            RemaingLoanAmount = Calculations.CalculateRemainingAmount((double) LoanAmount, OriginalTime, /*optionType,*/
+                 (uint) monthOfDateLoanTaken, (uint) yearOfDateLoanTaken, OriginalRate,
+                 (double) 0 /*originalInflation*/, (double) 0 /*interestPaidSoFar*/, (double) 0 /*totalPaidSoFar*/,
+                 (double) 0 /*principalPaidSoFar*/, out remaingLoanTime);
+            RemaingLoanTime = remaingLoanTime;
+
+            // update the values for the new loan
+            LoanAmount = (uint) RemaingLoanAmount;
+            BorrowerAge = 35; //  (uint) 75 - (remaingLoanTime / 12);
 
             // DesiredMonthlyPayment can be undefined, calculate it
             if (MiscConstants.UNDEFINED_UINT == DesiredMonthlyPayment)

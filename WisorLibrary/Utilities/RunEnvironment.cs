@@ -27,31 +27,23 @@ namespace WisorLib
         public int MaxBankPay { get; set; }
         public int MinBorrowerPay { get; set; }
        
-        public static string CreateOutputFilename(string orderid, double loanAmtWanted, double monthlyPmtWanted)
-        {
-            string customer = (String.IsNullOrEmpty(Share.CustomerName)) ? "" : (Share.CustomerName + MiscConstants.NAME_SEP_CHAR);
-            string fn = AppDomain.CurrentDomain.BaseDirectory // + Path.DirectorySeparatorChar
-                + MiscConstants.OUTPUT_DIR + Path.DirectorySeparatorChar +
-                customer + orderid +
-                MiscConstants.NAME_SEP_CHAR + loanAmtWanted.ToString() + MiscConstants.NAME_SEP_CHAR +
-                monthlyPmtWanted.ToString() + MiscConstants.NAME_SEP_CHAR + DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT;
-
-            return fn;
-        }
-
+     
         // Hold the entire running environment data
-        public RunEnvironment(string orderid, double loanAmtWanted, double monthlyPmtWanted,
-                    uint propertyValue, uint income, uint youngestLenderAge, uint fico)
+        public RunEnvironment(loanDetails loan)
+            //string orderid, double loanAmtWanted, double monthlyPmtWanted,
+            //        uint propertyValue, uint income, uint youngestLenderAge, uint fico, uint sequenceID)
         {
-            OrderID = orderid;
+            OrderID = loan.ID;
             //OutputFilename = CreateOutputFilename(orderid, loanAmtWanted, monthlyPmtWanted);
             CheckInfo = new CheckInfo(OrderID);
-            CalculationParameters = new CalculationParameters(loanAmtWanted, monthlyPmtWanted,
-                    propertyValue, income, youngestLenderAge, fico);
+            CalculationParameters = new CalculationParameters(loan.LoanAmount, loan.DesiredMonthlyPayment,
+                    loan.PropertyValue, loan.YearlyIncome, loan.BorrowerAge, loan.fico);
             PrintOptions = new PrintOptions();
             if (PrintOptions.printToOutputFile == true)
             {
-                OutputFile = new OutputFile(orderid, loanAmtWanted, monthlyPmtWanted, CheckInfo);
+                OutputFile = new OutputFile(loan, CheckInfo);
+                    //loan.ID, loan.LoanAmount, loan.DesiredMonthlyPayment, 
+                    //CheckInfo, loan.SequentialNumber);
             }
             listOfSelectedCompositions = new List<ChosenComposition>();
             headerOfListOfSelectedCompositions = new List<string>()
@@ -92,41 +84,51 @@ namespace WisorLib
         public void PrepareLog2CSV(string ID)
         {
             fileStream = null;
-            string filename = AppDomain.CurrentDomain.BaseDirectory // + Path.DirectorySeparatorChar
-                + MiscConstants.OUTPUT_DIR + Path.DirectorySeparatorChar +
-                /*orderid*/ ID +
-                MiscConstants.NAME_SEP_CHAR + "Logger" + MiscConstants.NAME_SEP_CHAR +
-                DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT;
+
+            if (Share.ShouldStoreAllCombinations)
+            {
+                string filename = AppDomain.CurrentDomain.BaseDirectory // + Path.DirectorySeparatorChar
+                    + MiscConstants.OUTPUT_DIR + Path.DirectorySeparatorChar +
+                    /*orderid*/ ID +
+                    MiscConstants.NAME_SEP_CHAR + "Logger" + MiscConstants.NAME_SEP_CHAR +
+                    DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT;
 
 
-            // TBD: Shuky - ensure the directory realy exists
-            if (!Directory.Exists(Path.GetDirectoryName(filename)))
-                Directory.CreateDirectory(Path.GetDirectoryName(filename));
+                // TBD: Shuky - ensure the directory realy exists
+                if (!Directory.Exists(Path.GetDirectoryName(filename)))
+                    Directory.CreateDirectory(Path.GetDirectoryName(filename));
 
-            fileStream = new StreamWriter(filename);
+                fileStream = new StreamWriter(filename);
+            }
         }
 
         public void PrintLog2CSV(string[] msg)
         {
-            try
+            if (Share.ShouldStoreAllCombinations && null != fileStream)
             {
-                string msg2write = null;
-                for (int i = 0; i < msg.Length; i++)
+                try
                 {
-                    msg2write += msg[i] + MiscConstants.COMMA_SEERATOR_STR;
-                }
+                    string msg2write = null;
+                    for (int i = 0; i < msg.Length; i++)
+                    {
+                        msg2write += msg[i] + MiscConstants.COMMA_SEERATOR_STR;
+                    }
 
-                fileStream.WriteLine(msg2write);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("ERROR: PrintLog2CSV got Exception: " + e.ToString());
+                    fileStream.WriteLine(msg2write);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("ERROR: PrintLog2CSV got Exception: " + e.ToString());
+                }
             }
         }
 
         public void CloseLog2CSV()
         {
-            fileStream.Close();
+            if (Share.ShouldStoreAllCombinations && null != fileStream)
+            {
+                fileStream.Close();
+            }
         }
 
     }

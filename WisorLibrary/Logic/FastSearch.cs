@@ -98,19 +98,10 @@ namespace WisorLib
                         // Print summary to file
                         if (env.PrintOptions.printToOutputFile == true)
                         {
-
-                            string dateCreated = env.CheckInfo.softwareOpenTime.Day.ToString() + "/" + env.CheckInfo.softwareOpenTime.Month.ToString()
-                                                    + "/" + env.CheckInfo.softwareOpenTime.Year.ToString() + " " + env.CheckInfo.softwareOpenTime.ToShortTimeString() + ":00";
-
-
-
-
-                            string summaryToFile = "" + env.CheckInfo.fastCheckID.ToString() + "," + env.CheckInfo.orderID + "," + dateCreated + ",";
-
-
-
-
-
+                            //string dateCreated = env.CheckInfo.softwareOpenTime.Day.ToString() + "/" + env.CheckInfo.softwareOpenTime.Month.ToString()
+                            //                        + "/" + env.CheckInfo.softwareOpenTime.Year.ToString() + " " + env.CheckInfo.softwareOpenTime.ToShortTimeString() + ":00";
+                            //string summaryToFile = "" + env.CheckInfo.fastCheckID.ToString() + "," + env.CheckInfo.orderID + "," + dateCreated + ",";
+                            string summaryToFile = null;
                             if (ResultsOutput.bestCompositionSoFar != null)
                             {
                                 summaryToFile += ResultsOutput.bestCompositionSoFar.ToString();

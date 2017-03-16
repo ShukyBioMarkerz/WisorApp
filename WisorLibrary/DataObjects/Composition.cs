@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WisorLibrary.Logic;
 
 namespace WisorLib
 {
@@ -16,6 +17,8 @@ namespace WisorLib
         public double ttlRatePay = 0;
         public double ttlPrincipalPay = 0;
 
+        double optXBankTtlPay, optYBankTtlPay, optZBankTtlPay;
+
         public bool calcTtlPayOrNo = false;
 
         public Composition(Option optionX, Option optionY, Option optionZ, RunEnvironment env)
@@ -27,14 +30,27 @@ namespace WisorLib
             ttlPmt = (opts[(int)Options.options.OPTX].optPmt + opts[(int)Options.options.OPTY].optPmt + opts[(int)Options.options.OPTZ].optPmt);
             CheckIfTtlCalculatedOrNo(env);
 
+            CalculateBankProfit();
         }
 
+        private void CalculateBankProfit()
+        {
+            // get the Bank interset value
+            double bankRate = RateUtilities.GetBankRate(opts[(int)Options.options.OPTX].product.productID.numberID, BorrowerProfile.borrowerProfile,
+                    (int)opts[(int)Options.options.OPTX].optTime / 12 - 4);
+            opts[(int)Options.options.OPTX].SetBankRate(bankRate);
+            optXBankTtlPay = opts[(int)Options.options.OPTX].GetBankTtlPay();
+            bankRate = RateUtilities.GetBankRate(opts[(int)Options.options.OPTY].product.productID.numberID, BorrowerProfile.borrowerProfile,
+                    (int)opts[(int)Options.options.OPTY].optTime / 12 - 4);
+            opts[(int)Options.options.OPTY].SetBankRate(bankRate);
+            optYBankTtlPay = opts[(int)Options.options.OPTY].GetBankTtlPay();
+            bankRate = RateUtilities.GetBankRate(opts[(int)Options.options.OPTZ].product.productID.numberID, BorrowerProfile.borrowerProfile,
+                    (int)opts[(int)Options.options.OPTZ].optTime / 12 - 4);
+            opts[(int)Options.options.OPTZ].SetBankRate(bankRate);
+            optZBankTtlPay = opts[(int)Options.options.OPTZ].GetBankTtlPay();
+         }
 
-
-
-
-
-
+   
 
         // **************************************************************************************************************************** //
         // *********************************** Check if Options have Luah Silukins Calculated Or No *********************************** //
@@ -104,6 +120,8 @@ namespace WisorLib
 
         public override string ToString()
         {
+            int ttlBankPayPayk = Convert.ToInt32(optXBankTtlPay + optYBankTtlPay + optZBankTtlPay);
+
             return "" + opts[(int)Options.options.OPTX]
                     + "," + opts[(int)Options.options.OPTY]
                         + "," + opts[(int)Options.options.OPTZ]
@@ -113,12 +131,15 @@ namespace WisorLib
                         + "," + (int)ttlPmt
                         + "," + (int)opts[(int)Options.options.OPTX].optTtlPay
                         + "," + (int)opts[(int)Options.options.OPTY].optTtlPay
-                        + "," + (int)opts[(int)Options.options.OPTZ].optTtlPay                        
-                        + "," + (int)ttlPay;
-       
+                        + "," + (int)opts[(int)Options.options.OPTZ].optTtlPay
+                        + "," + (int)ttlPay
+                        // the bank profit data
+                        + "," + Convert.ToInt32(optXBankTtlPay).ToString()
+                        + "," + Convert.ToInt32(optYBankTtlPay).ToString()
+                        + "," + Convert.ToInt32(optZBankTtlPay).ToString()
+                        + "," + Convert.ToInt32(ttlBankPayPayk).ToString()
+                        + "," + Convert.ToInt32(ttlPay - ttlBankPayPayk).ToString();
         }
-
-
 
     }
 }

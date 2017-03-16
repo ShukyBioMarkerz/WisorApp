@@ -28,6 +28,8 @@ namespace WisorLib
         public double optRateFirstPeriod = -1;
         public double optRateSecondPeriod = -1;
 
+        public double optRateForRemainingAmount = -1;
+
         // Shuky changes:
         //public double inflation = -1;
         public double indexFirstPeriod { get; set; }
@@ -399,10 +401,12 @@ namespace WisorLib
         public override string ToString()
         {
             //return "(" + optType + "," + optAmt + "," + optTime + "," + optRate + "," + optPmt + ")";
-            
+
             //return (optType + 4).ToString() + "," + optAmt + "," + optTime + "," + inflationStr + "," + optRate
             //            + "," + (int)optPmt + "," + (int)optTtlPay;
-            return (optType + 4).ToString() + "," + optAmt + "," + optTime + "," + optRateFirstPeriod;
+            string name = GenericProduct.GetProductName(optType);
+            return name + "," + optAmt + "," + optTime + "," + optRateFirstPeriod;
+            // return (optType + 4).ToString() + "," + optAmt + "," + optTime + "," + optRateFirstPeriod;
         }
 
         public string ToString2()

@@ -47,10 +47,10 @@ namespace WisorLib
 
         static private string ratesFilename;
 
-        public static void SetRatesFile(string filename)
+        public static void SetRatesFile(string filename, string bankFilename)
         {
             ratesFilename = filename;
-            RateUtilities.SetFilename(filename);
+            RateUtilities.SetFilename(filename, bankFilename);
         }
 
         public static double FindRateForKey(int productID, int profile, int index)

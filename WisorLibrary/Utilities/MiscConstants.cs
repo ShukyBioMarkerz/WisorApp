@@ -29,9 +29,17 @@ namespace WisorLib
         public static char      PERCANTAGE_STR = '%';
         public static string    CRITERIA_FILENAME = "criteria.txt";
         public static string    OUTPUT_DIR = "Output";
+        public static string    DATA_DIR = @"..\..\..\Data";
         public static char      NAME_SEP_CHAR = '-';
         public static string    CSV_EXT = ".csv";
         public static string    DOTS_STR = ":";
+        public static string    SEQ_STR = "#";
+        public static string    RATES_FILE = "RateFileGeneric.csv";
+        public static string    BANK_RATES_FILE = "CitiRateMarginGeneric.csv";
+        public static string    LOAN_FILE = "POC Data - Test Run.csv";
+        public static string    PRODUCTS_FILE = "MortgageProducts - Updated.xml";
+        public static string    CRETIRIA_FILE = "Gui.xml";
+  
 
         // Loan parameter
         public const string LOAN_AMOUNT = "Loan amount";
@@ -43,6 +51,12 @@ namespace WisorLib
         public const string PAYMENT_TYPE = "Payment type";
         public const string MORTGAGE_PRODUCT = "Mortgage product";
         public const string LOAN_FICO = "FICO";
+        public const string DATE_TAKEN = "Date Taken";
+        public const string DESIRE_TERMINATION_MONTH = "DesireTerminationMonth";
+        public const string SEQ_NUMBER = "SequentialNumber";
+        public const string ORIGINAL_PRODUCT = "Original Product";
+        public const string ORIGINAL_RATE = "Original Rate";
+        public const string ORIGINAL_TIME = "Original Time";
         public const string CUSTOMER_NAME = "Customer name";
 
         public static uint DEFAULT_PERCANTAGE_OF_MONTHLY_PAYMENT = 30;
@@ -55,14 +69,7 @@ namespace WisorLib
         // type of the selection window
         public enum SelectionType { ReadCretiria = 0, ReadProducts , ReadRates , ReadLoansFile};
         
-        // TBD: either read it from file
-        public static int GetLoanID()
-        {
-            Random random = new Random();
-            int randomNumber = random.Next(0, 1000);
-            return randomNumber;
-        }
-
+  
         // TBD - shuky
         public enum indices { MADAD, PRIME, CPI, FED, LIBOR, EUROBOR, BBBR, MAKAM, OTHER, NONE }; // Are the options in the code or pulled from outside DB?
 
@@ -133,6 +140,37 @@ namespace WisorLib
             Thread.Sleep(12345);
         }
 
+
+    }
+
+    public class MiscUtilities
+    {
+        // TBD: either read it from file
+        public static int GetLoanID()
+        {
+            Random random = new Random();
+            int randomNumber = random.Next(0, 1000);
+            return randomNumber;
+        }
+
+        public static uint GetSequenceID()
+        {
+            // TBD
+            return 1;
+        }
+
+        public static string CreateOutputFilename(string orderid, double loanAmtWanted, double monthlyPmtWanted, uint sequenceID)
+        {
+            string customer = (String.IsNullOrEmpty(Share.CustomerName)) ? "" : (Share.CustomerName + MiscConstants.NAME_SEP_CHAR);
+            string seq = (MiscConstants.UNDEFINED_UINT == sequenceID) ? "" : MiscConstants.SEQ_STR + sequenceID + MiscConstants.SEQ_STR + MiscConstants.NAME_SEP_CHAR;
+            string fn = AppDomain.CurrentDomain.BaseDirectory // + Path.DirectorySeparatorChar
+                + MiscConstants.OUTPUT_DIR + Path.DirectorySeparatorChar +
+                customer + seq + orderid +
+                MiscConstants.NAME_SEP_CHAR + loanAmtWanted.ToString() + MiscConstants.NAME_SEP_CHAR +
+                monthlyPmtWanted.ToString() + MiscConstants.NAME_SEP_CHAR + DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT;
+
+            return fn;
+        }
 
     }
 

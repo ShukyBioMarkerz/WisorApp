@@ -14,11 +14,12 @@ namespace WisorLib
 
         public string OutputFilename { get; }
 
-        public OutputFile(string orderid, double loanAmtWanted, double monthlyPmtWanted, CheckInfo CheckInfo)
+        public OutputFile(loanDetails loan, CheckInfo CheckInfo)
+            //string orderid, double loanAmtWanted, double monthlyPmtWanted, CheckInfo CheckInfo, uint sequenceID)
         {
             // get the exact output filename
-            OutputFilename = RunEnvironment.CreateOutputFilename(orderid, loanAmtWanted, monthlyPmtWanted);
-
+            OutputFilename = MiscUtilities.CreateOutputFilename(loan.ID, loan.LoanAmount, loan.DesiredMonthlyPayment, loan.SequentialNumber);
+    
             // TBD: Shuky - ensure the directory realy exists
             if (!Directory.Exists(Path.GetDirectoryName(OutputFilename)))
                 Directory.CreateDirectory(Path.GetDirectoryName(OutputFilename));
@@ -34,17 +35,25 @@ namespace WisorLib
 
             WriteToOutputFile("Fast Three Option Check V3.2");
             WriteToOutputFile("Order ID : " + CheckInfo.orderID);
-            WriteToOutputFile("Execution ID : " + CheckInfo.fastCheckID);
-            WriteToOutputFile("Borrower profile : " + CalculationConstants.profiles[BorrowerProfile.borrowerProfile]);
-            WriteToOutputFile("Start time : " + CheckInfo.softwareOpenTime);
+            WriteToOutputFile("Original loan date : " + loan.DateTaken.ToString());
+            WriteToOutputFile("Original loan amount : " + loan.OriginalLoanAmount);
+            WriteToOutputFile("Remainig loan amount : " + loan.LoanAmount);
+            
+            //WriteToOutputFile("Execution ID : " + CheckInfo.fastCheckID);
+            //WriteToOutputFile("Borrower profile : " + CalculationConstants.profiles[BorrowerProfile.borrowerProfile]);
+            WriteToOutputFile("Start time : " + DateTime.Now);
 
             // Shuky - add the header line 
-            WriteToOutputFile("Ticks" + "," + "OrderID" + "," + "Time" + "," +
+            WriteToOutputFile(/*"Ticks" + "," + "OrderID" + "," + "Time" + "," +*/
                 "X:optType" + "," + "X:optAmt" + "," + "X:optTime" + "," + "X:RateFirstPeriod" + "," +
                 "Y:optType" + "," + "Y:optAmt" + "," + "Y:optTime" + "," + "Y:RateFirstPeriod" + "," +
                 "Z:optType" + "," + "Z:optAmt" + "," + "Z:optTime" + "," + "Z:RateFirstPeriod" + "," +
                 "OPTX-optPmt" + "," + "OPTY-optPmt" + "," + "OPTZ-optPmt"
-                + "," + "ttlPmt" + "," + "OPTX-optTtlPay" + "," + "OPTY-optTtlPay" + "," + "OPTZ-optTtlPay" + "," + "ttlPay");
+                + "," + "ttlPmt" + "," + "OPTX-optTtlPay" + "," + "OPTY-optTtlPay" +
+                "," + "OPTZ-optTtlPay" + "," + "ttlPay" +
+                // bank profit data
+                "," + "X:BankTtlPay" + "," + "Y:BankTtlPay" + "," + "Z:BankTtlPay" +
+                "," + "TtlBankPayPay" + "," + "TtlBankProfit");
 
         }
 

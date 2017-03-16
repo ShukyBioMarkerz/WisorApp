@@ -239,7 +239,7 @@ namespace WisorLib
             string curr = MiscConstants.UNDEFINED_STRING;
             string[] entities;
             // id should be retrived by some logic
-            int id = MiscConstants.GetLoanID();
+            int id = MiscUtilities.GetLoanID();
 
             try
             {
@@ -277,6 +277,12 @@ namespace WisorLib
                         int yearlyIncomeIndex = fieldsDef.GetIndexOf(MiscConstants.YEARLY_INCOME); // + INDEX_ADD;
                         int ageIndex = fieldsDef.GetIndexOf(MiscConstants.AGE); // + INDEX_ADD;
                         int ficoIndex = fieldsDef.GetIndexOf(MiscConstants.LOAN_FICO);
+                        int dateTakenIndex = fieldsDef.GetIndexOf(MiscConstants.DATE_TAKEN);
+                        int desireTerminationMonthIndex = fieldsDef.GetIndexOf(MiscConstants.DESIRE_TERMINATION_MONTH);
+                        int sequentialNumberIndex = fieldsDef.GetIndexOf(MiscConstants.SEQ_NUMBER);
+                        //int originalProductIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_PRODUCT);
+                        int originalRateIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_RATE);
+                        int originalTimeIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_TIME);
 
                         if (MiscConstants.UNDEFINED_INT < loanAmountIndex /*&& INDEX_ADD <= monthlyPaymentIndex*/ && MiscConstants.UNDEFINED_INT < propertyValueIndex &&
                             MiscConstants.UNDEFINED_INT < yearlyIncomeIndex && INDEX_ADD < ficoIndex)
@@ -303,8 +309,37 @@ namespace WisorLib
                                 uint uageIndexV = INDEX_ADD > ageIndex ? 0 : Convert.ToUInt32(entities[ageIndex]);
                                 uint ficoIndexV = Convert.ToUInt32(entities[ficoIndex]);
 
+                                // optional parameters
+
+                                DateTime dateTakenIndexV = 
+                                    (dateTakenIndex >= entities.Length) ? DateTime.Now : Convert.ToDateTime(entities[dateTakenIndex]);
+                                uint desireTerminationMonthIndexV =
+                                    (desireTerminationMonthIndex >= entities.Length) ? MiscConstants.UNDEFINED_UINT : Convert.ToUInt32(entities[desireTerminationMonthIndex]);
+                                // ensure the bulk have its own sequencial number
+                                uint sequentialNumberIndexV = MiscConstants.UNDEFINED_UINT;
+                                if (sequentialNumberIndex >= entities.Length)
+                                {
+                                    CriteriaField cf = fieldsDef.GetField(MiscConstants.SEQ_NUMBER);
+
+                                    sequentialNumberIndexV = Convert.ToUInt32(cf.value) + (uint) lineNumber;
+                                }
+                                else
+                                {
+                                    sequentialNumberIndexV = Convert.ToUInt32(entities[sequentialNumberIndex]);
+                                }
+                                //string originalProductIndexV = 
+                                //    (originalProductIndex >= entities.Length) ? MiscConstants.UNDEFINED_STRING : entities[originalProductIndex];
+                                double originalRateIndexV =
+                                         (originalRateIndex >= entities.Length) ? MiscConstants.UNDEFINED_DOUBLE : Convert.ToDouble(entities[originalRateIndex]);
+                                uint originalTimeIndexV = 
+                                    (originalTimeIndex >= entities.Length) ? MiscConstants.UNDEFINED_UINT : Convert.ToUInt32(entities[originalTimeIndex]);
+
+
                                 loans.Add(new loanDetails(id.ToString(),
-                                    uloanAmountIndexV, umonthlyPaymentIndexV, upropertyValueIndexV, uyearlyIncomeIndexV, uageIndexV, ficoIndexV));
+                                    uloanAmountIndexV, umonthlyPaymentIndexV, upropertyValueIndexV, 
+                                    uyearlyIncomeIndexV, uageIndexV, ficoIndexV,
+                                    dateTakenIndexV, /*originalProductIndexV,*/ originalRateIndexV, originalTimeIndexV,
+                                    desireTerminationMonthIndexV, sequentialNumberIndexV));
                                 id++;
                             }
                         }
@@ -331,6 +366,7 @@ namespace WisorLib
                 else
                 {
                     Console.WriteLine("ERROR: LoadCSVFileData file: " + filename + " does not exists!!!");
+                    WindowsUtilities.loggerMethod("ERROR: LoadCSVFileData file: " + filename + " does not exists!!!");
                 }
             }
             catch (Exception e)

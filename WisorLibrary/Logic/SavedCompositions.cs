@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using WisorLibrary.Logic;
 using static WisorLib.Options;
 
 namespace WisorLib
@@ -116,75 +117,82 @@ namespace WisorLib
             }        
         }
 
- 
+     
         private void CalcTheBankProfit(Option optX, Option optY, Option optZ, RunEnvironment env)
         {
             if (0 < Share.numberOfPrintResultsInList)
             {
                 // Checking lender profit
                 // get the Bank interset value
-                double bankRate = Share.GetBankRate();
+                double bankRate = RateUtilities.GetBankRate(optX.product.productID.numberID, BorrowerProfile.borrowerProfile,
+                    (int)optX.optTime / 12 - 4);
                 optX.SetBankRate(bankRate);
                 double optXBankTtlPay = optX.GetBankTtlPay();
+                bankRate = RateUtilities.GetBankRate(optY.product.productID.numberID, BorrowerProfile.borrowerProfile,
+                    (int)optY.optTime / 12 - 4);
                 optY.SetBankRate(bankRate);
                 double optYBankTtlPay = optY.GetBankTtlPay();
+                bankRate = RateUtilities.GetBankRate(optZ.product.productID.numberID, BorrowerProfile.borrowerProfile,
+                    (int)optZ.optTime / 12 - 4);
                 optZ.SetBankRate(bankRate);
                 double optZBankTtlPay = optZ.GetBankTtlPay();
                 int ttlBankPayPayk = Convert.ToInt32(optXBankTtlPay + optYBankTtlPay + optZBankTtlPay);
                 int ttlPayForCheck = Convert.ToInt32(optX.optTtlPay + optY.optTtlPay + optZ.optTtlPay);
+                          
+                string productNameX = GenericProduct.GetProductName(optX.optType);
+                string resultX = productNameX + MiscConstants.DOTS_STR + optX.optAmt +
+                    MiscConstants.DOTS_STR + optX.optTime + MiscConstants.DOTS_STR + optX.optRateFirstPeriod;
+                string productNameY = GenericProduct.GetProductName(optY.optType);
+                string resultY = productNameY + MiscConstants.DOTS_STR + optY.optAmt +
+                    MiscConstants.DOTS_STR + optY.optTime + MiscConstants.DOTS_STR + optY.optRateFirstPeriod;
+                string productNameZ = GenericProduct.GetProductName(optZ.optType);
+                string resultZ = productNameZ + MiscConstants.DOTS_STR + optZ.optAmt +
+                    MiscConstants.DOTS_STR + optZ.optTime + MiscConstants.DOTS_STR + optZ.optRateFirstPeriod;
+                string totalBorrower = Convert.ToInt32(ttlPayForCheck).ToString();
+                string totalBank = Convert.ToInt32(ttlBankPayPayk).ToString();
+                string diff = Convert.ToInt32(ttlPayForCheck - ttlBankPayPayk).ToString();
 
-                // truncate the numbers
-                string[] msg2write = {
-                /*"X: " + */optX.ToString(),
-                /*"Y: " + */optY.ToString(),
-                /*"Z: " + */optZ.ToString(),
-                /*"X_pmt: " +*/ Convert.ToInt32(optX.optPmt).ToString() + ":" +
-                /*"Y_pmt: " +*/ Convert.ToInt32(optY.optPmt).ToString() + ":" +
-                /*"Z_pmt: " +*/ Convert.ToInt32(optZ.optPmt).ToString() + "=" +
-                /*"Ttl_pmt: " +*/ Convert.ToInt32(optX.optPmt + optY.optPmt + optZ.optPmt).ToString(),
-                /*"X_Ttl: " +*/ Convert.ToInt32(optX.optTtlPay).ToString() + ":" +
-                /*"Y_Ttl: " +*/ Convert.ToInt32(optY.optTtlPay).ToString() + ":" +
-                /*"Z_Ttl: " +*/ Convert.ToInt32(optZ.optTtlPay).ToString(),
-                /*"ttlPay: " +*/ Convert.ToInt32(ttlPayForCheck).ToString(),
-                /*"X_TtlBank: " +*/ Convert.ToInt32(optXBankTtlPay).ToString() + ":" +
-                /*"Y_TtlBank: " +*/ Convert.ToInt32(optYBankTtlPay).ToString() + ":" +
-                /*"Z_TtlBank: " +*/ Convert.ToInt32(optZBankTtlPay).ToString(),
-                /*"ttlPayBank: " +*/ Convert.ToInt32(ttlBankPayPayk).ToString()
-            };
-                env.PrintLog2CSV(msg2write);
+                //add the result to the oredered list
+                ChosenComposition comp = new ChosenComposition()
+                { resultX, resultY, resultZ, totalBorrower, totalBank, diff };
+                comp.SetBorrowerPay(ttlPayForCheck);
+                comp.SetBankPay(ttlBankPayPayk);
+                comp.SetBankProfit(Convert.ToInt32(ttlPayForCheck - ttlBankPayPayk));
 
-                if (0 < Share.numberOfPrintResultsInList)
+                env.listOfSelectedCompositions.Add(comp);
+                if (env.MaxProfit < Convert.ToInt32(diff))
+                    env.MaxProfit = Convert.ToInt32(diff);
+                if (env.MaxBankPay < Convert.ToInt32(totalBank))
+                    env.MaxBankPay = Convert.ToInt32(totalBank);
+                if (0 >= env.MinBorrowerPay)
+                    env.MinBorrowerPay = Convert.ToInt32(totalBorrower);
+                else if (env.MinBorrowerPay > Convert.ToInt32(totalBorrower))
+                    env.MinBorrowerPay = Convert.ToInt32(totalBorrower);
+        
+                if (Share.ShouldStoreAllCombinations)
                 {
-                    string productNameX = GenericProduct.GetProductName(optX.optType);
-                    string resultX = productNameX + MiscConstants.DOTS_STR + optX.optAmt +
-                        MiscConstants.DOTS_STR + optX.optTime + MiscConstants.DOTS_STR + optX.optRateFirstPeriod;
-                    string productNameY = GenericProduct.GetProductName(optY.optType);
-                    string resultY = productNameY + MiscConstants.DOTS_STR + optY.optAmt +
-                        MiscConstants.DOTS_STR + optY.optTime + MiscConstants.DOTS_STR + optY.optRateFirstPeriod;
-                    string productNameZ = GenericProduct.GetProductName(optZ.optType);
-                    string resultZ = productNameZ + MiscConstants.DOTS_STR + optZ.optAmt +
-                        MiscConstants.DOTS_STR + optZ.optTime + MiscConstants.DOTS_STR + optZ.optRateFirstPeriod;
-                    string totalBorrower = Convert.ToInt32(ttlPayForCheck).ToString();
-                    string totalBank = Convert.ToInt32(ttlBankPayPayk).ToString();
-                    string diff = Convert.ToInt32(ttlPayForCheck - ttlBankPayPayk).ToString();
+                    // truncate the numbers
+                    string[] msg2write = {
+                    /*"X: " + */optX.ToString(),
+                    /*"Y: " + */optY.ToString(),
+                    /*"Z: " + */optZ.ToString(),
+                    /*"X_pmt: " +*/ Convert.ToInt32(optX.optPmt).ToString() + ":" +
+                    /*"Y_pmt: " +*/ Convert.ToInt32(optY.optPmt).ToString() + ":" +
+                    /*"Z_pmt: " +*/ Convert.ToInt32(optZ.optPmt).ToString() + "=" +
+                    /*"Ttl_pmt: " +*/ Convert.ToInt32(optX.optPmt + optY.optPmt + optZ.optPmt).ToString(),
+                    /*"X_Ttl: " +*/ Convert.ToInt32(optX.optTtlPay).ToString() + ":" +
+                    /*"Y_Ttl: " +*/ Convert.ToInt32(optY.optTtlPay).ToString() + ":" +
+                    /*"Z_Ttl: " +*/ Convert.ToInt32(optZ.optTtlPay).ToString(),
+                    /*"ttlPay: " +*/ Convert.ToInt32(ttlPayForCheck).ToString(),
+                    /*"X_TtlBank: " +*/ Convert.ToInt32(optXBankTtlPay).ToString() + ":" +
+                    /*"Y_TtlBank: " +*/ Convert.ToInt32(optYBankTtlPay).ToString() + ":" +
+                    /*"Z_TtlBank: " +*/ Convert.ToInt32(optZBankTtlPay).ToString(),
+                    /*"ttlPayBank: " +*/ Convert.ToInt32(ttlBankPayPayk).ToString()
+                    };
 
-                    //add the result to the oredered list
-                    ChosenComposition comp = new ChosenComposition()
-                    { resultX, resultY, resultZ, totalBorrower, totalBank, diff };
-                    comp.SetBorrowerPay(ttlPayForCheck);
-                    comp.SetBankPay(ttlBankPayPayk);
-                    comp.SetBankProfit(Convert.ToInt32(ttlPayForCheck - ttlBankPayPayk));
-
-                    env.listOfSelectedCompositions.Add(comp);
-                    if (env.MaxProfit < Convert.ToInt32(diff))
-                        env.MaxProfit = Convert.ToInt32(diff);
-                    if (env.MaxBankPay < Convert.ToInt32(totalBank))
-                        env.MaxBankPay = Convert.ToInt32(totalBank);
-                    if (0 >= env.MinBorrowerPay)
-                        env.MinBorrowerPay = Convert.ToInt32(totalBorrower);
-                    else if (env.MinBorrowerPay > Convert.ToInt32(totalBorrower))
-                        env.MinBorrowerPay = Convert.ToInt32(totalBorrower);
+                    env.PrintLog2CSV(msg2write);
                 }
+
             }
         }
 
