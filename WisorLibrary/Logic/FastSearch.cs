@@ -69,6 +69,18 @@ namespace WisorLib
                     // Run through each combination possible for three options
                     for (uint combinationCounter = 0; combinationCounter <= CalculationConstants.GetCombination(Share.theMarket).GetUpperBound(0); combinationCounter++)
                     {
+                        // should each combination write a different file
+                        if (Share.ShouldEachCombinationRunSeparetly)
+                        {
+                            string com0 = CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 0];
+                            string com1 = CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 1];
+                            string com2 = CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 2];
+                            string additionalName = MiscConstants.NAME_SEP_CHAR + com0 + MiscConstants.NAME_SEP_CHAR + 
+                                com1 + MiscConstants.NAME_SEP_CHAR + com2 + MiscConstants.NAME_SEP_CHAR;
+                            // change the output file
+                            env.CreateTheOutputFiles(env.theLoan, additionalName);
+                       }
+
                         // Perform three option search for one combination of option types
                         env.CheckInfo.calculationStartTime = DateTime.Now;
                         DefineOptionTypes(combinationCounter, env);
@@ -128,10 +140,12 @@ namespace WisorLib
                     env.CheckInfo.softwareCloseTime = DateTime.Now;
 
                     // Close output file before end.
-                    if (env.PrintOptions.printToOutputFile == true)
-                    {
-                        env.OutputFile.CloseOutputFile(env.CheckInfo);
-                    }
+                    env.OutputFile.WriteToOutputFile("\nCalculation ended at " + env.CheckInfo.softwareCloseTime);
+                    env.OutputFile.WriteToOutputFile("Software runtime " + (env.CheckInfo.softwareCloseTime - env.CheckInfo.softwareOpenTime));
+                    env.OutputFile.WriteToOutputFile("Search runtime " + (env.CheckInfo.softwareCloseTime - env.CheckInfo.searchStartTime));
+
+                    env.CloseTheOutputFiles();
+        
                     if (env.PrintOptions.printMainInConsole == true)
                     {
                         if (ResultsOutput.bestComposition != null)
@@ -141,7 +155,6 @@ namespace WisorLib
                                             + ResultsOutput.bestComposition.opts[(int)Options.options.OPTY].optType
                                             + ResultsOutput.bestComposition.opts[(int)Options.options.OPTZ].optType + " :\n"
                                             + ResultsOutput.bestComposition.ToString());
-
                         }
                         else
                         {

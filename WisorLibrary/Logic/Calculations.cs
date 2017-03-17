@@ -282,7 +282,9 @@ namespace WisorLibrary.Logic
             }
             else
             {
-                throw new System.ArgumentOutOfRangeException("Rate Out of Range");
+                Console.WriteLine("NOTICE: CalculateMonthlyPmt got illegal originalRate: " + originalRate);
+                return 0;
+                //throw new System.ArgumentOutOfRangeException("Rate Out of Range");
             }
         }
         

@@ -188,17 +188,32 @@ namespace WisorLib
                                                         { "PrimeIsrael", "FixedNoTsamudIsrael", "FixedNoTsamudIsrael" },
                                                         { "PrimeIsrael", "FixedTsamudIsrael", "FixedTsamudIsrael" },
                                                         { "PrimeIsrael", "FixedNoTsamudIsrael", "FixedTsamudIsrael" } };
-        
 
+
+
+        //private static readonly string[,] combinationsUSA = {
+        //    //{ "Fixed30yrsUSA", "Fixed15yrsUSA" },
+        //    //{"Fixed20yrsUSA", "7.1ARMUSA" },
+        //    //{ "Fixed20yrsUSA", "Fixed15yrsUSA" }
+        //    /*{ "Fixed30yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" }  , */
+        //    { "Fixed30yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" } /*,
+        //    { "Fixed30yrsUSA", "Fixed20yrsUSA", "5.1ARMUSA" },
+        //    { "Fixed30yrsUSA", "Fixed20yrsUSA", "7.1ARMUSA" },
+        //    { "Fixed30yrsUSA", "Fixed10yrsUSA", "5.1ARMUSA" },
+        //    { "Fixed30yrsUSA", "Fixed10yrsUSA", "7.1ARMUSA" },
+        //    { "Fixed30yrsUSA", "Fixed20yrsUSA", "Fixed15yrsUSA" },
+        //    { "Fixed30yrsUSA", "Fixed20yrsUSA", "Fixed10yrsUSA" } ,
+        //    { "Fixed20yrsUSA", "Fixed15yrsUSA", "Fixed10yrsUSA" },
+        //    { "Fixed30yrsUSA", "Fixed15yrsUSA", "Fixed10yrsUSA" },
+        //    { "Fixed20yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" },
+        //    { "Fixed20yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" } */
+        //};
 
         private static readonly string[,] combinationsUSA = {
-            //{ "Fixed30yrsUSA", "Fixed15yrsUSA" },
-            //{"Fixed20yrsUSA", "7.1ARMUSA" },
-            //{ "Fixed20yrsUSA", "Fixed15yrsUSA" }
-            /*{ "Fixed30yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" }  , */
-            { "Fixed30yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" } /*,
             { "Fixed30yrsUSA", "Fixed20yrsUSA", "5.1ARMUSA" },
             { "Fixed30yrsUSA", "Fixed20yrsUSA", "7.1ARMUSA" },
+            { "Fixed30yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" }  ,
+            { "Fixed30yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" } ,
             { "Fixed30yrsUSA", "Fixed10yrsUSA", "5.1ARMUSA" },
             { "Fixed30yrsUSA", "Fixed10yrsUSA", "7.1ARMUSA" },
             { "Fixed30yrsUSA", "Fixed20yrsUSA", "Fixed15yrsUSA" },
@@ -206,8 +221,17 @@ namespace WisorLib
             { "Fixed20yrsUSA", "Fixed15yrsUSA", "Fixed10yrsUSA" },
             { "Fixed30yrsUSA", "Fixed15yrsUSA", "Fixed10yrsUSA" },
             { "Fixed20yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" },
-            { "Fixed20yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" } */
+            { "Fixed20yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" },
+            { "Fixed30yrsUSA", "Fixed30yrsUSA", "5.1ARMUSA" },
+            { "Fixed30yrsUSA", "Fixed30yrsUSA", "7.1ARMUSA" },
+            { "Fixed30yrsUSA", "Fixed20yrsUSA", "5.1ARMUSA" },
+            { "Fixed30yrsUSA", "Fixed20yrsUSA", "7.1ARMUSA" },
+            { "Fixed20yrsUSA", "Fixed20yrsUSA", "5.1ARMUSA" },
+            { "Fixed20yrsUSA", "Fixed20yrsUSA", "7.1ARMUSA" },
+            { "Fixed15yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" },
+            { "Fixed15yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" } 
         };
+
 
 
         // enum markets { USA, UK, ISRAEL, OTHER , NONE}

@@ -120,8 +120,9 @@ namespace WisorLib
      
         private void CalcTheBankProfit(Option optX, Option optY, Option optZ, RunEnvironment env)
         {
-            if (0 < Share.numberOfPrintResultsInList)
+            if (0 < Share.numberOfPrintResultsInList || Share.ShouldStoreAllCombinations)
             {
+  
                 // Checking lender profit
                 // get the Bank interset value
                 double bankRate = RateUtilities.GetBankRate(optX.product.productID.numberID, BorrowerProfile.borrowerProfile,
@@ -138,7 +139,7 @@ namespace WisorLib
                 double optZBankTtlPay = optZ.GetBankTtlPay();
                 int ttlBankPayPayk = Convert.ToInt32(optXBankTtlPay + optYBankTtlPay + optZBankTtlPay);
                 int ttlPayForCheck = Convert.ToInt32(optX.optTtlPay + optY.optTtlPay + optZ.optTtlPay);
-                          
+
                 string productNameX = GenericProduct.GetProductName(optX.optType);
                 string resultX = productNameX + MiscConstants.DOTS_STR + optX.optAmt +
                     MiscConstants.DOTS_STR + optX.optTime + MiscConstants.DOTS_STR + optX.optRateFirstPeriod;
@@ -152,48 +153,54 @@ namespace WisorLib
                 string totalBank = Convert.ToInt32(ttlBankPayPayk).ToString();
                 string diff = Convert.ToInt32(ttlPayForCheck - ttlBankPayPayk).ToString();
 
-                //add the result to the oredered list
-                ChosenComposition comp = new ChosenComposition()
-                { resultX, resultY, resultZ, totalBorrower, totalBank, diff };
-                comp.SetBorrowerPay(ttlPayForCheck);
-                comp.SetBankPay(ttlBankPayPayk);
-                comp.SetBankProfit(Convert.ToInt32(ttlPayForCheck - ttlBankPayPayk));
+                if (0 < Share.numberOfPrintResultsInList)
+                {
+                    //add the result to the oredered list
+                    ChosenComposition comp = new ChosenComposition()
+                        { resultX, resultY, resultZ, totalBorrower, totalBank, diff };
+                    comp.SetBorrowerPay(ttlPayForCheck);
+                    comp.SetBankPay(ttlBankPayPayk);
+                    comp.SetBankProfit(Convert.ToInt32(ttlPayForCheck - ttlBankPayPayk));
 
-                env.listOfSelectedCompositions.Add(comp);
-                if (env.MaxProfit < Convert.ToInt32(diff))
-                    env.MaxProfit = Convert.ToInt32(diff);
-                if (env.MaxBankPay < Convert.ToInt32(totalBank))
-                    env.MaxBankPay = Convert.ToInt32(totalBank);
-                if (0 >= env.MinBorrowerPay)
-                    env.MinBorrowerPay = Convert.ToInt32(totalBorrower);
-                else if (env.MinBorrowerPay > Convert.ToInt32(totalBorrower))
-                    env.MinBorrowerPay = Convert.ToInt32(totalBorrower);
-        
+                    env.listOfSelectedCompositions.Add(comp);
+                    if (env.MaxProfit < Convert.ToInt32(diff))
+                        env.MaxProfit = Convert.ToInt32(diff);
+                    if (env.MaxBankPay < Convert.ToInt32(totalBank))
+                        env.MaxBankPay = Convert.ToInt32(totalBank);
+                    if (0 >= env.MinBorrowerPay)
+                        env.MinBorrowerPay = Convert.ToInt32(totalBorrower);
+                    else if (env.MinBorrowerPay > Convert.ToInt32(totalBorrower))
+                        env.MinBorrowerPay = Convert.ToInt32(totalBorrower);
+                }
+            
+  
                 if (Share.ShouldStoreAllCombinations)
                 {
                     // truncate the numbers
                     string[] msg2write = {
-                    /*"X: " + */optX.ToString(),
-                    /*"Y: " + */optY.ToString(),
-                    /*"Z: " + */optZ.ToString(),
-                    /*"X_pmt: " +*/ Convert.ToInt32(optX.optPmt).ToString() + ":" +
-                    /*"Y_pmt: " +*/ Convert.ToInt32(optY.optPmt).ToString() + ":" +
-                    /*"Z_pmt: " +*/ Convert.ToInt32(optZ.optPmt).ToString() + "=" +
-                    /*"Ttl_pmt: " +*/ Convert.ToInt32(optX.optPmt + optY.optPmt + optZ.optPmt).ToString(),
-                    /*"X_Ttl: " +*/ Convert.ToInt32(optX.optTtlPay).ToString() + ":" +
-                    /*"Y_Ttl: " +*/ Convert.ToInt32(optY.optTtlPay).ToString() + ":" +
-                    /*"Z_Ttl: " +*/ Convert.ToInt32(optZ.optTtlPay).ToString(),
-                    /*"ttlPay: " +*/ Convert.ToInt32(ttlPayForCheck).ToString(),
-                    /*"X_TtlBank: " +*/ Convert.ToInt32(optXBankTtlPay).ToString() + ":" +
-                    /*"Y_TtlBank: " +*/ Convert.ToInt32(optYBankTtlPay).ToString() + ":" +
-                    /*"Z_TtlBank: " +*/ Convert.ToInt32(optZBankTtlPay).ToString(),
-                    /*"ttlPayBank: " +*/ Convert.ToInt32(ttlBankPayPayk).ToString()
-                    };
+                        /*"X: " + */optX.ToString(),
+                        /*"Y: " + */optY.ToString(),
+                        /*"Z: " + */optZ.ToString(),
+                        /*"X_pmt: " +*/ Convert.ToInt32(optX.optPmt).ToString() + ":" +
+                        /*"Y_pmt: " +*/ Convert.ToInt32(optY.optPmt).ToString() + ":" +
+                        /*"Z_pmt: " +*/ Convert.ToInt32(optZ.optPmt).ToString() + "=" +
+                        /*"Ttl_pmt: " +*/ Convert.ToInt32(optX.optPmt + optY.optPmt + optZ.optPmt).ToString(),
+                        /*"X_Ttl: " +*/ Convert.ToInt32(optX.optTtlPay).ToString() + ":" +
+                        /*"Y_Ttl: " +*/ Convert.ToInt32(optY.optTtlPay).ToString() + ":" +
+                        /*"Z_Ttl: " +*/ Convert.ToInt32(optZ.optTtlPay).ToString(),
+                        /*"ttlPay: " +*/ Convert.ToInt32(ttlPayForCheck).ToString(),
+                        /*"X_TtlBank: " +*/ Convert.ToInt32(optXBankTtlPay).ToString() + ":" +
+                        /*"Y_TtlBank: " +*/ Convert.ToInt32(optYBankTtlPay).ToString() + ":" +
+                        /*"Z_TtlBank: " +*/ Convert.ToInt32(optZBankTtlPay).ToString(),
+                        /*"ttlPayBank: " +*/ Convert.ToInt32(ttlBankPayPayk).ToString()
+                        };
 
-                    env.PrintLog2CSV(msg2write);
+                    env.Logger.PrintLog2CSV(msg2write);
                 }
 
+
             }
+
         }
 
 

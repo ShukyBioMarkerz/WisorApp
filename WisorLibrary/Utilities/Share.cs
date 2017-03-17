@@ -40,6 +40,8 @@ namespace WisorLib
         public static int numberOfPrintResultsInList { get; set; }
         public static int numberOfOption { get; set; }
 
+        public static bool ShouldEachCombinationRunSeparetly { get; set; }
+        
 
         public static int[,] combinations4market;
         public static string[,] combinationsAsString;

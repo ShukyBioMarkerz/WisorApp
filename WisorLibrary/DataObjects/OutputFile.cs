@@ -14,11 +14,13 @@ namespace WisorLib
 
         public string OutputFilename { get; }
 
-        public OutputFile(loanDetails loan, CheckInfo CheckInfo)
+ 
+        public OutputFile(loanDetails loan, string additionalName)
             //string orderid, double loanAmtWanted, double monthlyPmtWanted, CheckInfo CheckInfo, uint sequenceID)
         {
             // get the exact output filename
-            OutputFilename = MiscUtilities.CreateOutputFilename(loan.ID, loan.LoanAmount, loan.DesiredMonthlyPayment, loan.SequentialNumber);
+            OutputFilename = MiscUtilities.CreateOutputFilename(
+                loan.ID, loan.LoanAmount, loan.DesiredMonthlyPayment, loan.SequentialNumber, additionalName);
     
             // TBD: Shuky - ensure the directory realy exists
             if (!Directory.Exists(Path.GetDirectoryName(OutputFilename)))
@@ -34,7 +36,7 @@ namespace WisorLib
             }
 
             WriteToOutputFile("Fast Three Option Check V3.2");
-            WriteToOutputFile("Order ID : " + CheckInfo.orderID);
+            WriteToOutputFile("Order ID : " + loan.ID);
             WriteToOutputFile("Original loan date : " + loan.DateTaken.ToString());
             WriteToOutputFile("Original loan amount : " + loan.OriginalLoanAmount);
             WriteToOutputFile("Remainig loan amount : " + loan.LoanAmount);
@@ -62,13 +64,9 @@ namespace WisorLib
             WriteToOutputFile(lineToWrite);
         }
 
-        public void CloseOutputFile(CheckInfo ci)
+        public void CloseOutputFile()
         {
-            WriteToOutputFile("\nCalculation ended at " + ci.softwareCloseTime);
-            WriteToOutputFile("Software runtime " + (ci.softwareCloseTime - ci.softwareOpenTime));
-            WriteToOutputFile("Search runtime " + (ci.softwareCloseTime - ci.searchStartTime));
             summaryFile.Close();
-
         }
 
         // The only output function 
@@ -77,7 +75,31 @@ namespace WisorLib
             summaryFile.WriteLine(message);
         }
 
-     }
+        public void Remove()
+        {
+            CloseOutputFile();
+
+            try
+            {
+                if (File.Exists(OutputFilename))
+                {
+                    string filenm = System.IO.Path.GetFileNameWithoutExtension(OutputFilename);
+                    string ext = System.IO.Path.GetExtension(OutputFilename);
+                    string dir = System.IO.Path.GetDirectoryName(OutputFilename);
+                    string newfn = dir + System.IO.Path.DirectorySeparatorChar + filenm + "-OLD" + ext;
+
+                    File.Move(OutputFilename, newfn);
+                }
+            }
+            catch (Exception ex)
+            {
+                // TBD use the WindowsUtilities.loggerMethod
+                Console.WriteLine("ERROR: OutputFile File.Delete got Exception from file: " + OutputFilename + ". Exception: " + ex.ToString());
+            }
+        }
+
+
+    }
 }
 
     

@@ -39,7 +39,8 @@ namespace WisorLib
         public static string    LOAN_FILE = "POC Data - Test Run.csv";
         public static string    PRODUCTS_FILE = "MortgageProducts - Updated.xml";
         public static string    CRETIRIA_FILE = "Gui.xml";
-  
+        public static string    LOGGER_FILE = "LOGGER";
+
 
         // Loan parameter
         public const string LOAN_AMOUNT = "Loan amount";
@@ -159,15 +160,17 @@ namespace WisorLib
             return 1;
         }
 
-        public static string CreateOutputFilename(string orderid, double loanAmtWanted, double monthlyPmtWanted, uint sequenceID)
+        public static string CreateOutputFilename(string orderid, double loanAmtWanted, double monthlyPmtWanted, uint sequenceID, string additionalName)
         {
-            string customer = (String.IsNullOrEmpty(Share.CustomerName)) ? "" : (Share.CustomerName + MiscConstants.NAME_SEP_CHAR);
-            string seq = (MiscConstants.UNDEFINED_UINT == sequenceID) ? "" : MiscConstants.SEQ_STR + sequenceID + MiscConstants.SEQ_STR + MiscConstants.NAME_SEP_CHAR;
+            string customer = (String.IsNullOrEmpty(Share.CustomerName)) ? MiscConstants.UNDEFINED_STRING : (Share.CustomerName + MiscConstants.NAME_SEP_CHAR);
+            string seq = (MiscConstants.UNDEFINED_UINT == sequenceID) ? MiscConstants.UNDEFINED_STRING : MiscConstants.SEQ_STR + sequenceID + MiscConstants.SEQ_STR + MiscConstants.NAME_SEP_CHAR;
+            string add = (String.IsNullOrEmpty(additionalName)) ? MiscConstants.UNDEFINED_STRING : MiscConstants.NAME_SEP_CHAR + additionalName + MiscConstants.NAME_SEP_CHAR;
             string fn = AppDomain.CurrentDomain.BaseDirectory // + Path.DirectorySeparatorChar
                 + MiscConstants.OUTPUT_DIR + Path.DirectorySeparatorChar +
                 customer + seq + orderid +
                 MiscConstants.NAME_SEP_CHAR + loanAmtWanted.ToString() + MiscConstants.NAME_SEP_CHAR +
-                monthlyPmtWanted.ToString() + MiscConstants.NAME_SEP_CHAR + DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT;
+                monthlyPmtWanted.ToString() + MiscConstants.NAME_SEP_CHAR + add +
+                DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT;
 
             return fn;
         }
