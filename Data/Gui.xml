@@ -38,7 +38,43 @@
 		<default>785</default>
 		<mandatory>yes</mandatory>
 	</item>
+ <!-- optional -->
+ 
+	<item>
+		<type>TextBox</type>
+		<name>Date Taken</name>
+		<default>3/25/2016</default>
+		<mandatory>yes</mandatory>
+	</item>
+	<item>
+		<type>TextBox</type>
+		<name>Original Rate</name>
+		<default>0.03875</default>
+		<mandatory>yes</mandatory>
+	</item>
+	<item>
+		<type>TextBox</type>
+		<name>Original Time</name>
+		<default>360</default>
+		<mandatory>yes</mandatory>
+	</item>
 
+
+	<item>
+		<type>TextBox</type>
+		<name>DesireTerminationMonth</name>
+		<default>120</default>
+		<mandatory>no</mandatory>
+	</item>
+	<item>
+		<type>TextBox</type>
+		<name>SequentialNumber</name>
+		<default>123</default>
+		<mandatory>no</mandatory>
+	</item>
+
+
+	
 	
 	<item>
 		<type>ComboBox</type>
