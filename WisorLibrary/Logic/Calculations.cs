@@ -27,16 +27,19 @@ namespace WisorLibrary.Logic
             {
                 if (productIndexUsedFirstTimePeriod == 0)
                 {
+                    double bankPmt = CalculatePmt2(optAmt, optTime, rateFirstPeriod, optType, productFirstTimePeriod,
+                         rateFirstPeriod, rateSecondPeriod, indexFirstPeriod, indexSecondPeriod, printOrNo);
                     optTtlPrincipalPay = optAmt;
-                    ttlPay = optTime * Math.Round(optPmt, 2);
+                    ttlPay = optTime * Math.Round(bankPmt, 2);
                     optTtlRatePay = ttlPay - optTtlPrincipalPay;
                 }
                 else
                 {
                     double r = ((rateFirstPeriod / 12 * 100000000) - ((rateFirstPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
                     double i = ((indexFirstPeriod / 12 * 100000000) - ((indexFirstPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
-
-                    double monthlyPmt = Math.Round(optPmt, 2);
+                    double bankPmt = CalculatePmt2(optAmt, optTime, rateFirstPeriod, optType, productFirstTimePeriod,
+                                    rateFirstPeriod, rateSecondPeriod, indexFirstPeriod, indexSecondPeriod, printOrNo);
+                    double monthlyPmt = Math.Round(bankPmt, 2);
                     double startingAmount = optAmt;
 
                     for (int months = 1; months <= optTime; months++)
@@ -51,7 +54,7 @@ namespace WisorLibrary.Logic
                         {
                             monthlyPmt = Math.Round(
                                 CalculatePmt2(startingAmount, (optTime - months), rateFirstPeriod,
-                                optType, optAmt, productFirstTimePeriod,
+                                optType, productFirstTimePeriod,
                                 rateFirstPeriod, rateSecondPeriod,
                                 indexFirstPeriod, indexSecondPeriod, printOrNo), 
                                 2);
@@ -63,8 +66,9 @@ namespace WisorLibrary.Logic
             {
                 double r = ((rateFirstPeriod / 12 * 100000000) - ((rateFirstPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
                 double i = ((indexFirstPeriod / 12 * 100000000) - ((indexFirstPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
-
-                double monthlyPmt = Math.Round(optPmt, 2);
+                double bankPmt = CalculatePmt2(optAmt, optTime, rateFirstPeriod, optType, productFirstTimePeriod,
+                                rateFirstPeriod, rateSecondPeriod, indexFirstPeriod, indexSecondPeriod, printOrNo);
+                double monthlyPmt = Math.Round(bankPmt, 2);
                 double startingAmount = optAmt;
                 rateSecondPeriod = rateFirstPeriod;
                 // TBD Omri
@@ -82,7 +86,7 @@ namespace WisorLibrary.Logic
                     {
                         monthlyPmt = Math.Round(
                             CalculatePmt2(startingAmount, (optTime - months), rateFirstPeriod,
-                            optType, optAmt, productFirstTimePeriod,
+                            optType, productFirstTimePeriod,
                             rateFirstPeriod, rateSecondPeriod,
                             indexFirstPeriod, indexSecondPeriod, printOrNo),
                             2);
@@ -102,7 +106,7 @@ namespace WisorLibrary.Logic
                     {
                         monthlyPmt = Math.Round(
                             CalculatePmt2(startingAmount, (optTime - months), rateSecondPeriod,
-                            optType, optAmt, productFirstTimePeriod,
+                            optType, productFirstTimePeriod,
                             rateFirstPeriod, rateSecondPeriod,
                             indexFirstPeriod, indexSecondPeriod, printOrNo), 
                             2);
@@ -115,7 +119,7 @@ namespace WisorLibrary.Logic
         
 
         public static double CalculatePmt2(double amtForCalc, int timeForCalc, double interestRateForCalc,
-            int optType, double optAmt, int productFirstTimePeriod, 
+            int optType, /*double optAmt,*/ int productFirstTimePeriod, 
             double rateFirstPeriod, double rateSecondPeriod,
             double indexFirstPeriod, double indexSecondPeriod,  bool printOrNo)
         {
@@ -180,7 +184,7 @@ namespace WisorLibrary.Logic
                 {
                     Console.WriteLine("ERROR: CalculatePmt2 Option Type Out of Range");
                 }
-                else if (optAmt <= CalculationConstants.optionMinimumAmount)
+                else if (amtForCalc <= CalculationConstants.optionMinimumAmount)
                 {
                     Console.WriteLine("ERROR: CalculatePmt2 Option Amount Out of Range");
                 }
