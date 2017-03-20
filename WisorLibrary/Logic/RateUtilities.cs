@@ -161,7 +161,8 @@ namespace WisorLibrary.Logic
                 // TBD
                 result = 0.015;
             }
-
+            //Console.WriteLine("--- FindRateForKeyAsNumber key: " + productID.ToString() + ", profile: " 
+            //    + profile + ", index: " + index + ", result: " + result);
             return result;
         }
 
@@ -337,6 +338,8 @@ namespace WisorLibrary.Logic
                 result = MiscConstants.BANK_RATE;
             }
 
+            //Console.WriteLine("--- GetBankRate productID: " + productID.ToString() + ", profile: "
+            //    + profile.ToString() + ", index: " + index + ", result: " + result);
             return result;
         }
 

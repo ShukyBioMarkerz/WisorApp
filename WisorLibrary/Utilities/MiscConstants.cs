@@ -27,6 +27,7 @@ namespace WisorLib
         public static char      COMMA_SEERATOR_STR = ',';
         public static char      DOT_STR = '.';
         public static char      PERCANTAGE_STR = '%';
+        public static char      DOLLAR_STR = '$';
         public static string    CRITERIA_FILENAME = "criteria.txt";
         public static string    OUTPUT_DIR = "Output";
         public static string    DATA_DIR = @"..\..\..\Data";
@@ -34,12 +35,15 @@ namespace WisorLib
         public static string    CSV_EXT = ".csv";
         public static string    DOTS_STR = ":";
         public static string    SEQ_STR = "#";
-        public static string    RATES_FILE = "RateFileGeneric.csv";
-        public static string    BANK_RATES_FILE = "CitiRateMarginGeneric.csv";
-        public static string    LOAN_FILE = "POC Data - Test Run.csv";
+
+        // files to load from
         public static string    PRODUCTS_FILE = "MortgageProducts - Updated.xml";
         public static string    CRETIRIA_FILE = "Gui.xml";
         public static string    LOGGER_FILE = "LOGGER";
+
+        public static string RATES_FILE = "RateFileGeneric Bulk2 60-70.csv"; // "RateFileGeneric.csv";
+        public static string BANK_RATES_FILE = "RateMarginGeneric Bulk2 60-70.csv"; // "CitiRateMarginGeneric.csv";
+        public static string LOAN_FILE = "Citi Test cases Bulk2 60-70.csv"; // "Citi Test cases (2).csv"; // "POC Data - Test Run.csv";
 
 
         // Loan parameter
@@ -162,13 +166,12 @@ namespace WisorLib
 
         public static string CreateOutputFilename(string orderid, double loanAmtWanted, double monthlyPmtWanted, uint sequenceID, string additionalName)
         {
-            string customer = (String.IsNullOrEmpty(Share.CustomerName)) ? MiscConstants.UNDEFINED_STRING : (Share.CustomerName + MiscConstants.NAME_SEP_CHAR);
-            string seq = (MiscConstants.UNDEFINED_UINT == sequenceID) ? MiscConstants.UNDEFINED_STRING : MiscConstants.SEQ_STR + sequenceID + MiscConstants.SEQ_STR + MiscConstants.NAME_SEP_CHAR;
+            string seq = (MiscConstants.UNDEFINED_UINT == sequenceID) ? MiscConstants.UNDEFINED_STRING : MiscConstants.SEQ_STR + sequenceID + MiscConstants.SEQ_STR;
             string add = (String.IsNullOrEmpty(additionalName)) ? MiscConstants.UNDEFINED_STRING : MiscConstants.NAME_SEP_CHAR + additionalName + MiscConstants.NAME_SEP_CHAR;
             string fn = AppDomain.CurrentDomain.BaseDirectory // + Path.DirectorySeparatorChar
                 + MiscConstants.OUTPUT_DIR + Path.DirectorySeparatorChar +
-                customer + seq + orderid +
-                MiscConstants.NAME_SEP_CHAR + loanAmtWanted.ToString() + MiscConstants.NAME_SEP_CHAR +
+                Share.CustomerName + seq + /* orderid + MiscConstants.NAME_SEP_CHAR + */
+                 loanAmtWanted.ToString() + MiscConstants.NAME_SEP_CHAR +
                 monthlyPmtWanted.ToString() + MiscConstants.NAME_SEP_CHAR + add +
                 DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT;
 

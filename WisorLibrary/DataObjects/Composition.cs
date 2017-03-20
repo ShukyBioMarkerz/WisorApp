@@ -7,7 +7,7 @@ using WisorLibrary.Logic;
 
 namespace WisorLib
 {
-    class Composition
+    public class Composition
     {
         // General Parameters
         public Option[] opts = {null, null, null};

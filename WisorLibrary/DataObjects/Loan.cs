@@ -48,7 +48,6 @@ namespace WisorLib
             uint yearlyIncome, uint borrowerAge, uint fic,
             // optional parameters
             DateTime dateTaken,
-            //string originalProduct = MiscConstants.UNDEFINED_STRING, 
             double originalRate = MiscConstants.UNDEFINED_DOUBLE, uint originalTime = MiscConstants.UNDEFINED_UINT,
             uint desireTerminationMonth = MiscConstants.UNDEFINED_UINT,
             uint sequentialNumber = MiscConstants.UNDEFINED_UINT)
@@ -81,7 +80,8 @@ namespace WisorLib
 
             // update the values for the new loan
             LoanAmount = (uint) RemaingLoanAmount;
-            BorrowerAge = 35; //  (uint) 75 - (remaingLoanTime / 12);
+            //  TBD: shoiuld we limit this and in which market 
+            BorrowerAge = 35; // (uint) 75 - (remaingLoanTime / 12);
 
             // DesiredMonthlyPayment can be undefined, calculate it
             if (MiscConstants.UNDEFINED_UINT == DesiredMonthlyPayment)
