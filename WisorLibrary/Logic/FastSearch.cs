@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace WisorLib
@@ -72,9 +73,10 @@ namespace WisorLib
                         // should each combination write a different file
                         if (Share.ShouldEachCombinationRunSeparetly)
                         {
-                            string com0 = CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 0];
-                            string com1 = CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 1];
-                            string com2 = CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 2];
+                            string com0 = Regex.Replace(CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 0], "[^0-9]", ""); 
+                            string com1 = Regex.Replace(CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 1], "[^0-9]", "");
+                            string com2 = Regex.Replace(CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 2], "[^0-9]", "");
+                            // make the name shorten - keep only the numbers
                             string additionalName = MiscConstants.NAME_SEP_CHAR + com0 + MiscConstants.NAME_SEP_CHAR + 
                                 com1 + MiscConstants.NAME_SEP_CHAR + com2 + MiscConstants.NAME_SEP_CHAR;
                             // change the output file
