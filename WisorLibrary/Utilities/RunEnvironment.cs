@@ -20,7 +20,7 @@ namespace WisorLib
 
         public PrintOptions PrintOptions { get; }
 
-        public OutputFile OutputFile { get; internal set; }
+        OutputFile OutputFile { get; set; }
         public List<ChosenComposition> listOfSelectedCompositions { get; set; }
         public List<string> headerOfListOfSelectedCompositions  {  get; }
 
@@ -31,6 +31,8 @@ namespace WisorLib
         public LogCombinationResults Logger  { get; internal set; }
 
         public loanDetails theLoan { get; }
+
+        public ResultsOutput resultsOutput { get; set; }
 
 
         // Hold the entire running environment data
@@ -46,33 +48,53 @@ namespace WisorLib
                     loan.PropertyValue, loan.YearlyIncome, loan.BorrowerAge, loan.fico);
             PrintOptions = new PrintOptions();
 
-            CreateTheOutputFiles(loan);
-        
             listOfSelectedCompositions = new List<ChosenComposition>();
             headerOfListOfSelectedCompositions = new List<string>()
             {
                 "ProductX", "ProductY", "ProductZ", "Borrower pay", "Bank amount", "Profit"
             };
             MaxProfit = MaxBankPay = MinBorrowerPay = 0;
-   
+
+            resultsOutput = new ResultsOutput();
         }
 
         public void CreateTheOutputFiles(loanDetails loan, string additionalName = MiscConstants.UNDEFINED_STRING) {
-            CloseTheOutputFiles();
-
-            OutputFile = new OutputFile(loan, additionalName);
+            // no need to create output file to each composition
+            //CloseTheOutputFiles();
+      
+            if (null == OutputFile)
+            {
+                OutputFile = new OutputFile(loan /*, additionalName*/);
+            }
+    
             // create the combination logger file
             if (Share.ShouldStoreAllCombinations)
             {
-                Logger = new LogCombinationResults(OutputFile.OutputFilename);
+                if (null != Logger)
+                    Logger.CloseLog2CSV();
+                Logger = new LogCombinationResults(OutputFile.OutputFilename, additionalName);
             }
+        }
+
+        public string GetOutputFileName()
+        {
+            return OutputFile.OutputFilename;
+        }
+
+        public void WriteToOutputFile(string msg)
+        {
+            if (null == OutputFile)
+            {
+                CreateTheOutputFiles(theLoan);
+            }
+            OutputFile.WriteToOutputFile(msg);
         }
 
         public void CloseTheOutputFiles()
         {
             if (null != OutputFile)
             {
-                OutputFile.Remove();
+                //OutputFile.Remove();
                 OutputFile.CloseOutputFile();
             }
             //OutputFile = null;
