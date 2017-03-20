@@ -5,6 +5,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using static WisorLib.GenericProduct;
@@ -268,6 +269,13 @@ namespace WisorLib
                             continue;
                         }
 
+                        if (entities.Length != fieldsDef.Count)
+                        {
+                            Console.WriteLine("ERROR: LoadCSVFileData for loans file: " + filename + " is in a wrong syntax.");
+                            WindowsUtilities.loggerMethod("ERROR: LoadCSVFileData for loans file: " + filename + " is in a wrong syntax.");
+                            return loans;
+                        }
+
                         // ensure the line correctness
                         const int INDEX_ADD = 1;
 
@@ -291,54 +299,32 @@ namespace WisorLib
                             // skip the header
                             if (!line.ToLower().Contains(MiscConstants.LOAN_AMOUNT.ToLower()))
                             {
-                                // be prapared for missing data: skip that entry
-                                uint umonthlyPaymentIndexV = MiscConstants.UNDEFINED_UINT;
-                                uint uloanAmountIndexV = Convert.ToUInt32(entities[loanAmountIndex]);
-                                if (MiscConstants.UNDEFINED_INT != monthlyPaymentIndex)
-                                    umonthlyPaymentIndexV = Convert.ToUInt32(entities[monthlyPaymentIndex]);
-                                // be ready to non define proiprty value
-                                if (String.IsNullOrEmpty(entities[propertyValueIndex]))
-                                    continue;
-                                uint upropertyValueIndexV = Convert.ToUInt32(entities[propertyValueIndex]);
-                                int index = entities[yearlyIncomeIndex].IndexOf(MiscConstants.DOT_STR);
-                                string trimed = (0 < index) ? entities[yearlyIncomeIndex].Remove(index) : entities[yearlyIncomeIndex];
-                                uint uyearlyIncomeIndexV = Convert.ToUInt32(trimed);
-                                // age is not mandatory
-
-                                //uint uageIndexV = Convert.ToUInt32(entities[ageIndex]);
-                                uint uageIndexV = INDEX_ADD > ageIndex ? 0 : Convert.ToUInt32(entities[ageIndex]);
-                                uint ficoIndexV = Convert.ToUInt32(entities[ficoIndex]);
-
-                                // optional parameters
-
-                                DateTime dateTakenIndexV = 
-                                    (dateTakenIndex >= entities.Length) ? DateTime.Now : Convert.ToDateTime(entities[dateTakenIndex]);
-                                uint desireTerminationMonthIndexV =
-                                    (desireTerminationMonthIndex >= entities.Length) ? MiscConstants.UNDEFINED_UINT : Convert.ToUInt32(entities[desireTerminationMonthIndex]);
-                                // ensure the bulk have its own sequencial number
-                                uint sequentialNumberIndexV = MiscConstants.UNDEFINED_UINT;
-                                if (sequentialNumberIndex >= entities.Length)
+                                uint uyearlyIncomeIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, yearlyIncomeIndex));
+                                uint uloanAmountIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, loanAmountIndex));
+                                uint umonthlyPaymentIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, monthlyPaymentIndex));
+                                uint upropertyValueIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, propertyValueIndex));
+                                uint uageIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, ageIndex));
+                                uint ficoIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, ficoIndex));
+                                uint desireTerminationMonthIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, desireTerminationMonthIndex));
+                                uint sequentialNumberIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, sequentialNumberIndex));
+                                // clean percantage etc.
+                                double originalRateIndexV = 
+                                    (originalRateIndex >= entities.Length) ? MiscConstants.UNDEFINED_DOUBLE : 
+                                        Convert.ToDouble(CleanupRedundantChars(entities, originalRateIndex, true /*allowDot*/));
+                                uint originalTimeIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, originalTimeIndex));
+                                if (MiscConstants.UNDEFINED_UINT == sequentialNumberIndexV && MiscConstants.UNDEFINED_INT < sequentialNumberIndex)
                                 {
                                     CriteriaField cf = fieldsDef.GetField(MiscConstants.SEQ_NUMBER);
-
-                                    sequentialNumberIndexV = Convert.ToUInt32(cf.value) + (uint) lineNumber;
+                                    sequentialNumberIndexV = Convert.ToUInt32(cf.value) + (uint)lineNumber;
                                 }
-                                else
-                                {
-                                    sequentialNumberIndexV = Convert.ToUInt32(entities[sequentialNumberIndex]);
-                                }
-                                //string originalProductIndexV = 
-                                //    (originalProductIndex >= entities.Length) ? MiscConstants.UNDEFINED_STRING : entities[originalProductIndex];
-                                double originalRateIndexV =
-                                         (originalRateIndex >= entities.Length) ? MiscConstants.UNDEFINED_DOUBLE : Convert.ToDouble(entities[originalRateIndex]);
-                                uint originalTimeIndexV = 
-                                    (originalTimeIndex >= entities.Length) ? MiscConstants.UNDEFINED_UINT : Convert.ToUInt32(entities[originalTimeIndex]);
-
+                        
+                                DateTime dateTakenIndexV = 
+                                    (dateTakenIndex >= entities.Length) ? DateTime.Now : Convert.ToDateTime(entities[dateTakenIndex]);
 
                                 loans.Add(new loanDetails(id.ToString(),
                                     uloanAmountIndexV, umonthlyPaymentIndexV, upropertyValueIndexV, 
                                     uyearlyIncomeIndexV, uageIndexV, ficoIndexV,
-                                    dateTakenIndexV, /*originalProductIndexV,*/ originalRateIndexV, originalTimeIndexV,
+                                    dateTakenIndexV, originalRateIndexV, originalTimeIndexV,
                                     desireTerminationMonthIndexV, sequentialNumberIndexV));
                                 id++;
                             }
@@ -377,7 +363,58 @@ namespace WisorLib
         return loans;
         }
 
-  
+        static string CleanupRedundantChars(string[] entities, int index, bool allowDot = false, string defaultValue = "0")
+        {
+            string value = MiscConstants.UNDEFINED_STRING;
+            if (0 <= index && index < entities.Length)
+            {
+                string trimed;
+                int loc;
+                if (! allowDot)
+                {
+                    loc = entities[index].IndexOf(MiscConstants.DOT_STR);
+                    trimed = (0 <= loc) ? entities[index].Remove(loc) : entities[index];
+                }
+                else
+                {
+                    trimed = entities[index];
+                }
+                loc = trimed.IndexOf(MiscConstants.PERCANTAGE_STR);
+                trimed = (0 <= loc) ? trimed.Remove(loc) : trimed;
+
+                // remove currency symbole
+                string pattern = @"(\p{Sc}\s?)?";
+                Regex rgx = new Regex(pattern);
+                value = rgx.Replace(trimed, "");
+             }
+            else
+            {
+                value = defaultValue;
+            }
+            return value;
+        }
+
+        static uint GetValue(string[] entities, int index)
+        {
+            uint value = MiscConstants.UNDEFINED_UINT;
+            if (0 <= index && index < entities.Length)
+            {
+                int loc = entities[index].IndexOf(MiscConstants.DOT_STR);
+                string trimed = (0 <= loc) ? entities[index].Remove(loc) : entities[index];
+                loc = trimed.IndexOf(MiscConstants.PERCANTAGE_STR);
+                trimed = (0 <= loc) ? trimed.Remove(loc) : trimed;
+
+                // remove currency symbole
+                string pattern = @"(\p{Sc}\s?)?";
+                Regex rgx = new Regex(pattern);
+                string result = rgx.Replace(trimed, "");
+                //loc = trimed.IndexOf(MiscConstants.DOLLAR_STR);
+                //trimed = (0 <= loc) ? trimed.Remove(loc) : trimed;
+                value = Convert.ToUInt32(result);
+            }
+            return value;
+        }
+
 
     }
 }
