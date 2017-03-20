@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace WisorLib
@@ -14,13 +15,14 @@ namespace WisorLib
 
         public string OutputFilename { get; }
 
+        static ReaderWriterLockSlim locker = new ReaderWriterLockSlim();
  
-        public OutputFile(loanDetails loan, string additionalName)
+        public OutputFile(loanDetails loan, string additionalName = MiscConstants.UNDEFINED_STRING)
             //string orderid, double loanAmtWanted, double monthlyPmtWanted, CheckInfo CheckInfo, uint sequenceID)
         {
             // get the exact output filename
             OutputFilename = MiscUtilities.CreateOutputFilename(
-                loan.ID, loan.LoanAmount, loan.DesiredMonthlyPayment, loan.SequentialNumber, additionalName);
+                loan.ID, loan.OriginalLoanAmount, loan.DesiredMonthlyPayment, loan.SequentialNumber, additionalName);
     
             // TBD: Shuky - ensure the directory realy exists
             if (!Directory.Exists(Path.GetDirectoryName(OutputFilename)))
@@ -59,11 +61,7 @@ namespace WisorLib
 
         }
 
-        public void WriteNewLineInSummaryFile(string lineToWrite)
-        {
-            WriteToOutputFile(lineToWrite);
-        }
-
+     
         public void CloseOutputFile()
         {
             summaryFile.Close();
@@ -71,31 +69,39 @@ namespace WisorLib
 
         // The only output function 
         public void WriteToOutputFile(string message)
-        { 
-            summaryFile.WriteLine(message);
+        {
+            try
+            {
+                locker.EnterWriteLock(); 
+                summaryFile.WriteLine(message);
+            }
+            finally
+            {
+                locker.ExitWriteLock();
+            }
         }
 
         public void Remove()
         {
             CloseOutputFile();
 
-            try
-            {
-                if (File.Exists(OutputFilename))
-                {
-                    string filenm = System.IO.Path.GetFileNameWithoutExtension(OutputFilename);
-                    string ext = System.IO.Path.GetExtension(OutputFilename);
-                    string dir = System.IO.Path.GetDirectoryName(OutputFilename);
-                    string newfn = dir + System.IO.Path.DirectorySeparatorChar + filenm + "-OLD" + ext;
+            //try
+            //{
+            //    if (File.Exists(OutputFilename))
+            //    {
+            //        string filenm = System.IO.Path.GetFileNameWithoutExtension(OutputFilename);
+            //        string ext = System.IO.Path.GetExtension(OutputFilename);
+            //        string dir = System.IO.Path.GetDirectoryName(OutputFilename);
+            //        string newfn = dir + System.IO.Path.DirectorySeparatorChar + filenm + "-OLD" + ext;
 
-                    File.Move(OutputFilename, newfn);
-                }
-            }
-            catch (Exception ex)
-            {
-                // TBD use the WindowsUtilities.loggerMethod
-                Console.WriteLine("ERROR: OutputFile File.Delete got Exception from file: " + OutputFilename + ". Exception: " + ex.ToString());
-            }
+            //        File.Move(OutputFilename, newfn);
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    // TBD use the WindowsUtilities.loggerMethod
+            //    Console.WriteLine("ERROR: OutputFile File.Delete got Exception from file: " + OutputFilename + ". Exception: " + ex.ToString());
+            //}
         }
 
 
