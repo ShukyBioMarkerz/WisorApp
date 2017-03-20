@@ -17,16 +17,17 @@ namespace WisorLibrary.DataObjects
         private StreamWriter fileStream;
         private string filename;
 
-        public LogCombinationResults(string outputFilename)
+        public LogCombinationResults(string outputFilename, string additionalName = MiscConstants.UNDEFINED_STRING)
         {
             fileStream = null;
+            string add = (String.IsNullOrEmpty(additionalName)) ? MiscConstants.UNDEFINED_STRING : MiscConstants.NAME_SEP_CHAR + additionalName + MiscConstants.NAME_SEP_CHAR;
 
             if (Share.ShouldStoreAllCombinations)
             {
                 string fn = System.IO.Path.GetFileNameWithoutExtension(outputFilename);
                 string ext = System.IO.Path.GetExtension(outputFilename);
                 string dir = System.IO.Path.GetDirectoryName(outputFilename);
-                filename = dir + System.IO.Path.DirectorySeparatorChar + fn + MiscConstants.NAME_SEP_CHAR + MiscConstants.LOGGER_FILE + ext;
+                filename = dir + System.IO.Path.DirectorySeparatorChar + fn + MiscConstants.NAME_SEP_CHAR + add + MiscConstants.LOGGER_FILE + ext;
 
                 if (!Directory.Exists(Path.GetDirectoryName(filename)))
                     Directory.CreateDirectory(Path.GetDirectoryName(filename));
