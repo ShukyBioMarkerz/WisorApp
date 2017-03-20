@@ -3,15 +3,15 @@
 markets { USA, UK, ISRAEL, OTHER } 
 localMarket
 
-indices { NONE = 0, PRIME, FED, LIBOR, EUROBOR, BBBR, OTHER};
+indices { 0 = 0, PRIME, FED, LIBOR, EUROBOR, BBBR, OTHER};
 indexUsedFirstTimePeriod
 indexUsedSecondTimePeriod
 
-indexJumps { NONE = 0, DAY, WEEK, MONTHS1, MONTHS3, MONTHS6, MONTHS12, MONTHS24, MONTHS30, MONTHS36, MONTHS60, MONTHS84, MONTHS120, OTHER };
+indexJumps { 0 = 0, DAY, WEEK, MONTHS1, MONTHS3, MONTHS6, MONTHS12, MONTHS24, MONTHS30, MONTHS36, MONTHS60, MONTHS84, MONTHS120, OTHER };
 indexJumpFirstTimePeriod
 indexJumpSecondTimePeriod
 
-operators { NONE = 0, PLUS, MINUS, OTHER };
+operators { 0 = 0, PLUS, MINUS, OTHER };
 operatorUsedFirstTimePeriod
 operatorUsedSecondTimePeriod
 
@@ -54,11 +54,11 @@ operatorUsedSecondTimePeriod
 		<name>Fixed 30 yrs</name>
 		<typeId>Fixed30yrsUSA</typeId>
 		
-		<indexUsedFirstTimePeriod>NONE</indexUsedFirstTimePeriod>
-		<indexUsedSecondTimePeriod>NONE</indexUsedSecondTimePeriod>
+		<indexUsedFirstTimePeriod>0</indexUsedFirstTimePeriod>
+		<indexUsedSecondTimePeriod>0</indexUsedSecondTimePeriod>
 		
-		<indexJumpFirstTimePeriod>NONE</indexJumpFirstTimePeriod>
-		<indexJumpSecondTimePeriod>NONE</indexJumpSecondTimePeriod>
+		<indexJumpFirstTimePeriod>0</indexJumpFirstTimePeriod>
+		<indexJumpSecondTimePeriod>0</indexJumpSecondTimePeriod>
 		
 		<minTime>360</minTime>
 		<maxTime>360</maxTime>
@@ -73,11 +73,11 @@ operatorUsedSecondTimePeriod
 		<name>Fixed 25 yrs</name>
 		<typeId>Fixed25yrsUSA</typeId>
 		
-		<indexUsedFirstTimePeriod>NONE</indexUsedFirstTimePeriod>
-		<indexUsedSecondTimePeriod>NONE</indexUsedSecondTimePeriod>
+		<indexUsedFirstTimePeriod>0</indexUsedFirstTimePeriod>
+		<indexUsedSecondTimePeriod>0</indexUsedSecondTimePeriod>
 		
-		<indexJumpFirstTimePeriod>NONE</indexJumpFirstTimePeriod>
-		<indexJumpSecondTimePeriod>NONE</indexJumpSecondTimePeriod>
+		<indexJumpFirstTimePeriod>0</indexJumpFirstTimePeriod>
+		<indexJumpSecondTimePeriod>0</indexJumpSecondTimePeriod>
 
 		<minTime>300</minTime>
 		<maxTime>300</maxTime>
@@ -92,14 +92,14 @@ operatorUsedSecondTimePeriod
 		<name>Fixed 20 yrs</name>
 		<typeId>Fixed20yrsUSA</typeId>
 
-		<indexUsedFirstTimePeriod>NONE</indexUsedFirstTimePeriod>
-		<indexUsedSecondTimePeriod>NONE</indexUsedSecondTimePeriod>
+		<indexUsedFirstTimePeriod>0</indexUsedFirstTimePeriod>
+		<indexUsedSecondTimePeriod>0</indexUsedSecondTimePeriod>
 		
-		<indexJumpFirstTimePeriod>NONE</indexJumpFirstTimePeriod>
-		<indexJumpSecondTimePeriod>NONE</indexJumpSecondTimePeriod>
+		<indexJumpFirstTimePeriod>0</indexJumpFirstTimePeriod>
+		<indexJumpSecondTimePeriod>0</indexJumpSecondTimePeriod>
 		
-		<operatorUsedFirstTimePeriod>NONE</operatorUsedFirstTimePeriod>
-		<operatorUsedSecondTimePeriod>NONE</operatorUsedSecondTimePeriod>
+		<operatorUsedFirstTimePeriod>0</operatorUsedFirstTimePeriod>
+		<operatorUsedSecondTimePeriod>0</operatorUsedSecondTimePeriod>
 
 		<minTime>240</minTime>
 		<maxTime>240</maxTime>
@@ -114,11 +114,11 @@ operatorUsedSecondTimePeriod
 		<name>Fixed 15 yrs</name>
 		<typeId>Fixed15yrsUSA</typeId>
 
-		<indexUsedFirstTimePeriod>NONE</indexUsedFirstTimePeriod>
-		<indexUsedSecondTimePeriod>NONE</indexUsedSecondTimePeriod>
+		<indexUsedFirstTimePeriod>0</indexUsedFirstTimePeriod>
+		<indexUsedSecondTimePeriod>0</indexUsedSecondTimePeriod>
 		
-		<indexJumpFirstTimePeriod>NONE</indexJumpFirstTimePeriod>
-		<indexJumpSecondTimePeriod>NONE</indexJumpSecondTimePeriod>
+		<indexJumpFirstTimePeriod>0</indexJumpFirstTimePeriod>
+		<indexJumpSecondTimePeriod>0</indexJumpSecondTimePeriod>
 
 		<minTime>180</minTime>
 		<maxTime>180</maxTime>
@@ -133,11 +133,11 @@ operatorUsedSecondTimePeriod
 		<name>Fixed 10 yrs</name>
 		<typeId>Fixed10yrsUSA</typeId>
 
-		<indexUsedFirstTimePeriod>NONE</indexUsedFirstTimePeriod>
-		<indexUsedSecondTimePeriod>NONE</indexUsedSecondTimePeriod>
+		<indexUsedFirstTimePeriod>0</indexUsedFirstTimePeriod>
+		<indexUsedSecondTimePeriod>0</indexUsedSecondTimePeriod>
 		
-		<indexJumpFirstTimePeriod>NONE</indexJumpFirstTimePeriod>
-		<indexJumpSecondTimePeriod>NONE</indexJumpSecondTimePeriod>
+		<indexJumpFirstTimePeriod>0</indexJumpFirstTimePeriod>
+		<indexJumpSecondTimePeriod>0</indexJumpSecondTimePeriod>
 
 		<minTime>120</minTime>
 		<maxTime>120</maxTime>
@@ -152,11 +152,11 @@ operatorUsedSecondTimePeriod
 		<name>Fixed 5 yrs</name>
 		<typeId>Fixed5yrsUSA</typeId>
 
-		<indexUsedFirstTimePeriod>NONE</indexUsedFirstTimePeriod>
-		<indexUsedSecondTimePeriod>NONE</indexUsedSecondTimePeriod>
+		<indexUsedFirstTimePeriod>0</indexUsedFirstTimePeriod>
+		<indexUsedSecondTimePeriod>0</indexUsedSecondTimePeriod>
 		
-		<indexJumpFirstTimePeriod>NONE</indexJumpFirstTimePeriod>
-		<indexJumpSecondTimePeriod>NONE</indexJumpSecondTimePeriod>
+		<indexJumpFirstTimePeriod>0</indexJumpFirstTimePeriod>
+		<indexJumpSecondTimePeriod>0</indexJumpSecondTimePeriod>
 		
 		<minTime>60</minTime>
 		<maxTime>60</maxTime>
@@ -335,8 +335,8 @@ operatorUsedSecondTimePeriod
 		<name>Fixed No Tsamud</name>
 		<typeId>FixedNoTsamudIsrael</typeId>
 
-		<indexUsedFirstTimePeriod>NONE</indexUsedFirstTimePeriod>
-		<indexUsedSecondTimePeriod>NONE</indexUsedSecondTimePeriod>
+		<indexUsedFirstTimePeriod>0</indexUsedFirstTimePeriod>
+		<indexUsedSecondTimePeriod>0</indexUsedSecondTimePeriod>
 		
 		<indexJumpFirstTimePeriod>0</indexJumpFirstTimePeriod>
 		<indexJumpSecondTimePeriod>0</indexJumpSecondTimePeriod>
@@ -373,8 +373,8 @@ operatorUsedSecondTimePeriod
 		<name>Fixed No Rate No Tsamud</name>
 		<typeId>FixedNoRateNoTsamudIsrael</typeId>
 
-		<indexUsedFirstTimePeriod>NONE</indexUsedFirstTimePeriod>
-		<indexUsedSecondTimePeriod>NONE</indexUsedSecondTimePeriod>
+		<indexUsedFirstTimePeriod>0</indexUsedFirstTimePeriod>
+		<indexUsedSecondTimePeriod>0</indexUsedSecondTimePeriod>
 		
 		<indexJumpFirstTimePeriod>0</indexJumpFirstTimePeriod>
 		<indexJumpSecondTimePeriod>0</indexJumpSecondTimePeriod>
@@ -470,8 +470,8 @@ operatorUsedSecondTimePeriod
 		<name>Alternate 60 months no tsamud</name>
 		<typeId>Alt60NoTsamudIsrael</typeId>
 
-		<indexUsedFirstTimePeriod>NONE</indexUsedFirstTimePeriod>
-		<indexUsedSecondTimePeriod>NONE</indexUsedSecondTimePeriod>
+		<indexUsedFirstTimePeriod>0</indexUsedFirstTimePeriod>
+		<indexUsedSecondTimePeriod>0</indexUsedSecondTimePeriod>
 		
 		<indexJumpFirstTimePeriod>60</indexJumpFirstTimePeriod>
 		<indexJumpSecondTimePeriod>60</indexJumpSecondTimePeriod>
