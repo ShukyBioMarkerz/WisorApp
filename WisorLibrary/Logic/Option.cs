@@ -377,7 +377,15 @@ namespace WisorLib
         public void SetBankRate(double margin)
         {
             optBankRateFirstPeriod = optRateFirstPeriod - margin;
-            optBankRateSecondPeriod = optRateSecondPeriod - margin;
+            if (-1 == optRateSecondPeriod)
+            {
+                optBankRateSecondPeriod = optBankRateFirstPeriod;
+            }
+            else
+            {
+                optBankRateSecondPeriod = optRateSecondPeriod - margin;
+            }
+            
         }
 
         public double GetBankTtlPay()
