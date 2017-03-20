@@ -151,7 +151,7 @@ namespace WisorLib
         public const double optionMinimumAmount = 40000;
 
         // Jump between amounts for check
-        public const double jumpBetweenAmounts = 200;
+        public const double jumpBetweenAmounts = 1000;
 
         // Minimum Time to take a loan
         public const uint minimumTimeForLoan = 48;
@@ -326,11 +326,17 @@ namespace WisorLib
 
 
 
-    class ResultsOutput
+    public class ResultsOutput
     {
         // Composition saved with mimimum payment
-        public static Composition bestCompositionSoFar = null;
-        public static Composition bestComposition = null;
+        public Composition bestCompositionSoFar { get; set; }
+        public Composition bestComposition { get; set; }
+
+        public ResultsOutput()
+        {
+            bestCompositionSoFar = null;
+            bestComposition = null;
+        }
     }
 
 
