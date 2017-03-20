@@ -47,19 +47,19 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ********************************** Check one point if Total Pay is lower than lowest so far ******************************** //
 
-        private int CheckTotalPay(double pmtForCheck)
+        private int CheckTotalPay(double pmtForCheck, RunEnvironment env)
         {
-            if (ResultsOutput.bestCompositionSoFar == null)
+            if (env.resultsOutput.bestCompositionSoFar == null)
             {
                 return (int)ttlPayRange.SMALLER;
             }
             else
             {
-                if (pmtForCheck < ResultsOutput.bestCompositionSoFar.ttlPay)
+                if (pmtForCheck < env.resultsOutput.bestCompositionSoFar.ttlPay)
                 {
                     return (int)ttlPayRange.SMALLER;
                 }
-                else if (pmtForCheck > ResultsOutput.bestCompositionSoFar.ttlPay)
+                else if (pmtForCheck > env.resultsOutput.bestCompositionSoFar.ttlPay)
                 {
                     return (int)ttlPayRange.LARGER;
                 }
@@ -93,11 +93,11 @@ namespace WisorLib
             // ttlPayForCheck
             
             // 2 - Check total pay if smaller than the lowest so far
-            int ttlPayChecker = CheckTotalPay(ttlPayForCheck);
+            int ttlPayChecker = CheckTotalPay(ttlPayForCheck, env);
             
             if (ttlPayChecker == (int)ttlPayRange.SMALLER)
             {
-                ResultsOutput.bestCompositionSoFar = new Composition(matchingPoint[(int)Options.options.OPTX],
+                env.resultsOutput.bestCompositionSoFar = new Composition(matchingPoint[(int)Options.options.OPTX],
                                                                         matchingPoint[(int)Options.options.OPTY], fixedOptZ, env);
             }
         }
