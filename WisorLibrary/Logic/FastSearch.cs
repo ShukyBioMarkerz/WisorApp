@@ -93,13 +93,14 @@ namespace WisorLib
                         // Print summary to console
                         if (env.PrintOptions.printMainInConsole == true)
                         {
-                            Console.WriteLine("\nDone checking combination - " + 
+                            Console.WriteLine("\nDone checking combination - " + (combinationCounter + 1).ToString() + " out of: " +
+                                (CalculationConstants.GetCombination(Share.theMarket).GetUpperBound(0) + 1) + " : " +
                                 CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 0] + " " +
                                 CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 1] + " " +
                                 CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 2] + " :");
-                            if (ResultsOutput.bestCompositionSoFar != null)
+                            if (env.resultsOutput.bestCompositionSoFar != null)
                             {
-                                Console.WriteLine("\nBest composition so far :\n" + ResultsOutput.bestCompositionSoFar.ToString());
+                                Console.WriteLine("\nBest composition so far :\n" + env.resultsOutput.bestCompositionSoFar.ToString());
                             }
                             else
                             {
@@ -114,47 +115,48 @@ namespace WisorLib
                             //                        + "/" + env.CheckInfo.softwareOpenTime.Year.ToString() + " " + env.CheckInfo.softwareOpenTime.ToShortTimeString() + ":00";
                             //string summaryToFile = "" + env.CheckInfo.fastCheckID.ToString() + "," + env.CheckInfo.orderID + "," + dateCreated + ",";
                             string summaryToFile = null;
-                            if (ResultsOutput.bestCompositionSoFar != null)
+                            if (env.resultsOutput.bestCompositionSoFar != null)
                             {
-                                summaryToFile += ResultsOutput.bestCompositionSoFar.ToString();
+                                summaryToFile += env.resultsOutput.bestCompositionSoFar.ToString();
                             }
                             else
                             {
-                                summaryToFile += (CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 0] + 4)
-                                                    + "," + "," + "," + "," + "," + (CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 1] + 4)
-                                                    + "," + "," + "," + "," + "," + (CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 2] + 4);
+                                summaryToFile += (CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 0])
+                                                    + "," + "," + "," + "," + (CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 1])
+                                                    + "," + "," + "," + "," + (CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 2]);
                             }
-                            env.OutputFile.WriteNewLineInSummaryFile(summaryToFile);
+                            env.WriteToOutputFile(summaryToFile);
                         }
-                        if (ResultsOutput.bestCompositionSoFar != null)
+                        if (env.resultsOutput.bestCompositionSoFar != null)
                         {
-                            if ((ResultsOutput.bestComposition == null) ||
-                                ((ResultsOutput.bestComposition != null) && (ResultsOutput.bestCompositionSoFar.ttlPay < ResultsOutput.bestComposition.ttlPay)))
+                            if ((env.resultsOutput.bestComposition == null) ||
+                                ((env.resultsOutput.bestComposition != null) && (env.resultsOutput.bestCompositionSoFar.ttlPay < env.resultsOutput.bestComposition.ttlPay)))
                             {
-                                ResultsOutput.bestComposition = ResultsOutput.bestCompositionSoFar;
+                                env.resultsOutput.bestComposition = env.resultsOutput.bestCompositionSoFar;
                             }
-                            ResultsOutput.bestCompositionSoFar = null;
+                            env.resultsOutput.bestCompositionSoFar = null;
                         }
                     }
                     // Get end time for software
                     env.CheckInfo.softwareCloseTime = DateTime.Now;
 
                     // Close output file before end.
-                    env.OutputFile.WriteToOutputFile("\nCalculation ended at " + env.CheckInfo.softwareCloseTime);
-                    env.OutputFile.WriteToOutputFile("Software runtime " + (env.CheckInfo.softwareCloseTime - env.CheckInfo.softwareOpenTime));
-                    env.OutputFile.WriteToOutputFile("Search runtime " + (env.CheckInfo.softwareCloseTime - env.CheckInfo.searchStartTime));
+
+                    env.WriteToOutputFile("\nCalculation ended at " + env.CheckInfo.softwareCloseTime);
+                    env.WriteToOutputFile("Software runtime " + (env.CheckInfo.softwareCloseTime - env.CheckInfo.softwareOpenTime));
+                    env.WriteToOutputFile("Search runtime " + (env.CheckInfo.softwareCloseTime - env.CheckInfo.searchStartTime));
 
                     env.CloseTheOutputFiles();
         
                     if (env.PrintOptions.printMainInConsole == true)
                     {
-                        if (ResultsOutput.bestComposition != null)
+                        if (env.resultsOutput.bestComposition != null)
                         {
                             Console.WriteLine("\nBest composition in search is for combination "
-                                            + ResultsOutput.bestComposition.opts[(int)Options.options.OPTX].optType
-                                            + ResultsOutput.bestComposition.opts[(int)Options.options.OPTY].optType
-                                            + ResultsOutput.bestComposition.opts[(int)Options.options.OPTZ].optType + " :\n"
-                                            + ResultsOutput.bestComposition.ToString());
+                                            + env.resultsOutput.bestComposition.opts[(int)Options.options.OPTX].optType
+                                            + env.resultsOutput.bestComposition.opts[(int)Options.options.OPTY].optType
+                                            + env.resultsOutput.bestComposition.opts[(int)Options.options.OPTZ].optType + " :\n"
+                                            + env.resultsOutput.bestComposition.ToString());
                         }
                         else
                         {
@@ -186,7 +188,7 @@ namespace WisorLib
                     "\n, OptionObjectCounter: " + String.Format("{0:#,###,###}", Share.OptionObjectCounter));
             }
 
-            return new RunLoanDetails(env.CheckInfo.orderID, Convert.ToInt32(CanRunCalculation), elapsedMs, env.OutputFile.OutputFilename);
+            return new RunLoanDetails(env.CheckInfo.orderID, Convert.ToInt32(CanRunCalculation), elapsedMs, env.GetOutputFileName());
         } 
 
 
