@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using WisorLib;
 using WisorLibrary.Logic;
+using WisorLibrary.Utilities;
 using static WisorLib.MiscConstants;
 
 namespace WisorLib
@@ -20,6 +21,12 @@ namespace WisorLib
             this.numberID = numberID;
             this.stringTypeId = stringTypeId;
         }
+        public override string ToString()
+        {
+            return ("ProductID name: " + stringTypeId + ", number: " + numberID);
+
+        }
+
     }
 
 
@@ -33,8 +40,8 @@ namespace WisorLib
 
         // Identify the Index used to calculate rate
         // Once Index is identified -> DB has the historical rates -> the final value should be a percentage
-        public indices indexUsedFirstTimePeriod { get; set; }
-        public indices indexUsedSecondTimePeriod { get; set; }
+        public double indexUsedFirstTimePeriod { get; set; }
+        public double indexUsedSecondTimePeriod { get; set; }
 
         // Identify the time between updates of chosen index
         // Once Index is identified -> DB has the historical rates -> the final value should be an number
@@ -76,8 +83,8 @@ namespace WisorLib
             this.productID = productID;
             this.localMarket = localMarket;
             this.name = name;
-            this.indexUsedFirstTimePeriod = indexUsedFirstTimePeriod;
-            this.indexUsedSecondTimePeriod = indexUsedSecondTimePeriod;
+            this.indexUsedFirstTimePeriod = MiscUtilities.GetIndexRateForOption(indexUsedFirstTimePeriod);
+            this.indexUsedSecondTimePeriod = MiscUtilities.GetIndexRateForOption(indexUsedSecondTimePeriod);
             this.indexJumpFirstTimePeriod = indexJumpFirstTimePeriod;
             this.indexJumpSecondTimePeriod = indexJumpSecondTimePeriod;
             this.minTime = minTime;
@@ -85,12 +92,47 @@ namespace WisorLib
             this.timeJump = timeJump;
             this.firstTimePeriod = firstTimePeriod;
             this.maxPercentageOfLoan = maxPercentageOfLoan;
+
+            CheckCorrectness();
          }
 
-     
+        // Alert for illegal values
+        void CheckCorrectness()
+        {
+            string msg = null;
+            if (MiscConstants.UNDEFINED_UINT >= minTime)
+                msg += " Illegal minTime: " + minTime.ToString() + " .";
+            if (MiscConstants.UNDEFINED_UINT >= maxTime)
+                msg += " Illegal maxTime: " + maxTime.ToString() + " .";
+            if (MiscConstants.UNDEFINED_UINT > firstTimePeriod)
+                msg += " Illegal firstTimePeriod: " + firstTimePeriod.ToString() + " .";
+            if (MiscConstants.UNDEFINED_UINT >= timeJump)
+                msg += " Illegal timeJump: " + timeJump.ToString() + " .";
+            if (MiscConstants.UNDEFINED_DOUBLE >= maxPercentageOfLoan)
+                msg += " Illegal maxPercentageOfLoan: " + maxPercentageOfLoan.ToString() + " .";
+            //if (indices.NONE  == indexUsedFirstTimePeriod)
+            //    msg += " Illegal indexUsedFirstTimePeriod: " + indexUsedFirstTimePeriod.ToString() + " .";
+            //if (indices.NONE == indexUsedSecondTimePeriod)
+            //    msg += " Illegal indexUsedSecondTimePeriod: " + indexUsedSecondTimePeriod.ToString() + " .";
+            if (indexJumps.NONE == indexJumpFirstTimePeriod)
+                msg += " Illegal indexJumpFirstTimePeriod: " + indexJumpFirstTimePeriod.ToString() + " .";
+            if (indexJumps.NONE  == indexJumpSecondTimePeriod)
+                msg += " Illegal indexJumpSecondTimePeriod: " + indexJumpSecondTimePeriod.ToString() + " .";
+            if (markets.NONE == localMarket)
+                msg += " Illegal localMarket: " + localMarket.ToString() + " .";
+            
+            if (null != msg)
+            {
+                WindowsUtilities.loggerMethod("ERROR: CheckCorrectness for productID: " + productID.stringTypeId + " found: " + msg);
+                Console.WriteLine("ERROR: CheckCorrectness for productID: " + productID.stringTypeId + " found: " + msg);
+            }
+        }
+
+
         public static ProductsList LoadXMLProductsFile(string filename)
         {
             ProductsList products = new ProductsList();
+            XElement currProduct = null;
 
             // Load only th nneded products according to the combination definition
             try {
@@ -101,6 +143,7 @@ namespace WisorLib
                     // loop all the items in the document
                     foreach (XElement product in from p in doc.Descendants("Product") select p)
                     {
+                        currProduct = product;
                         markets market = (markets)Enum.Parse(typeof(markets), product.Element("market").Value, true);
                         string name = product.Element("name").Value;
                         string typeId = product.Element("typeId").Value;
@@ -123,9 +166,14 @@ namespace WisorLib
                         {
                             ProductID productID = new ProductID(index, typeId);
                             products.Add(index, new GenericProduct(productID /*ID*/, market /*localMarket*/, name,
-                            iftp /*indices*/, istp /*indices*/,
-                            ijftp /*indexJumps*/, ijstp /*indexJumps*/,
-                            minTime, maxTime, timeJump, firstTimePeriod, maxPercentageLoan));
+                                iftp /*indices*/, istp /*indices*/,
+                                ijftp /*indexJumps*/, ijstp /*indexJumps*/,
+                                minTime, maxTime, timeJump, firstTimePeriod, maxPercentageLoan));
+                        }
+                        // the product in the products file does not have rate so ignore it
+                        else
+                        {
+                            //WindowsUtilities.loggerMethod("LoadXMLProductsFile producs: " + typeId + " does not have rate. Ignore it.");
                         }
 
                     }
@@ -137,10 +185,19 @@ namespace WisorLib
             }
             catch(Exception ex)
             {
-                WindowsUtilities.loggerMethod("NOTICE: LoadXMLProductsFile Exception occured: " + ex.ToString());
+                WindowsUtilities.loggerMethod("NOTICE: LoadXMLProductsFile Exception occured: " + ex.ToString() + ", product: " + currProduct.ToString());
             }
 
-            WindowsUtilities.loggerMethod("LoadXMLProductsFile succeffuly load: " + products.Count + " products.");
+            if (null == products || 0 >= products.Count)
+            {
+                WindowsUtilities.loggerMethod("ERROR: failed to load products from file: " + filename);
+                Console.WriteLine("ERROR: failed to load products from file: " + filename);
+            }
+            else
+            {
+                WindowsUtilities.loggerMethod("LoadXMLProductsFile succeffuly load: " + products.Count + " products.");
+                Console.WriteLine("LoadXMLProductsFile succeffuly load: " + products.Count + " products.");
+            }
             Share.theLoadedProducts = products;
             return products;
         }
@@ -189,6 +246,58 @@ namespace WisorLib
 
             return productName;
         }
+
+        // get the product by the unique id
+        public static GenericProduct GetProduct(int id)
+        {
+            GenericProduct product = null;
+            if (null != Share.theLoadedProducts)
+                product = Share.theLoadedProducts.GetProduct(id);
+            else
+                WindowsUtilities.loggerMethod("GetProduct: Share.theLoadedProducts in null!!! ");
+
+            if (null == product)
+            {
+                WindowsUtilities.loggerMethod("GetProduct: failed to find product id: " + id);
+            }
+            else
+            {
+                // TBD: check product correctess
+            }
+
+            return product;
+        }
+
+        // get the product by the name
+        public static GenericProduct GetProductByName(string productName)
+        {
+            GenericProduct product = null;
+            if (null != Share.theLoadedProducts)
+            {
+                foreach (KeyValuePair<int, GenericProduct> p in Share.theLoadedProducts)
+                {
+                    if (p.Value.productID.stringTypeId == productName)
+                    {
+                        product = p.Value;
+                        break;
+                    }
+                }
+            }
+            else
+                WindowsUtilities.loggerMethod("GetProductByName: Share.theLoadedProducts in null!!! ");
+
+            if (null == product)
+            {
+                WindowsUtilities.loggerMethod("GetProductByName: failed to find productName: " + productName);
+            }
+            else
+            {
+                // TBD: check product correctess
+            }
+
+            return product;
+        }
+
     }
 
 

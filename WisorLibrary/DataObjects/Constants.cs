@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WisorLibrary.DataObjects;
+using WisorLibrary.Utilities;
 using static WisorLib.GenericProduct;
 
 namespace WisorLib
@@ -141,14 +143,14 @@ namespace WisorLib
 
 
 
-
+    
     class CalculationConstants
     {
         // Maximum loan amount possible
-        public const double maximumLoanAmount = 5000000;
+        //public const double maximumLoanAmount = 5000000;
 
         // Minimum Amount possible in a single Option
-        public const double optionMinimumAmount = 40000;
+        public const double optionMinimumAmount = 30000; // 40000;
 
         // Jump between amounts for check
         public const double jumpBetweenAmounts = 1000;
@@ -157,7 +159,7 @@ namespace WisorLib
         public const uint minimumTimeForLoan = 48;
 
         // Yearly inflation for calculation
-        public const double inflation = 0.018;
+        //public const double inflation = 0.018;
 
         // Large deviation from target monthly payment
         public const double largeDev = 20.0;
@@ -166,10 +168,10 @@ namespace WisorLib
         public const double smallDev = 1.0;
 
         // Size of Round for fractions - number of digits after decimal
-        public const int fractionRound = 100000000;
+        //public const int fractionRound = 100000000;
 
         // Size of Round for Amounts - number of digits after decimal
-        public const int doubleRound = 100;
+        //public const int doubleRound = 100;
 
         // Borrower profile - Low =1 / Medium = 2 / High = 3
         public enum borrowerProfiles { NOTSET, BEST, VERY_GOOD, GOOD, AVERAGE, NOT_SO_GOOD, BAD, NOTOK };
@@ -181,13 +183,13 @@ namespace WisorLib
         // Omri: define the other markets
         // Should be outside the code
         //public static readonly uint[,] combinations = { { 1, 4, 9 }, { 1, 4, 8 }, { 1, 3, 9 }, { 1, 3, 8 }, { 1, 4, 4 }, { 1, 3, 3 }, { 1, 4, 3 } };
-        private static readonly string[,] combinationsIsrael = { { "PrimeIsrael", "FixedNoTsamudIsrael", "Alt60NoTsamudIsrael" },
-                                                        { "PrimeIsrael", "FixedNoTsamudIsrael", "Alt60TsamudIsrael" }, 
-                                                        { "PrimeIsrael", "FixedTsamudIsrael", "Alt60NoTsamudIsrael" }, 
-                                                        { "PrimeIsrael", "FixedTsamudIsrael", "Alt60TsamudIsrael" }, 
-                                                        { "PrimeIsrael", "FixedNoTsamudIsrael", "FixedNoTsamudIsrael" },
-                                                        { "PrimeIsrael", "FixedTsamudIsrael", "FixedTsamudIsrael" },
-                                                        { "PrimeIsrael", "FixedNoTsamudIsrael", "FixedTsamudIsrael" } };
+        //private static readonly string[,] combinationsIsrael = { { "PrimeIsrael", "FixedNoTsamudIsrael", "Alt60NoTsamudIsrael" },
+        //                                                { "PrimeIsrael", "FixedNoTsamudIsrael", "Alt60TsamudIsrael" }, 
+        //                                                { "PrimeIsrael", "FixedTsamudIsrael", "Alt60NoTsamudIsrael" }, 
+        //                                                { "PrimeIsrael", "FixedTsamudIsrael", "Alt60TsamudIsrael" }, 
+        //                                                { "PrimeIsrael", "FixedNoTsamudIsrael", "FixedNoTsamudIsrael" },
+        //                                                { "PrimeIsrael", "FixedTsamudIsrael", "FixedTsamudIsrael" },
+        //                                                { "PrimeIsrael", "FixedNoTsamudIsrael", "FixedTsamudIsrael" } };
 
 
 
@@ -209,28 +211,29 @@ namespace WisorLib
         //    { "Fixed20yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" } */
         //};
 
-        private static readonly string[,] combinationsUSA = {
-            { "Fixed30yrsUSA", "Fixed20yrsUSA", "5.1ARMUSA" },
-            { "Fixed30yrsUSA", "Fixed20yrsUSA", "7.1ARMUSA" },
-            { "Fixed30yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" }  ,
-            { "Fixed30yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" } ,
-            { "Fixed30yrsUSA", "Fixed10yrsUSA", "5.1ARMUSA" },
-            { "Fixed30yrsUSA", "Fixed10yrsUSA", "7.1ARMUSA" },
-            { "Fixed30yrsUSA", "Fixed20yrsUSA", "Fixed15yrsUSA" },
-            { "Fixed30yrsUSA", "Fixed20yrsUSA", "Fixed10yrsUSA" } ,
-            { "Fixed20yrsUSA", "Fixed15yrsUSA", "Fixed10yrsUSA" },
-            { "Fixed30yrsUSA", "Fixed15yrsUSA", "Fixed10yrsUSA" },
-            { "Fixed20yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" },
-            { "Fixed20yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" },
-            { "Fixed30yrsUSA", "Fixed30yrsUSA", "5.1ARMUSA" },
-            { "Fixed30yrsUSA", "Fixed30yrsUSA", "7.1ARMUSA" },
-            { "Fixed30yrsUSA", "Fixed20yrsUSA", "5.1ARMUSA" },
-            { "Fixed30yrsUSA", "Fixed20yrsUSA", "7.1ARMUSA" },
-            { "Fixed20yrsUSA", "Fixed20yrsUSA", "5.1ARMUSA" },
-            { "Fixed20yrsUSA", "Fixed20yrsUSA", "7.1ARMUSA" },
-            { "Fixed15yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" },
-            { "Fixed15yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" } 
-        };
+        //private static readonly string[,] combinationsUSA = {
+        //    { "Fixed30yrsUSA", "Fixed20yrsUSA", "5.1ARMUSA" },
+        //    { "Fixed30yrsUSA", "Fixed20yrsUSA", "7.1ARMUSA" },
+        //    { "Fixed30yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" }  ,
+        //    { "Fixed30yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" } ,
+        //    { "Fixed30yrsUSA", "Fixed10yrsUSA", "5.1ARMUSA" },
+        //    { "Fixed30yrsUSA", "Fixed10yrsUSA", "7.1ARMUSA" },
+        //    { "Fixed30yrsUSA", "Fixed20yrsUSA", "Fixed15yrsUSA" },
+        //    { "Fixed30yrsUSA", "Fixed20yrsUSA", "Fixed10yrsUSA" } ,
+        //    { "Fixed20yrsUSA", "Fixed15yrsUSA", "Fixed10yrsUSA" },
+        //    { "Fixed30yrsUSA", "Fixed15yrsUSA", "Fixed10yrsUSA" },
+        //    { "Fixed20yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" },
+        //    { "Fixed20yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" },
+        //    //{ "Fixed30yrsUSA", "Fixed30yrsUSA", "5.1ARMUSA" },
+        //    //{ "Fixed30yrsUSA", "Fixed30yrsUSA", "7.1ARMUSA" },
+        //    //{ "Fixed30yrsUSA", "Fixed20yrsUSA", "5.1ARMUSA" },
+        //    //{ "Fixed30yrsUSA", "Fixed20yrsUSA", "7.1ARMUSA" },
+        //    //{ "Fixed20yrsUSA", "Fixed20yrsUSA", "5.1ARMUSA" },
+        //    //{ "Fixed20yrsUSA", "Fixed20yrsUSA", "7.1ARMUSA" },
+        //    //{ "Fixed15yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" },
+        //    //{ "Fixed15yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" } 
+        //    { "3.1ARMUSA", "5.1ARMUSA", "10.1ARMUSA" }
+        //};
 
 
 
@@ -239,21 +242,23 @@ namespace WisorLib
         {
             string[,] combination = { { } };
 
-            switch (market)
-            {
-                case markets.ISRAEL:
-                    combination = combinationsIsrael;
-                    break;
-                case markets.UK:
-                    //combination = combinationsIsrael;
-                    break;
-                case markets.USA:
-                    combination = combinationsUSA;
-                    break;
-                default:
-                    WindowsUtilities.loggerMethod("ERROR: no combination founded for market: " + market.ToString());
-                    break;
-            }
+            combination = MiscUtilities.GetCombination(market);
+
+            //switch (market)
+            //{
+            //    case markets.ISRAEL:
+            //        combination = combinationsIsrael;
+            //        break;
+            //    case markets.UK:
+            //        //combination = combinationsIsrael;
+            //        break;
+            //    case markets.USA:
+            //        combination = combinationsUSA;
+            //        break;
+            //    default:
+            //        WindowsUtilities.loggerMethod("ERROR: no combination founded for market: " + market.ToString());
+            //        break;
+            //}
             return combination;
         }
 

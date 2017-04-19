@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WisorLibrary.Logic;
+using WisorLibrary.Utilities;
 using static WisorLib.FileUtils;
+using static WisorLib.MiscConstants;
 
 namespace WisorLib
 {
@@ -43,6 +45,8 @@ namespace WisorLib
         //public double InterestRate { get; set; }
         //public PaymentType PaymentType { get; set; }
 
+        public Risk risk { set; get; }
+        public Liquidity liquidity { set; get; }
 
         public loanDetails(string id, uint loanAmount, uint desiredMonthlyPayment, uint propertyValue,
             uint yearlyIncome, uint borrowerAge, uint fic,
@@ -50,8 +54,9 @@ namespace WisorLib
             DateTime dateTaken,
             double originalRate = MiscConstants.UNDEFINED_DOUBLE, uint originalTime = MiscConstants.UNDEFINED_UINT,
             uint desireTerminationMonth = MiscConstants.UNDEFINED_UINT,
-            uint sequentialNumber = MiscConstants.UNDEFINED_UINT)
-         {
+            uint sequentialNumber = MiscConstants.UNDEFINED_UINT,
+            Risk risk = Risk.NONERisk, Liquidity liquidity = Liquidity.NONELiquidity)
+        {
             ID = id;
             PropertyValue = propertyValue;
             DesiredMonthlyPayment = desiredMonthlyPayment;
@@ -69,24 +74,33 @@ namespace WisorLib
 
             int monthOfDateLoanTaken = DateTaken.Month;
             int yearOfDateLoanTaken = DateTaken.Year;
+            uint remaingLoanTime = MiscConstants.UNDEFINED_UINT;
             //int optionType = GenericProduct.GetProductIndex(OriginalProduct);
 
-            uint remaingLoanTime;
-            RemaingLoanAmount = Calculations.CalculateRemainingAmount((double) LoanAmount, OriginalTime, /*optionType,*/
-                 (uint) monthOfDateLoanTaken, (uint) yearOfDateLoanTaken, OriginalRate,
-                 (double) 0 /*originalInflation*/, (double) 0 /*interestPaidSoFar*/, (double) 0 /*totalPaidSoFar*/,
-                 (double) 0 /*principalPaidSoFar*/, out remaingLoanTime);
-            RemaingLoanTime = remaingLoanTime;
+            if (DateTime.Now == dateTaken || /*MiscConstants.UNDEFINED_DOUBLE == originalRate ||*/
+                MiscConstants.UNDEFINED_UINT == originalTime)
+            {
+                // nothing to calculate
+            }
+            else
+            {
+                RemaingLoanAmount = Calculations.CalculateRemainingAmount((double)LoanAmount, OriginalTime, /*optionType,*/
+                     (uint)monthOfDateLoanTaken, (uint)yearOfDateLoanTaken, OriginalRate,
+                     (double)0 /*originalInflation*/, (double)0 /*interestPaidSoFar*/, (double)0 /*totalPaidSoFar*/,
+                     (double)0 /*principalPaidSoFar*/, out remaingLoanTime);
+                RemaingLoanTime = remaingLoanTime;
 
-            // update the values for the new loan
-            LoanAmount = (uint) RemaingLoanAmount;
-            //  TBD: shoiuld we limit this and in which market 
-            BorrowerAge = 35; // (uint) 75 - (remaingLoanTime / 12);
+                // update the values for the new loan
+                LoanAmount = (uint)RemaingLoanAmount;
+                BorrowerAge = (uint) 75 - (remaingLoanTime / 12);
+            }
+            //  TBD: should we limit this in each market 
+            //BorrowerAge = 65; //  (uint) 75 - (remaingLoanTime / 12);
 
             // DesiredMonthlyPayment can be undefined, calculate it
             if (MiscConstants.UNDEFINED_UINT == DesiredMonthlyPayment)
             {
-                DesiredMonthlyPayment = MiscConstants.CalculateMonthlyPayment(loanAmount, propertyValue, yearlyIncome, borrowerAge);
+                DesiredMonthlyPayment = MiscUtilities.CalculateMonthlyPayment(loanAmount, propertyValue, yearlyIncome, borrowerAge);
             }
             //    MortgageType = mortgageType;
             //    PaymentType = paymentType;
@@ -95,6 +109,8 @@ namespace WisorLib
             //    InterestRate = interestRate;
             //    TermInYears = termInYears;
             //    CreditClass = creditClass;
+            this.risk = risk;
+            this.liquidity = liquidity;
         }
 
         public override string ToString()

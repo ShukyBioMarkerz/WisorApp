@@ -18,6 +18,8 @@ namespace WisorLib
 
         public CalculationParameters CalculationParameters { get; }
 
+        public BorrowerProfile BorrowerProfile { get; }
+
         public PrintOptions PrintOptions { get; }
 
         OutputFile OutputFile { get; set; }
@@ -34,6 +36,8 @@ namespace WisorLib
 
         public ResultsOutput resultsOutput { get; set; }
 
+        public Composition bestDiffComposition, bestBankComposition, bestBorrowerComposition;
+
 
         // Hold the entire running environment data
         public RunEnvironment(loanDetails loan)
@@ -46,6 +50,10 @@ namespace WisorLib
             CheckInfo = new CheckInfo(OrderID);
             CalculationParameters = new CalculationParameters(loan.LoanAmount, loan.DesiredMonthlyPayment,
                     loan.PropertyValue, loan.YearlyIncome, loan.BorrowerAge, loan.fico);
+
+            // Set borrower risk profile for choosing interest rates
+            BorrowerProfile = new BorrowerProfile(loan.fico);
+
             PrintOptions = new PrintOptions();
 
             listOfSelectedCompositions = new List<ChosenComposition>();
@@ -58,13 +66,13 @@ namespace WisorLib
             resultsOutput = new ResultsOutput();
         }
 
-        public void CreateTheOutputFiles(loanDetails loan, string additionalName = MiscConstants.UNDEFINED_STRING) {
+        public void CreateTheOutputFiles(loanDetails loan, int borrowerProfile, string additionalName = MiscConstants.UNDEFINED_STRING) {
             // no need to create output file to each composition
             //CloseTheOutputFiles();
       
             if (null == OutputFile)
             {
-                OutputFile = new OutputFile(loan /*, additionalName*/);
+                OutputFile = new OutputFile(loan, borrowerProfile /*, additionalName*/);
             }
     
             // create the combination logger file
@@ -78,6 +86,10 @@ namespace WisorLib
 
         public string GetOutputFileName()
         {
+            if (null == OutputFile)
+            {
+                CreateTheOutputFiles(theLoan, BorrowerProfile.profile);
+            }
             return OutputFile.OutputFilename;
         }
 
@@ -85,7 +97,7 @@ namespace WisorLib
         {
             if (null == OutputFile)
             {
-                CreateTheOutputFiles(theLoan);
+                CreateTheOutputFiles(theLoan, BorrowerProfile.profile);
             }
             OutputFile.WriteToOutputFile(msg);
         }
@@ -116,9 +128,11 @@ namespace WisorLib
                 WindowsUtilities.loggerMethod("ERROR: no combination founded for market: " + market.ToString());
             }
             else
+            {
                 rc = true;
-            WindowsUtilities.loggerMethod("NOTICE: running for market: " + market.ToString() + ", #of combination: " + combination.GetUpperBound(0));
-            Console.WriteLine("NOTICE: running for market: " + market.ToString() + ", #of combination: " + combination.Length);
+                WindowsUtilities.loggerMethod("NOTICE: running for market: " + market.ToString() + ", #of combination: " + combination.Length);
+                Console.WriteLine("NOTICE: running for market: " + market.ToString() + ", #of combination: " + combination.Length);
+            }
             return rc;
         }
 

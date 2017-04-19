@@ -15,10 +15,12 @@ namespace WisorLibrary.Utilities
         /// <summary>
         /// Read the loans from excel file
         /// </summary>
-        static string[] excelLines;
+        
+        static bool ShouldRemoveFractions;
 
         private static string[] OpenExcelFile(string filename)
         {
+            string[] excelLines = null;
 
             try
             {
@@ -64,14 +66,10 @@ namespace WisorLibrary.Utilities
             return excelLines;
         }
 
-        public static string[] GetLinesFromFile(string filename)
+        public static string[] GetLinesFromFile(string filename, bool shouldRemoveFractions = true)
         {
-            string[] lines = excelLines;
-
-            if (null == excelLines)
-            {
-                lines = OpenExcelFile(filename);
-            }
+            ShouldRemoveFractions = shouldRemoveFractions;
+            string[] lines = OpenExcelFile(filename);
             return lines;
         }
 
@@ -82,6 +80,7 @@ namespace WisorLibrary.Utilities
             int pos = 0;
             List<string> lines = new List<string>();
             //int lineNumber = 1;
+            DateTime dateValue;
 
             //Data Reader methods
             foreach (DataTable table in dataset.Tables)
@@ -91,14 +90,22 @@ namespace WisorLibrary.Utilities
                     line = null;
                     for (int j = 0; j < table.Columns.Count; j++)
                     {
+                        var v = table.Rows[i].ItemArray[j];
                         if (0 < table.Rows[i].ItemArray[j].ToString().Length)
                         {
                             // avoid the fraction area
-                            pos = table.Rows[i].ItemArray[j].ToString().IndexOf(MiscConstants.DOT_STR);
-                            if (0 < pos)
-                                line += table.Rows[i].ItemArray[j].ToString().Remove(pos) + MiscConstants.COMMA_SEERATOR_STR;
-                            else
-                                line += table.Rows[i].ItemArray[j].ToString() + MiscConstants.COMMA_SEERATOR_STR;
+                            if (! DateTime.TryParse(table.Rows[i].ItemArray[j].ToString(), out dateValue))
+                            {
+                                if (ShouldRemoveFractions)
+                                    pos = table.Rows[i].ItemArray[j].ToString().IndexOf(MiscConstants.DOT_STR);
+                                else
+                                    pos = 0;
+
+                                if (0 < pos)
+                                    line += table.Rows[i].ItemArray[j].ToString().Remove(pos).Trim() + MiscConstants.COMMA_SEERATOR_STR;
+                                else
+                                    line += table.Rows[i].ItemArray[j].ToString() + MiscConstants.COMMA_SEERATOR_STR;
+                            }
                         }
                     }
                     //Console.WriteLine("Excel line is: " + line);

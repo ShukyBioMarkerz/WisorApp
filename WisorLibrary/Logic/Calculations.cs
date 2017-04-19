@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WisorLib;
+using WisorLibrary.DataObjects;
+using WisorLibrary.Utilities;
 using static WisorLib.MiscConstants;
 
 namespace WisorLibrary.Logic
@@ -11,7 +13,7 @@ namespace WisorLibrary.Logic
     class Calculations
     {
         public static double CalculateLuahSilukin2(double rateFirstPeriod, double rateSecondPeriod, 
-            int productFirstTimePeriod, indices productIndexUsedFirstTimePeriod,
+            int productFirstTimePeriod, /*indices*/ double productIndexUsedFirstTimePeriod,
             double optAmt, int optTime, double optPmt, 
             double indexFirstPeriod, double indexSecondPeriod, int optType, bool printOrNo
             //,out double ttlPay
@@ -162,6 +164,7 @@ namespace WisorLibrary.Logic
                 else if (currInterest > 0)
                 {
                     double r = ((currInterest / 12 * 100000000) - ((currInterest / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
+                    // TBD - suspected as performance bottleneck
                     double calcPow = Math.Pow((1 + r), timeForCalc);
                     double monthlyPmt = ((amtForCalc * (1 + i)) * (r * calcPow) / (calcPow - 1));
                     monthlyPmt = ((monthlyPmt * 100000) - ((monthlyPmt * 100000) % 1)) / 100000; // Instead of Math.Round
@@ -174,7 +177,7 @@ namespace WisorLibrary.Logic
                 }
                 else
                 {
-                    Console.WriteLine("ERROR: CalculatePmt2 Rate Out of Range");
+                    Console.WriteLine("ERROR: CalculatePmt2 Rate Out of Range. currInterest: " + currInterest);
                 }
 
             }
@@ -350,5 +353,143 @@ namespace WisorLibrary.Logic
 
         }
 
+        private static double CalculateLuahSilukinSoFar2(indices indices,
+            double originalRate, double originalInflation,
+            double originalLoanAmount, uint originalLoanTime,
+            uint monthOfDateLoanTaken, uint yearOfDateLoanTaken,
+            double interestPaidSoFar, double totalPaidSoFar,
+            double firstMonthlyPMT, double principalPaidSoFar, out uint remaingLoanTime)
+        {
+            double historicRate = MiscUtilities.GetHistoricIndexRateForOption(indices, yearOfDateLoanTaken, monthOfDateLoanTaken);
+
+            double r = ((originalRate / 12 * 100000000) - ((originalRate / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
+            double i = ((originalInflation / 12 * 100000000) - ((originalInflation / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
+
+            double monthlyPmt = Math.Round(firstMonthlyPMT, 2);
+            double startingAmount = originalLoanAmount;
+
+            int numOfMonths = CalculateTimeLoops(monthOfDateLoanTaken, yearOfDateLoanTaken);
+  
+            remaingLoanTime = originalLoanTime;
+
+            for (int m = 0; m < numOfMonths; m++)
+            {
+                remaingLoanTime--;
+                double ratePmt = Math.Round((startingAmount * (1 + i) * r), 2);
+                double principalPmt = monthlyPmt - ratePmt;
+                principalPaidSoFar += principalPmt;
+                interestPaidSoFar += ratePmt;
+                totalPaidSoFar += monthlyPmt;
+                startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
+
+                monthlyPmt = Math.Round(CalculateMonthlyPmt(startingAmount, (uint)(originalLoanTime - m+1),
+                /*originalRate,*/ originalRate, originalInflation), 2);
+            }
+
+            return startingAmount;
+        }
+
+
+        private static int CalculateTimeLoops(uint Month, uint Year)
+        {
+            int months = ((DateTime.Now.Year * 12) + DateTime.Now.Month) - (((int)Year * 12) + (int)Month);
+            return months;
+        }
+
+
+
+
+        // The maximun and minimum amounts is calculated now by the Risk and Liquidity scores of the user
+        public static MinMax FindMinMaxAmount(double loanAmtWanted, OneOptType optType, Risk risk, 
+            Liquidity liquidity, double prevMin)
+        {
+            RiskLiquidityValue riskLiquidityValue = new RiskLiquidityValue();
+            riskLiquidityValue.liquidity = liquidity; 
+            riskLiquidityValue.risk = risk; 
+            riskLiquidityValue.productID = optType.product.productID;
+            bool rc = false;
+            MinMax minmax = new MinMax();
+
+            if (Risk.NONERisk == risk || Liquidity.NONELiquidity == liquidity)
+            {
+                // keep the old good stuff...
+                minmax.max = (int) (Calculations.FindMaxAmount(loanAmtWanted, optType) / 100 * 100);
+                minmax.min = (int) prevMin; // ... don't touch
+                //Console.WriteLine("FindMinMaxAmount no risk or liquidity for product: " + optType.product.productID.ToString());
+            }
+            else
+            {
+                rc = MiscUtilities.FindRiskLiquidity(riskLiquidityValue);
+                if (rc)
+                {
+                    // should calculate the loan values according to the percantage
+                    minmax.min = (int)(loanAmtWanted * riskLiquidityValue.min / 100 * 100);
+                    minmax.max = (int)(loanAmtWanted * riskLiquidityValue.max / 100 * 100);
+                }
+                else
+                    Console.WriteLine("TestRiskLiquidity failed for: " + riskLiquidityValue.ToString());
+            }
+ 
+            return minmax;
+        }
+
+        private static double FindMaxAmount(double loanAmountTemp, OneOptType optType)
+        {
+            double loanAmount = loanAmountTemp;
+            OneOptType optTypeForTest = optType;
+            int numOfFixedOptions = 2;
+            double result = MiscConstants.UNDEFINED_DOUBLE;
+
+            // Omri - need the maxPercentageOfLoan value
+            if (optTypeForTest.product.maxPercentageOfLoan < 100)
+            {
+                if ((((loanAmount * optTypeForTest.product.maxPercentageOfLoan / 100) / 100) - (((loanAmount * optTypeForTest.product.maxPercentageOfLoan / 100) / 100) % 1)) % 2 == 1)
+                    result = ((((loanAmount * optTypeForTest.product.maxPercentageOfLoan / 100 / 100) - ((loanAmount * optTypeForTest.product.maxPercentageOfLoan / 100 / 100) % 1)) - 1) * 100);
+                else
+                    result = (((loanAmount * optTypeForTest.product.maxPercentageOfLoan / 100 / 100) - ((loanAmount * optTypeForTest.product.maxPercentageOfLoan / 100 / 100) % 1)) * 100);
+
+                if (((loanAmount - (numOfFixedOptions * CalculationConstants.optionMinimumAmount))) < result)
+                    result = ((loanAmount - (numOfFixedOptions * CalculationConstants.optionMinimumAmount)));
+            }
+            else
+            {
+                result = ((loanAmount - (numOfFixedOptions * CalculationConstants.optionMinimumAmount)));
+            }
+
+            return result;
+        }
+
+
+        //////////////////////////////////////
+
+        public static void CalculateTheBankProfit(Option optionX, Option optionY, Option optionZ, int profile)
+        {
+            // get the Bank interset value
+            double bankRate = RateUtilities.GetBankRate(optionX.product.productID.numberID,
+                profile, (int)optionX.optTime / 12 - 4);
+            optionX.SetBankRate(bankRate);
+            bankRate = RateUtilities.GetBankRate(optionY.product.productID.numberID,
+                profile, (int)optionY.optTime / 12 - 4);
+            optionY.SetBankRate(bankRate);
+            bankRate = RateUtilities.GetBankRate(optionZ.product.productID.numberID,
+                profile, (int)optionZ.optTime / 12 - 4);
+            optionZ.SetBankRate(bankRate);
+        }
+
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class MinMax
+    {
+        public int min { get; set; }
+        public int max { get; set; }
+
+        public MinMax()
+        {
+            min = MiscConstants.UNDEFINED_INT;
+            max = MiscConstants.UNDEFINED_INT;
+        }
     }
 }

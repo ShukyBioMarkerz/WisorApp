@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using WisorLibrary.Utilities;
 using static WisorLib.GenericProduct;
+using static WisorLib.MiscConstants;
 
 namespace WisorLib
 {
@@ -186,9 +187,11 @@ namespace WisorLib
                 //int originalProductIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_PRODUCT);
                 int originalRateIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_RATE);
                 int originalTimeIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_TIME);
+                int riskIndex = fieldsDef.GetIndexOf(MiscConstants.RISK_VALUE);
+                int liquidityIndex = fieldsDef.GetIndexOf(MiscConstants.LIQUIDITY_VALUE);
 
                 if (MiscConstants.UNDEFINED_INT < loanAmountIndex /*&& INDEX_ADD <= monthlyPaymentIndex*/ && MiscConstants.UNDEFINED_INT < propertyValueIndex &&
-                    MiscConstants.UNDEFINED_INT < yearlyIncomeIndex && INDEX_ADD < ficoIndex)
+                    MiscConstants.UNDEFINED_INT < yearlyIncomeIndex /*&& INDEX_ADD < ficoIndex*/)
                 {
                     uint uyearlyIncomeIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, yearlyIncomeIndex));
                     uint uloanAmountIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, loanAmountIndex));
@@ -210,29 +213,36 @@ namespace WisorLib
                     }
 
                     DateTime dateTakenIndexV =
-                        (dateTakenIndex >= entities.Length) ? DateTime.Now : Convert.ToDateTime(entities[dateTakenIndex]);
+                        (0 > dateTakenIndex || dateTakenIndex >= entities.Length) ? DateTime.Now : 
+                        Convert.ToDateTime(entities[dateTakenIndex]);
+
+                    Risk risk = Risk.NONERisk; // (Risk)Enum.Parse(typeof(Risk), CleanupRedundantChars(entities, riskIndex), true);
+                    Liquidity liquidity = Liquidity.NONELiquidity; // (Liquidity)Enum.Parse(typeof(Liquidity), CleanupRedundantChars(entities, liquidityIndex), true);
+
+                    if (0 < sequentialNumberIndexV)
+                        id = (int) sequentialNumberIndexV;
 
                     loans.Add(new loanDetails(id.ToString(),
                         uloanAmountIndexV, umonthlyPaymentIndexV, upropertyValueIndexV,
                         uyearlyIncomeIndexV, uageIndexV, ficoIndexV,
                         dateTakenIndexV, originalRateIndexV, originalTimeIndexV,
-                        desireTerminationMonthIndexV, sequentialNumberIndexV));
+                        desireTerminationMonthIndexV, sequentialNumberIndexV, risk, liquidity));
                     id++;
                     
                 }
                 else
                 {
                     string err = null;
-                    if (INDEX_ADD > loanAmountIndex)
+                    if (0 > loanAmountIndex)
                         err += " illegal loanAmountIndex value: " + loanAmountIndex.ToString();
-                    if (INDEX_ADD > monthlyPaymentIndex)
+                    if (0 > monthlyPaymentIndex)
                         err += " illegal monthlyPaymentIndex value: " + monthlyPaymentIndex.ToString();
-                    if (INDEX_ADD > propertyValueIndex)
+                    if (0 > propertyValueIndex)
                         err += " illegal propertyValueIndex value: " + propertyValueIndex.ToString();
-                    if (INDEX_ADD > yearlyIncomeIndex)
+                    if (0 > yearlyIncomeIndex)
                         err += " illegal yearlyIncomeIndex value: " + yearlyIncomeIndex.ToString();
-                    if (INDEX_ADD > ageIndex)
-                        err += " illegal ageIndex value: " + ageIndex.ToString();
+                    //if (INDEX_ADD > ageIndex)
+                    //    err += " illegal ageIndex value: " + ageIndex.ToString();
 
                     WindowsUtilities.loggerMethod("NOTICE: LoadLoans file: illegal index of the mandatory parameters. Probably missing some cretiria. " + err);
                 }

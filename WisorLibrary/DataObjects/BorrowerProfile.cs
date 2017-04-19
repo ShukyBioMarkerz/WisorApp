@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static WisorLib.CalculationConstants;
 
 namespace WisorLib
 {
-    class BorrowerProfile
+    public class BorrowerProfile
     {
         // Borrower Index
-        public static int borrowerProfile = (int)CalculationConstants.borrowerProfiles.NOTSET;
+        public /* static */ int profile = (int)CalculationConstants.borrowerProfiles.NOTSET;
 
         // General Parameters
         // Local market
@@ -20,30 +21,43 @@ namespace WisorLib
         // End of Israel only
 
  
-        public BorrowerProfile(RunEnvironment env)
+           // handle borrower class with FICO or class 
+
+        public BorrowerProfile(uint ficoScore)
         {
             // get the profile from the fico store
-            uint ficoScore = env.CalculationParameters.fico;
-            if ((0 < ficoScore) && (550 >= ficoScore))
+            //uint ficoScore = env.CalculationParameters.fico;
+            // TBD: this is hugly but short - in order to enable using FICO and class (1-6), once recognize as 1-6 it means the exact class and not fico...
+            if (0 <= ficoScore && ficoScore < Enum.GetValues(typeof(borrowerProfiles)).Length)
             {
-                borrowerProfile = (int)CalculationConstants.borrowerProfiles.AVERAGE;
-            }
-            else if ((550 < ficoScore) && (650 >= ficoScore))
-            {
-                borrowerProfile = (int)CalculationConstants.borrowerProfiles.GOOD;
-            }
-            else if ((650 < ficoScore) && (750 >= ficoScore))
-            {
-                borrowerProfile = (int)CalculationConstants.borrowerProfiles.VERY_GOOD;
-            }
-            else if ((750 < ficoScore) && (850 >= ficoScore))
-            {
-                borrowerProfile = (int)CalculationConstants.borrowerProfiles.BEST;
+                profile = (int)Enum.Parse(typeof(borrowerProfiles), ficoScore.ToString(), true);
             }
             else
             {
-                // Should happen...
-                borrowerProfile = (int)CalculationConstants.borrowerProfiles.NOTOK;
+                if ((0 < ficoScore) && (550 >= ficoScore))
+                {
+                    profile = (int)CalculationConstants.borrowerProfiles.AVERAGE;
+                }
+                else if ((550 < ficoScore) && (650 >= ficoScore))
+                {
+                    profile = (int)CalculationConstants.borrowerProfiles.GOOD;
+                }
+                else if ((650 < ficoScore) && (750 >= ficoScore))
+                {
+                    profile = (int)CalculationConstants.borrowerProfiles.VERY_GOOD;
+                }
+                else if ((750 < ficoScore) && (850 >= ficoScore))
+                {
+                    profile = (int)CalculationConstants.borrowerProfiles.BEST;
+                }
+                else
+                {
+                    // Should happen...
+                    profile = (int)CalculationConstants.borrowerProfiles.NOTOK;
+
+                    // TBD. to be on the safe side
+                    profile = (int)CalculationConstants.borrowerProfiles.AVERAGE;
+                }
             }
          }
 
@@ -53,7 +67,7 @@ namespace WisorLib
         
         public int ShowBorrowerProfile()
         {
-            return borrowerProfile;
+            return profile;
         }
 
     }

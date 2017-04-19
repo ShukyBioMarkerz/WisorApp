@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using WisorLibrary.Utilities;
 
 namespace WisorLib
 {
@@ -17,7 +18,7 @@ namespace WisorLib
 
         static ReaderWriterLockSlim locker = new ReaderWriterLockSlim();
  
-        public OutputFile(loanDetails loan, string additionalName = MiscConstants.UNDEFINED_STRING)
+        public OutputFile(loanDetails loan, int borrowerProfile, string additionalName = MiscConstants.UNDEFINED_STRING)
             //string orderid, double loanAmtWanted, double monthlyPmtWanted, CheckInfo CheckInfo, uint sequenceID)
         {
             // get the exact output filename
@@ -37,15 +38,27 @@ namespace WisorLib
                 Console.WriteLine("ERROR: OutputFile got Exception: " + e.ToString());
             }
 
-            WriteToOutputFile("Fast Three Option Check V3.2");
-            WriteToOutputFile("Order ID : " + loan.ID);
+            //WriteToOutputFile("Fast Three Option Check V3.2");
+            WriteToOutputFile("Wisor: The next best practice in mortgage lending");
+            WriteToOutputFile("\nLoan information:");
+            //WriteToOutputFile("Order ID : " + loan.ID);
             WriteToOutputFile("Original loan date : " + loan.DateTaken.ToString());
             WriteToOutputFile("Original loan amount : " + loan.OriginalLoanAmount);
+            uint amount = loan.OriginalLoanAmount - loan.LoanAmount;
+            WriteToOutputFile("Down payment amount : " + amount);
+            WriteToOutputFile("Remaing loan time : " + loan.RemaingLoanTime);
             WriteToOutputFile("Remainig loan amount : " + loan.LoanAmount);
-            
+             WriteToOutputFile("Monthly payment wanted : " + loan.DesiredMonthlyPayment);
+            WriteToOutputFile("Property value : " + loan.PropertyValue);
+
+            WriteToOutputFile("\nBorrower information:");
+            WriteToOutputFile("Youngest borrower age: " + loan.BorrowerAge);
+            WriteToOutputFile("Total monthly gross income: " + loan.YearlyIncome);
+            WriteToOutputFile("Borrower credit score : " + CalculationConstants.profiles[borrowerProfile]);
+
             //WriteToOutputFile("Execution ID : " + CheckInfo.fastCheckID);
-            //WriteToOutputFile("Borrower profile : " + CalculationConstants.profiles[BorrowerProfile.borrowerProfile]);
-            WriteToOutputFile("Start time : " + DateTime.Now);
+            //WriteToOutputFile("Start time : " + DateTime.Now);
+            WriteToOutputFile("\nComposition list:");
 
             // Shuky - add the header line 
             WriteToOutputFile(/*"Ticks" + "," + "OrderID" + "," + "Time" + "," +*/
@@ -57,7 +70,7 @@ namespace WisorLib
                 "," + "OPTZ-optTtlPay" + "," + "ttlPay" +
                 // bank profit data
                 "," + "X:BankTtlPay" + "," + "Y:BankTtlPay" + "," + "Z:BankTtlPay" +
-                "," + "TtlBankPayPay" + "," + "TtlBankProfit");
+                "," + "TtlBankPay" + "," + "TtlBankProfit");
 
         }
 

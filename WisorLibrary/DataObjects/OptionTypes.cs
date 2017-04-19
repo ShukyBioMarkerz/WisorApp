@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WisorLibrary.DataObjects;
+using WisorLibrary.Logic;
+using static WisorLib.GenericProduct;
 
 namespace WisorLib
 {
@@ -46,7 +49,7 @@ namespace WisorLib
 
         public OneOptType(int optionType)
         {
-            product = MiscConstants.GetProduct(optionType);
+            product = GenericProduct.GetProduct(optionType);
             if (null == product)
                 WindowsUtilities.loggerMethod("ERROR OneOptType can't find product id: " + optionType);
         }
@@ -152,8 +155,8 @@ namespace WisorLib
             optionTypes[(int)Options.options.OPTY] = new OneOptType(optYType);
             optionTypes[(int)Options.options.OPTZ] = new OneOptType(optZType);
             GetAgeRestriction(env);
-            GetMaxAmountsForThreeOptions(env);
-        }
+            GetMinMaxAmountsForThreeOptions(env);
+         }
 
 
 
@@ -183,9 +186,12 @@ namespace WisorLib
             {
                 Console.WriteLine("\nMaximum time possible = " + (env.CalculationParameters.maximumTimeForLoan / 12));
             }
-            //GetAgeRestrictionOneOption(optionTypes[(int)Options.options.OPTX], env);
-            //GetAgeRestrictionOneOption(optionTypes[(int)Options.options.OPTY], env);
-            //GetAgeRestrictionOneOption(optionTypes[(int)Options.options.OPTZ], env);
+            if (markets.ISRAEL == Share.theMarket)
+            {
+                GetAgeRestrictionOneOption(optionTypes[(int)Options.options.OPTX], env);
+                GetAgeRestrictionOneOption(optionTypes[(int)Options.options.OPTY], env);
+                GetAgeRestrictionOneOption(optionTypes[(int)Options.options.OPTZ], env);
+            }
         }
 
 
@@ -194,39 +200,39 @@ namespace WisorLib
 
         // ******************************************** Get Maximum Time For One Option *********************************************** //
 
-        //private static void GetAgeRestrictionOneOption(OneOptType optTypeForCheck, RunEnvironment env)
-        //{
-        //    //Console.WriteLine("Option type = " + optTypeForCheck.typeId);
-        //    //Console.ReadKey();
+        private static void GetAgeRestrictionOneOption(OneOptType optTypeForCheck, RunEnvironment env)
+        {
+            //Console.WriteLine("Option type = " + optTypeForCheck.typeId);
+            //Console.ReadKey();
 
-        //    uint remainingTimePossible;
-        //    if (0 < optTypeForCheck.product.timeJump)
-        //    {
-        //        remainingTimePossible = env.CalculationParameters.maximumTimeForLoan - (env.CalculationParameters.maximumTimeForLoan % optTypeForCheck.product.timeJump);
-        //    }
-        //    else
-        //    {
-        //        remainingTimePossible = env.CalculationParameters.maximumTimeForLoan;
-        //    }
+            uint remainingTimePossible;
+            if (0 < optTypeForCheck.product.timeJump)
+            {
+                remainingTimePossible = env.CalculationParameters.maximumTimeForLoan - (env.CalculationParameters.maximumTimeForLoan % optTypeForCheck.product.timeJump);
+            }
+            else
+            {
+                remainingTimePossible = env.CalculationParameters.maximumTimeForLoan;
+            }
 
-        //    if (optTypeForCheck.product.maxTime > optTypeForCheck.product.minTime)
-        //    {
-        //        if (remainingTimePossible >= optTypeForCheck.product.maxTime)
-        //            optTypeForCheck.product.maxTime = remainingTimePossible;
-        //    }
+            if (optTypeForCheck.product.maxTime > optTypeForCheck.product.minTime)
+            {
+                if (remainingTimePossible >= optTypeForCheck.product.maxTime)
+                    optTypeForCheck.product.maxTime = remainingTimePossible;
+            }
 
 
 
-        //    if (env.PrintOptions.printSubFunctionsInConsole == true)
-        //    {
-        //        Console.WriteLine("Option Type = " + optTypeForCheck.product.name + "\nMaximum time for option type = " + optTypeForCheck.product.maxTime
-        //                            + "\nMaximum time possible for loaner = " + env.CalculationParameters.maximumTimeForLoan
-        //                            + "\nNew maximum time for option type = " + remainingTimePossible);
-        //    }
+            if (env.PrintOptions.printSubFunctionsInConsole == true)
+            {
+                Console.WriteLine("Option Type = " + optTypeForCheck.product.name + "\nMaximum time for option type = " + optTypeForCheck.product.maxTime
+                                    + "\nMaximum time possible for loaner = " + env.CalculationParameters.maximumTimeForLoan
+                                    + "\nNew maximum time for option type = " + remainingTimePossible);
+            }
 
-        //    //optTypeForCheck.product.maxTime = remainingTimePossible;
+            optTypeForCheck.product.maxTime = remainingTimePossible;
 
-        //}
+        }
 
 
 
@@ -235,15 +241,40 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ***************************************** Finding Maximum Amounts For All Options ****************************************** //
 
-        private void GetMaxAmountsForThreeOptions(RunEnvironment env)
+        private void GetMinMaxAmountsForThreeOptions(RunEnvironment env)
         {
-            env.CalculationParameters.maxAmts[(int)Options.options.OPTX] = FindMaxAmount(env.CalculationParameters.loanAmtWanted,
-                                                                optionTypes[(int)Options.options.OPTX]);
-            env.CalculationParameters.maxAmts[(int)Options.options.OPTY] = FindMaxAmount(env.CalculationParameters.loanAmtWanted,
-                                                                            optionTypes[(int)Options.options.OPTY]);
-            env.CalculationParameters.maxAmts[(int)Options.options.OPTZ] = FindMaxAmount(env.CalculationParameters.loanAmtWanted,
-                                                                            optionTypes[(int)Options.options.OPTZ]);          
-        }
+            MinMax minmax = Calculations.FindMinMaxAmount(
+                env.CalculationParameters.loanAmtWanted, optionTypes[(int)Options.options.OPTX], 
+                env.theLoan.risk, env.theLoan.liquidity,
+                env.CalculationParameters.minAmts[(int)Options.options.OPTX]);
+            if (null != minmax)
+            {
+                env.CalculationParameters.minAmts[(int)Options.options.OPTX] = minmax.min;
+                env.CalculationParameters.maxAmts[(int)Options.options.OPTX] = minmax.max;
+            }
+
+            minmax = Calculations.FindMinMaxAmount(
+                env.CalculationParameters.loanAmtWanted, optionTypes[(int)Options.options.OPTY],
+                env.theLoan.risk, env.theLoan.liquidity,
+                env.CalculationParameters.minAmts[(int)Options.options.OPTY]);
+            if (null != minmax)
+            {
+                env.CalculationParameters.minAmts[(int)Options.options.OPTY] = minmax.min;
+                env.CalculationParameters.maxAmts[(int)Options.options.OPTY] = minmax.max;
+            }
+
+            minmax = Calculations.FindMinMaxAmount(
+                    env.CalculationParameters.loanAmtWanted, optionTypes[(int)Options.options.OPTZ],
+                    env.theLoan.risk, env.theLoan.liquidity,
+                    env.CalculationParameters.minAmts[(int)Options.options.OPTZ]);
+            if (null != minmax)
+            {
+                env.CalculationParameters.minAmts[(int)Options.options.OPTZ] = minmax.min;
+                env.CalculationParameters.maxAmts[(int)Options.options.OPTZ] = minmax.max;
+            }
+
+            // TBD: ensure the sum produce the loan ...
+       }
 
 
         // **************************************************************************************************************************** //
@@ -264,33 +295,11 @@ namespace WisorLib
 
         // **************************************************************************************************************************** //
         // *********************************** Finding Maximum Amount According to Option Type **************************************** //
-        
-            // Omri TBD
 
-         
-        private static double FindMaxAmount(double loanAmountTemp, OneOptType optType)
-        {
-            double loanAmount = loanAmountTemp;
-            OneOptType optTypeForTest = optType;
-            int numOfFixedOptions = 2;
-            double result = MiscConstants.UNDEFINED_DOUBLE;
+        // Omri TBD
 
 
-            // Omri - need the maxPercentageOfLoan value
-            if (optTypeForTest.product.maxPercentageOfLoan < 100)
-            {
-                if ((((loanAmount * optTypeForTest.product.maxPercentageOfLoan / 100) / 100) - (((loanAmount * optTypeForTest.product.maxPercentageOfLoan / 100) / 100) % 1)) % 2 == 1)
-                    result = ((((loanAmount * optTypeForTest.product.maxPercentageOfLoan / 100 / 100) - ((loanAmount * optTypeForTest.product.maxPercentageOfLoan / 100 / 100) % 1)) - 1) * 100);
-                else
-                    result = (((loanAmount * optTypeForTest.product.maxPercentageOfLoan / 100 / 100) - ((loanAmount * optTypeForTest.product.maxPercentageOfLoan / 100 / 100) % 1)) * 100);
-            }
-            else
-            {
-                result = ((loanAmount - (numOfFixedOptions * CalculationConstants.optionMinimumAmount)));
-            }
-
-            return result;
-        }
+     
     }
 
 }

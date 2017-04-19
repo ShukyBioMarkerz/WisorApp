@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using WisorLibrary.Utilities;
 
 namespace WisorLib
 {
@@ -34,6 +35,9 @@ namespace WisorLib
 
         public RunLoanDetails runSearch()
         {
+            // write the PDF document
+            //PDFUtilities.WriteFile();
+
             long elapsedMs = 0;
 
             if (CanRunCalculation)
@@ -46,16 +50,13 @@ namespace WisorLib
                     Console.WriteLine("\n\tBegin Fast Three Option Check - Version 3.2.1\n\tSoftware Started at " + env.CheckInfo.softwareOpenTime
                                         + "\n\tAll Rights Reserved - Wisor Technologies Ltd. 2014-2015 \n");
                 }
-   
-                // Set borrower risk profile for choosing interest rates
-                BorrowerProfile bp = new BorrowerProfile(env);
 
-                if (bp.ShowBorrowerProfile() == (int)CalculationConstants.borrowerProfiles.NOTOK)
+                if (env.BorrowerProfile.ShowBorrowerProfile() == (int)CalculationConstants.borrowerProfiles.NOTOK)
                 {
-                    Console.WriteLine("\nBorrower profile not ok - closing software.");
+                    Console.WriteLine("\nBorrower profile not ok - check yourself....");
                 }
-                else
-                {
+                //else
+                //{
                     if (env.PrintOptions.printMainInConsole == true)
                     {
                         Console.WriteLine("\nLoan Amount = " + env.CalculationParameters.loanAmtWanted + "\nTarget monthly payment = "
@@ -66,7 +67,7 @@ namespace WisorLib
                         
                     }
                     env.CheckInfo.searchStartTime = DateTime.Now;
-
+                    
                     // Run through each combination possible for three options
                     for (uint combinationCounter = 0; combinationCounter <= CalculationConstants.GetCombination(Share.theMarket).GetUpperBound(0); combinationCounter++)
                     {
@@ -80,11 +81,13 @@ namespace WisorLib
                             string additionalName = MiscConstants.NAME_SEP_CHAR + com0 + MiscConstants.NAME_SEP_CHAR + 
                                 com1 + MiscConstants.NAME_SEP_CHAR + com2 + MiscConstants.NAME_SEP_CHAR;
                             // change the output file
-                            env.CreateTheOutputFiles(env.theLoan, additionalName);
+                            env.CreateTheOutputFiles(env.theLoan, env.BorrowerProfile.profile, additionalName);
                        }
 
                         // Perform three option search for one combination of option types
                         env.CheckInfo.calculationStartTime = DateTime.Now;
+
+                        // Set the search range by the user' Risk and Liquidity
                         DefineOptionTypes(combinationCounter, env);
                         Console.WriteLine();
                         ThreeOptionSearch search = new ThreeOptionSearch(env.CalculationParameters.minAmts[(int)Options.options.OPTX],
@@ -138,18 +141,37 @@ namespace WisorLib
                             }
                             env.resultsOutput.bestCompositionSoFar = null;
                         }
+
+                        // store the best composition from the borrower and the bank sides
+                        // env.resultsOutput.bestComposition should be the same as env.bestBorrowerComposition
+                        Composition borrowerBestC = env.resultsOutput.bestComposition;
+                        Composition borrowerC = env.bestBorrowerComposition;
+                        Composition bankC = env.bestBankComposition; 
                     }
+
                     // Get end time for software
                     env.CheckInfo.softwareCloseTime = DateTime.Now;
 
                     // Close output file before end.
+                    // write the best composition founded
+                    env.WriteToOutputFile("\n\nMaxProfit: " + env.MaxProfit + ", MaxBankPay: " + env.MaxBankPay + ", MinBorrowerPay: " + env.MinBorrowerPay);
+                    if (null != env.bestDiffComposition)
+                        env.WriteToOutputFile("\nBest bank profit composition:\n" + env.bestDiffComposition.ToString());
+                    if (null != env.bestBankComposition)
+                        env.WriteToOutputFile("Best bank payment composition:\n" + env.bestBankComposition.ToString());
+                    if (null != env.bestBorrowerComposition)
+                        env.WriteToOutputFile("Best borrower composition:\n" + env.bestBorrowerComposition.ToString());
 
                     env.WriteToOutputFile("\nCalculation ended at " + env.CheckInfo.softwareCloseTime);
                     env.WriteToOutputFile("Software runtime " + (env.CheckInfo.softwareCloseTime - env.CheckInfo.softwareOpenTime));
                     env.WriteToOutputFile("Search runtime " + (env.CheckInfo.softwareCloseTime - env.CheckInfo.searchStartTime));
 
                     env.CloseTheOutputFiles();
-        
+
+                    // write the PDF document
+                    //PDFUtilities.WriteFile();
+
+
                     if (env.PrintOptions.printMainInConsole == true)
                     {
                         if (env.resultsOutput.bestComposition != null)
@@ -169,7 +191,7 @@ namespace WisorLib
                     }
 
 
-                }
+                //}
 
             } // CanRunCalculation
             else

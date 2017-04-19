@@ -181,7 +181,7 @@ namespace WisorLib
                 if (printOrNo == true)
                 {
                     Console.WriteLine("Option Type: " + opt.optType + " , Amount= " + opt.optAmt + " , Time = "
-                                        + opt.optTime + " , Rate = " + (opt.ShowRate() * 100) + " - PMT = " + opt.optPmt
+                                        + opt.optTime + " , Rate = " + (opt.ShowRate(env.BorrowerProfile.profile) * 100) + " - PMT = " + opt.optPmt
                                         + "\nMidCell = " + midCell + " | MidValue = " + midValue);
                 }
                 if (midPmt < (targetOneOptPmt - CalculationConstants.largeDev))  // No exact match, time saved is middle cell

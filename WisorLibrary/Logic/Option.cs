@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using WisorLibrary.Logic;
+using WisorLibrary.Utilities;
 using static WisorLib.MiscConstants;
 
 namespace WisorLib
@@ -50,13 +51,14 @@ namespace WisorLib
             optAmt = optionAmount;
             optTime = optionTime;
 
-            product = MiscConstants.GetProduct(optionType);
+            product = GenericProduct.GetProduct(optionType);
             bool rc = GetInflationsForOption(optType);
 
-            optRateFirstPeriod = FindInterestRate();
+            optRateFirstPeriod = FindInterestRate(env.BorrowerProfile.profile);
             if (-1 == optRateFirstPeriod)
             {
                 // TBD: Uston we have a problem
+                Console.WriteLine("Option optRateFirstPeriod is -1. optionType: " + optionType + ", optionAmount: " + optionAmount + ", optionTime: " + optionTime);
             }
             optPmt = CalculatePmt(optAmt, optTime, optRateFirstPeriod, env);
         }
@@ -77,18 +79,20 @@ namespace WisorLib
         private bool GetInflationsForOption(int id)
         {
             bool rc = false;
-            GenericProduct product = GetProduct(id);
+            GenericProduct product = GenericProduct.GetProduct(id);
             if (null != product)
             {
-                indices indexUsedFirstTimePeriod = product.indexUsedFirstTimePeriod;
-                indices indexUsedSecondTimePeriod = product.indexUsedSecondTimePeriod;
-                indexFirstPeriod = MiscConstants.GetIndexRateForOption(indexUsedFirstTimePeriod);
-                indexSecondPeriod = MiscConstants.GetIndexRateForOption(indexUsedSecondTimePeriod);
+                //indices indexUsedFirstTimePeriod = product.indexUsedFirstTimePeriod;
+                //indices indexUsedSecondTimePeriod = product.indexUsedSecondTimePeriod;
+                //indexFirstPeriod = MiscUtilities.GetIndexRateForOption(indexUsedFirstTimePeriod);
+                //indexSecondPeriod = MiscUtilities.GetIndexRateForOption(indexUsedSecondTimePeriod);
+                indexFirstPeriod = product.indexUsedFirstTimePeriod;
+                indexSecondPeriod = product.indexUsedSecondTimePeriod;
                 rc = true;
             }
             else
             {
-                WindowsUtilities.loggerMethod("GetInflationsForOption: failed to find product id: " + id);
+                //WindowsUtilities.loggerMethod("GetInflationsForOption: failed to find product id: " + id);
                 indexFirstPeriod = indexSecondPeriod = ILLEGAL_RATE_VALUE;
             }
             return rc;
@@ -101,7 +105,7 @@ namespace WisorLib
         // ***************************** Calculating Interest Rate According to Option Type and Option Time *************************** //
 
         // get the rate by the product, the borrower profile and time
-        private double FindInterestRate()
+        private double FindInterestRate(int borrowerProfile)
         {
             double rate = MiscConstants.UNDEFINED_DOUBLE;
 
@@ -109,7 +113,7 @@ namespace WisorLib
             {
                 // Instead of looking for product in local class -> lookup via xml
                 // Go to local Rates class, lookup value and plug in
-                 rate = Rates.FindRateForKey(product.productID.numberID, BorrowerProfile.borrowerProfile, (int)optTime/12-4);
+                 rate = Rates.FindRateForKey(product.productID.numberID, borrowerProfile, (int)optTime/12-4);
             }
             else
             {
@@ -134,13 +138,13 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // *************************************************** Show Interest Rate ***************************************************** //
 
-        public double ShowRate()
+        public double ShowRate(int borrowerProfile)
         {
             if ((optTime >= CalculationConstants.minimumTimeForLoan) && (MiscConstants.UNDEFINED_INT != optType))
             {
                 if (optRateFirstPeriod == -1)
                 {
-                    optRateFirstPeriod = FindInterestRate();
+                    optRateFirstPeriod = FindInterestRate(borrowerProfile);
                     return optRateFirstPeriod;
                 }
                 else if (optRateFirstPeriod >= 0)
@@ -269,7 +273,7 @@ namespace WisorLib
   
         private void CalculateLuahSilukin(double rateFirstPeriod, double rateSecondPeriod, out double ttlPay, RunEnvironment env)
         {
-            //Console.WriteLine("CalculateLuahSilukin product.firstTimePeriod: " + product.firstTimePeriod);
+            //Console.WriteLine("CalculateLuahSilukin product type: " + product.name);
             ttlPay = 0;
             Interlocked.Add(ref Share.CalculateLuahSilukinCounter, 1);
             //env.CalculateLuahSilukinCounter++;
@@ -299,6 +303,12 @@ namespace WisorLib
                         optTtlPrincipalPay += principalPmt;
                         optTtlRatePay += ratePmt;
                         ttlPay += monthlyPmt;
+
+                        //Console.WriteLine(months + " - " + startingAmount.ToString() + " - " + r.ToString() + " - " +
+                        //                    i.ToString() + " - " + ratePmt.ToString() + " - " +
+                        //                    principalPmt.ToString() + " - " + monthlyPmt + " - " +
+                        //                    ttlPay.ToString());
+
                         startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
                         if (months < optTime)
                         {
@@ -385,6 +395,11 @@ namespace WisorLib
             {
                 optBankRateSecondPeriod = optRateSecondPeriod - margin;
             }
+
+            if (0 > optBankRateFirstPeriod || 0 > optBankRateSecondPeriod)
+            {
+                Console.WriteLine("NOTICE: SetBankRate illegal value to optBankRateFirstPeriod: " + optBankRateFirstPeriod);
+            }
             
         }
 
@@ -413,7 +428,7 @@ namespace WisorLib
             //return (optType + 4).ToString() + "," + optAmt + "," + optTime + "," + inflationStr + "," + optRate
             //            + "," + (int)optPmt + "," + (int)optTtlPay;
             string name = GenericProduct.GetProductName(optType);
-            return name + "," + optAmt + "," + optTime + "," + optRateFirstPeriod;
+            return name + "," + optAmt + "," + optTime + "," + optRateFirstPeriod + "," + optBankRateFirstPeriod;
             // return (optType + 4).ToString() + "," + optAmt + "," + optTime + "," + optRateFirstPeriod;
         }
 

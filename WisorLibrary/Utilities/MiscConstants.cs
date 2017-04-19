@@ -37,13 +37,22 @@ namespace WisorLib
         public static string    SEQ_STR = "#";
 
         // files to load from
-        public static string    PRODUCTS_FILE = "MortgageProducts - Updated.xml";
-        public static string    CRETIRIA_FILE = "Gui.xml";
-        public static string    LOGGER_FILE = "LOGGER";
 
-        public static string RATES_FILE = "RateFileGeneric Bulk2 60-70.csv"; // "RateFileGeneric.csv";
-        public static string BANK_RATES_FILE = "RateMarginGeneric Bulk2 60-70.csv"; // "CitiRateMarginGeneric.csv";
-        public static string LOAN_FILE = "Citi Test cases Bulk2 60-70.csv"; // "Citi Test cases (2).csv"; // "POC Data - Test Run.csv";
+        // citi:
+        //public static string CRETIRIA_FILE = "CitiGui.xml"; // "Gui.xml"; //  "ClalGui.xml";
+        //public static string RATES_FILE = "RateFileGeneric.csv"; // "RateFileClalOnlyApril2017.xlsx"; // ;
+        //public static string BANK_RATES_FILE = "CitiRateMarginGeneric.csv"; // "MarginFileClalOnlyApril2017.xlsx";
+        //public static string LOAN_FILE = "TestCases.xlsx"; // "ClalPOCDataForFinalCalculation.xlsx"; // "Citi Test cases (2).csv"; // "POC Data - Test Run.csv";
+        //public static string COMBINATIONS_FILE = "Combinations.csv"; // "CombinationsIsrael.csv";
+
+        public static string PRODUCTS_FILE = "MortgageProducts - Updated.xml";
+        public static string LOGGER_FILE = "LOGGER";
+
+        public static string CRETIRIA_FILE = "ClalGui.xml"; // "Gui.xml"; 
+        public static string RATES_FILE = "RateFileClalOnlyApril2017.xlsx";
+        public static string BANK_RATES_FILE = "MarginFileClalOnlyApril2017.xlsx";
+        public static string LOAN_FILE = "ClalShort.xlsx"; //"ClalPOCDataForFinalCalculation.xlsx"; // "Citi Test cases (2).csv"; // "POC Data - Test Run.csv";
+        public static string COMBINATIONS_FILE = "CombinationsIsrael.csv";
 
 
         // Loan parameter
@@ -63,8 +72,12 @@ namespace WisorLib
         public const string ORIGINAL_RATE = "Original Rate";
         public const string ORIGINAL_TIME = "Original Time";
         public const string CUSTOMER_NAME = "Customer name";
+        public const string RISK_VALUE = "Risk";
+        public const string LIQUIDITY_VALUE = "Liquidity";
 
         public static uint DEFAULT_PERCANTAGE_OF_MONTHLY_PAYMENT = 30;
+
+        public static uint NUM_OF_PRODUCTS_IN_COMBINATION = 3;
 
         public const int NumberOfProfiles = 6;
         public const int NumberOfYearsFrProduct = 27;
@@ -78,49 +91,13 @@ namespace WisorLib
         // TBD - shuky
         public enum indices { MADAD, PRIME, CPI, FED, LIBOR, EUROBOR, BBBR, MAKAM, OTHER, NONE }; // Are the options in the code or pulled from outside DB?
 
-        public static uint CalculateMonthlyPayment(uint loanAmount, uint propertyValue, uint yearlyIncome, uint borrowerAge)
-        {
-            uint desiredMonthlyPayment = 0;
+        // Risk and Liquidity
+        public const int RISK_LIQUIDITY_HEADER = 3;
+        public enum Risk { MinimumRisk1, LessRisk2, MediumRisk3, MoreRisk4, MaximumRisk5, NONERisk}; 
+        public enum Liquidity { MinimumLiquidity1, LessLiquidity2, MediumLiquidity3, MoreLiquidity4, MaximumLiquidity5 , NONELiquidity};
+        public static string RISK_LIQUIDITY_FILE = "RiskLiquidityCiti.xlsx"; 
 
-            desiredMonthlyPayment = (uint)yearlyIncome / 3;
-            return desiredMonthlyPayment;
-        }
-
-        public static double GetIndexRateForOption(indices indic)
-        {
-            double index = 0;
-
-            return index;
-        }
-
-        public static bool LoadIndexFile(string filename)
-        {
-            bool rc = false;
-
-            return rc;
-        }
-
-        // function to get the product by the unique id
-        public static GenericProduct GetProduct(int id)
-        {
-            GenericProduct product = null;
-            if (null != Share.theLoadedProducts)
-                product = Share.theLoadedProducts.GetProduct(id);
-            else
-                WindowsUtilities.loggerMethod("GetProduct: Share.theLoadedProducts in null!!! ");
-
-            if (null == product)
-            {
-                WindowsUtilities.loggerMethod("GetProduct: failed to find product id: " + id);
-            }
-            else
-            {
-                // TBD: check product correctess
-            }
-
-            return product;
-        }
-
+  
         //public static GenericProduct GetProduct(uint id)
         //{
         //    (markets)Enum.Parse(typeof(markets), product.Element("market").Value, true);
@@ -139,45 +116,14 @@ namespace WisorLib
         //    return product;
         //}
 
-        // spend some time .....
-        public static void FakeFunctionality()
-        {
-            Thread.Sleep(12345);
-        }
+        //// spend some time .....
+        //public static void FakeFunctionality()
+        //{
+        //    Thread.Sleep(12345);
+        //}
 
-
-    }
-
-    public class MiscUtilities
-    {
-        // TBD: either read it from file
-        public static int GetLoanID()
-        {
-            Random random = new Random();
-            int randomNumber = random.Next(0, 1000);
-            return randomNumber;
-        }
-
-        public static uint GetSequenceID()
-        {
-            // TBD
-            return 1;
-        }
-
-        public static string CreateOutputFilename(string orderid, double loanAmtWanted, double monthlyPmtWanted, uint sequenceID, string additionalName)
-        {
-            string seq = (MiscConstants.UNDEFINED_UINT == sequenceID) ? MiscConstants.UNDEFINED_STRING : MiscConstants.SEQ_STR + sequenceID + MiscConstants.SEQ_STR;
-            string add = (String.IsNullOrEmpty(additionalName)) ? MiscConstants.UNDEFINED_STRING : MiscConstants.NAME_SEP_CHAR + additionalName + MiscConstants.NAME_SEP_CHAR;
-            string fn = AppDomain.CurrentDomain.BaseDirectory // + Path.DirectorySeparatorChar
-                + MiscConstants.OUTPUT_DIR + Path.DirectorySeparatorChar +
-                Share.CustomerName + seq + /* orderid + MiscConstants.NAME_SEP_CHAR + */
-                 loanAmtWanted.ToString() + MiscConstants.NAME_SEP_CHAR +
-                monthlyPmtWanted.ToString() + MiscConstants.NAME_SEP_CHAR + add +
-                DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT;
-
-            return fn;
-        }
 
     }
 
 }
+

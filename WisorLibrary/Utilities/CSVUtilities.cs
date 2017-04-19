@@ -10,12 +10,12 @@ namespace WisorLibrary.Utilities
 {
     class CSVUtilities
     {
-        static string[] csvLines;
-
-        private static string[] OpenExcelFile(string filename)
+ 
+        private static string[] OpenCSVFile(string filename)
         {
             List<string> lines = new List<string>();
             string line = MiscConstants.UNDEFINED_STRING;
+            string[] csvLines = null;
 
             try
             {
@@ -44,13 +44,13 @@ namespace WisorLibrary.Utilities
                 }
                 else
                 {
-                    Console.WriteLine("ERROR: OpenExcelFile file: " + filename + " does not exists!!!");
-                    WindowsUtilities.loggerMethod("ERROR: OpenExcelFile file: " + filename + " does not exists!!!");
+                    Console.WriteLine("ERROR: OpenCSVFile file: " + filename + " does not exists!!!");
+                    WindowsUtilities.loggerMethod("ERROR: OpenCSVFile file: " + filename + " does not exists!!!");
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine("ERROR: OpenExcelFile got Exception: " + e.ToString() + ". line: " + line);
+                Console.WriteLine("ERROR: OpenCSVFile got Exception: " + e.ToString() + ". line: " + line);
             }
 
             return csvLines;
@@ -58,11 +58,7 @@ namespace WisorLibrary.Utilities
 
         public static string[] GetLinesFromFile(string filename)
         {
-            string[] lines = csvLines;
-
-            if (null == csvLines) {
-                lines = OpenExcelFile(filename);
-            }
+            string[] lines = OpenCSVFile(filename);
             return lines;
         }
         

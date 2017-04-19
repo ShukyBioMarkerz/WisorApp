@@ -95,6 +95,8 @@ namespace WisorLib
             // 2 - Check total pay if smaller than the lowest so far
             int ttlPayChecker = CheckTotalPay(ttlPayForCheck, env);
             
+            // TBD. Add also the max bank option
+
             if (ttlPayChecker == (int)ttlPayRange.SMALLER)
             {
                 env.resultsOutput.bestCompositionSoFar = new Composition(matchingPoint[(int)Options.options.OPTX],
@@ -122,20 +124,22 @@ namespace WisorLib
         {
             if (0 < Share.numberOfPrintResultsInList || Share.ShouldStoreAllCombinations)
             {
-  
                 // Checking lender profit
                 // get the Bank interset value
-                double bankRate = RateUtilities.GetBankRate(optX.product.productID.numberID, BorrowerProfile.borrowerProfile,
-                    (int)optX.optTime / 12 - 4);
-                optX.SetBankRate(bankRate);
+                Calculations.CalculateTheBankProfit(optX, optY, optZ, env.BorrowerProfile.profile);
+
+                //double bankRate = RateUtilities.GetBankRate(optX.product.productID.numberID,
+                //    env.BorrowerProfile.profile, (int)optX.optTime / 12 - 4);
+                //optX.SetBankRate(bankRate);
+                //bankRate = RateUtilities.GetBankRate(optY.product.productID.numberID,
+                //    env.BorrowerProfile.profile, (int)optY.optTime / 12 - 4);
+                //optY.SetBankRate(bankRate);
+                //bankRate = RateUtilities.GetBankRate(optZ.product.productID.numberID,
+                //    env.BorrowerProfile.profile, (int)optZ.optTime / 12 - 4);
+                //optZ.SetBankRate(bankRate);
+
                 double optXBankTtlPay = optX.GetBankTtlPay();
-                bankRate = RateUtilities.GetBankRate(optY.product.productID.numberID, BorrowerProfile.borrowerProfile,
-                    (int)optY.optTime / 12 - 4);
-                optY.SetBankRate(bankRate);
                 double optYBankTtlPay = optY.GetBankTtlPay();
-                bankRate = RateUtilities.GetBankRate(optZ.product.productID.numberID, BorrowerProfile.borrowerProfile,
-                    (int)optZ.optTime / 12 - 4);
-                optZ.SetBankRate(bankRate);
                 double optZBankTtlPay = optZ.GetBankTtlPay();
                 int ttlBankPayPayk = Convert.ToInt32(optXBankTtlPay + optYBankTtlPay + optZBankTtlPay);
                 int ttlPayForCheck = Convert.ToInt32(optX.optTtlPay + optY.optTtlPay + optZ.optTtlPay);
@@ -153,27 +157,43 @@ namespace WisorLib
                 string totalBank = Convert.ToInt32(ttlBankPayPayk).ToString();
                 string diff = Convert.ToInt32(ttlPayForCheck - ttlBankPayPayk).ToString();
 
-                if (0 < Share.numberOfPrintResultsInList)
-                {
-                    //add the result to the oredered list
-                    ChosenComposition comp = new ChosenComposition()
-                        { resultX, resultY, resultZ, totalBorrower, totalBank, diff };
-                    comp.SetBorrowerPay(ttlPayForCheck);
-                    comp.SetBankPay(ttlBankPayPayk);
-                    comp.SetBankProfit(Convert.ToInt32(ttlPayForCheck - ttlBankPayPayk));
-
-                    env.listOfSelectedCompositions.Add(comp);
-                    if (env.MaxProfit < Convert.ToInt32(diff))
-                        env.MaxProfit = Convert.ToInt32(diff);
-                    if (env.MaxBankPay < Convert.ToInt32(totalBank))
-                        env.MaxBankPay = Convert.ToInt32(totalBank);
-                    if (0 >= env.MinBorrowerPay)
-                        env.MinBorrowerPay = Convert.ToInt32(totalBorrower);
-                    else if (env.MinBorrowerPay > Convert.ToInt32(totalBorrower))
-                        env.MinBorrowerPay = Convert.ToInt32(totalBorrower);
-                }
+                // save it anyway in order to store the best from borrower and from the bank sides
+                //if (0 < Share.numberOfPrintResultsInList)
+                //{
+                //add the result to the oredered list
+                    if (1 < Share.numberOfPrintResultsInList)
+                    {
+                        ChosenComposition comp = new ChosenComposition()
+                            { resultX, resultY, resultZ, totalBorrower, totalBank, diff };
+                        comp.SetBorrowerPay(ttlPayForCheck);
+                        comp.SetBankPay(ttlBankPayPayk);
+                        comp.SetBankProfit(Convert.ToInt32(ttlPayForCheck - ttlBankPayPayk));
+                
+                        env.listOfSelectedCompositions.Add(comp);
+                    }
             
-  
+                    if (env.MaxProfit < Convert.ToInt32(diff))
+                    {
+                        env.MaxProfit = Convert.ToInt32(diff);
+                        env.bestDiffComposition = new Composition(optX, optY, optZ, env);
+                    }
+                    if (env.MaxBankPay < Convert.ToInt32(totalBank))
+                    {
+                        env.MaxBankPay = Convert.ToInt32(totalBank);
+                        env.bestBankComposition = new Composition(optX, optY, optZ, env);
+                    }
+                    if (0 >= env.MinBorrowerPay)
+                    {
+                        env.MinBorrowerPay = Convert.ToInt32(totalBorrower);
+                        env.bestBorrowerComposition = new Composition(optX, optY, optZ, env);
+                    }
+                    if (env.MinBorrowerPay > Convert.ToInt32(totalBorrower))
+                    {
+                        env.MinBorrowerPay = Convert.ToInt32(totalBorrower);
+                        env.bestBorrowerComposition = new Composition(optX, optY, optZ, env);
+                    }
+                //}
+               
                 if (Share.ShouldStoreAllCombinations)
                 {
                     // truncate the numbers
@@ -209,8 +229,8 @@ namespace WisorLib
   
     public class ChosenComposition : List<string>
     {
-        //Option[]        chosenCombination;
-        public double borrowerPay, bankPay, profit;
+        //public Composition      chosenCombination;
+        public double           borrowerPay, bankPay, profit;
 
         //public ChosenComposition(Option combinationX, Option combinationY, Option combinationZ)
         //{
@@ -218,6 +238,11 @@ namespace WisorLib
         //    chosenCombination[(int)options.OPTX] = combinationX;
         //    chosenCombination[(int)options.OPTY] = combinationY;
         //    chosenCombination[(int)options.OPTZ] = combinationZ;
+        //}
+
+        //public void AddOption(Option optX, Option optY, Option optZ, RunEnvironment env)
+        //{
+        //    chosenCombination = new Composition(optX, optY, optZ, env);
         //}
 
         public void SetBorrowerPay(double borrowerPay)
@@ -233,5 +258,10 @@ namespace WisorLib
         {
             this.profit = profit;
         }
+
+        //public override string ToString()
+        //{
+        //    return chosenCombination.ToString();
+        //}
     }
 }

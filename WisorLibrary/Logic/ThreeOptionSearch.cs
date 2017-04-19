@@ -28,8 +28,6 @@ namespace WisorLib
 
         public ThreeOptionSearch(double minAmountOptX, double maxAmountOptX, RunEnvironment env)
         {
-            //minAmtOptX = CalculationParameters.minAmts[(int)Options.options.OPTX];
-            //maxAmtOptX = CalculationParameters.maxAmts[(int)Options.options.OPTX];
             minAmtOptX = env.CalculationParameters.minAmts[(int)Options.options.OPTX];
             maxAmtOptX = env.CalculationParameters.maxAmts[(int)Options.options.OPTX]; 
             minAmtOptY = env.CalculationParameters.minAmts[(int)Options.options.OPTY];
