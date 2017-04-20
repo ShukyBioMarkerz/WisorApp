@@ -2,22 +2,43 @@
 <employees>
 	<item>
 		<type>TextBox</type>
+		<name>SequentialNumber</name>
+		<default>123</default>
+		<mandatory>yes</mandatory>
+	</item>
+
+	<item>
+		<type>TextBox</type>
 		<name>Loan amount</name>
-		<default>199200</default>
+		<default>408475</default>
+		<mandatory>yes</mandatory>
+	</item>
+ 	<item>
+		<type>TextBox</type>
+		<name>Desired monthly payment</name>
+		<default>5500</default>
 		<mandatory>yes</mandatory>
 	</item>
 	<item>
 		<type>TextBox</type>
 		<name>Property value</name>
-		<default>249000</default>
+		<default>1400000</default>
 		<mandatory>yes</mandatory>
 	</item>
 	<item>
 		<type>TextBox</type>
 		<name>Yearly income</name>
-		<default>17714</default>
+		<default>24000</default>
 		<mandatory>yes</mandatory>
 	</item>
+
+	<item>
+		<type>TextBox</type>
+		<name>FICO</name>
+		<default>1</default>
+		<mandatory>yes</mandatory>
+	</item>
+
 	<item>
 		<type>TextBox</type>
 		<name>Borrower age</name>
@@ -26,52 +47,41 @@
 		<default>35</default>
 		<mandatory>yes</mandatory>
 	</item>
- 	<item>
-		<type>TextBox</type>
-		<name>Desired monthly payment</name>
-		<default>1300</default>
-		<mandatory>yes</mandatory>
-	</item>
-	<item>
-		<type>TextBox</type>
-		<name>FICO</name>
-		<default>785</default>
-		<mandatory>yes</mandatory>
-	</item>
- <!-- optional -->
- 
-	<item>
-		<type>TextBox</type>
-		<name>Date Taken</name>
-		<default>3/25/2016</default>
-		<mandatory>yes</mandatory>
-	</item>
-	<item>
-		<type>TextBox</type>
-		<name>Original Rate</name>
-		<default>0.03875</default>
-		<mandatory>yes</mandatory>
-	</item>
+	
 	<item>
 		<type>TextBox</type>
 		<name>Original Time</name>
 		<default>360</default>
-		<mandatory>yes</mandatory>
+		<mandatory>no</mandatory>
 	</item>
 
 	<item>
 		<type>TextBox</type>
-		<name>Risk</name>
-		<default>2</default>
-		<mandatory>yes</mandatory>
+		<name>Date Taken</name>
+		<default>3/25/2016</default>
+		<mandatory>no</mandatory>
 	</item>
+
+
 	<item>
 		<type>TextBox</type>
-		<name>Liquidity</name>
-		<default>3</default>
-		<mandatory>yes</mandatory>
+		<name>Borrower age</name>
+		<ToCheck>min=35</ToCheck>
+		<ToCheck>max=100</ToCheck>
+		<default>35</default>
+		<mandatory>no</mandatory>
 	</item>
-	
+
+
+ <!-- optional -->
+ 
+	<item>
+		<type>TextBox</type>
+		<name>Original Rate</name>
+		<default>0.03875</default>
+		<mandatory>no</mandatory>
+	</item>
+
 
 	<item>
 		<type>TextBox</type>
@@ -79,13 +89,6 @@
 		<default>120</default>
 		<mandatory>no</mandatory>
 	</item>
-	<item>
-		<type>TextBox</type>
-		<name>SequentialNumber</name>
-		<default>123</default>
-		<mandatory>no</mandatory>
-	</item>
-
 
 	
 	
