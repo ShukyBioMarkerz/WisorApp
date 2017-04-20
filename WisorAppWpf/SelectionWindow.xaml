@@ -1,0 +1,57 @@
+﻿<Window x:Class="WisorAppWpf.SelectionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WisorAppWpf"
+        xmlns:dd="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
+        mc:Ignorable="d"
+        Title="SelectionWindow" Height="457.773" Width="839.017">
+
+    <Grid>
+        <Grid.Resources>
+            <Style TargetType="{x:Type DataGrid}" BasedOn="{StaticResource DefaultDataGridStyle}" />
+        </Grid.Resources>
+
+        <DockPanel LastChildFill="True">
+            <TextBlock Text="DataGrid" Style="{StaticResource SampleHeaderTextBlockStyle}" DockPanel.Dock="Top" />
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource DefaultTextBlockStyle}"
+                     Text="Welcome to Wisor. Your best peer in the Mortgage area." />
+                    <TextBlock Style="{StaticResource DefaultTextBlockStyle}"
+                     Text="Select the needed critiria from the left windo to the right window and order them by drag and drop." />
+
+                    <!--<Image Source="wisor-logo.jpg"  />-->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <DataGrid Grid.Column="0"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      IsReadOnly="True"
+                      x:Name="LeftBoundDataGrid"
+                      ItemsSource="{Binding Data.DataGridCollection1}"
+                      dd:DragDrop.IsDragSource="True"
+                      dd:DragDrop.IsDropTarget="True"/>
+                        
+                      <DataGrid Grid.Column="1"
+                      CanUserAddRows="True"
+                      CanUserDeleteRows="True"
+                      ItemsSource="{Binding Data.DataGridCollection2}"
+                      dd:DragDrop.IsDragSource="True"
+                      dd:DragDrop.IsDropTarget="True"
+                      dd:DragDrop.DropScrollingMode="VerticalOnly"
+                      dd:DragDrop.UseDefaultEffectDataTemplate="True"/>
+                    </Grid>
+
+                    <Button Background="Beige" Content="Continue" Click="ContinueProcessing" Width="87"/>
+                </StackPanel>
+            </ScrollViewer>
+        </DockPanel>
+    </Grid>
+
+</Window>
