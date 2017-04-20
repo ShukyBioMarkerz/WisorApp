@@ -128,16 +128,6 @@ namespace WisorLib
                 // get the Bank interset value
                 Calculations.CalculateTheBankProfit(optX, optY, optZ, env.BorrowerProfile.profile);
 
-                //double bankRate = RateUtilities.GetBankRate(optX.product.productID.numberID,
-                //    env.BorrowerProfile.profile, (int)optX.optTime / 12 - 4);
-                //optX.SetBankRate(bankRate);
-                //bankRate = RateUtilities.GetBankRate(optY.product.productID.numberID,
-                //    env.BorrowerProfile.profile, (int)optY.optTime / 12 - 4);
-                //optY.SetBankRate(bankRate);
-                //bankRate = RateUtilities.GetBankRate(optZ.product.productID.numberID,
-                //    env.BorrowerProfile.profile, (int)optZ.optTime / 12 - 4);
-                //optZ.SetBankRate(bankRate);
-
                 double optXBankTtlPay = optX.GetBankTtlPay();
                 double optYBankTtlPay = optY.GetBankTtlPay();
                 double optZBankTtlPay = optZ.GetBankTtlPay();

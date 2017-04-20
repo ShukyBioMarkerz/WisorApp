@@ -38,17 +38,6 @@ namespace WisorLib
             Calculations.CalculateTheBankProfit(opts[(int)Options.options.OPTX], opts[(int)Options.options.OPTY],
                 opts[(int)Options.options.OPTZ], env.BorrowerProfile.profile);
 
-            //// get the Bank interset value
-            //double bankRate = RateUtilities.GetBankRate(opts[(int)Options.options.OPTX].product.productID.numberID, 
-            //    env.BorrowerProfile.profile,  (int)opts[(int)Options.options.OPTX].optTime / 12 - 4);
-            //opts[(int)Options.options.OPTX].SetBankRate(bankRate);
-            //bankRate = RateUtilities.GetBankRate(opts[(int)Options.options.OPTY].product.productID.numberID,
-            //    env.BorrowerProfile.profile, (int)opts[(int)Options.options.OPTY].optTime / 12 - 4);
-            //opts[(int)Options.options.OPTY].SetBankRate(bankRate);
-            //bankRate = RateUtilities.GetBankRate(opts[(int)Options.options.OPTZ].product.productID.numberID,
-            //    env.BorrowerProfile.profile, (int)opts[(int)Options.options.OPTZ].optTime / 12 - 4);
-            //opts[(int)Options.options.OPTZ].SetBankRate(bankRate);
-
             optXBankTtlPay = opts[(int)Options.options.OPTX].GetBankTtlPay();
             optYBankTtlPay = opts[(int)Options.options.OPTY].GetBankTtlPay();
             optZBankTtlPay = opts[(int)Options.options.OPTZ].GetBankTtlPay();
