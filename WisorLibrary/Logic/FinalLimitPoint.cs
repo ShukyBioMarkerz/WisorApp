@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WisorLib
 {
-    class FinalLimitPoint
+    public class FinalLimitPoint
     {
         // General Parameters
         private InitialLimitPoint initialPoint = null;
@@ -15,8 +15,10 @@ namespace WisorLib
         public Option[] opts = { null, null };
         private OneOptType[] optTypes = { null, null };
         private bool printOrNo = false;
+        private bool printOrNoDebug = false;
         public double targetTwoOptionPmt = -1;
         public bool exactMatchFound = false;
+        public bool Status;
 
         // Parameters for Expanding Point
         private Option[] optsForSave = { null, null };
@@ -31,7 +33,7 @@ namespace WisorLib
         public FinalLimitPoint(InitialLimitPoint initialLimitPoint, RunEnvironment env)
         {
             initialPoint = initialLimitPoint;
-            printOrNo = env.PrintOptions.printFunctionsInConsole;
+            /*printOrNo =*/ printOrNoDebug = env.PrintOptions.printFunctionsInConsole;
             letter = initialPoint.letter;
             number = initialPoint.number;
             targetTwoOptionPmt = initialLimitPoint.targetTwoOptionPmt;
@@ -43,7 +45,7 @@ namespace WisorLib
             }
             InsertOptionsAccordingToLetter(env);
 
-            if (printOrNo == true)
+            if (printOrNoDebug == true)
             {
                 Console.WriteLine("Looking for expanded point " + Options.letters[(int)letter] + Options.numbers[(int)number]
                                     + " (Match = " + initialPoint.matchOrNo + ")\nOptX Type = "
@@ -51,9 +53,18 @@ namespace WisorLib
                                     + optTypes[(int)Options.options.OPTY].product.productID.numberID + "\nOptX = " + expandingOpts[(int)Options.options.OPTX].ToString()
                                     + "\nOptY = " + expandingOpts[(int)Options.options.OPTY].ToString() + "\n");
             }
-            InsertOptionsForSavedPoint(ExpandPoint(optTypes[(int)Options.options.OPTX], optTypes[(int)Options.options.OPTY],
-                                        expandingOpts[(int)Options.options.OPTX], expandingOpts[(int)Options.options.OPTY], env));
-
+            Option[] opt = ExpandPoint(optTypes[(int)Options.options.OPTX], optTypes[(int)Options.options.OPTY],
+                                        expandingOpts[(int)Options.options.OPTX], expandingOpts[(int)Options.options.OPTY], env);
+            if (null == opt)
+            {
+                Console.WriteLine("ERROR: FinalLimitPoint ExpandPoint return NULL!!!");
+                Status = false;
+            }
+            else
+            {
+                InsertOptionsForSavedPoint(opt);
+                Status = true;
+            }
         }
 
 
@@ -82,6 +93,7 @@ namespace WisorLib
             }
             else
             {
+                Console.WriteLine("ERROR: InsertOptionsAccordingToLetter unrecognized letter: " + letter);
                 // Add Throw ....
             }
         }
@@ -95,7 +107,7 @@ namespace WisorLib
         {
             if ((optionX.optPmt + optionY.optPmt) < (targetTwoOptionPmt - CalculationConstants.largeDev))
             {
-                if (printOrNo == true)
+                if (printOrNoDebug == true)
                 {
                     Console.WriteLine("\nPmt(X,Y) = (" + optionX.optTime + "," + optionY.optTime + ") = "
                                         + (optionX.optPmt + optionY.optPmt).ToString() + "\nPmt(X,Y) Too small\n");
@@ -104,7 +116,7 @@ namespace WisorLib
             }
             else if ((optionX.optPmt + optionY.optPmt) > (targetTwoOptionPmt + CalculationConstants.smallDev))
             {
-                if (printOrNo == true)
+                if (printOrNoDebug == true)
                 {
                     Console.WriteLine("\nPmt(X,Y) = (" + optionX.optTime + "," + optionY.optTime + ") = "
                                         + (optionX.optPmt + optionY.optPmt).ToString() + "\nPmt(X,Y) Too large\n");
@@ -113,7 +125,7 @@ namespace WisorLib
             }
             else
             {
-                if (printOrNo == true)
+                if (printOrNoDebug == true)
                 {
                     Console.WriteLine("\nPmt(X,Y) = (" + optionX.optTime + "," + optionY.optTime + ") = "
                                         + (optionX.optPmt + optionY.optPmt).ToString() + "\nPmt(X,Y) In range !\n");
@@ -134,14 +146,14 @@ namespace WisorLib
             expandingOpts[(int)Options.options.OPTX] = optionX;
             expandingOpts[(int)Options.options.OPTY] = optionY;
 
-            if (printOrNo == true)
+            if (printOrNoDebug == true)
             {
                 Console.WriteLine("Starting point for check : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ")");
             }
 
             if (optionY.optTime == optTypes[(int)Options.options.OPTY].product.minTime)
             {
-                if (printOrNo == true)
+                if (printOrNoDebug == true)
                 {
                     Console.WriteLine("Time is at minimum limit\n");
                 }
@@ -150,7 +162,7 @@ namespace WisorLib
             else if (optionY.optTime > optTypes[(int)Options.options.OPTY].product.minTime)
             {
                 optionY = new Option(optionY.optType, optionY.optAmt, (optionY.optTime - optTypes[(int)Options.options.OPTY].product.timeJump), env);
-                if (printOrNo == true)
+                if (printOrNoDebug == true)
                 {
                     Console.WriteLine("New Point for check : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ")");
                 }
@@ -171,7 +183,7 @@ namespace WisorLib
             {
                 if (printOrNo == true)
                 {
-                    Console.WriteLine("Point : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ") ---> EXEPTION");
+                    Console.WriteLine("ERROR: Point : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ") ---> EXEPTION");
                 }
                 // Add exeption - throw ...
                 return null;
@@ -190,13 +202,13 @@ namespace WisorLib
             expandingOpts[(int)Options.options.OPTX] = optionX;
             expandingOpts[(int)Options.options.OPTY] = optionY;
 
-            if (printOrNo == true)
+            if (printOrNoDebug == true)
             {
                 Console.WriteLine("Starting point for check : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ")");
             }
             if (optionX.optTime == optTypes[(int)Options.options.OPTX].product.maxTime)
             {
-                if (printOrNo == true)
+                if (printOrNoDebug == true)
                 {
                     Console.WriteLine("Time is at maximum limit\n");
                 }
@@ -205,7 +217,7 @@ namespace WisorLib
             else if (optionX.optTime < optTypes[(int)Options.options.OPTX].product.maxTime)
             {
                 optionX = new Option(optionX.optType, optionX.optAmt, (optionX.optTime + optTypes[(int)Options.options.OPTX].product.timeJump), env);
-                if (printOrNo == true)
+                if (printOrNoDebug == true)
                 {
                     Console.WriteLine("New Point for check : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ")");
                 }
@@ -226,7 +238,7 @@ namespace WisorLib
             {
                 if (printOrNo == true)
                 {
-                    Console.WriteLine("Point : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ") ---> EXEPTION");
+                    Console.WriteLine("ERROR: Point : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ") ---> EXEPTION");
                 }                
                 // Add exeption - throw ...
                 return null;
@@ -248,13 +260,13 @@ namespace WisorLib
             expandingOpts[(int)Options.options.OPTX] = optionX;
             expandingOpts[(int)Options.options.OPTY] = optionY;
 
-            if (printOrNo == true)
+            if (printOrNoDebug == true)
             {
                 Console.WriteLine("Starting point for check : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ")");
             }
             if (optionX.optTime == optTypes[(int)Options.options.OPTX].product.minTime)
             {
-                if (printOrNo == true)
+                if (printOrNoDebug == true)
                 {
                     Console.WriteLine("Time is at minimum limit\n");
                 }
@@ -263,7 +275,7 @@ namespace WisorLib
             else if (optionX.optTime > optTypes[(int)Options.options.OPTX].product.minTime)
             {
                 optionX = new Option(optionX.optType, optionX.optAmt, (optionX.optTime - optTypes[(int)Options.options.OPTX].product.timeJump), env);
-                if (printOrNo == true)
+                if (printOrNoDebug == true)
                 {
                     Console.WriteLine("New Point for check : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ")");
                 }
@@ -290,7 +302,7 @@ namespace WisorLib
             {
                 if (printOrNo == true)
                 {
-                    Console.WriteLine("Point : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ") ---> EXEPTION");
+                    Console.WriteLine("ERROR: Point : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ") ---> EXEPTION");
                 }                
                 // Add exeption - throw ...
                 return null;
@@ -367,7 +379,7 @@ namespace WisorLib
                 {
                     if (printOrNo == true)
                     {
-                        Console.WriteLine("Point : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ") ---> EXEPTION");
+                        Console.WriteLine("ERROR: Point : (X,Y) = (" + optionX.optTime + "," + optionY.optTime + ") ---> EXEPTION");
                     }
                     // Add exeption - throw ...
                     a2b2NoMatchBool = false;
@@ -396,21 +408,30 @@ namespace WisorLib
         private Option[] ExpandPoint(OneOptType optionXType, OneOptType optionYType, Option optionX, Option optionY, RunEnvironment env)
 
         {
+            Option[] retVal;
+
             if (initialPoint.matchOrNo == true)
             {
                 if (number == (int)Options.limitPointsNumbers.ONE)
                 {
                     // Expand Point - Exact Match - A1/B1
-                    return ExpandPointExactMatchA1B1(optionXType, optionYType, optionX, optionY, env);
+                    retVal = ExpandPointExactMatchA1B1(optionXType, optionYType, optionX, optionY, env);
+                    if (null == retVal)
+                        Console.WriteLine("ERROR: ExpandPoint initialPoint.matchOrNo ONE ExpandPointExactMatchA1B1 return NULL!!!");
+                    return retVal;
                 }
                 else if (number == (int)Options.limitPointsNumbers.TWO)
                 {
                     // Expand Point - Exact Match - A2/B2
-                    return ExpandPointExactMatchA2B2(optionXType, optionYType, optionX, optionY, env);
+                    retVal = ExpandPointExactMatchA2B2(optionXType, optionYType, optionX, optionY, env);
+                    if (null == retVal)
+                        Console.WriteLine("ERROR: ExpandPoint initialPoint.matchOrNo TWO ExpandPointExactMatchA2B2 return NULL!!!");
+                    return retVal;
                 }
                 else
                 {
                     // Add throw - exeption ....
+                    Console.WriteLine("ERROR: ExpandPoint in initialPoint.matchOrNo unrecognized number: " + number);
                     return null;
                 }
 
@@ -420,16 +441,24 @@ namespace WisorLib
                 if (number == (int)Options.limitPointsNumbers.ONE)
                 {
                     // Expand Point - No Match - A1/B1
-                    return ExpandPointNoMatchA1B1(optionXType, optionYType, optionX, optionY, env);
+                    retVal = ExpandPointNoMatchA1B1(optionXType, optionYType, optionX, optionY, env);
+                    if (null == retVal)
+                        Console.WriteLine("ERROR: ExpandPoint NOT initialPoint.matchOrNo ONE ExpandPointNoMatchA1B1 return NULL!!!");
+                    return retVal;
+
                 }
                 else if (number == (int)Options.limitPointsNumbers.TWO)
                 {
                     // Expand Point - No Match - A2/B2                   
-                    return ExpandPointNoMatchA2B2(optionXType, optionYType, optionX, optionY, env);
+                    retVal = ExpandPointNoMatchA2B2(optionXType, optionYType, optionX, optionY, env);
+                    if (null == retVal)
+                        Console.WriteLine("ERROR: ExpandPoint NOT initialPoint.matchOrNo TWO ExpandPointExactMatchA2B2 return NULL!!!");
+                    return retVal;
                 }
                 else
                 {
                     // Add throw - exeption ....
+                    Console.WriteLine("ERROR: ExpandPoint unrecognized number: " + number);
                     return null;
                 }
             }
@@ -444,6 +473,14 @@ namespace WisorLib
 
         private void InsertOptionsForSavedPoint(Option[] optionsForSave)
         {
+            // TBD: crash here...
+            if (null == optionsForSave || null == optionsForSave[(int)Options.options.OPTX] ||
+                null == optionsForSave[(int)Options.options.OPTY])
+            {
+                Console.WriteLine("ERROR: InsertOptionsForSavedPoint optionsForSave in NULL!!!");
+                return;
+            }
+
             if (letter == (int)Options.limitPointsLetters.A)
             {
                 opts[(int)Options.options.OPTX] = optionsForSave[(int)Options.options.OPTX];
@@ -457,6 +494,7 @@ namespace WisorLib
             else
             {
                 // Add Throw Exeption ...
+                Console.WriteLine("ERROR: InsertOptionsForSavedPoint unrecognized letter: " + letter);
             }
         }
 

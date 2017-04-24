@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace WisorLib
 {
-    class OneSavedMatchBeforeCheck
+    public class OneSavedMatchBeforeCheck
     {
         // General Parameters
         public Option[] savedMatch = { null, null };
@@ -23,7 +23,7 @@ namespace WisorLib
 
 
 
-    class SavedMatchesBeforeCheck
+    public class SavedMatchesBeforeCheck
     {
         // General Parameters
         public List<OneSavedMatchBeforeCheck> savedMatchesList = null;

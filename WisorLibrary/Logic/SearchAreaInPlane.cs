@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WisorLibrary.Utilities;
 
 namespace WisorLib
 {
@@ -11,7 +12,7 @@ namespace WisorLib
         // General Parameters
         public Option[] cornerAMaxTimeXMinTimeY = { null, null };
         public Option[] cornerBMinTimeXMaxTimeY = { null, null };
-        public uint numOfCells = 0;
+        //public uint numOfCells = 0;
 
 
         // Finding new corners and creating search area
@@ -35,12 +36,15 @@ namespace WisorLib
         // Counters
         private uint numOfLines = 0, numOfColumns = 0;
 
-
-
-
-
+        
         public SearchAreaInPlane(FinalLimitPoint[] finalPoints, RunEnvironment env)
         {
+            if (!MiscUtilities.CheckConsistency(finalPoints))
+            {
+                Console.WriteLine("ERROR: SearchAreaInPlane failed in CheckConsistency.");
+                return;
+            }
+
             limitPoints[(int)Options.limitPointsLetters.A] = finalPoints[(int)Options.limitPointsLetters.A];
             limitPoints[(int)Options.limitPointsLetters.B] = finalPoints[(int)Options.limitPointsLetters.B];
             targetTwoOptionPmt = finalPoints[(int)Options.options.OPTX].targetTwoOptionPmt;
@@ -51,26 +55,30 @@ namespace WisorLib
             cornerAMaxTimeXMinTimeY = FindCornerAPointMaxTimeXMinTimeY(env);
             cornerBMinTimeXMaxTimeY = FindCornerBPointMinTimeXMaxTimeY(env);
 
-            
-            if ((cornerBMinTimeXMaxTimeY[(int)Options.options.OPTY].optTime - 
-                cornerAMaxTimeXMinTimeY[(int)Options.options.OPTY].optTime > 0)                            
-                && (cornerAMaxTimeXMinTimeY[(int)Options.options.OPTX].optTime - 
-                    cornerBMinTimeXMaxTimeY[(int)Options.options.OPTX].optTime > 0))                            
+            if ((cornerBMinTimeXMaxTimeY[(int)Options.options.OPTY].optTime > 
+                cornerAMaxTimeXMinTimeY[(int)Options.options.OPTY].optTime)                            
+                && (cornerAMaxTimeXMinTimeY[(int)Options.options.OPTX].optTime > 
+                    cornerBMinTimeXMaxTimeY[(int)Options.options.OPTX].optTime))                            
             {
-                numOfLines = ((cornerBMinTimeXMaxTimeY[(int)Options.options.OPTY].optTime -
-                                cornerAMaxTimeXMinTimeY[(int)Options.options.OPTY].optTime) /
-                                env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].product.timeJump) + 1;
-                numOfColumns = ((cornerAMaxTimeXMinTimeY[(int)Options.options.OPTX].optTime -
-                                cornerBMinTimeXMaxTimeY[(int)Options.options.OPTX].optTime) /
-                                env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].product.timeJump) + 1;
-                numOfCells = numOfLines * numOfColumns;
+                numOfLines = (uint) Math.Abs(((cornerBMinTimeXMaxTimeY[(int)Options.options.OPTY].optTime -
+                    cornerAMaxTimeXMinTimeY[(int)Options.options.OPTY].optTime) /
+                    env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].product.timeJump) + 1);
+                numOfColumns = (uint)Math.Abs(((cornerAMaxTimeXMinTimeY[(int)Options.options.OPTX].optTime -
+                    cornerBMinTimeXMaxTimeY[(int)Options.options.OPTX].optTime) /
+                    env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].product.timeJump) + 1);
+
+
+                int diff = Math.Abs((int)cornerBMinTimeXMaxTimeY[(int)Options.options.OPTY].optTime -
+                                (int)cornerAMaxTimeXMinTimeY[(int)Options.options.OPTY].optTime);
+                numOfLines = (uint) (diff / (int)env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].product.timeJump + 1);
+
+                diff = Math.Abs((int)cornerAMaxTimeXMinTimeY[(int)Options.options.OPTX].optTime -
+                                (int)cornerBMinTimeXMaxTimeY[(int)Options.options.OPTX].optTime);
+                numOfColumns = (uint) (diff / (int)env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].product.timeJump + 1);
+                //numOfCells = numOfLines * numOfColumns; // Omri - nobody use it...
                 columns = new OneColumnForSearch[numOfColumns];
                 columnsChecked = new bool[numOfColumns];
             }
-
-
-
-
 
         }
 
@@ -83,6 +91,18 @@ namespace WisorLib
 
         private bool FindLimitTimeForCornerPoint(uint pointLetter, uint pointNumber)
         {
+            // TBD: carsh so check its value
+            if (null == limitPoints || null == limitPoints[(int)Options.limitPointsLetters.A] ||
+                    null == limitPoints[(int)Options.limitPointsLetters.B] ||
+                    null == limitPoints[(int)Options.limitPointsLetters.A].opts[(int)Options.options.OPTX] ||
+                    null == limitPoints[(int)Options.limitPointsLetters.B].opts[(int)Options.options.OPTX] ||
+                    null == limitPoints[(int)Options.limitPointsLetters.A].opts[(int)Options.options.OPTY] ||
+                    null == limitPoints[(int)Options.limitPointsLetters.B].opts[(int)Options.options.OPTY])
+            {
+                Console.WriteLine("FindLimitTimeForCornerPoint found limitPoints as NULL!!!");
+                return false;
+            }
+
             switch (pointLetter)
             {
                 case (int)Options.limitPointsLetters.A:

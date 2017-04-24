@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WisorLib
 {
-    class OneOption
+    public class OneOption
     {
         // General Parameters
         public Option[] times = { null, null };
@@ -27,7 +27,7 @@ namespace WisorLib
 
 
 
-    class PmtLimits
+    public class PmtLimits
     {
         public double[] amts = { -1, -1, -1 };
         public OneOption[] opts = { null, null, null };

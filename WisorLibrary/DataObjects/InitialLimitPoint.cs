@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WisorLib
 {
-    class InitialLimitPoint
+    public class InitialLimitPoint
     {
         // General Parameters
         public uint letter = 0;

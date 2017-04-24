@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WisorLibrary.Utilities;
 
 namespace WisorLib
 {
@@ -58,6 +59,12 @@ namespace WisorLib
                 FindFinalExtendedLimitPointsForSearchArea(env);
                 //Console.ReadKey();
 
+                if (! MiscUtilities.CheckConsistency(finalLimitPoints))
+                {
+                    Console.WriteLine("ERROR: SinglePlane failed in CheckConsistency.");
+                    return;
+                }
+
                 // 4 - Create final search Area
                 FindFinalSearchArea(env);
                 //Console.ReadKey();
@@ -76,9 +83,7 @@ namespace WisorLib
             }
         }
 
-
-
-
+    
 
 
 
@@ -109,6 +114,14 @@ namespace WisorLib
         {
             finalLimitPoints[(int)Options.limitPointsLetters.A] = new FinalLimitPoint(initialLimitPoints[(int)Options.limitPointsLetters.A], env);
             finalLimitPoints[(int)Options.limitPointsLetters.B] = new FinalLimitPoint(initialLimitPoints[(int)Options.limitPointsLetters.B], env);
+
+            if (null == finalLimitPoints ||
+                null == finalLimitPoints[(int)Options.limitPointsLetters.A] ||
+                null == finalLimitPoints[(int)Options.limitPointsLetters.B])
+            {
+                Console.WriteLine("ERROR: FindFinalExtendedLimitPointsForSearchArea got null finalLimitPoints");
+                return;
+            }
 
             if ((finalLimitPoints[(int)Options.limitPointsLetters.A].savedMatches.numOfMatches == 1) &&
                  (finalLimitPoints[(int)Options.limitPointsLetters.B].savedMatches.numOfMatches == 1))

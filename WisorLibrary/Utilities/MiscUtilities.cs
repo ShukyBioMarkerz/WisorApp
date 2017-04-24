@@ -356,6 +356,21 @@ namespace WisorLibrary.Utilities
             return rc;
         }
 
+        public static bool CheckConsistency(FinalLimitPoint[] points)
+        {
+            if (null == points ||
+                null == points[(int)Options.limitPointsLetters.A] ||
+                null == points[(int)Options.limitPointsLetters.B] ||
+                !points[(int)Options.limitPointsLetters.A].Status ||
+                !points[(int)Options.limitPointsLetters.B].Status)
+            {
+                Console.WriteLine("ERROR: CheckConsistency failed on illegal finalLimitPoints.");
+                return false;
+            }
+            return true;
+        }
+
+
 
     }
 
