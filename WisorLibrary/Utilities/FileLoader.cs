@@ -97,7 +97,7 @@ namespace WisorLib
 
   
    
-        public static LoanList LoadLoansFileData(string filename, FieldList fieldsDef)
+        public static LoanList LoadLoansFileData(string filename, FieldList fieldsDef, bool shouldRemoveFractions = false)
         {
             string[] lines = null;
             LoanList loans = new LoanList();
@@ -110,7 +110,7 @@ namespace WisorLib
 
                     if (".xls" == ext || ".xlsx" == ext)
                     {
-                        lines = ExcelUtilities.GetLinesFromFile(filename);
+                        lines = ExcelUtilities.GetLinesFromFile(filename, shouldRemoveFractions);
                     }
                     else if (".csv" == ext)
                     {
@@ -172,9 +172,6 @@ namespace WisorLib
                     return loans;
                 }
 
-                // ensure the line correctness
-                const int INDEX_ADD = 1;
-
                 int loanAmountIndex = fieldsDef.GetIndexOf(MiscConstants.LOAN_AMOUNT); // // there is a index in the excel file
                 int monthlyPaymentIndex = fieldsDef.GetIndexOf(MiscConstants.MONTHLY_PAYMENT); // + INDEX_ADD;
                 int propertyValueIndex = fieldsDef.GetIndexOf(MiscConstants.PROPERTY_VALUE); // + INDEX_ADD;
@@ -182,13 +179,14 @@ namespace WisorLib
                 int ageIndex = fieldsDef.GetIndexOf(MiscConstants.AGE); // + INDEX_ADD;
                 int ficoIndex = fieldsDef.GetIndexOf(MiscConstants.LOAN_FICO);
                 int dateTakenIndex = fieldsDef.GetIndexOf(MiscConstants.DATE_TAKEN);
-                int desireTerminationMonthIndex = fieldsDef.GetIndexOf(MiscConstants.DESIRE_TERMINATION_MONTH);
+                //int desireTerminationMonthIndex = fieldsDef.GetIndexOf(MiscConstants.DESIRE_TERMINATION_MONTH);
                 int sequentialNumberIndex = fieldsDef.GetIndexOf(MiscConstants.SEQ_NUMBER);
                 //int originalProductIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_PRODUCT);
                 int originalRateIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_RATE);
                 int originalTimeIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_TIME);
                 int riskIndex = fieldsDef.GetIndexOf(MiscConstants.RISK_VALUE);
                 int liquidityIndex = fieldsDef.GetIndexOf(MiscConstants.LIQUIDITY_VALUE);
+                int productNameIndex = fieldsDef.GetIndexOf(MiscConstants.PRODUCT_NAME);
 
                 if (MiscConstants.UNDEFINED_INT < loanAmountIndex /*&& INDEX_ADD <= monthlyPaymentIndex*/ && MiscConstants.UNDEFINED_INT < propertyValueIndex &&
                     MiscConstants.UNDEFINED_INT < yearlyIncomeIndex /*&& INDEX_ADD < ficoIndex*/)
@@ -198,8 +196,8 @@ namespace WisorLib
                     uint umonthlyPaymentIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, monthlyPaymentIndex));
                     uint upropertyValueIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, propertyValueIndex));
                     uint uageIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, ageIndex));
-                    uint ficoIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, ficoIndex));
-                    uint desireTerminationMonthIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, desireTerminationMonthIndex));
+                    int ficoIndexV = Convert.ToInt32(CleanupRedundantChars(entities, ficoIndex));
+                    //uint desireTerminationMonthIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, desireTerminationMonthIndex));
                     uint sequentialNumberIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, sequentialNumberIndex));
                     // clean percantage etc.
                     double originalRateIndexV =
@@ -218,6 +216,11 @@ namespace WisorLib
 
                     Risk risk = Risk.NONERisk; // (Risk)Enum.Parse(typeof(Risk), CleanupRedundantChars(entities, riskIndex), true);
                     Liquidity liquidity = Liquidity.NONELiquidity; // (Liquidity)Enum.Parse(typeof(Liquidity), CleanupRedundantChars(entities, liquidityIndex), true);
+                    
+                    string productName =
+                        (0 > productNameIndex || productNameIndex >= entities.Length) ? 
+                        MiscConstants.UNDEFINED_STRING : entities[productNameIndex];
+                    ProductID product = new ProductID(MiscConstants.UNDEFINED_INT, productName);
 
                     if (0 < sequentialNumberIndexV)
                         id = (int) sequentialNumberIndexV;
@@ -225,8 +228,9 @@ namespace WisorLib
                     loans.Add(new loanDetails(id.ToString(),
                         uloanAmountIndexV, umonthlyPaymentIndexV, upropertyValueIndexV,
                         uyearlyIncomeIndexV, uageIndexV, ficoIndexV,
-                        dateTakenIndexV, originalRateIndexV, originalTimeIndexV,
-                        desireTerminationMonthIndexV, sequentialNumberIndexV, risk, liquidity));
+                        dateTakenIndexV, product, true /*shouldCalculate*/,
+                        originalRateIndexV, originalTimeIndexV,
+                        /*desireTerminationMonthIndexV,*/ sequentialNumberIndexV, risk, liquidity));
                     id++;
                     
                 }
@@ -250,137 +254,6 @@ namespace WisorLib
  
             return loans;
         }
-
-        //public static LoanList LoadCSVFileData(string filename, FieldList fieldsDef)
-        //{
-        //    LoanList loans = new LoanList();
-        //    string currLine = MiscConstants.UNDEFINED_STRING;
-
-        //    string curr = MiscConstants.UNDEFINED_STRING;
-        //    string[] entities;
-        //    // id should be retrived by some logic
-        //    int id = MiscUtilities.GetLoanID();
-
-        //    try
-        //    {
-        //        if (File.Exists(filename))
-        //        {
-        //            var file = new FileInfo(filename);
-        //            StreamReader fileReader = new System.IO.StreamReader(filename);
-        //            string line;
-        //            int lineNumber = 1;
-        //            do
-        //            {
-        //                line = fileReader.ReadLine();
-        //                curr = line;
-        //                if (String.IsNullOrEmpty(line))
-        //                    continue;
-
-        //                // skip the first line
-        //                // TBD: should read the headers and relate to it
-        //                if (1 == lineNumber++)
-        //                    continue;
-
-        //                entities = line.Split(MiscConstants.COMMA_SEERATOR_STR);
-
-        //                if (String.IsNullOrEmpty(entities[0]))
-        //                {
-        //                    continue;
-        //                }
-
-        //                if (entities.Length != fieldsDef.Count)
-        //                {
-        //                    Console.WriteLine("ERROR: LoadCSVFileData for loans file: " + filename + " is in a wrong syntax.");
-        //                    WindowsUtilities.loggerMethod("ERROR: LoadCSVFileData for loans file: " + filename + " is in a wrong syntax.");
-        //                    return loans;
-        //                }
-
-        //                // ensure the line correctness
-        //                const int INDEX_ADD = 1;
-
-        //                int loanAmountIndex = fieldsDef.GetIndexOf(MiscConstants.LOAN_AMOUNT); // // there is a index in the excel file
-        //                int monthlyPaymentIndex = fieldsDef.GetIndexOf(MiscConstants.MONTHLY_PAYMENT); // + INDEX_ADD;
-        //                int propertyValueIndex = fieldsDef.GetIndexOf(MiscConstants.PROPERTY_VALUE); // + INDEX_ADD;
-        //                int yearlyIncomeIndex = fieldsDef.GetIndexOf(MiscConstants.YEARLY_INCOME); // + INDEX_ADD;
-        //                int ageIndex = fieldsDef.GetIndexOf(MiscConstants.AGE); // + INDEX_ADD;
-        //                int ficoIndex = fieldsDef.GetIndexOf(MiscConstants.LOAN_FICO);
-        //                int dateTakenIndex = fieldsDef.GetIndexOf(MiscConstants.DATE_TAKEN);
-        //                int desireTerminationMonthIndex = fieldsDef.GetIndexOf(MiscConstants.DESIRE_TERMINATION_MONTH);
-        //                int sequentialNumberIndex = fieldsDef.GetIndexOf(MiscConstants.SEQ_NUMBER);
-        //                //int originalProductIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_PRODUCT);
-        //                int originalRateIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_RATE);
-        //                int originalTimeIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_TIME);
-
-        //                if (MiscConstants.UNDEFINED_INT < loanAmountIndex /*&& INDEX_ADD <= monthlyPaymentIndex*/ && MiscConstants.UNDEFINED_INT < propertyValueIndex &&
-        //                    MiscConstants.UNDEFINED_INT < yearlyIncomeIndex && INDEX_ADD < ficoIndex)
-        //                {
-        //                    currLine = line;
-        //                    // skip the header
-        //                    if (!line.ToLower().Contains(MiscConstants.LOAN_AMOUNT.ToLower()))
-        //                    {
-        //                        uint uyearlyIncomeIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, yearlyIncomeIndex));
-        //                        uint uloanAmountIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, loanAmountIndex));
-        //                        uint umonthlyPaymentIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, monthlyPaymentIndex));
-        //                        uint upropertyValueIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, propertyValueIndex));
-        //                        uint uageIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, ageIndex));
-        //                        uint ficoIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, ficoIndex));
-        //                        uint desireTerminationMonthIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, desireTerminationMonthIndex));
-        //                        uint sequentialNumberIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, sequentialNumberIndex));
-        //                        // clean percantage etc.
-        //                        double originalRateIndexV = 
-        //                            (originalRateIndex >= entities.Length) ? MiscConstants.UNDEFINED_DOUBLE : 
-        //                                Convert.ToDouble(CleanupRedundantChars(entities, originalRateIndex, true /*allowDot*/));
-        //                        uint originalTimeIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, originalTimeIndex));
-        //                        if (MiscConstants.UNDEFINED_UINT == sequentialNumberIndexV && MiscConstants.UNDEFINED_INT < sequentialNumberIndex)
-        //                        {
-        //                            CriteriaField cf = fieldsDef.GetField(MiscConstants.SEQ_NUMBER);
-        //                            sequentialNumberIndexV = Convert.ToUInt32(cf.value) + (uint)lineNumber;
-        //                        }
-                        
-        //                        DateTime dateTakenIndexV = 
-        //                            (dateTakenIndex >= entities.Length) ? DateTime.Now : Convert.ToDateTime(entities[dateTakenIndex]);
-
-        //                        loans.Add(new loanDetails(id.ToString(),
-        //                            uloanAmountIndexV, umonthlyPaymentIndexV, upropertyValueIndexV, 
-        //                            uyearlyIncomeIndexV, uageIndexV, ficoIndexV,
-        //                            dateTakenIndexV, originalRateIndexV, originalTimeIndexV,
-        //                            desireTerminationMonthIndexV, sequentialNumberIndexV));
-        //                        id++;
-        //                    }
-        //                }
-        //                else
-        //                {
-        //                    string err = null;
-        //                    if (INDEX_ADD > loanAmountIndex)
-        //                        err += " illegal loanAmountIndex value: " + loanAmountIndex.ToString();
-        //                    if (INDEX_ADD > monthlyPaymentIndex)
-        //                        err += " illegal monthlyPaymentIndex value: " + monthlyPaymentIndex.ToString();
-        //                    if (INDEX_ADD > propertyValueIndex)
-        //                        err += " illegal propertyValueIndex value: " + propertyValueIndex.ToString();
-        //                    if (INDEX_ADD > yearlyIncomeIndex)
-        //                        err += " illegal yearlyIncomeIndex value: " + yearlyIncomeIndex.ToString();
-        //                    if (INDEX_ADD > ageIndex)
-        //                        err += " illegal ageIndex value: " + ageIndex.ToString();
-
-        //                    WindowsUtilities.loggerMethod("NOTICE: LoadCSVFileData file: illegal index of the mandatory parameters. Probably missing some cretiria. " + err);
-        //                }
-        //            }
-        //            while (!System.String.IsNullOrEmpty(line));
-
-        //        }
-        //        else
-        //        {
-        //            Console.WriteLine("ERROR: LoadCSVFileData file: " + filename + " does not exists!!!");
-        //            WindowsUtilities.loggerMethod("ERROR: LoadCSVFileData file: " + filename + " does not exists!!!");
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Console.WriteLine("ERROR: LoadCSVFileData got Exception: " + e.ToString() + ". Curr: " + curr);
-        //    }
-
-        //return loans;
-        //}
 
         static string CleanupRedundantChars(string[] entities, int index, bool allowDot = false, string defaultValue = "0")
         {

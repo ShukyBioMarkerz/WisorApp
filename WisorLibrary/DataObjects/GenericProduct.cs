@@ -42,6 +42,7 @@ namespace WisorLib
         // Once Index is identified -> DB has the historical rates -> the final value should be a percentage
         public double indexUsedFirstTimePeriod { get; set; }
         public double indexUsedSecondTimePeriod { get; set; }
+        public indices originalIndexUsedFirstTimePeriod { get; set; }
 
         // Identify the time between updates of chosen index
         // Once Index is identified -> DB has the historical rates -> the final value should be an number
@@ -83,6 +84,7 @@ namespace WisorLib
             this.productID = productID;
             this.localMarket = localMarket;
             this.name = name;
+            this.originalIndexUsedFirstTimePeriod = indexUsedFirstTimePeriod;
             this.indexUsedFirstTimePeriod = MiscUtilities.GetIndexRateForOption(indexUsedFirstTimePeriod);
             this.indexUsedSecondTimePeriod = MiscUtilities.GetIndexRateForOption(indexUsedSecondTimePeriod);
             this.indexJumpFirstTimePeriod = indexJumpFirstTimePeriod;
@@ -195,8 +197,8 @@ namespace WisorLib
             }
             else
             {
-                WindowsUtilities.loggerMethod("LoadXMLProductsFile succeffuly load: " + products.Count + " products.");
-                Console.WriteLine("LoadXMLProductsFile succeffuly load: " + products.Count + " products.");
+                WindowsUtilities.loggerMethod("LoadXMLProductsFile succeffuly load: " + products.Count + " products from file: " + filename);
+                Console.WriteLine("LoadXMLProductsFile succeffuly load: " + products.Count + " products from file: " + filename);
             }
             Share.theLoadedProducts = products;
             return products;

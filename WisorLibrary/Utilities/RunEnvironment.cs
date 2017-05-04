@@ -52,7 +52,7 @@ namespace WisorLib
                     loan.PropertyValue, loan.YearlyIncome, loan.BorrowerAge, loan.fico);
 
             // Set borrower risk profile for choosing interest rates
-            BorrowerProfile = new BorrowerProfile(loan.fico);
+            BorrowerProfile = new BorrowerProfile(CalculationParameters, loan.fico);
 
             PrintOptions = new PrintOptions();
 

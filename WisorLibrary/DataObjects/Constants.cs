@@ -106,7 +106,7 @@ namespace WisorLib
         public double pti;
 
         // Credit score (FICO)
-        public uint fico;
+        public int fico;
 
         // Time restriction from age of youngest lender
         public uint maximumTimeForLoan = 360;
@@ -121,7 +121,7 @@ namespace WisorLib
         public double[] maxAmts;
 
         public CalculationParameters(double loanAmtWante, double monthlyPmtWante,
-                uint propertyValu, uint incom, uint youngestLenderAg, uint fic)
+                uint propertyValu, uint incom, uint youngestLenderAg, int fic)
         {
             loanAmtWanted = loanAmtWante;
             monthlyPmtWanted = monthlyPmtWante;
