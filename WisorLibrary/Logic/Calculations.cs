@@ -209,24 +209,18 @@ namespace WisorLibrary.Logic
         /// <param name="originalTime"></param>
         /// <returns></returns>
     
-        public static double CalculateRemainingAmount(double originalLoanAmount, uint originalLoanTime, /*int optionType,*/
-             uint monthOfDateLoanTaken, uint yearOfDateLoanTaken, double originalRate,
-             double originalInflation, double interestPaidSoFar, double totalPaidSoFar,
-             double principalPaidSoFar, out uint remaingLoanTime)
+        public static double CalculateRemainingAmount(indices indices, double originalLoanAmount, uint originalLoanTime, 
+             DateTime dateLoanTaken, double originalRate, double originalInflation, out uint remaingLoanTime,
+             RunEnvironment env = null)
          {
-
-            //Option optionForCheck = new Option(optionType, originalLoanAmount, originalLoanTime);
-            //optionForCheck.optRateForRemainingAmount = originalRate;
-
             double firstMonthlyPMT = CalculateMonthlyPmt(originalLoanAmount, originalLoanTime,
-                /*optionForCheck.optRateForRemainingAmount,*/ originalRate, originalInflation);
+                originalRate, originalInflation);
  
-            double remeaingAmount = CalculateLuahSilukinSoFar(
+            double remeaingAmount = CalculateLuahSilukinSoFar2(
+                indices,
                 originalRate, originalInflation,
                 originalLoanAmount, originalLoanTime,
-                monthOfDateLoanTaken, yearOfDateLoanTaken,
-                interestPaidSoFar, totalPaidSoFar,
-                firstMonthlyPMT, principalPaidSoFar, out remaingLoanTime);
+                dateLoanTaken, firstMonthlyPMT, out remaingLoanTime, env);
             return remeaingAmount;
         }
         
@@ -353,49 +347,74 @@ namespace WisorLibrary.Logic
 
         }
 
+        /*
+         * This calculation is manily for the products which have a rate dependency 
+         * actually the Israel PRIME and the ARM products
+         */
+
         private static double CalculateLuahSilukinSoFar2(indices indices,
             double originalRate, double originalInflation,
             double originalLoanAmount, uint originalLoanTime,
-            uint monthOfDateLoanTaken, uint yearOfDateLoanTaken,
-            double interestPaidSoFar, double totalPaidSoFar,
-            double firstMonthlyPMT, double principalPaidSoFar, out uint remaingLoanTime)
+            DateTime dateLoanTaken, double firstMonthlyPMT, out uint remaingLoanTime,
+            RunEnvironment env)
         {
-            double historicRate = MiscUtilities.GetHistoricIndexRateForOption(indices, yearOfDateLoanTaken, monthOfDateLoanTaken);
-
+            double interestPaidSoFar = MiscConstants.UNDEFINED_DOUBLE, 
+                totalPaidSoFar = MiscConstants.UNDEFINED_DOUBLE, 
+                principalPaidSoFar = MiscConstants.UNDEFINED_DOUBLE;
+            double startingAmount = originalLoanAmount;
+            remaingLoanTime = originalLoanTime;
+            double historicRate = MiscUtilities.GetHistoricIndexRateForDate(indices, dateLoanTaken);
+            // the difference between the original rate and the historic rate define the base for the product
+            double productPlanRate = originalRate - historicRate;
             double r = ((originalRate / 12 * 100000000) - ((originalRate / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
             double i = ((originalInflation / 12 * 100000000) - ((originalInflation / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
-
             double monthlyPmt = Math.Round(firstMonthlyPMT, 2);
-            double startingAmount = originalLoanAmount;
+            int numOfMonths = MiscUtilities.CalculateMonthBetweenDates(dateLoanTaken, DateTime.Now);
+            double currentRate = originalRate, ratePmt, principalPmt;
+            DateTime currentDate = dateLoanTaken;
+            int m;
 
-            int numOfMonths = CalculateTimeLoops(monthOfDateLoanTaken, yearOfDateLoanTaken);
-  
-            remaingLoanTime = originalLoanTime;
-
-            for (int m = 0; m < numOfMonths; m++)
+            try
             {
-                remaingLoanTime--;
-                double ratePmt = Math.Round((startingAmount * (1 + i) * r), 2);
-                double principalPmt = monthlyPmt - ratePmt;
-                principalPaidSoFar += principalPmt;
-                interestPaidSoFar += ratePmt;
-                totalPaidSoFar += monthlyPmt;
-                startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
+                if (null != env)
+                    env.WriteToOutputFile("historicRate: " + historicRate + ", productPlanRate: " + productPlanRate);
 
-                monthlyPmt = Math.Round(CalculateMonthlyPmt(startingAmount, (uint)(originalLoanTime - m+1),
-                /*originalRate,*/ originalRate, originalInflation), 2);
+                for (m = 1; m <= numOfMonths; m++)
+                {
+                    ratePmt = Math.Round((startingAmount * (1 + i) * r), 2);
+                    principalPmt = monthlyPmt - ratePmt;
+                    principalPaidSoFar += principalPmt;
+                    interestPaidSoFar += ratePmt;
+                    totalPaidSoFar += monthlyPmt;
+
+                    remaingLoanTime--;
+                    // for debug:
+                    if (null != env)
+                        env.WriteToOutputFile(m + "," + startingAmount + "," + principalPmt +
+                            "," + ratePmt + "," + r + "," + historicRate + "," + currentRate + "," + monthlyPmt);
+
+                    // calculate the exact historical rate 
+                    currentDate = dateLoanTaken.AddMonths(m);
+                    historicRate = MiscUtilities.GetHistoricIndexRateForPeriod(indices, currentDate);
+                    currentRate = historicRate + productPlanRate;
+                    r = ((currentRate / 12 * 100000000) - ((currentRate / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
+
+
+                    startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
+
+                    monthlyPmt = Math.Round(CalculateMonthlyPmt(startingAmount, (uint)(originalLoanTime - m),
+                            currentRate, originalInflation), 2);
+                }
             }
-
+            catch (Exception ex)
+            {
+                WindowsUtilities.loggerMethod("ERROR: CalculateLuahSilukinSoFar2 got Exception: " + ex.ToString());
+            }
             return startingAmount;
         }
 
 
-        private static int CalculateTimeLoops(uint Month, uint Year)
-        {
-            int months = ((DateTime.Now.Year * 12) + DateTime.Now.Month) - (((int)Year * 12) + (int)Month);
-            return months;
-        }
-
+     
 
 
 
