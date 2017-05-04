@@ -25,7 +25,7 @@ namespace WisorLib
         public uint DesiredMonthlyPayment { get; set; }
         public uint LoanAmount { get; set; }
         public uint OriginalLoanAmount { get; set; }
-        public uint fico { get; set; }
+        public int fico { get; set; }
         public DateTime DateTaken { get; set; }
         public uint DesireTerminationMonth { get; set; }
         public uint BorrowerAge { get; set; }
@@ -39,21 +39,21 @@ namespace WisorLib
         public double RemaingLoanAmount { get; set; }
         public uint RemaingLoanTime { get; set; }
 
-        //public CreditClass CreditClass { get; set; }
-        //public MortgageType MortgageType { get; set; }
-        //public MortgagProduct MortgagProduct { get; set; }
-        //public double InterestRate { get; set; }
-        //public PaymentType PaymentType { get; set; }
-
         public Risk risk { set; get; }
         public Liquidity liquidity { set; get; }
 
+        public indices indices { set; get; }
+
+        public double OriginalInflation { set; get; }
+
+        public bool Status { set; get; }
+
         public loanDetails(string id, uint loanAmount, uint desiredMonthlyPayment, uint propertyValue,
-            uint yearlyIncome, uint borrowerAge, uint fic,
+            uint yearlyIncome, uint borrowerAge, int fic,
             // optional parameters
-            DateTime dateTaken,
+            DateTime dateTaken, ProductID product, bool shouldCalculate = true,
             double originalRate = MiscConstants.UNDEFINED_DOUBLE, uint originalTime = MiscConstants.UNDEFINED_UINT,
-            uint desireTerminationMonth = MiscConstants.UNDEFINED_UINT,
+            //uint desireTerminationMonth = MiscConstants.UNDEFINED_UINT,
             uint sequentialNumber = MiscConstants.UNDEFINED_UINT,
             Risk risk = Risk.NONERisk, Liquidity liquidity = Liquidity.NONELiquidity)
         {
@@ -65,29 +65,47 @@ namespace WisorLib
             YearlyIncome = yearlyIncome;
             fico = fic;
             DateTaken = dateTaken;
-            DesireTerminationMonth = desireTerminationMonth;
+            //DesireTerminationMonth = desireTerminationMonth;
             SequentialNumber = (MiscConstants.UNDEFINED_UINT == sequentialNumber) ? MiscUtilities.GetSequenceID() : sequentialNumber;
 
-            //OriginalProduct = originalProduct;
-            OriginalRate = originalRate;
-            OriginalTime = originalTime;
+            OriginalInflation = MiscConstants.UNDEFINED_DOUBLE;
 
-            int monthOfDateLoanTaken = DateTaken.Month;
-            int yearOfDateLoanTaken = DateTaken.Year;
-            uint remaingLoanTime = MiscConstants.UNDEFINED_UINT;
-            //int optionType = GenericProduct.GetProductIndex(OriginalProduct);
-
-            if (DateTime.Now == dateTaken || /*MiscConstants.UNDEFINED_DOUBLE == originalRate ||*/
-                MiscConstants.UNDEFINED_UINT == originalTime)
+            // get the indics from the product to calculate the exact rate
+            indices = indices.NONE;
+            if (null == product)
             {
-                // nothing to calculate
+                Console.WriteLine("ERROR: loanDetails got NULL product. Ignore calculate the historical rate.");
             }
             else
             {
-                RemaingLoanAmount = Calculations.CalculateRemainingAmount((double)LoanAmount, OriginalTime, /*optionType,*/
-                     (uint)monthOfDateLoanTaken, (uint)yearOfDateLoanTaken, OriginalRate,
-                     (double)0 /*originalInflation*/, (double)0 /*interestPaidSoFar*/, (double)0 /*totalPaidSoFar*/,
-                     (double)0 /*principalPaidSoFar*/, out remaingLoanTime);
+                GenericProduct gp = GenericProduct.GetProductByName(product.stringTypeId);
+                if (null != gp)
+                {
+                    indices = gp.originalIndexUsedFirstTimePeriod;
+                    OriginalInflation = gp.indexUsedFirstTimePeriod;
+                }
+                else
+                {
+                    Console.WriteLine("ERROR: loanDetails can't recognize the product: " + product.stringTypeId);
+                }
+            }
+
+            OriginalRate = originalRate;
+            OriginalTime = originalTime;
+            uint remaingLoanTime = RemaingLoanTime = OriginalTime;
+           
+            if (! shouldCalculate || DateTime.Now == dateTaken
+                /*|| MiscConstants.UNDEFINED_DOUBLE == originalRate ||  MiscConstants.UNDEFINED_UINT == originalTime*/)
+            {
+                // nothing to calculate
+                RemaingLoanTime = remaingLoanTime;
+            }
+            else
+            {
+                RemaingLoanAmount = Calculations.CalculateRemainingAmount(
+                     indices, (double)LoanAmount, OriginalTime, DateTaken, OriginalRate, 
+                     OriginalInflation, 
+                     out remaingLoanTime);
                 RemaingLoanTime = remaingLoanTime;
 
                 // update the values for the new loan
@@ -102,17 +120,53 @@ namespace WisorLib
             {
                 DesiredMonthlyPayment = MiscUtilities.CalculateMonthlyPayment(loanAmount, propertyValue, yearlyIncome, borrowerAge);
             }
-            //    MortgageType = mortgageType;
-            //    PaymentType = paymentType;
-            //    DateTaken = (DateTime) dateTaken;
-            //    MortgagProduct = mortgagProduct;
-            //    InterestRate = interestRate;
-            //    TermInYears = termInYears;
-            //    CreditClass = creditClass;
+          
             this.risk = risk;
             this.liquidity = liquidity;
+
+            Status = CheckConsistancy();
         }
 
+
+        private bool CheckConsistancy()
+        {
+            bool rc = false;
+
+            if (MiscConstants.UNDEFINED_UINT < LoanAmount && MiscConstants.UNDEFINED_UINT < DesiredMonthlyPayment &&
+                MiscConstants.UNDEFINED_UINT < PropertyValue && MiscConstants.UNDEFINED_UINT < YearlyIncome &&
+                MiscConstants.UNDEFINED_DOUBLE < OriginalRate && MiscConstants.UNDEFINED_UINT < OriginalTime &&
+                MiscConstants.UNDEFINED_DOUBLE < OriginalInflation && indices.NONE != indices &&
+                MiscConstants.UNDEFINED_UINT < RemaingLoanTime)
+            {
+                rc = true;
+            }
+            else
+            {
+                string err = null;
+                if (MiscConstants.UNDEFINED_UINT >= LoanAmount)
+                    err += " illegal LoanAmount value: " + LoanAmount;
+                if (MiscConstants.UNDEFINED_UINT >= DesiredMonthlyPayment)
+                    err += " illegal DesiredMonthlyPayment value: " + DesiredMonthlyPayment;
+                if (MiscConstants.UNDEFINED_UINT >= PropertyValue)
+                    err += " illegal PropertyValue value: " + PropertyValue;
+                if (MiscConstants.UNDEFINED_UINT >= YearlyIncome)
+                    err += " illegal YearlyIncome value: " + YearlyIncome;
+                if (MiscConstants.UNDEFINED_DOUBLE >= OriginalRate)
+                    err += " illegal OriginalRate value: " + OriginalRate;
+                if (MiscConstants.UNDEFINED_UINT >= OriginalTime)
+                    err += " illegal OriginalTime value: " + OriginalTime;
+                if (MiscConstants.UNDEFINED_UINT >= RemaingLoanTime)
+                    err += " illegal RemaingLoanTime value: " + RemaingLoanTime;
+                if (MiscConstants.UNDEFINED_DOUBLE >= OriginalInflation)
+                    err += " illegal OriginalInflation value: " + OriginalInflation;
+                if (indices.NONE == indices)
+                    err += " illegal indices value: " + indices;
+                Console.WriteLine("ERROR: illegal loanDetails: " + err);
+                WindowsUtilities.loggerMethod("ERROR: illegal loanDetails: " + err);
+            }
+
+            return rc;
+        }
         public override string ToString()
         {
             return ("Loan data ID: " + this.ID + ", amount: " + this.LoanAmount + ", monthly payment: " + this.DesiredMonthlyPayment +
