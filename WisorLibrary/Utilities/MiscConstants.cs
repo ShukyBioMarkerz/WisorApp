@@ -35,6 +35,8 @@ namespace WisorLib
         public static string    CSV_EXT = ".csv";
         public static string    DOTS_STR = ":";
         public static string    SEQ_STR = "#";
+        public static char      SPACE_STR = ' ';
+        public static string    DATE_FORMAT  = "d/M/yyyy";
 
         // files to load from
 
@@ -45,35 +47,46 @@ namespace WisorLib
         //public static string LOAN_FILE = "TestCases.xlsx"; // "ClalPOCDataForFinalCalculation.xlsx"; // "Citi Test cases (2).csv"; // "POC Data - Test Run.csv";
         //public static string COMBINATIONS_FILE = "Combinations.csv"; // "CombinationsIsrael.csv";
 
-        public static string PRODUCTS_FILE = "MortgageProducts - Updated.xml";
+        public const string MARKET = "market";
         public static string LOGGER_FILE = "LOGGER";
-
-        public static string CRETIRIA_FILE = "ClalGui.xml"; // "Gui.xml"; 
-        public static string RATES_FILE = "RateFileClalOnlyApril2017.xlsx";
-        public static string BANK_RATES_FILE = "MarginFileClalOnlyApril2017.xlsx";
-        public static string LOAN_FILE = "ClalShort.xlsx"; //"ClalPOCDataForFinalCalculation.xlsx"; // "Citi Test cases (2).csv"; // "POC Data - Test Run.csv";
-        public static string COMBINATIONS_FILE = "CombinationsIsrael.csv";
-
+        public const string PRODUCTS_FILE = "MortgageProducts - Updated.xml";
+        public const string CRETIRIA_FILE = "ClalGui.xml"; // "Gui.xml"; 
+        public const string RATES_FILE = "RateFileClalOnlyApril2017.xlsx";
+        public const string BANK_RATES_FILE = "MarginFileClalOnlyApril2017.xlsx";
+        public const string LOAN_FILE = "ClalShort.xlsx"; //"ClalPOCDataForFinalCalculation.xlsx"; // "Citi Test cases (2).csv"; // "POC Data - Test Run.csv";
+        public const string COMBINATIONS_FILE = "CombinationsIsrael.csv";
+        public const string HISTORIC_FILE = "PrimeIsraelRateDB_Test.xlsx"; // "HistoricIsraelPrimeRates - Copy.xlsx";
+        public const string CONFIGURATION_FILE = "WisorConfiguration.xml";
 
         // Loan parameter
-        public const string LOAN_AMOUNT = "Loan amount";
-        public const string MONTHLY_PAYMENT = "Desired monthly payment";
-        public const string PROPERTY_VALUE = "Property value";
-        public const string YEARLY_INCOME = "Yearly income";
-        public const string AGE = "Borrower age";
-        public const string MORTGAGE_TYPE = "Mortgage type"; // First time buyer, 
-        public const string PAYMENT_TYPE = "Payment type";
-        public const string MORTGAGE_PRODUCT = "Mortgage product";
-        public const string LOAN_FICO = "FICO";
-        public const string DATE_TAKEN = "Date Taken";
-        public const string DESIRE_TERMINATION_MONTH = "DesireTerminationMonth";
-        public const string SEQ_NUMBER = "SequentialNumber";
-        public const string ORIGINAL_PRODUCT = "Original Product";
-        public const string ORIGINAL_RATE = "Original Rate";
-        public const string ORIGINAL_TIME = "Original Time";
-        public const string CUSTOMER_NAME = "Customer name";
-        public const string RISK_VALUE = "Risk";
-        public const string LIQUIDITY_VALUE = "Liquidity";
+        public const string LOAN_AMOUNT = "loan amount";
+        public const string MONTHLY_PAYMENT = "monthly payment";
+        public const string PROPERTY_VALUE = "property value";
+        public const string YEARLY_INCOME = "income";
+        public const string AGE = "age";
+        public const string MORTGAGE_TYPE = "mortgage type"; // First time buyer, 
+        public const string PAYMENT_TYPE = "payment type";
+        public const string MORTGAGE_PRODUCT = "mortgage product";
+        public const string LOAN_FICO = "fico";
+        public const string DATE_TAKEN = "date";
+        public const string DESIRE_TERMINATION_MONTH = "desireterminationmonth";
+        public const string SEQ_NUMBER = "sequentialnumber";
+        public const string ORIGINAL_PRODUCT = "original product";
+        public const string ORIGINAL_RATE = "rate";
+        public const string ORIGINAL_TIME = "time";
+        public const string CUSTOMER_NAME = "CUSTOMER_NAME";
+        public const string RISK_VALUE = "risk";
+        public const string LIQUIDITY_VALUE = "liquidity";
+        public const string PRODUCT_NAME = "product name";
+        public const string CRETIRIA_FILENAME = "CRETIRIA_FILE";
+        public const string LOAN_FILENAME = "LOAN_FILE";
+
+        public const string RATES_FILENAME = "RATES_FILE";
+        public const string HISTORIC_FILENAME = "HISTORIC_FILE";
+        public const string COMBINATIONS_FILENAME = "COMBINATIONS_FILE";
+        public const string RISK_LIQUIDITY_FILENAME = "RISK_LIQUIDITY_FILE";
+        public const string PRODUCTS_FILENAME = "PRODUCTS_FILE";
+
 
         public static uint DEFAULT_PERCANTAGE_OF_MONTHLY_PAYMENT = 30;
 
@@ -95,34 +108,8 @@ namespace WisorLib
         public const int RISK_LIQUIDITY_HEADER = 3;
         public enum Risk { MinimumRisk1, LessRisk2, MediumRisk3, MoreRisk4, MaximumRisk5, NONERisk}; 
         public enum Liquidity { MinimumLiquidity1, LessLiquidity2, MediumLiquidity3, MoreLiquidity4, MaximumLiquidity5 , NONELiquidity};
-        public static string RISK_LIQUIDITY_FILE = "RiskLiquidityCiti.xlsx"; 
-
-  
-        //public static GenericProduct GetProduct(uint id)
-        //{
-        //    (markets)Enum.Parse(typeof(markets), product.Element("market").Value, true);
-
-        //    GenericProduct product = Share.theLoadedProducts.GetProduct(id);
-        //    if (null == product)
-        //    {
-        //        WindowsUtilities.loggerMethod("GetProduct: failed to find product id: " + id);
-        //    }
-        //    else
-        //    {
-        //        // TBD: check product correctess
-        //        product = null;
-        //    }
-
-        //    return product;
-        //}
-
-        //// spend some time .....
-        //public static void FakeFunctionality()
-        //{
-        //    Thread.Sleep(12345);
-        //}
-
-
+        public const string RISK_LIQUIDITY_FILE = "RiskLiquidityCiti.xlsx"; 
+        
     }
 
 }
