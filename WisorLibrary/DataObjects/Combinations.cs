@@ -63,8 +63,8 @@ namespace WisorLibrary.DataObjects
                 string[] comb = LoadCombinationsFileData(filename);
                 if (null == comb || 0 >= comb.Length)
                 {
-                    WindowsUtilities.loggerMethod("ERROR Combinations failed to load from file: " + filename);
-                    Console.WriteLine("ERROR Combinations failed to load from file: " + filename);
+                    //WindowsUtilities.loggerMethod("ERROR Combinations failed to load from file: " + filename);
+                    //Console.WriteLine("ERROR Combinations failed to load from file: " + filename);
                 }
                 else
                 {
@@ -124,6 +124,17 @@ namespace WisorLibrary.DataObjects
             catch (Exception e)
             {
                 WindowsUtilities.loggerMethod("ERROR: LoadCombinationsFileData got Exception: " + e.ToString()/* + ". line: " + line*/);
+            }
+
+            if (null == lines || 0 >= lines.Length)
+            {
+                WindowsUtilities.loggerMethod("ERROR Combinations failed to load from file: " + filename);
+                Console.WriteLine("ERROR Combinations failed to load from file: " + filename);
+            }
+            else
+            {
+                //WindowsUtilities.loggerMethod("NOTICE successfully load: " + lines.Length + " Combinations from file: " + filename);
+                Console.WriteLine("NOTICE successfully load: " + lines.Length + " Combinations from file: " + filename);
             }
 
             return lines;

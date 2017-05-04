@@ -95,8 +95,8 @@ namespace WisorLibrary.Logic
             }
             else
             {
-                WindowsUtilities.loggerMethod("NOTICE LoadRates succesfully load: " + Share.theProductsRates.Length + " entries.");
-                Console.WriteLine("NOTICE LoadRates succesfully load: " + Share.theProductsRates.Length + " entries.");
+                WindowsUtilities.loggerMethod("NOTICE LoadRates succesfully load: " + Share.theProductsRates.Length + " entries from file: " + filename);
+                Console.WriteLine("NOTICE LoadRates succesfully load: " + Share.theProductsRates.Length + " entries from file: " + filename);
             }
 
             return (null != Share.theProductsRates && 0 < Share.theProductsRates.Length);
@@ -108,8 +108,8 @@ namespace WisorLibrary.Logic
             if (null == Share.theBankRates || 0 >= Share.theBankRates.Length)
                 Share.theBankRates = LoadRatesCSVFile(bankFilename);
             int numOfRates = (null == Share.theBankRates) ? 0 : Share.theBankRates.Length;
-            WindowsUtilities.loggerMethod("NOTICE LoadBankRates succesfully load: " + numOfRates + " entries.");
-            Console.WriteLine("NOTICE LoadBankRates succesfully load: " + numOfRates + " entries.");
+            WindowsUtilities.loggerMethod("NOTICE LoadBankRates succesfully load: " + numOfRates + " entries from file: " + bankFilename);
+            Console.WriteLine("NOTICE LoadBankRates succesfully load: " + numOfRates + " entries from file: " + bankFilename);
             return (null != Share.theBankRates && 0 < Share.theBankRates.Length);
         }
 
@@ -282,8 +282,8 @@ namespace WisorLibrary.Logic
             if (null == Share.theProductsNames || 0 >= Share.theProductsNames.Length)
             {
                 string[] productNames = products.ToArray();
-                WindowsUtilities.loggerMethod("NOTICE: #of productNames: " + productNames.Length);
-                Console.WriteLine("NOTICE: #of productNames: " + productNames.Length);
+                WindowsUtilities.loggerMethod("NOTICE: #of productNames: " + productNames.Length + " from file: " + filename);
+                Console.WriteLine("NOTICE: #of productNames: " + productNames.Length + " from file: " + filename);
                 Share.theProductsNames = productNames;
                 ConvertProductsNaming();
             }

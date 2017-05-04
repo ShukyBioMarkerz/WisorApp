@@ -66,7 +66,7 @@ namespace WisorLibrary.Utilities
             return excelLines;
         }
 
-        public static string[] GetLinesFromFile(string filename, bool shouldRemoveFractions = true)
+        public static string[] GetLinesFromFile(string filename, bool shouldRemoveFractions/* = true*/)
         {
             ShouldRemoveFractions = shouldRemoveFractions;
             string[] lines = OpenExcelFile(filename);
@@ -90,21 +90,26 @@ namespace WisorLibrary.Utilities
                     line = null;
                     for (int j = 0; j < table.Columns.Count; j++)
                     {
-                        var v = table.Rows[i].ItemArray[j];
-                        if (0 < table.Rows[i].ItemArray[j].ToString().Length)
+                        string str = table.Rows[i].ItemArray[j].ToString();
+                        if (0 < str.Length)
                         {
                             // avoid the fraction area
-                            if (! DateTime.TryParse(table.Rows[i].ItemArray[j].ToString(), out dateValue))
+                            if (!DateTime.TryParse(str, out dateValue))
                             {
                                 if (ShouldRemoveFractions)
-                                    pos = table.Rows[i].ItemArray[j].ToString().IndexOf(MiscConstants.DOT_STR);
+                                    pos = str.IndexOf(MiscConstants.DOT_STR);
                                 else
                                     pos = 0;
 
                                 if (0 < pos)
-                                    line += table.Rows[i].ItemArray[j].ToString().Remove(pos).Trim() + MiscConstants.COMMA_SEERATOR_STR;
+                                    line += str.Remove(pos).Trim() + MiscConstants.COMMA_SEERATOR_STR;
                                 else
-                                    line += table.Rows[i].ItemArray[j].ToString() + MiscConstants.COMMA_SEERATOR_STR;
+                                    line += str + MiscConstants.COMMA_SEERATOR_STR;
+                            }
+                            else
+                            {
+                                // it is a date
+                                line += str + MiscConstants.COMMA_SEERATOR_STR;
                             }
                         }
                     }
