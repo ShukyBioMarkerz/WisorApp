@@ -132,7 +132,7 @@ namespace WisorAppWpf
 
         public static FieldList GetCriteriaFromFile()
         {
-            WindowsUtilities.loggerMethod("Select the critiria and order for the loan");
+            //WindowsUtilities.loggerMethod("Select the critiria and order for the loan");
             FieldList fields = null;
             Share.theSelectionType = SelectionType.ReadCretiria;
 
@@ -159,18 +159,20 @@ namespace WisorAppWpf
                 {
                     fields = FileUtils.LoadXMLFileData(filename);
                 }
+                WindowsUtilities.loggerMethod("Successfully upload: " + fields.Count + " criteria definitions from file: " + filename);
+                Console.WriteLine("Successfully upload: " + fields.Count + " criteria definitions from file: " + filename);
             }
 
             return fields;
         }
 
+        
         public static ProductsList GetProductsFromFile()
         {
             //WindowsUtilities.loggerMethod("Select the Products from file");
             ProductsList products = null;
             Share.theSelectionType = SelectionType.ReadProducts;
-
-
+            
             if (Share.shouldShowProductSelectionWindow)
             {
                 try
@@ -299,8 +301,6 @@ namespace WisorAppWpf
             }
             else
             {
-                WindowsUtilities.loggerMethod("Successfully upload: " + fields.Count + " criteria definitions");
-
                 ProductsList products = Utilities.GetProductsFromFile();
                 if (null == Share.theLoadedProducts)
                 {
@@ -406,29 +406,38 @@ namespace WisorAppWpf
         {
             RunLoanDetails result = null;
 
-            if (1 == Interlocked.Add(ref GlobalCurrentLoanCounter, 1))
+            // is the loan ready to be calculated?
+            if (loan.Status)
             {
-                // start the time elapse counter
-                Utilities.StartPerformanceCalculation();
+                if (1 == Interlocked.Add(ref GlobalCurrentLoanCounter, 1))
+                {
+                    // start the time elapse counter
+                    Utilities.StartPerformanceCalculation();
+                }
+
+                WindowsUtilities.loggerMethod("+++ LoanCalculation Running a new task with: " + loan.ToString() + ", Task.CurrentId: " + Task.CurrentId + ", GlobalCurrentLoanCounter: " + GlobalCurrentLoanCounter);
+                RunEnvironment env = new RunEnvironment(loan);
+                //env.risk = 1;
+                //env.liquidity = 2;
+
+                FastSearch fs = new FastSearch(env);
+                result = fs.runSearch();
+
+                Interlocked.Decrement(ref GlobalCurrentLoanCounter);
+                long c = Interlocked.Read(ref GlobalCurrentLoanCounter);
+                if (0 >= c)
+                    Utilities.StopPerformanceCalculation();
+
+                WindowsUtilities.loggerMethod("--- LoanCalculation Complete running the engine with: " + loan.ToString() + ", result: " + result.ToString() + ", Task.CurrentId: " + Task.CurrentId + ", GlobalCurrentLoanCounter: " + GlobalCurrentLoanCounter);
+                Console.WriteLine("--- LoanCalculation Complete running the engine with: " + loan.ToString() + ", result: " + result.ToString() + ", Task.CurrentId: " + Task.CurrentId + ", GlobalCurrentLoanCounter: " + GlobalCurrentLoanCounter);
+
+                Utilities.PrintResultsInList(env);
             }
-
-            WindowsUtilities.loggerMethod("+++ LoanCalculation Running a new task with: " + loan.ToString() + ", Task.CurrentId: " + Task.CurrentId + ", GlobalCurrentLoanCounter: " + GlobalCurrentLoanCounter);
-            RunEnvironment env = new RunEnvironment(loan);
-            //env.risk = 1;
-            //env.liquidity = 2;
- 
-            FastSearch fs = new FastSearch(env);
-            result = fs.runSearch();
-
-            Interlocked.Decrement(ref GlobalCurrentLoanCounter);
-            long c = Interlocked.Read(ref GlobalCurrentLoanCounter);
-            if (0 >= c)
-                Utilities.StopPerformanceCalculation();
-
-            WindowsUtilities.loggerMethod("--- LoanCalculation Complete running the engine with: " + loan.ToString() + ", result: " + result.ToString() + ", Task.CurrentId: " + Task.CurrentId + ", GlobalCurrentLoanCounter: " + GlobalCurrentLoanCounter);
-            Console.WriteLine("--- LoanCalculation Complete running the engine with: " + loan.ToString() + ", result: " + result.ToString() + ", Task.CurrentId: " + Task.CurrentId + ", GlobalCurrentLoanCounter: " + GlobalCurrentLoanCounter);
-
-            Utilities.PrintResultsInList(env);
+            else
+            {
+                WindowsUtilities.loggerMethod("--- LoanCalculation illegal loan details: " + loan.ToString());
+                Console.WriteLine("--- LoanCalculation illegal loan details: " + loan.ToString());
+            }
 
             return result;
         }
@@ -753,8 +762,9 @@ namespace WisorAppWpf
         {
             LoanList loans = new LoanList();
             int id = MiscUtilities.GetLoanID();
-            uint loanAmount, desiredMonthlyPayment, propertyValue, yearlyIncome, 
-                borrowerAge, fico;
+            uint loanAmount, desiredMonthlyPayment, propertyValue, yearlyIncome,
+                borrowerAge;
+            int fico;
             DateTime dateTaken = DateTime.Now;
             uint desireTerminationMonth, sequentialNumber;
             //string originalProduct = MiscConstants.UNDEFINED_STRING;
@@ -762,9 +772,11 @@ namespace WisorAppWpf
             uint originalTime = MiscConstants.UNDEFINED_UINT;
             Risk risk = Risk.NONERisk;
             Liquidity liquidity = Liquidity.NONELiquidity;
+            ProductID product = null;
 
             loanAmount = desiredMonthlyPayment = propertyValue = yearlyIncome = borrowerAge =
-                fico = desireTerminationMonth = sequentialNumber = MiscConstants.UNDEFINED_UINT;
+                desireTerminationMonth = sequentialNumber = MiscConstants.UNDEFINED_UINT;
+            fico = MiscConstants.UNDEFINED_INT;
 
             foreach (System.Windows.Forms.Control c in uil.Controls)
             {
@@ -774,7 +786,7 @@ namespace WisorAppWpf
                 {
                     string txt = c.Text;
                     string name = c.Name;
-                    switch (name)
+                    switch (name.ToLower())
                     {
                         case MiscConstants.LOAN_AMOUNT:
                             loanAmount = Convert.ToUInt32(txt);
@@ -792,7 +804,7 @@ namespace WisorAppWpf
                             borrowerAge = Convert.ToUInt32(txt);
                             break;
                         case MiscConstants.LOAN_FICO:
-                            fico = Convert.ToUInt32(txt);
+                            fico = Convert.ToInt32(txt);
                             break;
                         case MiscConstants.CUSTOMER_NAME:
                             if (! String.IsNullOrEmpty(txt))
@@ -839,6 +851,10 @@ namespace WisorAppWpf
                         case MiscConstants.LIQUIDITY_VALUE:
                             liquidity = (Liquidity)Enum.Parse(typeof(Liquidity), txt, true);
                             break;
+                        case MiscConstants.PRODUCT_NAME:
+                            product = new ProductID(MiscConstants.UNDEFINED_INT, txt);
+                            break;
+                            
 
                         //    case MiscConstants.MORTGAGE_TYPE:
                         //        mortgageType = Convert.ToUInt32(txt);
@@ -857,11 +873,11 @@ namespace WisorAppWpf
             }
             uil.Hide();
             uil.Close();
-
+            
             loanDetails loan = new loanDetails(id.ToString(), loanAmount, desiredMonthlyPayment,
                 propertyValue, yearlyIncome, borrowerAge, fico,
-                dateTaken, /*originalProduct,*/ originalRate, originalTime,
-                desireTerminationMonth, sequentialNumber, risk, liquidity);
+                dateTaken, product, true /*shouldCalculate*/, originalRate, originalTime,
+                /*desireTerminationMonth,*/ sequentialNumber, risk, liquidity);
            
             WindowsUtilities.runLoanMethod(loan);
         }
