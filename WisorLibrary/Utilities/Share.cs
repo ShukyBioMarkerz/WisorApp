@@ -73,6 +73,118 @@ namespace WisorLib
 
         public static markets theMarket { get; set; }
 
+        private static string criteriaFileName;
+        public static string CriteriaFileName
+        {
+            get {
+                if (string.IsNullOrEmpty(criteriaFileName))
+                    return MiscConstants.CRETIRIA_FILE;
+                return criteriaFileName;
+            }
+            set
+            {
+                //if (File.Exists(value))
+                    criteriaFileName = value;
+            }
+        }
+
+        private static string productsFileName;
+        public static string ProductsFileName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(productsFileName))
+                    return MiscConstants.PRODUCTS_FILE;
+                return productsFileName;
+            }
+            set
+            {
+                //if (File.Exists(value))
+                    productsFileName = value;
+            }
+        }
+
+        private static string loansFileName;
+        public static string LoansFileName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(loansFileName))
+                    return MiscConstants.LOAN_FILE;
+                return loansFileName;
+            }
+            set
+            {
+                //if (File.Exists(value))
+                    loansFileName = value;
+            }
+        }
+
+        private static string ratesFileName;
+        public static string RatesFileName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(ratesFileName))
+                    return MiscConstants.RATES_FILE;
+                return ratesFileName;
+            }
+            set
+            {
+                //if (File.Exists(value))
+                    ratesFileName = value;
+            }
+        }
+
+        private static string historicFileName;
+        public static string HistoricFileName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(historicFileName))
+                    return MiscConstants.HISTORIC_FILE;
+                return historicFileName;
+            }
+            set
+            {
+                //if (File.Exists(value))
+                    historicFileName = value;
+            }
+        }
+
+        private static string combinationFileName;
+        public static string CombinationFileName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(combinationFileName))
+                    return MiscConstants.COMBINATIONS_FILE;
+                return combinationFileName;
+            }
+            set
+            {
+                //if (File.Exists(value))
+                    combinationFileName = value;
+            }
+        }
+
+        private static string riskAndLiquidityFileName;
+        public static string RiskAndLiquidityFileName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(riskAndLiquidityFileName))
+                    return MiscConstants.RISK_LIQUIDITY_FILE;
+                return riskAndLiquidityFileName;
+            }
+            set
+            {
+                //if (File.Exists(value))
+                    riskAndLiquidityFileName = value;
+            }
+        }
+        
+
         // Once the user select the order, update the loaded list accordingly
         public static void OrderTheCriteriaFields()
         {
