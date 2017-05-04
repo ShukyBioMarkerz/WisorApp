@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
+using System.Xml.Linq;
 using WisorLib;
 using WisorLibrary.DataObjects;
+using WisorLibrary.Logic;
 using static WisorLib.GenericProduct;
 using static WisorLib.MiscConstants;
 
@@ -66,6 +70,16 @@ namespace WisorLibrary.Utilities
             //{
             //    rc = Rates.SetRatesFile(fullfilename, bankfullfilename);
             //}
+
+            return rc;
+        }
+
+        public static bool SetHistoricRatesFilename()
+        {
+            string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
+            string filename = dir + MiscConstants.HISTORIC_FILE;
+
+            bool rc = HistoricRate.SetFilename(filename);
 
             return rc;
         }
@@ -130,13 +144,14 @@ namespace WisorLibrary.Utilities
             }
         }
 
-   
 
         public static string GetFilenameFromUser()
         {
             string filename = null;
             bool toShow = false;
             string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
+            // the directory alrady set ....
+            dir = MiscConstants.UNDEFINED_STRING;
 
             // get the file from the user
             string header = null;
@@ -144,25 +159,25 @@ namespace WisorLibrary.Utilities
             {
                 header = "Select the critiria and order for the loan";
                 toShow = Share.shouldShowCriteriaSelectionWindow;
-                filename = dir + MiscConstants.CRETIRIA_FILE; // @"..\..\..\Data\Gui.xml";
+                filename = dir + Share.CriteriaFileName; // MiscConstants.CRETIRIA_FILE; 
             }
             else if (SelectionType.ReadProducts == Share.theSelectionType)
             {
                 header = "Select the products file";
                 toShow = Share.shouldShowProductSelectionWindow;
-                filename = dir + MiscConstants.PRODUCTS_FILE; // @"..\..\..\Data\MortgageProducts - Updated.xml";
+                filename = dir + Share.ProductsFileName; // MiscConstants.PRODUCTS_FILE; 
             }
             else if (SelectionType.ReadLoansFile == Share.theSelectionType)
             {
                 header = "Select the loans file";
                 toShow = Share.shouldShowLoansSelectionWindow;
-                filename = dir + MiscConstants.LOAN_FILE; //@"..\..\..\Data\POC Data - Test Run.csv";
+                filename = dir + Share.LoansFileName; // MiscConstants.LOAN_FILE; 
             }
             else if (SelectionType.ReadRates == Share.theSelectionType)
             {
                 header = "Select the rates file";
                 toShow = Share.shouldShowRatesSelectionWindow;
-                filename = dir + MiscConstants.RATES_FILE; //@"..\..\..\Data\RateFileGeneric.csv";
+                filename = dir + Share.RatesFileName; // MiscConstants.RATES_FILE; 
             }
             else
             {
@@ -195,31 +210,32 @@ namespace WisorLibrary.Utilities
         {
             string fin = filename;
 
-            // check if thee is a specific file to this customer
-            if (!String.IsNullOrEmpty(customerName))
-            {
-                string fn = System.IO.Path.GetFileName(filename);
-                string dirc = System.IO.Path.GetDirectoryName(filename);
-                string filename2 = dirc + System.IO.Path.DirectorySeparatorChar + Share.CustomerName + fn;
+            // check if there is a specific file to this customer
+            // leave it for now....
+            //if (!String.IsNullOrEmpty(customerName))
+            //{
+            //    string fn = System.IO.Path.GetFileName(filename);
+            //    string dirc = System.IO.Path.GetDirectoryName(filename);
+            //    string filename2 = dirc + System.IO.Path.DirectorySeparatorChar + Share.CustomerName + fn;
 
-                if (File.Exists(filename2))
-                {
-                    fin = filename2;
-                }
-            }
+            //    if (File.Exists(filename2))
+            //    {
+            //        fin = filename2;
+            //    }
+            //}
             return fin;
         }
 
 
         public static LoanList GetLoansFromFile(FieldList fields)
         {
-            WindowsUtilities.loggerMethod("Select the loans file");
+            //WindowsUtilities.loggerMethod("Select the loans file");
             LoanList loans = null;
 
             Share.theSelectionType = SelectionType.ReadLoansFile;
             //string filename = @"..\..\..\Data\Test Cases.xlsx";
             string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
-            string filename = dir + MiscConstants.LOAN_FILE; //  @"..\..\..\Data\\citi_POC_Data_Updated.csv";
+            string filename = dir + Share.LoansFileName; // MiscConstants.LOAN_FILE; 
             if (Share.shouldShowLoansSelectionWindow)
                 filename = MiscUtilities.GetFilenameFromUser();
             if (null != filename)
@@ -240,7 +256,7 @@ namespace WisorLibrary.Utilities
                 WindowsUtilities.loggerMethod("NOTICE: failed to upload loans from file: " + filename);
             }
             else
-                WindowsUtilities.loggerMethod("Successfully Upload " + loans.Count + " loans");
+                WindowsUtilities.loggerMethod("Successfully Upload " + loans.Count + " loans from file: " + filename);
 
             return loans;
         }
@@ -308,8 +324,11 @@ namespace WisorLibrary.Utilities
             return index;
         }
 
-        // for the remaining loan amount we should calculate the luch-silukin precisly according to the known historic rate
-        public static double GetHistoricIndexRateForOption(indices indic, uint year, uint month)
+        /*
+         * For the remaining loan amount we should calculate the luch-silukin precisly according to the known historic rate
+         * The function calculate the avarage rate if the rate was change several time in the same month
+         */
+        public static double GetHistoricIndexRateForPeriod(indices indic, DateTime dateLoanTaken)
         {
             double index = 0;
 
@@ -317,9 +336,14 @@ namespace WisorLibrary.Utilities
             {
                 case indices.MADAD:
                     index = 0.018;
-                    break;
-               case indices.PRIME:
-                    index = 0;
+                    break; 
+                case indices.PRIME:
+                    // ensure the file was loaded
+                    if (null == HistoricRate.Instance || !HistoricRate.Instance.Status)
+                        MiscUtilities.SetHistoricRatesFilename();
+                    //index = HistoricRate.GetHistoricIndex(indic, dateLoanTaken);
+                    // get the entire month values
+                    index = HistoricRate.GetHistoricValues(indic, dateLoanTaken, dateLoanTaken.AddMonths(1));
                     break;
                 case indices.CPI:
                     index = 0;
@@ -348,14 +372,106 @@ namespace WisorLibrary.Utilities
             return index;
         }
 
-
-        public static bool LoadIndexFile(string filename)
+        public static double GetHistoricIndexRateForDate(indices indic, DateTime dateLoanTaken)
         {
-            bool rc = false;
+            double index = 0;
 
-            return rc;
+            switch (indic)
+            {
+                case indices.MADAD:
+                    index = 0.018;
+                    break;
+                case indices.PRIME:
+                    // ensure the file was loaded
+                    if (null == HistoricRate.Instance || !HistoricRate.Instance.Status)
+                        MiscUtilities.SetHistoricRatesFilename();
+                    index = HistoricRate.GetHistoricIndex(indic, dateLoanTaken);
+                    break;
+                case indices.CPI:
+                    index = 0;
+                    break;
+                case indices.FED:
+                    index = 0;
+                    break;
+                case indices.LIBOR:
+                    index = 0;
+                    break;
+                case indices.EUROBOR:
+                    index = 0;
+                    break;
+                case indices.BBBR:
+                    index = 0;
+                    break;
+                case indices.MAKAM:
+                    index = 0;
+                    break;
+                default:
+                    index = 0;
+                    //WindowsUtilities.loggerMethod("NOTICE: GetIndexRateForOption undefined for indic: " + indic);
+                    break;
+            }
+
+            return index;
         }
 
+        public static int CalculateMonthBetweenDates(DateTime fromDate, DateTime toDate)
+        {
+            //int yearOfDateLoanTaken = DateTaken.Year;
+            int months = ((toDate.Year * 12) + toDate.Month) - (((int)fromDate.Year * 12) + (int)fromDate.Month);
+            return months;
+        }
+
+        public static int CalculateDatesBetweenDates(DateTime fromDate, DateTime toDate)
+        {
+            //int yearOfDateLoanTaken = DateTaken.Year;
+            int dayes = (int) /*Math.Abs*/((toDate- fromDate).TotalDays);
+            return dayes;
+        }
+
+        // if 'date' is between 'from' and 'to', return th days between 'date' and 'from'
+        public static int IsDateInBetween(DateTime date, DateTime fromDate, DateTime toDate)
+        {
+            int days = -1;
+
+            if (date >= fromDate && date <= toDate)
+            {
+                days = CalculateDatesBetweenDates(fromDate, date);
+            }
+
+            return days;
+        }
+
+        public static DateTime ConvertDate(string str)
+        {
+            CultureInfo provider = CultureInfo.InvariantCulture;
+            DateTime dt = default(DateTime);
+
+            // cleanup the minutes
+            int ind = str.IndexOf(MiscConstants.SPACE_STR);
+            if (0 < ind)
+                str = str.Remove(str.IndexOf(MiscConstants.SPACE_STR)).Trim();
+
+            try
+            {
+                //CultureInfo culture = new CultureInfo("he-IL"); // ("en -US");
+                //dt = DateTime.Parse(str, culture);
+                dt = DateTime.ParseExact(str, MiscConstants.DATE_FORMAT, provider);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("ERROR ConvertDate Exception: " + ex.ToString() + " for str: " + str);
+            }
+
+            return dt;
+        }
+
+        /// <summary>
+        /// /////////////////
+        /// </summary>
+        /// <returns></returns>
+        /// 
+
+    
         public static bool CheckConsistency(FinalLimitPoint[] points)
         {
             if (null == points ||
@@ -369,6 +485,76 @@ namespace WisorLibrary.Utilities
             }
             return true;
         }
+
+        public static void LoadXMLConfigurationFile(string filename)
+        {
+            string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
+            string fullFilename = dir + filename;
+
+            try
+            {
+                if (File.Exists(fullFilename))
+                {
+                    XmlDocument doc = new XmlDocument();
+
+                    //load up the xml from the location 
+                    doc.Load(fullFilename);
+
+                    // cycle through each child noed 
+                    foreach (XmlNode child in doc.DocumentElement.ChildNodes)
+                    {
+                        foreach (XmlNode node in child)
+                        {
+                            switch (child.Name/*.ToLower()*/)
+                            {
+                                case MiscConstants.CUSTOMER_NAME:
+                                    Share.CustomerName = node.Value;
+                                    break;
+                                case MiscConstants.MARKET:
+                                    markets market = (markets)Enum.Parse(typeof(markets), node.Value, true);
+                                    RunEnvironment.SetMarket(market);
+                                    break;
+                                case MiscConstants.CRETIRIA_FILENAME:
+                                    Share.CriteriaFileName = dir + node.Value;
+                                    break;
+                                case MiscConstants.LOAN_FILENAME:
+                                    Share.LoansFileName = dir + node.Value;
+                                    break;
+                                case MiscConstants.RATES_FILENAME:
+                                    Share.RatesFileName = dir + node.Value;
+                                    break;
+                                case MiscConstants.HISTORIC_FILENAME:
+                                    Share.HistoricFileName = dir + node.Value;
+                                    break;
+                                case MiscConstants.COMBINATIONS_FILE:
+                                    Share.CombinationFileName = dir + node.Value;
+                                    break;
+                                case MiscConstants.RISK_LIQUIDITY_FILENAME:
+                                    Share.RiskAndLiquidityFileName = dir + node.Value;
+                                    break;
+                                case MiscConstants.PRODUCTS_FILENAME:
+                                    Share.ProductsFileName = dir + node.Value;
+                                    break;
+                                default:
+                                    //WindowsUtilities.loggerMethod("NOTICE: LoadXMLConfigurationFile undefined for indic: " + indic);
+                                    break;
+                            }
+
+                        }
+                    }
+                }
+                else
+                {
+                    WindowsUtilities.loggerMethod("LoadXMLConfigurationFile file: " + fullFilename + " does not exists!!!");
+                }
+            }
+            catch (Exception ex)
+            {
+                WindowsUtilities.loggerMethod("NOTICE: LoadXMLConfigurationFile Exception occured: " + ex.ToString());
+            }
+
+        }
+
 
 
 
