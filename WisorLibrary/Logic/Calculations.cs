@@ -414,39 +414,47 @@ namespace WisorLibrary.Logic
         }
 
 
-     
+
 
 
 
         // The maximun and minimum amounts is calculated now by the Risk and Liquidity scores of the user
+        // for primeIsrael (indids == PRIME) then the min = max amount
         public static MinMax FindMinMaxAmount(double loanAmtWanted, OneOptType optType, Risk risk, 
             Liquidity liquidity, double prevMin)
         {
-            RiskLiquidityValue riskLiquidityValue = new RiskLiquidityValue();
-            riskLiquidityValue.liquidity = liquidity; 
-            riskLiquidityValue.risk = risk; 
-            riskLiquidityValue.productID = optType.product.productID;
-            bool rc = false;
             MinMax minmax = new MinMax();
 
-            if (Risk.NONERisk == risk || Liquidity.NONELiquidity == liquidity)
+            // TBD: should check if this is the case when the interest is low 
+            if (indices.PRIME == optType.product.originalIndexUsedFirstTimePeriod)
             {
-                // keep the old good stuff...
-                minmax.max = (int) (Calculations.FindMaxAmount(loanAmtWanted, optType) / 100 * 100);
-                minmax.min = (int) prevMin; // ... don't touch
-                //Console.WriteLine("FindMinMaxAmount no risk or liquidity for product: " + optType.product.productID.ToString());
+                minmax.max = (int)(Calculations.FindMaxAmount(loanAmtWanted, optType) / 100 * 100);
+                minmax.min = minmax.max;
             }
             else
             {
-                rc = MiscUtilities.FindRiskLiquidity(riskLiquidityValue);
-                if (rc)
+                if (Risk.NONERisk == risk || Liquidity.NONELiquidity == liquidity)
                 {
-                    // should calculate the loan values according to the percantage
-                    minmax.min = (int)(loanAmtWanted * riskLiquidityValue.min / 100 * 100);
-                    minmax.max = (int)(loanAmtWanted * riskLiquidityValue.max / 100 * 100);
+                    // keep the old good stuff...
+                    minmax.max = (int)(Calculations.FindMaxAmount(loanAmtWanted, optType) / 100 * 100);
+                    minmax.min = (int)prevMin; // ... don't touch
                 }
                 else
-                    Console.WriteLine("TestRiskLiquidity failed for: " + riskLiquidityValue.ToString());
+                {
+                    RiskLiquidityValue riskLiquidityValue = new RiskLiquidityValue();
+                    riskLiquidityValue.liquidity = liquidity;
+                    riskLiquidityValue.risk = risk;
+                    riskLiquidityValue.productID = optType.product.productID;
+                    bool rc = MiscUtilities.FindRiskLiquidity(riskLiquidityValue);
+                    if (rc)
+                    {
+                        // should calculate the loan values according to the percantage
+                        minmax.min = (int)(loanAmtWanted * riskLiquidityValue.min / 100 * 100);
+                        minmax.max = (int)(loanAmtWanted * riskLiquidityValue.max / 100 * 100);
+                    }
+                    else
+                        Console.WriteLine("TestRiskLiquidity failed for: " + riskLiquidityValue.ToString());
+                }
             }
  
             return minmax;
