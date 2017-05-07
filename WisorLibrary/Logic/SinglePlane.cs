@@ -59,8 +59,15 @@ namespace WisorLib
                 FindFinalExtendedLimitPointsForSearchArea(env);
                 //Console.ReadKey();
 
+                
                 if (! MiscUtilities.CheckConsistency(finalLimitPoints))
                 {
+                    //env.WriteToOutputFile("ERROR: SinglePlane failed in CheckConsistency. fixedOptZ: " + fixedOptZ.ToString() +
+                    //    ", initialLimitPoints OPTX: " + initialLimitPoints[(int)Options.options.OPTX].ToString() +
+                    //    ", initialLimitPoints OPTY: " + initialLimitPoints[(int)Options.options.OPTY].ToString() +
+                    //    ", finalLimitPoints OPTX: " + finalLimitPoints[(int)Options.options.OPTX].ToString() +
+                    //    ", finalLimitPoints OPTY: " + finalLimitPoints[(int)Options.options.OPTY].ToString());
+               
                     Console.WriteLine("ERROR: SinglePlane failed in CheckConsistency.");
                     return;
                 }
