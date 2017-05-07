@@ -13,6 +13,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 using WisorLib;
+using WisorLibrary.Testings;
 using WisorLibrary.Utilities;
 using static WisorLib.GenericProduct;
 using static WisorLib.MiscConstants;
@@ -75,23 +76,15 @@ namespace WisorAppWpf
             Share.ShouldEachCombinationRunSeparetly = false;
             Share.ShouldStoreAllCombinations = false;
 
-            // TBD. Should read from env.
-            Share.CustomerName = MiscConstants.UNDEFINED_STRING; // "Citi"; // "Clal"; 
-
-            // TBD. Should read from env.
-            RunEnvironment.SetMarket(markets.ISRAEL); //  USA);
-
-            // set the settings file accordingly
-            //COMBINATIONS_FILE = "Combinations.csv";
-            //RISK_LIQUIDITY_FILE = "RiskLiquidityCiti.xlsx";
-            //PRODUCTS_FILE = "MortgageProducts - Updated.xml";
-            //CRETIRIA_FILE = "Gui.xml";
-            //RATES_FILE = "RateFileGeneric.csv";
-            //LOAN_FILE = "TestCases.xlsx"; 
+            // load the configuration file
+            MiscUtilities.LoadXMLConfigurationFile(MiscConstants.CONFIGURATION_FILE);
+            
+            // testing area
+            //Tests.TestHistoricIndexRate();
 
     }
 
-        private void SetLogger(MyDelegate func)
+    private void SetLogger(MyDelegate func)
         {
             WindowsUtilities.loggerMethod = func;
         }
