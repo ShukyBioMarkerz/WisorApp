@@ -159,8 +159,10 @@ namespace WisorAppWpf
                 {
                     fields = FileUtils.LoadXMLFileData(filename);
                 }
-                WindowsUtilities.loggerMethod("Successfully upload: " + fields.Count + " criteria definitions from file: " + filename);
-                Console.WriteLine("Successfully upload: " + fields.Count + " criteria definitions from file: " + filename);
+                WindowsUtilities.loggerMethod("Successfully upload: " + fields.Count + " criteria definitions from file: " +
+                    filename.Substring(filename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
+                Console.WriteLine("Successfully upload: " + fields.Count + " criteria definitions from file: " +
+                    filename.Substring(filename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
             }
 
             return fields;

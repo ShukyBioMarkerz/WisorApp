@@ -197,8 +197,10 @@ namespace WisorLib
             }
             else
             {
-                WindowsUtilities.loggerMethod("LoadXMLProductsFile succeffuly load: " + products.Count + " products from file: " + filename);
-                Console.WriteLine("LoadXMLProductsFile succeffuly load: " + products.Count + " products from file: " + filename);
+                WindowsUtilities.loggerMethod("LoadXMLProductsFile succeffuly load: " + products.Count + " products from file: " +
+                    filename.Substring(filename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
+                Console.WriteLine("LoadXMLProductsFile succeffuly load: " + products.Count + " products from file: " +
+                    filename.Substring(filename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
             }
             Share.theLoadedProducts = products;
             return products;

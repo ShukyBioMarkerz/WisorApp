@@ -128,13 +128,16 @@ namespace WisorLibrary.DataObjects
 
             if (null == lines || 0 >= lines.Length)
             {
-                WindowsUtilities.loggerMethod("ERROR Combinations failed to load from file: " + filename);
-                Console.WriteLine("ERROR Combinations failed to load from file: " + filename);
+                WindowsUtilities.loggerMethod("ERROR Combinations failed to load from file: " + 
+                    filename.Substring(filename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
+                Console.WriteLine("ERROR Combinations failed to load from file: " +
+                    filename.Substring(filename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
             }
             else
             {
                 //WindowsUtilities.loggerMethod("NOTICE successfully load: " + lines.Length + " Combinations from file: " + filename);
-                Console.WriteLine("NOTICE successfully load: " + lines.Length + " Combinations from file: " + filename);
+                Console.WriteLine("NOTICE successfully load: " + lines.Length + " Combinations from file: " +
+                    filename.Substring(filename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
             }
 
             return lines;

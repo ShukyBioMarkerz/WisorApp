@@ -256,7 +256,8 @@ namespace WisorLibrary.Utilities
                 WindowsUtilities.loggerMethod("NOTICE: failed to upload loans from file: " + filename);
             }
             else
-                WindowsUtilities.loggerMethod("Successfully Upload " + loans.Count + " loans from file: " + filename);
+                WindowsUtilities.loggerMethod("Successfully Upload " + loans.Count + " loans from file: " +
+                    filename.Substring(filename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
 
             return loans;
         }

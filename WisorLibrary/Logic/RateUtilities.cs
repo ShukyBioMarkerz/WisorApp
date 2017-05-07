@@ -95,8 +95,10 @@ namespace WisorLibrary.Logic
             }
             else
             {
-                WindowsUtilities.loggerMethod("NOTICE LoadRates succesfully load: " + Share.theProductsRates.Length + " entries from file: " + filename);
-                Console.WriteLine("NOTICE LoadRates succesfully load: " + Share.theProductsRates.Length + " entries from file: " + filename);
+                WindowsUtilities.loggerMethod("NOTICE LoadRates succesfully load: " + Share.theProductsRates.Length + " entries from file: " +
+                    filename.Substring(filename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
+                Console.WriteLine("NOTICE LoadRates succesfully load: " + Share.theProductsRates.Length + " entries from file: " +
+                    filename.Substring(filename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
             }
 
             return (null != Share.theProductsRates && 0 < Share.theProductsRates.Length);
@@ -108,8 +110,10 @@ namespace WisorLibrary.Logic
             if (null == Share.theBankRates || 0 >= Share.theBankRates.Length)
                 Share.theBankRates = LoadRatesCSVFile(bankFilename);
             int numOfRates = (null == Share.theBankRates) ? 0 : Share.theBankRates.Length;
-            WindowsUtilities.loggerMethod("NOTICE LoadBankRates succesfully load: " + numOfRates + " entries from file: " + bankFilename);
-            Console.WriteLine("NOTICE LoadBankRates succesfully load: " + numOfRates + " entries from file: " + bankFilename);
+            WindowsUtilities.loggerMethod("NOTICE LoadBankRates succesfully load: " + numOfRates + " entries from file: " +
+                bankFilename.Substring(bankFilename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
+            Console.WriteLine("NOTICE LoadBankRates succesfully load: " + numOfRates + " entries from file: " +
+                bankFilename.Substring(bankFilename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
             return (null != Share.theBankRates && 0 < Share.theBankRates.Length);
         }
 
@@ -282,8 +286,10 @@ namespace WisorLibrary.Logic
             if (null == Share.theProductsNames || 0 >= Share.theProductsNames.Length)
             {
                 string[] productNames = products.ToArray();
-                WindowsUtilities.loggerMethod("NOTICE: #of productNames: " + productNames.Length + " from file: " + filename);
-                Console.WriteLine("NOTICE: #of productNames: " + productNames.Length + " from file: " + filename);
+                WindowsUtilities.loggerMethod("NOTICE: #of productNames: " + productNames.Length + " from file: " +
+                    filename.Substring(filename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
+                Console.WriteLine("NOTICE: #of productNames: " + productNames.Length + " from file: " +
+                    filename.Substring(filename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
                 Share.theProductsNames = productNames;
                 ConvertProductsNaming();
             }
