@@ -14,6 +14,7 @@ using WisorLibrary.DataObjects;
 using WisorLibrary.Logic;
 using static WisorLib.GenericProduct;
 using static WisorLib.MiscConstants;
+using static WisorLib.Options;
 
 namespace WisorLibrary.Utilities
 {
@@ -47,19 +48,20 @@ namespace WisorLibrary.Utilities
 
             return fn;
         }
-        
+
         public static bool SetRatesFilename()
         {
             Share.theSelectionType = SelectionType.ReadRates;
             //string ratesFilename = @"..\..\..\Data\RateFileGeneric.csv";
             //string ratesBankFilename = @"..\..\..\Data\CitiRateMarginGeneric.csv";
-            string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
-            string borrowerFullfilename = MiscUtilities.GetFilenameFromUser(); // dir + MiscConstants.RATES_FILE;
-            string bankFullfilename = dir + MiscConstants.BANK_RATES_FILE;
             bool rc;
+            string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
+            //string borrowerFullfilename = MiscUtilities.GetFilenameFromUser(); // dir + MiscConstants.RATES_FILE;
+            //string bankFullfilename = dir + MiscConstants.BANK_RATES_FILE;
+            //string fn2 = MiscUtilities.GetSpecificFilename(bankFullfilename, Share.CustomerName);
 
-            string fn2 = MiscUtilities.GetSpecificFilename(bankFullfilename, Share.CustomerName);
-            rc = Rates.SetRatesFile(borrowerFullfilename, fn2);
+            //rc = Rates.SetRatesFile(borrowerFullfilename, fn2);
+            rc = Rates.SetRatesFile(Share.RatesFileName, Share.BankRatesFileName);
 
             //if (!File.Exists(fullfilename))
             //{
@@ -82,30 +84,6 @@ namespace WisorLibrary.Utilities
             bool rc = HistoricRate.SetFilename(filename);
 
             return rc;
-        }
-
-        public static bool SetCombinationsFilename()
-        {
-            string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
-            string filename = dir + MiscConstants.COMBINATIONS_FILE;
-
-            bool rc = Combinations.SetFilename(filename);
-
-            return rc;
-        }
-
-        public static string GetCombinationsFilename()
-        {
-            string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
-            string filename = dir + MiscConstants.COMBINATIONS_FILE;
-
-            return filename;
-        }
-
-        public static string[,] GetCombination(markets market)
-        {
-            string[,] combination = Combinations.Instance.GetCombination(market);
-            return combination;
         }
 
         public static bool SetRiskAndLiquidityFilename()
@@ -337,7 +315,7 @@ namespace WisorLibrary.Utilities
             {
                 case indices.MADAD:
                     index = 0.018;
-                    break; 
+                    break;
                 case indices.PRIME:
                     // ensure the file was loaded
                     if (null == HistoricRate.Instance || !HistoricRate.Instance.Status)
@@ -425,7 +403,7 @@ namespace WisorLibrary.Utilities
         public static int CalculateDatesBetweenDates(DateTime fromDate, DateTime toDate)
         {
             //int yearOfDateLoanTaken = DateTaken.Year;
-            int dayes = (int) /*Math.Abs*/((toDate- fromDate).TotalDays);
+            int dayes = (int) /*Math.Abs*/((toDate - fromDate).TotalDays);
             return dayes;
         }
 
@@ -472,7 +450,7 @@ namespace WisorLibrary.Utilities
         /// <returns></returns>
         /// 
 
-    
+
         public static bool CheckConsistency(FinalLimitPoint[] points)
         {
             if (null == points ||
@@ -524,10 +502,13 @@ namespace WisorLibrary.Utilities
                                 case MiscConstants.RATES_FILENAME:
                                     Share.RatesFileName = dir + node.Value;
                                     break;
+                                case MiscConstants.BANK_RATES_FILENAME:
+                                    Share.BankRatesFileName = dir + node.Value;
+                                    break;
                                 case MiscConstants.HISTORIC_FILENAME:
                                     Share.HistoricFileName = dir + node.Value;
                                     break;
-                                case MiscConstants.COMBINATIONS_FILE:
+                                case MiscConstants.COMBINATIONS_FILENAME:
                                     Share.CombinationFileName = dir + node.Value;
                                     break;
                                 case MiscConstants.RISK_LIQUIDITY_FILENAME:
@@ -536,8 +517,29 @@ namespace WisorLibrary.Utilities
                                 case MiscConstants.PRODUCTS_FILENAME:
                                     Share.ProductsFileName = dir + node.Value;
                                     break;
+                                case MiscConstants.RISK_FACTOR:
+                                    Share.RiskFactor = System.Convert.ToDouble(node.Value);
+                                    break;
+                                case MiscConstants.LIQUIDITY_FACTOR:
+                                    Share.LiquidityFactor = System.Convert.ToDouble(node.Value);
+                                    break;
+                                case MiscConstants.BENEFIT_FACTOR:
+                                    Share.BenefitFactor = System.Convert.ToDouble(node.Value);
+                                    break;
+                                case MiscConstants.BENEFIT_THRESHOLD:
+                                    Share.ProductBeneficialScoreCriteria = System.Convert.ToUInt32(node.Value);
+                                    break;
+                                case MiscConstants.MAX_COMBINATIONS:
+                                    Share.MaxCombinationNumber = System.Convert.ToUInt32(node.Value);
+                                    break;
+                                case SHOULD_CREATE_REPORT:
+                                    Share.ShouldCreateReport = "yes" == node.Value ? true : false;
+                                    break;
+                                case SHOULD_STORE_REPORT_IN_DB:
+                                    Share.ShouldStoreInDB = "yes" == node.Value ? true : false;
+                                    break;
                                 default:
-                                    //WindowsUtilities.loggerMethod("NOTICE: LoadXMLConfigurationFile undefined for indic: " + indic);
+                                    Console.WriteLine("LoadXMLConfigurationFile Illegal input: " + child.Name);
                                     break;
                             }
 
@@ -556,7 +558,155 @@ namespace WisorLibrary.Utilities
 
         }
 
+        /*
+         * Calculate the product' score.
+         * 
+         */
 
+        // does the product cross the beneficial threshold?
+        public static bool CheckBeneficialProducts(uint score)
+        {
+            bool rc = false;
+
+            if (Share.ProductBeneficialScoreCriteria >= score)
+                rc = true;
+
+            return rc;
+        }
+
+        public static uint CalculateProductScore(/*Risk*/ double risk, /*Liquidity*/ double liquidity, /*Benefit*/ double benefit)
+        {
+            //return (uint)(Convert.ToInt32(risk) * Share.RiskFactor + Convert.ToInt32(liquidity) * Share.LiquidityFactor + Convert.ToInt32(benefit) * Share.BenefitFactor);
+            return (uint)(risk * Share.RiskFactor + liquidity * Share.LiquidityFactor + benefit * Share.BenefitFactor);
+        }
+
+        // analayze the selected combination fittness to the specific user profile
+        // loop the Environment.bestDiffCompositionList and other lists
+        public static Composition[] CalculateCompositionScore(List<Composition> composition, int number2select)
+        {
+            Composition[] comp = composition.ToArray();
+
+            for (int i = 0; i < comp.Length; i++)
+            {
+                comp[i].score = CalculateCompositionScore(comp[i]);
+            }
+
+            // order the list and get the first X elements
+            Array.Sort(comp, delegate (Composition c1, Composition c2) {
+                return c1.score.CompareTo(c2.score);
+            });
+
+            // print the results
+            Composition[] selected = (Composition[])comp.Take(number2select);
+            for (int i = 0; i < selected.Length; i++)
+                selected[i].ToString();
+
+            return selected;
+        }
+
+        // TBD - Omri: what should be the actuall calculation here?
+        public static uint CalculateCompositionScore(Composition composition)
+        {
+            uint result = MiscConstants.UNDEFINED_UINT;
+            double[] amounts = new double[Enum.GetNames(typeof(options)).Length];
+            /*Risk*/ double [] risk = new double[Enum.GetNames(typeof(options)).Length];
+            /*Liquidity*/ double [] liquidity = new double[Enum.GetNames(typeof(options)).Length];
+            /*Benefit*/ double[] benefit = new double[Enum.GetNames(typeof(options)).Length];
+            FixOrAdjustable[] fixOrAdjustable = new FixOrAdjustable[Enum.GetNames(typeof(options)).Length];
+            int i = 0;
+
+            foreach (Option o in composition.opts)
+            {
+                risk[i] = o.product.risk;
+                liquidity[i] = o.product.liquidity;
+                benefit[i] = o.product.benefit;
+                fixOrAdjustable[i] = o.product.fixOrAdjustable;
+                amounts[i] = o.optAmt;
+                i++;
+            }
+
+            // check the amounts are in the same range
+            double amountScore = CalculateAmountScore(amounts);
+            uint riskScore = CalculateRiskScore(risk);
+            uint liquidityScore = CalculateLiquidityScore(liquidity);
+            uint fixOrAdjustableScore = CalculateFixOrAdjustableScore(fixOrAdjustable);
+
+            // TBD - what should be calculate here
+            // risk liquidity benefit fix ....
+            result = (uint) (1 - amountScore) + riskScore + liquidityScore + fixOrAdjustableScore;
+
+            return result;
+        }
+
+        // calculate the difference percantage between the min and the max amounts
+        // the less the result is, means it it spread more equily between the plans
+        // meaning: less is good
+        public static double CalculateAmountScore(double[] amounts)
+        {
+            double result = 0;
+            double totalAmount = 0;
+            double min = MiscConstants.UNDEFINED_DOUBLE, max = MiscConstants.UNDEFINED_DOUBLE;
+
+            for (int i = 0; i < amounts.Length; i++)
+            {
+                totalAmount += amounts[i];
+                if (MiscConstants.UNDEFINED_DOUBLE == min || min > amounts[i])
+                    min = amounts[i];
+                if (MiscConstants.UNDEFINED_DOUBLE == max || max < amounts[i])
+                    max = amounts[i];
+            }
+
+            result = (max - min) / totalAmount;
+            return result;
+        }
+
+        static uint CalculateRiskScore(/*Risk*/double[] risk)
+        {
+            uint riskScore = MiscConstants.UNDEFINED_UINT;
+
+            for (int i = 0; i < risk.Length; i++)
+            {
+                riskScore += (uint) risk[i]; // or should it calculate differently?
+            }
+
+            return riskScore;
+        }
+
+        static uint  CalculateLiquidityScore(/*Liquidity*/double[] liquidity)
+        {
+            uint liquidityScore = MiscConstants.UNDEFINED_UINT;
+
+            for (int i = 0; i < liquidity.Length; i++)
+            {
+                liquidityScore += (uint)liquidity[i]; // or should it calculate differently?
+            }
+
+            return liquidityScore;
+        }
+
+        static uint  CalculateFixOrAdjustableScore(FixOrAdjustable[] fixOrAdjustable)
+        {
+            uint fixOrAdjustableScore = MiscConstants.UNDEFINED_UINT;
+
+            for (int i = 0; i < fixOrAdjustable.Length; i++)
+            {
+                fixOrAdjustableScore += (uint)fixOrAdjustable[i]; // or should it calculate differently?
+            }
+
+            return fixOrAdjustableScore;
+        }
+
+
+        public static string GetArray<T>(T[] data)
+        {
+            string s = MiscConstants.UNDEFINED_STRING;
+            foreach (T t in data)
+            {
+                // Console.WriteLine(t.ToString());
+                s += t.ToString() + MiscConstants.COMMA_SEERATOR_STR;
+            }
+            return s;
+        }
 
 
     }
