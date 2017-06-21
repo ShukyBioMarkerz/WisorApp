@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using WisorLibrary.DataObjects;
 using WisorLibrary.Utilities;
 
 namespace WisorLib
@@ -60,7 +61,7 @@ namespace WisorLib
                     if (env.PrintOptions.printMainInConsole == true)
                     {
                         Console.WriteLine("\nLoan Amount = " + env.CalculationParameters.loanAmtWanted + "\nTarget monthly payment = "
-                                            + env.CalculationParameters.monthlyPmtWanted + "\n\nThere are " + (CalculationConstants.GetCombination(Share.theMarket).GetUpperBound(0) + 1)
+                                            + env.CalculationParameters.monthlyPmtWanted + "\n\nThere are " + (Combinations.GetCombination(Share.theMarket).GetUpperBound(0) + 1)
                                             + " combinations possible :");
 
                         CalculationConstants.PrintCombination(Share.theMarket);
@@ -69,20 +70,20 @@ namespace WisorLib
                     env.CheckInfo.searchStartTime = DateTime.Now;
                     
                     // Run through each combination possible for three options
-                    for (uint combinationCounter = 0; combinationCounter <= CalculationConstants.GetCombination(Share.theMarket).GetUpperBound(0); combinationCounter++)
+                    for (uint combinationCounter = 0; combinationCounter <= Combinations.GetCombination(Share.theMarket).GetUpperBound(0); combinationCounter++)
                     {
                         // should each combination write a different file
                         if (Share.ShouldEachCombinationRunSeparetly)
                         {
-                            string com0 = Regex.Replace(CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 0], "[^0-9]", ""); 
-                            string com1 = Regex.Replace(CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 1], "[^0-9]", "");
-                            string com2 = Regex.Replace(CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 2], "[^0-9]", "");
+                            string com0 = Regex.Replace(Combinations.GetCombination(Share.theMarket)[combinationCounter, 0], "[^0-9]", ""); 
+                            string com1 = Regex.Replace(Combinations.GetCombination(Share.theMarket)[combinationCounter, 1], "[^0-9]", "");
+                            string com2 = Regex.Replace(Combinations.GetCombination(Share.theMarket)[combinationCounter, 2], "[^0-9]", "");
                             // make the name shorten - keep only the numbers
                             string additionalName = MiscConstants.NAME_SEP_CHAR + com0 + MiscConstants.NAME_SEP_CHAR + 
                                 com1 + MiscConstants.NAME_SEP_CHAR + com2 + MiscConstants.NAME_SEP_CHAR;
                             // change the output file
                             env.CreateTheOutputFiles(env.theLoan, env.BorrowerProfile.profile, additionalName);
-                       }
+                        }
 
                         // Perform three option search for one combination of option types
                         env.CheckInfo.calculationStartTime = DateTime.Now;
@@ -90,8 +91,9 @@ namespace WisorLib
                         // Set the search range by the user' Risk and Liquidity
                         DefineOptionTypes(combinationCounter, env);
                         Console.WriteLine();
-                        ThreeOptionSearch search = new ThreeOptionSearch(env.CalculationParameters.minAmts[(int)Options.options.OPTX],
-                                               env.CalculationParameters.maxAmts[(int)Options.options.OPTX], env);
+                        ThreeOptionSearch search = new ThreeOptionSearch(
+                            //env.CalculationParameters.minAmts[(int)Options.options.OPTX], env.CalculationParameters.maxAmts[(int)Options.options.OPTX], 
+                            env);
                         env.CheckInfo.calculationEndTime = DateTime.Now;
                         // End of three option search for one combination of option types
 
@@ -99,10 +101,11 @@ namespace WisorLib
                         if (env.PrintOptions.printMainInConsole == true)
                         {
                             Console.WriteLine("\nDone checking combination - " + (combinationCounter + 1).ToString() + " out of: " +
-                                (CalculationConstants.GetCombination(Share.theMarket).GetUpperBound(0) + 1) + " : " +
-                                CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 0] + " " +
-                                CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 1] + " " +
-                                CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 2] + " :");
+                                (Combinations.GetCombination(Share.theMarket).GetUpperBound(0) + 1) + " : " +
+                                Combinations.GetCombination(Share.theMarket)[combinationCounter, 0] + " " +
+                                Combinations.GetCombination(Share.theMarket)[combinationCounter, 1] + " " +
+                                Combinations.GetCombination(Share.theMarket)[combinationCounter, 2] + " :");
+                            Console.WriteLine("\nnumOfCalculations: " + search.numOfCalculations);
                             if (env.resultsOutput.bestCompositionSoFar != null)
                             {
                                 Console.WriteLine("\nBest composition so far :\n" + env.resultsOutput.bestCompositionSoFar.ToString());
@@ -123,9 +126,9 @@ namespace WisorLib
                             }
                             else
                             {
-                                summaryToFile += (CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 0])
-                                                    + "," + "," + "," + "," + (CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 1])
-                                                    + "," + "," + "," + "," + (CalculationConstants.GetCombination(Share.theMarket)[combinationCounter, 2]);
+                                summaryToFile += (Combinations.GetCombination(Share.theMarket)[combinationCounter, 0])
+                                                    + "," + "," + "," + "," + (Combinations.GetCombination(Share.theMarket)[combinationCounter, 1])
+                                                    + "," + "," + "," + "," + (Combinations.GetCombination(Share.theMarket)[combinationCounter, 2]);
                             }
                             env.WriteToOutputFile(summaryToFile);
                         }
@@ -139,57 +142,46 @@ namespace WisorLib
                             env.resultsOutput.bestCompositionSoFar = null;
                         }
 
-                        // store the best composition from the borrower and the bank sides
-                        // env.resultsOutput.bestComposition should be the same as env.bestBorrowerComposition
-                        Composition borrowerBestC = env.resultsOutput.bestComposition;
-                        Composition borrowerC = env.bestBorrowerComposition;
-                        Composition bankC = env.bestBankComposition; 
+                    // store the best composition from the borrower and the bank sides
+                    // env.resultsOutput.bestComposition should be the same as env.bestBorrowerComposition
+                    //Composition borrowerBestC = env.resultsOutput.bestComposition;
+
+                        env.AddBestDiffComposition(env.bestDiffComposition);
+                        env.AddBestBankComposition(env.bestBankComposition);
+                        env.AddBestBorroweComposition(env.bestBorrowerComposition);
                     }
 
-                    // Get end time for software
-                    env.CheckInfo.softwareCloseTime = DateTime.Now;
+                // Get end time for software
+                env.CheckInfo.softwareCloseTime = DateTime.Now;
 
-                    // Close output file before end.
-                    // write the best composition founded
-                    env.WriteToOutputFile("\n\nMaxProfit: " + env.MaxProfit + ", MaxBankPay: " + env.MaxBankPay + ", MinBorrowerPay: " + env.MinBorrowerPay);
-                    if (null != env.bestDiffComposition)
-                        env.WriteToOutputFile("\nBest bank profit composition:\n" + env.bestDiffComposition.ToString());
-                    if (null != env.bestBankComposition)
-                        env.WriteToOutputFile("Best bank payment composition:\n" + env.bestBankComposition.ToString());
-                    if (null != env.bestBorrowerComposition)
-                        env.WriteToOutputFile("Best borrower composition:\n" + env.bestBorrowerComposition.ToString());
+                PrintResultsToFile();
 
-                    env.WriteToOutputFile("\nCalculation ended at " + env.CheckInfo.softwareCloseTime);
-                    env.WriteToOutputFile("Software runtime " + (env.CheckInfo.softwareCloseTime - env.CheckInfo.softwareOpenTime));
-                    env.WriteToOutputFile("Search runtime " + (env.CheckInfo.softwareCloseTime - env.CheckInfo.searchStartTime));
+                // manage the selected composition ordering
+                SelectBestCompositions();
+                
+                // Close output file before end.
+                env.CloseTheOutputFiles();
 
-                    env.CloseTheOutputFiles();
+                // write the PDF document
+                //PDFUtilities.WriteFile();
 
-                    // write the PDF document
-                    //PDFUtilities.WriteFile();
-
-
-                    if (env.PrintOptions.printMainInConsole == true)
+                  if (env.PrintOptions.printMainInConsole == true)
                     {
                         if (env.resultsOutput.bestComposition != null)
                         {
-                            Console.WriteLine("\nBest composition in search is for combination "
-                                            + env.resultsOutput.bestComposition.opts[(int)Options.options.OPTX].optType
-                                            + env.resultsOutput.bestComposition.opts[(int)Options.options.OPTY].optType
-                                            + env.resultsOutput.bestComposition.opts[(int)Options.options.OPTZ].optType + " :\n"
+                            Console.WriteLine("\nBest composition in search is for combination : "
+                                            //+ env.resultsOutput.bestComposition.opts[(int)Options.options.OPTX].optType
+                                            //+ env.resultsOutput.bestComposition.opts[(int)Options.options.OPTY].optType
+                                            //+ env.resultsOutput.bestComposition.opts[(int)Options.options.OPTZ].optType + " :\n"
                                             + env.resultsOutput.bestComposition.ToString());
                         }
                         else
                         {
                             // TBD: Shuky - what is the meaning?
                             Console.WriteLine("\nNo composition found in search");
-
                         }
                     }
-
-
                 //}
-
             } // CanRunCalculation
             else
             {
@@ -232,8 +224,28 @@ namespace WisorLib
         }
 
 
+        // manage the selected composition ordering
+        void SelectBestCompositions()
+        {
+            // store in DB and create the reports
+            env.CompleteCalculation();
+        }
 
+        void PrintResultsToFile()
+        {
+            // write the best composition founded
+            env.WriteToOutputFile("\n\nMaxProfit: " + env.MaxProfit + ", MaxBankPay: " + env.MaxBankPay + ", MinBorrowerPay: " + env.MinBorrowerPay);
+            if (null != env.bestDiffComposition)
+                env.WriteToOutputFile("\nBest bank profit composition:\n" + env.bestDiffComposition.ToString());
+            if (null != env.bestBankComposition)
+                env.WriteToOutputFile("Best bank payment composition:\n" + env.bestBankComposition.ToString());
+            if (null != env.bestBorrowerComposition)
+                env.WriteToOutputFile("Best borrower composition:\n" + env.bestBorrowerComposition.ToString());
 
+            env.WriteToOutputFile("\nCalculation ended at " + env.CheckInfo.softwareCloseTime);
+            env.WriteToOutputFile("Software runtime " + (env.CheckInfo.softwareCloseTime - env.CheckInfo.softwareOpenTime));
+            env.WriteToOutputFile("Search runtime " + (env.CheckInfo.softwareCloseTime - env.CheckInfo.searchStartTime));
+        }
 
 
 

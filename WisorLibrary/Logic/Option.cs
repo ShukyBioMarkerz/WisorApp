@@ -4,44 +4,60 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Schema;
+using System.Xml.Serialization;
 using WisorLibrary.Logic;
 using WisorLibrary.Utilities;
 using static WisorLib.MiscConstants;
 
+  
 namespace WisorLib
 {
-    public class Option
+    [Serializable]
+    public class Option /*: IXmlSerializable*/
     {
 
         // General Parameters
         public int optType;
         public double optAmt = 0;
         public uint optTime = 0;
-        public double optPmt = -1;
+        public double optPmt = 0;
 
         //private double[] optRateList = new double[360];
         public double optTtlPay = 0;
+        [XmlIgnoreAttribute]
         public double optTtlRatePay = 0;
+        [XmlIgnoreAttribute]
         public double optTtlPrincipalPay = 0;
+        [XmlIgnoreAttribute]
         private bool printOrNo = false;
         
         //private double optRate = -1;
         public double optRateFirstPeriod = -1;
+        [XmlIgnoreAttribute]
         public double optRateSecondPeriod = -1;
-
+        [XmlIgnoreAttribute]
         public double optRateForRemainingAmount = -1;
 
         // Shuky changes:
         //public double inflation = -1;
+        [XmlIgnoreAttribute]
         public double indexFirstPeriod { get; set; }
+        [XmlIgnoreAttribute]
         public double indexSecondPeriod { get; set; }
 
         private double optBankRateFirstPeriod = -1;
         private double optBankRateSecondPeriod = -1;
-        public double optBankTtlPay = 0;
+        //public uint optBankTtlPay = 0;
 
+        [XmlIgnoreAttribute]
         public GenericProduct product;
 
+        // for the sake of serialization.....
+        public Option()
+        {
+        }
         public Option(int optionType, double optionAmount, uint optionTime, RunEnvironment env)
         {
             //Console.WriteLine("Option ctor optionType: " + optionType + ", optionAmount: " + optionAmount + ", optionTime: " + optionTime);
@@ -176,7 +192,7 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ******************************* Calculating PMT According to Option Type and Time and Rate ********************************* //
 
-        public double CalculatePmt(double amtForCalc, uint timeForCalc, double interestRateForCalc,
+        public uint CalculatePmt(double amtForCalc, uint timeForCalc, double interestRateForCalc,
             RunEnvironment env)
         {
             double currInterest = MiscConstants.UNDEFINED_DOUBLE;
@@ -189,7 +205,7 @@ namespace WisorLib
                 double i2 = ((indexFirstPeriod /*inflation*/ / 12 * 100000000) - ((indexFirstPeriod /*inflation*/ / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
                 double monthlyPmt2 = ((amtForCalc * (1 + i2)) / timeForCalc);
                 monthlyPmt2 = ((monthlyPmt2 * 100000) - ((monthlyPmt2 * 100000) % 1)) / 100000; // Instead of Math.Round
-                return monthlyPmt2;
+                return (uint)Math.Round(monthlyPmt2);
             }
 
             //Console.WriteLine("CalculatePmt amtForCalc: " + amtForCalc + ", timeForCalc: " + timeForCalc + ", interestRateForCalc: " + interestRateForCalc);
@@ -225,7 +241,7 @@ namespace WisorLib
                         double calcPow = 0;
                         WindowsUtilities.loggerMethod("Monthly Rate = " + r + "\nPower = " + calcPow + "\nMonthly Inflation = " + i + "\nMonthly Payment = " + monthlyPmt + " \n");
                     }
-                    return monthlyPmt;
+                    return (uint)Math.Round(monthlyPmt);
                 }
                 else if (currInterest > 0)
                 {
@@ -238,7 +254,7 @@ namespace WisorLib
                     {
                         WindowsUtilities.loggerMethod("Monthly Rate = " + r + "\nPower = " + calcPow + "\nMonthly Inflation = " + i + "\nMonthly Payment = " + monthlyPmt + " \n");
                     }
-                    return monthlyPmt;
+                    return (uint)Math.Round(monthlyPmt);
                 }
                 else
                 {
@@ -275,6 +291,8 @@ namespace WisorLib
         {
             //Console.WriteLine("CalculateLuahSilukin product type: " + product.name);
             ttlPay = 0;
+            double ttlPayTmp = 0;
+            
             Interlocked.Add(ref Share.CalculateLuahSilukinCounter, 1);
             //env.CalculateLuahSilukinCounter++;
 
@@ -284,7 +302,7 @@ namespace WisorLib
                 if (product.indexUsedFirstTimePeriod == 0)
                 {
                     optTtlPrincipalPay = optAmt;
-                    ttlPay = optTime * Math.Round(optPmt, 2);
+                    ttlPayTmp = optTime * Math.Round(optPmt, 2);
                     optTtlRatePay = ttlPay - optTtlPrincipalPay;
                     Interlocked.Add(ref Share.CalculateLuahSilukinCounterIndexUsedFirstTimePeriod, 1);
                 }
@@ -302,7 +320,7 @@ namespace WisorLib
                         double principalPmt = monthlyPmt - ratePmt;
                         optTtlPrincipalPay += principalPmt;
                         optTtlRatePay += ratePmt;
-                        ttlPay += monthlyPmt;
+                        ttlPayTmp += monthlyPmt;
 
                         //Console.WriteLine(months + " - " + startingAmount.ToString() + " - " + r.ToString() + " - " +
                         //                    i.ToString() + " - " + ratePmt.ToString() + " - " +
@@ -313,7 +331,7 @@ namespace WisorLib
                         if (months < optTime)
                         {
                             Interlocked.Add(ref Share.CalculatePmtFromCalculateLuahSilukinCounter, 1);
-                            monthlyPmt = Math.Round(CalculatePmt(startingAmount, (optTime - months), rateFirstPeriod, env), 2);
+                            monthlyPmt = (double)CalculatePmt(startingAmount, (optTime - months), rateFirstPeriod, env);
                         }
                     }
                 }
@@ -337,12 +355,12 @@ namespace WisorLib
                     double principalPmt = monthlyPmt - ratePmt;
                     optTtlPrincipalPay += principalPmt;
                     optTtlRatePay += ratePmt;
-                    ttlPay += monthlyPmt;
+                    ttlPayTmp += monthlyPmt;
                     startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
                     if (months < optTime)
                     {
                         Interlocked.Add(ref Share.CalculatePmtFromCalculateLuahSilukinCounter, 1);
-                        monthlyPmt = Math.Round(CalculatePmt(startingAmount, (optTime - months), rateFirstPeriod, env), 2);
+                        monthlyPmt = (double) CalculatePmt(startingAmount, (optTime - months), rateFirstPeriod, env);
                     }
                 }
                 r = ((rateSecondPeriod / 12 * 100000000) - ((rateSecondPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
@@ -353,15 +371,17 @@ namespace WisorLib
                     double principalPmt = monthlyPmt - ratePmt;
                     optTtlPrincipalPay += principalPmt;
                     optTtlRatePay += ratePmt;
-                    ttlPay += monthlyPmt;
+                    ttlPayTmp += monthlyPmt;
                     startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
                     if (months < optTime)
                     {
                         Interlocked.Add(ref Share.CalculatePmtFromCalculateLuahSilukinCounter, 1);
-                        monthlyPmt = Math.Round(CalculatePmt(startingAmount, (optTime - months), rateSecondPeriod, env), 2);
+                        monthlyPmt = (double) CalculatePmt(startingAmount, (optTime - months), rateSecondPeriod, env);
                     }
                 }
             }
+
+            ttlPay = (uint)Math.Round(ttlPayTmp);
         }
 
 
@@ -371,16 +391,16 @@ namespace WisorLib
         // **************************************************************************************************************************** //
         // ************************************* PUBLIC - Calculating full luah silukin for option ************************************ //
 
-        public double GetTtlPay(RunEnvironment env)
+        public uint GetTtlPay(RunEnvironment env)
         {
             if (optTtlPay > 0)
             {
-                return optTtlPay;
+                return (uint)Math.Round(optTtlPay);
             }
             else
             {
                 CalculateLuahSilukin(optRateFirstPeriod, optRateSecondPeriod, out optTtlPay, env);
-                return optTtlPay;
+                return (uint)Math.Round(optTtlPay);
             }
         }
         
@@ -403,13 +423,13 @@ namespace WisorLib
             
         }
 
-        public double GetBankTtlPay()
+        public uint GetBankTtlPay()
         {
            return Calculations.CalculateLuahSilukin2(optBankRateFirstPeriod, optBankRateSecondPeriod,
                 (int) product.firstTimePeriod, product.indexUsedFirstTimePeriod,
                 optAmt, (int) optTime, optPmt,
                 indexFirstPeriod, indexSecondPeriod, optType, printOrNo);
-         }
+        }
         
 
 
@@ -428,18 +448,64 @@ namespace WisorLib
             //return (optType + 4).ToString() + "," + optAmt + "," + optTime + "," + inflationStr + "," + optRate
             //            + "," + (int)optPmt + "," + (int)optTtlPay;
             string name = GenericProduct.GetProductName(optType);
-            return name + "," + optAmt + "," + optTime + "," + optRateFirstPeriod + "," + optBankRateFirstPeriod;
+            return name + "," + optAmt + "," + optTime + "," + optRateFirstPeriod /*+ "," + optBankRateFirstPeriod*/;
             // return (optType + 4).ToString() + "," + optAmt + "," + optTime + "," + optRateFirstPeriod;
         }
 
-        public string ToString2()
-        {
-            //return "(" + optType + "," + optAmt + "," + optTime + "," + optRate + "," + optPmt + ")";
+        //public XmlSchema GetSchema()
+        //{
+        //    //throw new NotImplementedException();
+        //    return null;
+        //}
 
-            //return (optType + 4).ToString() + "," + optAmt + "," + optTime + "," + inflationStr + "," + optRate
-            //            + "," + (int)optPmt + "," + (int)optTtlPay;
-            return (optType + 4).ToString() + ":" + optAmt + ":" + optTime + ":" + optRateFirstPeriod;
-        }
+        //public void ReadXml(XmlReader reader)
+        //{
+        //    reader.ReadStartElement("Option");
+        //    reader.ReadElementContentAsString(name,
+        //        ((MiscConstants.Product, GenericProduct.GetProductName(optType));
+        //    writer.WriteAttributeString(MiscConstants.ORIGINAL_TIME, optAmt.ToString());
+        //    writer.WriteAttributeString(MiscConstants.ORIGINAL_TIME, optTime.ToString());
+        //    writer.WriteAttributeString(MiscConstants.ORIGINAL_TIME, optRateFirstPeriod.ToString());
+        //    reader.ReadEndElement();
+
+        //    reader.MoveToContent();
+        //    Name = reader.GetAttribute("Name");
+        //    Boolean isEmptyElement = reader.IsEmptyElement; // (1)
+        //    reader.ReadStartElement();
+        //    if (!isEmptyElement) // (1)
+        //    {
+        //        Birthday = DateTime.ParseExact(reader.
+        //            ReadElementString("Birthday"), "yyyy-MM-dd", null);
+        //        reader.ReadEndElement();
+        //    }
+
+        //    _attributes = new NameValueCollection();
+        //    _name = r.GetAttribute("Name");
+        //    while (r.MoveToNextAttribute())
+        //        if (r.Name != "Name")
+        //            _attributes.Add(r.Name, r.Value);
+        //    r.Read();
+        //}
+
+
+        //public void WriteXml(XmlWriter writer)
+        //{
+        //    writer.WriteStartElement("Option", optType.ToString());  
+        //    writer.WriteAttributeString(MiscConstants.Product, GenericProduct.GetProductName(optType));
+        //    writer.WriteAttributeString(MiscConstants.ORIGINAL_TIME, optAmt.ToString());
+        //    writer.WriteAttributeString(MiscConstants.ORIGINAL_TIME, optTime.ToString());
+        //    writer.WriteAttributeString(MiscConstants.ORIGINAL_TIME, optRateFirstPeriod.ToString());
+        //    writer.WriteEndAttribute();
+        //}
+
+        //public string ToString2()
+        //{
+        //    //return "(" + optType + "," + optAmt + "," + optTime + "," + optRate + "," + optPmt + ")";
+
+        //    //return (optType + 4).ToString() + "," + optAmt + "," + optTime + "," + inflationStr + "," + optRate
+        //    //            + "," + (int)optPmt + "," + (int)optTtlPay;
+        //    return (optType + 4).ToString() + ":" + optAmt + ":" + optTime + ":" + optRateFirstPeriod;
+        //}
 
 
     }
