@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
+using WisorLibrary.DataObjects;
 using WisorLibrary.Logic;
 using WisorLibrary.Utilities;
 using static WisorLib.FileUtils;
@@ -16,11 +18,11 @@ namespace WisorLib
 
     }
 
-
+    [Serializable]
     public class loanDetails
     {
         public string ID { get; set; }
-
+        ProductID ProductID;
         public uint PropertyValue { get; set; }
         public uint DesiredMonthlyPayment { get; set; }
         public uint LoanAmount { get; set; }
@@ -30,23 +32,37 @@ namespace WisorLib
         public uint DesireTerminationMonth { get; set; }
         public uint BorrowerAge { get; set; }
         public uint YearlyIncome { get; set; }
+        [XmlIgnoreAttribute]
         public uint SequentialNumber { get; set; }
         //string OriginalProduct { get; set; }
 
         double OriginalRate { get; set; }
         uint OriginalTime { get; set; }
 
-        public double RemaingLoanAmount { get; set; }
-        public uint RemaingLoanTime { get; set; }
+        //public uint RemaingLoanAmount { get; set; }
+        //public uint RemaingLoanTime { get; set; }
+        //public uint FirstMonthlyPMT { get; set; }
+        //public uint PayUntilToday { get; set; }
 
+        [XmlIgnoreAttribute]
         public Risk risk { set; get; }
+        [XmlIgnoreAttribute]
         public Liquidity liquidity { set; get; }
 
         public indices indices { set; get; }
 
         public double OriginalInflation { set; get; }
 
+        public ResultReportData resultReportData { set; get; }
+
+
+        [XmlIgnoreAttribute]
         public bool Status { set; get; }
+
+        // for the sake of serialization.....
+        public loanDetails()
+        {
+        }
 
         public loanDetails(string id, uint loanAmount, uint desiredMonthlyPayment, uint propertyValue,
             uint yearlyIncome, uint borrowerAge, int fic,
@@ -65,6 +81,7 @@ namespace WisorLib
             YearlyIncome = yearlyIncome;
             fico = fic;
             DateTaken = dateTaken;
+            ProductID = product;
             //DesireTerminationMonth = desireTerminationMonth;
             SequentialNumber = (MiscConstants.UNDEFINED_UINT == sequentialNumber) ? MiscUtilities.GetSequenceID() : sequentialNumber;
 
@@ -92,25 +109,23 @@ namespace WisorLib
 
             OriginalRate = originalRate;
             OriginalTime = originalTime;
-            uint remaingLoanTime = RemaingLoanTime = OriginalTime;
-           
+ 
             if (! shouldCalculate || DateTime.Now == dateTaken
                 /*|| MiscConstants.UNDEFINED_DOUBLE == originalRate ||  MiscConstants.UNDEFINED_UINT == originalTime*/)
             {
                 // nothing to calculate
-                RemaingLoanTime = remaingLoanTime;
             }
             else
             {
-                RemaingLoanAmount = Calculations.CalculateRemainingAmount(
+                ResultReportData resultData = new ResultReportData();
+                Calculations.CalculateRemainingAmount(
                      indices, (double)LoanAmount, OriginalTime, DateTaken, OriginalRate, 
-                     OriginalInflation, 
-                     out remaingLoanTime);
-                RemaingLoanTime = remaingLoanTime;
-
+                     OriginalInflation, ref resultData);
+                resultReportData = resultData;
                 // update the values for the new loan
-                LoanAmount = (uint)RemaingLoanAmount;
-                BorrowerAge = (uint) 75 - (remaingLoanTime / 12);
+                //RemaingLoanAmount = calculationData.RemaingLoanAmount;
+                //LoanAmount = calculationData.RemaingLoanAmount;
+                BorrowerAge = (uint) 75 - (resultReportData.RemaingLoanTime / 12);
             }
             //  TBD: should we limit this in each market 
             //BorrowerAge = 65; //  (uint) 75 - (remaingLoanTime / 12);
@@ -118,15 +133,40 @@ namespace WisorLib
             // DesiredMonthlyPayment can be undefined, calculate it
             if (MiscConstants.UNDEFINED_UINT == DesiredMonthlyPayment)
             {
-                DesiredMonthlyPayment = MiscUtilities.CalculateMonthlyPayment(loanAmount, propertyValue, yearlyIncome, borrowerAge);
+                DesiredMonthlyPayment = MiscUtilities.CalculateMonthlyPayment(
+                    resultReportData.RemaingLoanAmount, propertyValue, yearlyIncome, borrowerAge);
             }
           
             this.risk = risk;
             this.liquidity = liquidity;
 
             Status = CheckConsistancy();
+
+            // ensure the resultReport object is updated
+            UpdateResultReportData();
         }
 
+        void UpdateResultReportData()
+        {
+            resultReportData.BankName = Share.CustomerName;
+            resultReportData.ProductName = ProductID.stringTypeId;
+            resultReportData.ID = ID;
+            resultReportData.PropertyValue = PropertyValue;
+            resultReportData.DesiredMonthlyPayment = DesiredMonthlyPayment;
+            resultReportData.LoanAmount = LoanAmount;
+            resultReportData.OriginalLoanAmount = OriginalLoanAmount;
+            resultReportData.fico = fico;
+            resultReportData.DateTaken = DateTaken;
+            resultReportData.DesireTerminationMonth = DesireTerminationMonth;
+            resultReportData.BorrowerAge = BorrowerAge;
+            resultReportData.YearlyIncome = YearlyIncome;
+            resultReportData.OriginalRate = OriginalRate;
+            resultReportData.OriginalTime = OriginalTime;
+            //resultReportData.indices = indices;
+            resultReportData.OriginalInflation = OriginalInflation;
+            // start the timer
+            resultReportData.StartTime = DateTime.Now;
+        }
 
         private bool CheckConsistancy()
         {
@@ -136,7 +176,7 @@ namespace WisorLib
                 MiscConstants.UNDEFINED_UINT < PropertyValue && MiscConstants.UNDEFINED_UINT < YearlyIncome &&
                 MiscConstants.UNDEFINED_DOUBLE < OriginalRate && MiscConstants.UNDEFINED_UINT < OriginalTime &&
                 MiscConstants.UNDEFINED_DOUBLE < OriginalInflation && indices.NONE != indices &&
-                MiscConstants.UNDEFINED_UINT < RemaingLoanTime)
+                MiscConstants.UNDEFINED_UINT < resultReportData.RemaingLoanTime)
             {
                 rc = true;
             }
@@ -155,13 +195,12 @@ namespace WisorLib
                     err += " illegal OriginalRate value: " + OriginalRate;
                 if (MiscConstants.UNDEFINED_UINT >= OriginalTime)
                     err += " illegal OriginalTime value: " + OriginalTime;
-                if (MiscConstants.UNDEFINED_UINT >= RemaingLoanTime)
-                    err += " illegal RemaingLoanTime value: " + RemaingLoanTime;
+                if (MiscConstants.UNDEFINED_UINT >= resultReportData.RemaingLoanTime)
+                    err += " illegal RemaingLoanTime value: " + resultReportData.RemaingLoanTime;
                 if (MiscConstants.UNDEFINED_DOUBLE >= OriginalInflation)
                     err += " illegal OriginalInflation value: " + OriginalInflation;
                 if (indices.NONE == indices)
                     err += " illegal indices value: " + indices;
-                Console.WriteLine("ERROR: illegal loanDetails: " + err);
                 WindowsUtilities.loggerMethod("ERROR: illegal loanDetails: " + err);
             }
 
@@ -182,6 +221,13 @@ namespace WisorLib
             return monthlyPayment;
 
         }
+
+        public void CompleteCalculation(Composition[]composition, bool shouldStoreInDB, bool shouldCreateReport)
+        {
+            resultReportData.CalculationTime = DateTime.Now - resultReportData.StartTime;
+            resultReportData.SetCompositionData(composition);
+            resultReportData.Activate(shouldStoreInDB, shouldCreateReport);
+         }
     }
 
 }
