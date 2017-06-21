@@ -57,20 +57,17 @@ namespace WisorLibrary.Logic
                 {
                     Status = rc;
                     WindowsUtilities.loggerMethod("ERROR RateUtilities failed to load borrower rates from file: " + filename);
-                    Console.WriteLine("ERROR RateUtilities failed to load borrower rates from file: " + filename);
-                }
+                   }
                 rc = LoadBankRates();
                 if (!rc)
                 {
                     Status = rc;
                     WindowsUtilities.loggerMethod("ERROR RateUtilities failed to load bank  rates from file: " + bankFilename);
-                    Console.WriteLine("ERROR RateUtilities failed to load bank rates from file: " + bankFilename);
-                }
+                 }
             }
             else
             {
                 WindowsUtilities.loggerMethod("NOTICE RateUtilities without setting the rates file name");
-                Console.WriteLine("NOTICE RateUtilities without setting the rates file name");
             }
         }
 
@@ -91,13 +88,10 @@ namespace WisorLibrary.Logic
             if (null == Share.theProductsRates || 0 >= Share.theProductsRates.Length)
             {
                 WindowsUtilities.loggerMethod("ERROR LoadRates failed to load.");
-                Console.WriteLine("ERROR LoadRates failed to load.");
             }
             else
             {
                 WindowsUtilities.loggerMethod("NOTICE LoadRates succesfully load: " + Share.theProductsRates.Length + " entries from file: " +
-                    filename.Substring(filename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
-                Console.WriteLine("NOTICE LoadRates succesfully load: " + Share.theProductsRates.Length + " entries from file: " +
                     filename.Substring(filename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
             }
 
@@ -112,8 +106,6 @@ namespace WisorLibrary.Logic
             int numOfRates = (null == Share.theBankRates) ? 0 : Share.theBankRates.Length;
             WindowsUtilities.loggerMethod("NOTICE LoadBankRates succesfully load: " + numOfRates + " entries from file: " +
                 bankFilename.Substring(bankFilename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
-            Console.WriteLine("NOTICE LoadBankRates succesfully load: " + numOfRates + " entries from file: " +
-                bankFilename.Substring(bankFilename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
             return (null != Share.theBankRates && 0 < Share.theBankRates.Length);
         }
 
@@ -122,16 +114,14 @@ namespace WisorLibrary.Logic
         // the forula for geting the rate:
         //      Product-index * MiscConstants.NumberOfProfiles * MiscConstants.NumberOfYearsFrProduct +
         //      profile * MiscConstants.NumberOfYearsFrProduct + year
-        public double FindRateForKeyAsNumber(/*RatesKey key*/int productID, int profile, int index)
+        public double GetBorrowerRate(/*RatesKey key*/int productID, int profile, int index)
         {
             //Console.WriteLine("--- FindRateForKeyAsNumber key: " + key.ToString() + ",index: " + index);
             Interlocked.Add(ref Share.RateCounter, 1);
             //env.RateCounter++;
 
             double result = MiscConstants.UNDEFINED_DOUBLE;
-            int indexInRatesArray = /*key.*/productID * MiscConstants.NumberOfProfiles
-                 * MiscConstants.NumberOfYearsFrProduct +
-                 (/*key.*/profile - 1) * MiscConstants.NumberOfYearsFrProduct + index;
+            int indexInRatesArray = CalculateIndexInTable(productID, profile) + index;
             if (Share.theProductsRates.Length > indexInRatesArray)
             {
                 result = Share.theProductsRates[indexInRatesArray];
@@ -139,13 +129,11 @@ namespace WisorLibrary.Logic
             else
             {
                 Console.WriteLine("ERROR: FindRateForKeyAsNumber illegal indexInRatesArray: " + indexInRatesArray + " while theProductsRates include: " + Share.theProductsRates.Length);
-                WindowsUtilities.loggerMethod("ERROR: FindRateForKeyAsNumber illegal indexInRatesArray: " + indexInRatesArray + " while theProductsRates include: " + Share.theProductsRates.Length);
             }
 
             if (0 > result)
             {
-                Console.WriteLine("ERROR: FindRateForKeyAsNumber illegal rate for key: " + /*key.*/productID.ToString() + " and index: " + index + ", indexInRatesArray: " + indexInRatesArray);
-                //WindowsUtilities.loggerMethod("ERROR: FindRateForKeyAsNumber illegal rate for key: " + key.ToString() + " and index: " + index);
+                WindowsUtilities.loggerMethod("ERROR: FindRateForKeyAsNumber illegal rate for productID: " + productID + ", " + GenericProduct.GetProductName(productID) + " and index: " + index + ", indexInRatesArray: " + indexInRatesArray);
                 // TBD
                 result = 0.015;
             }
@@ -159,7 +147,7 @@ namespace WisorLibrary.Logic
             // load only the needed rates
             HashSet<string> products = new HashSet<string>();
             int numOfOptions2Check = Share.numberOfOption; //Enum.GetValues(typeof(options)).Length;
-            string[,] combinations = CalculationConstants.GetCombination(Share.theMarket);
+            string[,] combinations = Combinations.GetCombination(Share.theMarket);
             int combinationsUpperBound = combinations.GetUpperBound(0);
             for (int i = 0; i <= combinationsUpperBound; i++)
             {
@@ -172,31 +160,7 @@ namespace WisorLibrary.Logic
             return products.ToArray();
         }
         
-        private void ConvertProductsNaming()
-        {
-            // the index of the product is set now for the entire run, instead of the name (string)
-            //string[] productNames = products.ToArray();
-            int[,] combinationsAsNumbers = new int[
-                CalculationConstants.GetCombination(Share.theMarket).GetUpperBound(0) + 1,
-                CalculationConstants.GetCombination(Share.theMarket).GetUpperBound(1) + 1];
-            string[,] combinationsAsString = new string[
-                CalculationConstants.GetCombination(Share.theMarket).GetUpperBound(0) + 1,
-                CalculationConstants.GetCombination(Share.theMarket).GetUpperBound(1) + 1];
 
-            for (int i = 0; i <= CalculationConstants.GetCombination(Share.theMarket).GetUpperBound(0); i++)
-            {
-                for (int o = 0; o <= CalculationConstants.GetCombination(Share.theMarket).GetUpperBound(1); o++)
-                {
-                    string item = CalculationConstants.GetCombination(Share.theMarket)[i, o];
-                    int ind = Array.IndexOf(Share.theProductsNames, item);
-                    combinationsAsNumbers[i, o] = Array.IndexOf(Share.theProductsNames, CalculationConstants.GetCombination(Share.theMarket)[i, o]);
-                    combinationsAsString[i, o] = CalculationConstants.GetCombination(Share.theMarket)[i, o];
-                }
-            }
-            Share.combinations4market = combinationsAsNumbers;
-            Share.combinationsAsString = combinationsAsString;
-            //Share.theProductsNames = productNames;
-        }
         
 
         private double[] LoadRatesCSVFile(string filename)
@@ -218,7 +182,8 @@ namespace WisorLibrary.Logic
                 return null;
             }
 
-            string[] uniqueProducts4market = GetProductsFromCombinations();
+            //string[] uniqueProducts4market = GetProductsFromCombinations();
+            string[] uniqueProducts4market = Share.theProductsNames;
 
             // allocate thre entire rates array
             double[] ratesArray = new double[uniqueProducts4market.Length * 
@@ -228,7 +193,6 @@ namespace WisorLibrary.Logic
             string curr = MiscConstants.UNDEFINED_STRING;
             string[] entities;
             double[] currentRates = new double[MiscConstants.NumberOfYearsFrProduct];
-            HashSet<string> products = new HashSet<string>();
 
             string line;
             int lineNumber = 1;
@@ -251,7 +215,8 @@ namespace WisorLibrary.Logic
                     continue;
                 }
 
-                if (-1 == Array.IndexOf(uniqueProducts4market, entities[0].Trim()))
+                int productIndex = Array.IndexOf(uniqueProducts4market, entities[0].Trim());
+                if (0 > productIndex)
                 {
                     continue;
                 }
@@ -262,10 +227,9 @@ namespace WisorLibrary.Logic
                     continue;
                 }
 
-                // add the product to the indexed list
-                        
-                products.Add(entities[0].Trim());
-                        
+                int userProfile = Int32.Parse(entities[1]);
+                int indexInRatesArray = CalculateIndexInTable(productIndex, userProfile);
+
                 // clean all redundant chars e.g. %
                 for (int i = 2, j = 0; i < entities.Length; i++, j++)
                 {
@@ -279,37 +243,37 @@ namespace WisorLibrary.Logic
                 // the first column is the ProductID
                 // the second column is the user profile
                 // and than 27 entries according to the years from 4 to 30
-                currentRates.CopyTo(ratesArray, currentIndex);
+                //currentRates.CopyTo(ratesArray, currentIndex);
+                // should copy to the right place according to the product index
+                currentRates.CopyTo(ratesArray, indexInRatesArray);
                 currentIndex += MiscConstants.NumberOfYearsFrProduct;
-           }
-   
-            if (null == Share.theProductsNames || 0 >= Share.theProductsNames.Length)
-            {
-                string[] productNames = products.ToArray();
-                WindowsUtilities.loggerMethod("NOTICE: #of productNames: " + productNames.Length + " from file: " +
-                    filename.Substring(filename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
-                Console.WriteLine("NOTICE: #of productNames: " + productNames.Length + " from file: " +
-                    filename.Substring(filename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
-                Share.theProductsNames = productNames;
-                ConvertProductsNaming();
+                
+                //if ("FixedNoTsamudIsrael" == entities[0].Trim() && 5 == userProfile)
+                //    Console.WriteLine("LoadRates from file: " + filename + " for productID: " + entities[0].Trim() + ", productIndex: " + productIndex 
+                //        + ", userProfile: " + userProfile + ", indexInRatesArray: " + indexInRatesArray + " store rates: " + MiscUtilities.GetArray(currentRates));
             }
+            
             return ratesArray;
         }
 
+        private static int CalculateIndexInTable(int productID, int profile)
+        {
+            return productID * MiscConstants.NumberOfProfiles
+                 * MiscConstants.NumberOfYearsFrProduct +
+                 (profile - 1) * MiscConstants.NumberOfYearsFrProduct;
+        }
 
         /// <summary>
         /// ///////////
         /// Bank rates
         /// <returns></returns>
  
-        public static double GetBankRate(int productID, int profile, int index)
+        public double GetBankRate(int productID, int profile, int index)
         {
             //return MiscConstants.BANK_RATE;
 
             double result = MiscConstants.UNDEFINED_DOUBLE;
-            int indexInRatesArray = productID * MiscConstants.NumberOfProfiles
-                 * MiscConstants.NumberOfYearsFrProduct +
-                 (profile - 1) * MiscConstants.NumberOfYearsFrProduct + index;
+            int indexInRatesArray = CalculateIndexInTable(productID, profile) + index;
             if (Share.theBankRates.Length > indexInRatesArray)
             {
                 result = Share.theBankRates[indexInRatesArray];
@@ -321,7 +285,7 @@ namespace WisorLibrary.Logic
 
             if (0 > result)
             {
-                Console.WriteLine("ERROR: GetBankRate illegal rate for key: " + /*key.*/productID.ToString() + " and index: " + index + ", indexInRatesArray: " + indexInRatesArray);
+                Console.WriteLine("ERROR: GetBankRate illegal rate for key: " + productID + ", " + GenericProduct.GetProductName(productID) + " and index: " + index + ", indexInRatesArray: " + indexInRatesArray);
                 result = MiscConstants.BANK_RATE;
             }
 
