@@ -76,13 +76,22 @@ namespace WisorAppWpf
             Share.ShouldEachCombinationRunSeparetly = false;
             Share.ShouldStoreAllCombinations = false;
 
+            Share.ShouldCreateReport = true;
+            Share.ShouldStoreInDB = true;
+            Share.ShouldStoreHTMLReport = true;
+
             // load the configuration file
             MiscUtilities.LoadXMLConfigurationFile(MiscConstants.CONFIGURATION_FILE);
-            
-            // testing area
-            //Tests.TestHistoricIndexRate();
 
-    }
+            // testing area
+            Tests.TestRegularExpression();
+            //Tests.TestXMLFunctionality("123");
+            //Tests.TestHistoricIndexRate();
+            //Tests.TestRatesLoading();
+            //Tests.TestCombinations();
+            //Tests.SendSimpleMessage();
+
+        }
 
     private void SetLogger(MyDelegate func)
         {
@@ -115,9 +124,11 @@ namespace WisorAppWpf
         }
 
 
-        public void Log2Window(string msg)
+        public void Log2Window(string msg, bool write2console = true)
         {
             AddEntry(msg);
+            if (write2console)
+                Console.WriteLine(msg);
         }
 
          private void Button_Click(object sender, RoutedEventArgs e)
