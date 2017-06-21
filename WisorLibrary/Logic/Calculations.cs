@@ -12,7 +12,7 @@ namespace WisorLibrary.Logic
 {
     class Calculations
     {
-        public static double CalculateLuahSilukin2(double rateFirstPeriod, double rateSecondPeriod, 
+        public static uint CalculateLuahSilukin2(double rateFirstPeriod, double rateSecondPeriod, 
             int productFirstTimePeriod, /*indices*/ double productIndexUsedFirstTimePeriod,
             double optAmt, int optTime, double optPmt, 
             double indexFirstPeriod, double indexSecondPeriod, int optType, bool printOrNo
@@ -116,7 +116,7 @@ namespace WisorLibrary.Logic
                 }
             }
 
-            return ttlPay;
+            return (uint)Math.Round(ttlPay);
         }
         
 
@@ -209,19 +209,20 @@ namespace WisorLibrary.Logic
         /// <param name="originalTime"></param>
         /// <returns></returns>
     
-        public static double CalculateRemainingAmount(indices indices, double originalLoanAmount, uint originalLoanTime, 
-             DateTime dateLoanTaken, double originalRate, double originalInflation, out uint remaingLoanTime,
+        public static void CalculateRemainingAmount(indices indices, double originalLoanAmount, uint originalLoanTime, 
+             DateTime dateLoanTaken, double originalRate, double originalInflation, 
+             ref ResultReportData resultReportData,
              RunEnvironment env = null)
          {
-            double firstMonthlyPMT = CalculateMonthlyPmt(originalLoanAmount, originalLoanTime,
-                originalRate, originalInflation);
  
-            double remeaingAmount = CalculateLuahSilukinSoFar2(
+            resultReportData.FirstMonthlyPMT = (uint) Math.Round(CalculateMonthlyPmt(originalLoanAmount, originalLoanTime,
+                originalRate, originalInflation));
+ 
+            CalculateLuahSilukinSoFar2(
                 indices,
                 originalRate, originalInflation,
                 originalLoanAmount, originalLoanTime,
-                dateLoanTaken, firstMonthlyPMT, out remaingLoanTime, env);
-            return remeaingAmount;
+                dateLoanTaken, ref resultReportData, env);
         }
         
         // **************************************************************************************************************************** //
@@ -352,23 +353,23 @@ namespace WisorLibrary.Logic
          * actually the Israel PRIME and the ARM products
          */
 
-        private static double CalculateLuahSilukinSoFar2(indices indices,
+        private static void CalculateLuahSilukinSoFar2(indices indices,
             double originalRate, double originalInflation,
             double originalLoanAmount, uint originalLoanTime,
-            DateTime dateLoanTaken, double firstMonthlyPMT, out uint remaingLoanTime,
+            DateTime dateLoanTaken, ref ResultReportData calculationData,
             RunEnvironment env)
         {
             double interestPaidSoFar = MiscConstants.UNDEFINED_DOUBLE, 
                 totalPaidSoFar = MiscConstants.UNDEFINED_DOUBLE, 
                 principalPaidSoFar = MiscConstants.UNDEFINED_DOUBLE;
             double startingAmount = originalLoanAmount;
-            remaingLoanTime = originalLoanTime;
+            calculationData.RemaingLoanTime = originalLoanTime;
             double historicRate = MiscUtilities.GetHistoricIndexRateForDate(indices, dateLoanTaken);
             // the difference between the original rate and the historic rate define the base for the product
             double productPlanRate = originalRate - historicRate;
             double r = ((originalRate / 12 * 100000000) - ((originalRate / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
             double i = ((originalInflation / 12 * 100000000) - ((originalInflation / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
-            double monthlyPmt = Math.Round(firstMonthlyPMT, 2);
+            double monthlyPmt = calculationData.FirstMonthlyPMT;
             int numOfMonths = MiscUtilities.CalculateMonthBetweenDates(dateLoanTaken, DateTime.Now);
             double currentRate = originalRate, ratePmt, principalPmt;
             DateTime currentDate = dateLoanTaken;
@@ -387,7 +388,7 @@ namespace WisorLibrary.Logic
                     interestPaidSoFar += ratePmt;
                     totalPaidSoFar += monthlyPmt;
 
-                    remaingLoanTime--;
+                    calculationData.RemaingLoanTime--;
                     // for debug:
                     if (null != env)
                         env.WriteToOutputFile(m + "," + startingAmount + "," + principalPmt +
@@ -398,10 +399,7 @@ namespace WisorLibrary.Logic
                     historicRate = MiscUtilities.GetHistoricIndexRateForPeriod(indices, currentDate);
                     currentRate = historicRate + productPlanRate;
                     r = ((currentRate / 12 * 100000000) - ((currentRate / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
-
-
                     startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
-
                     monthlyPmt = Math.Round(CalculateMonthlyPmt(startingAmount, (uint)(originalLoanTime - m),
                             currentRate, originalInflation), 2);
                 }
@@ -410,7 +408,21 @@ namespace WisorLibrary.Logic
             {
                 WindowsUtilities.loggerMethod("ERROR: CalculateLuahSilukinSoFar2 got Exception: " + ex.ToString());
             }
-            return startingAmount;
+            calculationData.PayUntilToday = (uint)Math.Round(totalPaidSoFar);
+            calculationData.RemaingLoanAmount = (uint)Math.Round(startingAmount);
+            // TBD - omri
+            calculationData.Left2Pay = (uint)Math.Round(startingAmount);
+            calculationData.EstimateFuturePay = (uint)Math.Round(startingAmount);
+            calculationData.EstimateMargin = (uint)Math.Round(startingAmount);
+            calculationData.EstimateProfitSoFar = (uint)Math.Round(startingAmount);
+            calculationData.EstimateProfitPercantageSoFar = (uint)Math.Round(startingAmount);
+            calculationData.EstimateTotalProfit = (uint)Math.Round(startingAmount);
+            calculationData.EstimateTotalProfitPercantage = (uint)Math.Round(startingAmount);
+            calculationData.EstimateFutureProfit = (uint)Math.Round(startingAmount);
+            calculationData.EstimateFutureProfitPercantage = (uint)Math.Round(startingAmount);
+            calculationData.PTI = (uint)Math.Round(startingAmount);
+            calculationData.Debt2Income = (uint)Math.Round(startingAmount);
+            calculationData.OriginalMargin = startingAmount;
         }
 
 
@@ -492,13 +504,13 @@ namespace WisorLibrary.Logic
         public static void CalculateTheBankProfit(Option optionX, Option optionY, Option optionZ, int profile)
         {
             // get the Bank interset value
-            double bankRate = RateUtilities.GetBankRate(optionX.product.productID.numberID,
+            double bankRate = RateUtilities.Instance.GetBankRate(optionX.product.productID.numberID,
                 profile, (int)optionX.optTime / 12 - 4);
             optionX.SetBankRate(bankRate);
-            bankRate = RateUtilities.GetBankRate(optionY.product.productID.numberID,
+            bankRate = RateUtilities.Instance.GetBankRate(optionY.product.productID.numberID,
                 profile, (int)optionY.optTime / 12 - 4);
             optionY.SetBankRate(bankRate);
-            bankRate = RateUtilities.GetBankRate(optionZ.product.productID.numberID,
+            bankRate = RateUtilities.Instance.GetBankRate(optionZ.product.productID.numberID,
                 profile, (int)optionZ.optTime / 12 - 4);
             optionZ.SetBankRate(bankRate);
         }
