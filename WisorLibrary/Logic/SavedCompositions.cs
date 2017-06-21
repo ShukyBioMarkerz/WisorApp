@@ -119,7 +119,6 @@ namespace WisorLib
             }        
         }
 
-     
         private void CalcTheBankProfit(Option optX, Option optY, Option optZ, RunEnvironment env)
         {
             if (0 < Share.numberOfPrintResultsInList || Share.ShouldStoreAllCombinations)
@@ -131,7 +130,7 @@ namespace WisorLib
                 double optXBankTtlPay = optX.GetBankTtlPay();
                 double optYBankTtlPay = optY.GetBankTtlPay();
                 double optZBankTtlPay = optZ.GetBankTtlPay();
-                int ttlBankPayPayk = Convert.ToInt32(optXBankTtlPay + optYBankTtlPay + optZBankTtlPay);
+                int ttlBankPayPayk = Convert.ToInt32(optX.GetBankTtlPay() + optY.GetBankTtlPay() + optZ.GetBankTtlPay());
                 int ttlPayForCheck = Convert.ToInt32(optX.optTtlPay + optY.optTtlPay + optZ.optTtlPay);
 
                 string productNameX = GenericProduct.GetProductName(optX.optType);
@@ -143,9 +142,9 @@ namespace WisorLib
                 string productNameZ = GenericProduct.GetProductName(optZ.optType);
                 string resultZ = productNameZ + MiscConstants.DOTS_STR + optZ.optAmt +
                     MiscConstants.DOTS_STR + optZ.optTime + MiscConstants.DOTS_STR + optZ.optRateFirstPeriod;
-                string totalBorrower = Convert.ToInt32(ttlPayForCheck).ToString();
-                string totalBank = Convert.ToInt32(ttlBankPayPayk).ToString();
-                string diff = Convert.ToInt32(ttlPayForCheck - ttlBankPayPayk).ToString();
+                string totalBorrower = ttlPayForCheck.ToString();
+                string totalBank = ttlBankPayPayk.ToString();
+                string diff = (ttlPayForCheck - ttlBankPayPayk).ToString();
 
                 // save it anyway in order to store the best from borrower and from the bank sides
                 //if (0 < Share.numberOfPrintResultsInList)
