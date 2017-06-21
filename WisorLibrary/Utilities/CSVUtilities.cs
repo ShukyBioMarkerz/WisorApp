@@ -44,7 +44,6 @@ namespace WisorLibrary.Utilities
                 }
                 else
                 {
-                    Console.WriteLine("ERROR: OpenCSVFile file: " + filename + " does not exists!!!");
                     WindowsUtilities.loggerMethod("ERROR: OpenCSVFile file: " + filename + " does not exists!!!");
                 }
             }
