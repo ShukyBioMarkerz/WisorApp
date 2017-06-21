@@ -167,7 +167,6 @@ namespace WisorLib
 
                 if (entities.Length != fieldsDef.Count)
                 {
-                    Console.WriteLine("ERROR: LoadLoans for loans file: " + filename + " is in a wrong syntax.");
                     WindowsUtilities.loggerMethod("ERROR: LoadLoans for loans file: " + filename + " is in a wrong syntax.");
                     return loans;
                 }
@@ -305,6 +304,23 @@ namespace WisorLib
                 value = Convert.ToUInt32(result);
             }
             return value;
+        }
+
+        public static void DoRemoveStringFromFile(string filename, string string2removeStart, string string2removeEnd)
+        {
+            string str = System.IO.File.ReadAllText(filename);
+            // str = str.Replace(string2remove, "");
+            string outs = DoRemoveStringFromString(str, string2removeStart, string2removeEnd);
+            System.IO.File.WriteAllText(filename, outs);
+        }
+
+        public static string DoRemoveStringFromString(string inputString, string string2removeStart, string string2removeEnd)
+        {
+            const string anything = ".*";
+            string pattern = string2removeStart + anything + string2removeEnd;
+            var iqMatch = Regex.Match(inputString, pattern);
+            string str = Regex.Replace(inputString, pattern, MiscConstants.UNDEFINED_STRING);
+            return str;
         }
 
 
