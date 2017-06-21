@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WisorLibrary.DataObjects;
 using static WisorLib.GenericProduct;
+using static WisorLib.MiscConstants;
 
 namespace WisorLib
 {
@@ -38,7 +39,6 @@ namespace WisorLib
 
         public Composition bestDiffComposition, bestBankComposition, bestBorrowerComposition;
 
-
         // Hold the entire running environment data
         public RunEnvironment(loanDetails loan)
             //string orderid, double loanAmtWanted, double monthlyPmtWanted,
@@ -64,6 +64,10 @@ namespace WisorLib
             MaxProfit = MaxBankPay = MinBorrowerPay = 0;
 
             resultsOutput = new ResultsOutput();
+
+            bestDiffCompositionList = new List<Composition>();
+            bestBankCompositionList = new List<Composition>();
+            bestBorrowerCompositionList = new List<Composition>();
         }
 
         public void CreateTheOutputFiles(loanDetails loan, int borrowerProfile, string additionalName = MiscConstants.UNDEFINED_STRING) {
@@ -118,28 +122,64 @@ namespace WisorLib
 
         public static bool SetMarket(markets market)
         {
-            bool rc = false;
+            bool rc = true;
             Share.theMarket = market;
-            // ensure there are combination for this market
-            string[,] combination = CalculationConstants.GetCombination(market);
+            //// ensure there are combination for this market
+            //string[,] combination = CalculationConstants.GetCombination(market);
 
-            if (null == combination || 0 == combination.Length)
-            {
-                WindowsUtilities.loggerMethod("ERROR: no combination founded for market: " + market.ToString());
-            }
-            else
-            {
-                rc = true;
-                WindowsUtilities.loggerMethod("NOTICE: running for market: " + market.ToString() + ", #of combination: " + combination.Length);
-                Console.WriteLine("NOTICE: running for market: " + market.ToString() + ", #of combination: " + combination.Length);
-            }
+            //if (null == combination || 0 == combination.Length)
+            //{
+            //    WindowsUtilities.loggerMethod("ERROR: no combination founded for market: " + market.ToString());
+            //}
+            //else
+            //{
+            //    rc = true;
+            //    WindowsUtilities.loggerMethod("NOTICE: running for market: " + market.ToString() + ", #of combination: " + combination.Length);
+            //    Console.WriteLine("NOTICE: running for market: " + market.ToString() + ", #of combination: " + combination.Length);
+            //}
             return rc;
         }
 
-     
-
+        // store the entire best results
+        public List<Composition> bestDiffCompositionList { get; }
+        public List<Composition> bestBankCompositionList { get; }
+        public List<Composition> bestBorrowerCompositionList { get; }
 
        
+
+        public void AddBestDiffComposition(Composition c)
+        {
+            if (!bestDiffCompositionList.Exists(Composition.CompositionPredicate(c)))
+                bestDiffCompositionList.Add(c);
+        }
+        public void AddBestBankComposition(Composition c)
+        {
+            if (!bestBankCompositionList.Exists(Composition.CompositionPredicate(c)))
+                bestBankCompositionList.Add(c);
+        }
+        public void AddBestBorroweComposition(Composition c)
+        {
+            if (!bestBorrowerCompositionList.Exists(Composition.CompositionPredicate(c)))
+                bestBorrowerCompositionList.Add(c);
+        }
+
+        // store the results in the DB and create the reports
+        public void CompleteCalculation()
+        {
+           
+            // check if should create the report
+            if (Share.ShouldCreateReport || Share.ShouldStoreInDB)
+            {
+                theLoan.CompleteCalculation(new Composition[] 
+                    { bestDiffComposition, bestBankComposition, bestBorrowerComposition }, 
+                    Share.ShouldStoreInDB, Share.ShouldCreateReport);
+             }
+
+
+            
+
+        }
+
     }
 
 
