@@ -161,8 +161,6 @@ namespace WisorAppWpf
                 }
                 WindowsUtilities.loggerMethod("Successfully upload: " + fields.Count + " criteria definitions from file: " +
                     filename.Substring(filename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
-                Console.WriteLine("Successfully upload: " + fields.Count + " criteria definitions from file: " +
-                    filename.Substring(filename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
             }
 
             return fields;
@@ -201,6 +199,8 @@ namespace WisorAppWpf
 
             return products;
         }
+
+        
 
         /// <summary>
         /// Print the results in a sorted manner
@@ -279,42 +279,44 @@ namespace WisorAppWpf
 
         private static bool PrepareRun()
         {
-            bool rc = MiscUtilities.SetCombinationsFilename();
-            if (!rc)
-            {
-                WindowsUtilities.loggerMethod("NOTICE: Ask4Input Failed to load combination file.");
-                return rc;
-            }
+            bool rc = false;
 
-            // ensure the rates file is located
-            rc = MiscUtilities.SetRatesFilename();
-            if (!rc)
+            ProductsList products = Utilities.GetProductsFromFile();
+            if (null == Share.theLoadedProducts)
             {
-                WindowsUtilities.loggerMethod("NOTICE: Ask4Input Failed to load rates file.");
-                return rc;
-            }
-
-            // Build the input controls from the xml file
-            // Load the loan' parameters from a file
-            FieldList fields = Utilities.GetCriteriaFromFile();
-            if (null == Share.theSelectedCriteriaFields)
-            {
-                WindowsUtilities.loggerMethod("NOTICE: Ask4Input Failed to upload criteria definitions.");
+                WindowsUtilities.loggerMethod("NOTICE: PrepareRun Failed to upload products definitions.");
             }
             else
             {
-                ProductsList products = Utilities.GetProductsFromFile();
-                if (null == Share.theLoadedProducts)
+                rc = Combinations.SetCombinationsFilename();
+                if (!rc)
                 {
-                    WindowsUtilities.loggerMethod("NOTICE: Ask4Input Failed to upload products definitions.");
+                    WindowsUtilities.loggerMethod("NOTICE: PrepareRun Failed to load combination file.");
+                    return rc;
+                }
+
+                // ensure the rates file is located
+                rc = MiscUtilities.SetRatesFilename();
+                if (!rc)
+                {
+                    WindowsUtilities.loggerMethod("NOTICE: PrepareRun Failed to load rates file.");
+                    return rc;
+                }
+
+                // Build the input controls from the xml file
+                // Load the loan' parameters from a file
+                FieldList fields = Utilities.GetCriteriaFromFile();
+                if (null == Share.theSelectedCriteriaFields)
+                {
+                    WindowsUtilities.loggerMethod("NOTICE: PrepareRun Failed to upload criteria definitions.");
                 }
                 else
                 {
                     rc = MiscUtilities.SetRiskAndLiquidityFilename();
                     if (!rc)
                     {
-                        WindowsUtilities.loggerMethod("NOTICE: Ask4Input Failed in SetRiskAndLiquidityFilename.");
-                        return rc ;
+                        WindowsUtilities.loggerMethod("NOTICE: PrepareRun Failed in SetRiskAndLiquidityFilename.");
+                        return rc;
                     }
                 }
             }
@@ -431,14 +433,12 @@ namespace WisorAppWpf
                     Utilities.StopPerformanceCalculation();
 
                 WindowsUtilities.loggerMethod("--- LoanCalculation Complete running the engine with: " + loan.ToString() + ", result: " + result.ToString() + ", Task.CurrentId: " + Task.CurrentId + ", GlobalCurrentLoanCounter: " + GlobalCurrentLoanCounter);
-                Console.WriteLine("--- LoanCalculation Complete running the engine with: " + loan.ToString() + ", result: " + result.ToString() + ", Task.CurrentId: " + Task.CurrentId + ", GlobalCurrentLoanCounter: " + GlobalCurrentLoanCounter);
 
                 Utilities.PrintResultsInList(env);
             }
             else
             {
                 WindowsUtilities.loggerMethod("--- LoanCalculation illegal loan details: " + loan.ToString());
-                Console.WriteLine("--- LoanCalculation illegal loan details: " + loan.ToString());
             }
 
             return result;
@@ -611,7 +611,6 @@ namespace WisorAppWpf
         {
             // Shuky - measure the elapse time. Stop
             watch.Stop();
-            Console.WriteLine("\n*** Calculation time in milliseconds*** {0}", String.Format("{0:#,###,###}", watch.ElapsedMilliseconds));
             WindowsUtilities.loggerMethod("*** Calculation time in milliseconds*** " + String.Format("{0:#,###,###}", watch.ElapsedMilliseconds));
         }
 
@@ -728,23 +727,23 @@ namespace WisorAppWpf
                 }
             }
 
-            // Add the customer optional name
-            comp = new System.Windows.Forms.TextBox();
-            comp.Name = MiscConstants.CUSTOMER_NAME;
-            ////comp.Tag = f.ID;
-            //comp.Text = MiscConstants.CUSTOMER_NAME;
-            //// add the label
-            System.Windows.Forms.Label lbl2 = new System.Windows.Forms.Label();
-            lbl2.Font = new Font("Arial", 11);
-            lbl2.Text = "Customer name";
-            lbl2.Width = 250; // w + 20;
-            lbl2.Location = new System.Drawing.Point(positionX + 20, positionY);
-            uil.Controls.Add(lbl2);
+            //// Add the customer optional name
+            ////// add the label
+            //System.Windows.Forms.Label lbl2 = new System.Windows.Forms.Label();
+            //lbl2.Font = new Font("Arial", 11);
+            //lbl2.Text = "Customer name";
+            //lbl2.Width = 250; // w + 20;
+            //lbl2.Location = new System.Drawing.Point(positionX + 20, positionY);
+            //uil.Controls.Add(lbl2);
 
-            comp.Location = new System.Drawing.Point(positionX + 450, positionY);
-            comp.Width = 200;
-            positionY += yShift;
-            uil.Controls.Add(comp);
+            //comp = new System.Windows.Forms.TextBox();
+            //comp.Name = Share.CustomerName;
+            //////comp.Tag = f.ID;
+            ////comp.Text = MiscConstants.CUSTOMER_NAME;
+            //comp.Location = new System.Drawing.Point(positionX + 450, positionY);
+            //comp.Width = 200;
+            //positionY += yShift;
+            //uil.Controls.Add(comp);
 
             // Add the start button
             System.Windows.Forms.Control startButton = new System.Windows.Forms.Button();
