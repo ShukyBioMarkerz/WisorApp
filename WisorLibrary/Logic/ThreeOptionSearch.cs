@@ -21,12 +21,12 @@ namespace WisorLib
         
         // Counters
         private double amtYCounter = 0;
+        public uint numOfCalculations;
 
 
 
 
-
-        public ThreeOptionSearch(double minAmountOptX, double maxAmountOptX, RunEnvironment env)
+        public ThreeOptionSearch(/*double minAmountOptX, double maxAmountOptX,*/ RunEnvironment env)
         {
             minAmtOptX = env.CalculationParameters.minAmts[(int)Options.options.OPTX];
             maxAmtOptX = env.CalculationParameters.maxAmts[(int)Options.options.OPTX]; 
@@ -58,6 +58,7 @@ namespace WisorLib
             double percentDone = 0;
             double loopCount = ((maxAmtOptY - minAmtOptY) / CalculationConstants.jumpBetweenAmounts) + 1;
             double percentForOneLoop = ((((1 / loopCount) * 100) * 100) - ((((1 / loopCount) * 100) * 100) % 1)) / 100;
+            numOfCalculations = 0;
 
             // Begin loop for Option 1 amount
             for (double opt1Amt = minAmtOptX; opt1Amt <= maxAmtOptX; opt1Amt += CalculationConstants.jumpBetweenAmounts)
@@ -65,6 +66,7 @@ namespace WisorLib
                 // Begin loop for Option 2 amount
                 for (double opt2Amt = minAmtOptY; opt2Amt <= maxAmtOptY; opt2Amt += CalculationConstants.jumpBetweenAmounts)
                 {
+                    numOfCalculations++;
                     // Show progress and  calculate remaining time
                     if (env.PrintOptions.printPercentageDone == true)
                     {
