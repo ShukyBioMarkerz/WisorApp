@@ -58,8 +58,7 @@ namespace WisorLibrary.DataObjects
                 if (null == riskAndLiquidity || 0 >= riskAndLiquidity.Length)
                 {
                     WindowsUtilities.loggerMethod("ERROR RiskLiquidityObject failed to load from file: " + filename);
-                    Console.WriteLine("ERROR RiskLiquidityObject failed to load from file: " + filename);
-                }
+                 }
                 else
                 {
                     Share.riskAndLiquidity = riskAndLiquidity;
@@ -209,7 +208,6 @@ namespace WisorLibrary.DataObjects
             }
             else
             {
-                Console.WriteLine("ERROR: FindRiskLiquidity illegal indexInArray: " + indexInArray + " while riskAndLiquidity include: " + Share.riskAndLiquidity.Length);
                 WindowsUtilities.loggerMethod("ERROR: FindRiskLiquidity illegal indexInArray: " + indexInArray + " while riskAndLiquidity include: " + Share.riskAndLiquidity.Length);
             }
 

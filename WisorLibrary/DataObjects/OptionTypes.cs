@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using WisorLibrary.DataObjects;
 using WisorLibrary.Logic;
 using static WisorLib.GenericProduct;
+using static WisorLib.MiscConstants;
 
 namespace WisorLib
 {

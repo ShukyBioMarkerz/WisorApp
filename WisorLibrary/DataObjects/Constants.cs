@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using WisorLibrary.DataObjects;
 using WisorLibrary.Utilities;
 using static WisorLib.GenericProduct;
+using static WisorLib.MiscConstants;
 
 namespace WisorLib
 {
@@ -52,7 +53,7 @@ namespace WisorLib
     //}
 
 
-
+    
 
     class Options
     {
@@ -177,95 +178,17 @@ namespace WisorLib
         public enum borrowerProfiles { NOTSET, BEST, VERY_GOOD, GOOD, AVERAGE, NOT_SO_GOOD, BAD, NOTOK };
         public static string[] profiles = { "NOTSET", "6/6 - BEST", "5/6 - VERY GOOD", "4/6 - GOOD", "3/6 - AVERAGE", "2/6 - NOT SO GOOD", "1/6 - BAD", "NOTOK" };
 
-        // Possible combinations of options for fast search
-        //public static readonly uint[,] combinations = { { 4, 4, 4 }, { 3, 3, 3 } };
-
-        // Omri: define the other markets
-        // Should be outside the code
-        //public static readonly uint[,] combinations = { { 1, 4, 9 }, { 1, 4, 8 }, { 1, 3, 9 }, { 1, 3, 8 }, { 1, 4, 4 }, { 1, 3, 3 }, { 1, 4, 3 } };
-        //private static readonly string[,] combinationsIsrael = { { "PrimeIsrael", "FixedNoTsamudIsrael", "Alt60NoTsamudIsrael" },
-        //                                                { "PrimeIsrael", "FixedNoTsamudIsrael", "Alt60TsamudIsrael" }, 
-        //                                                { "PrimeIsrael", "FixedTsamudIsrael", "Alt60NoTsamudIsrael" }, 
-        //                                                { "PrimeIsrael", "FixedTsamudIsrael", "Alt60TsamudIsrael" }, 
-        //                                                { "PrimeIsrael", "FixedNoTsamudIsrael", "FixedNoTsamudIsrael" },
-        //                                                { "PrimeIsrael", "FixedTsamudIsrael", "FixedTsamudIsrael" },
-        //                                                { "PrimeIsrael", "FixedNoTsamudIsrael", "FixedTsamudIsrael" } };
-
-
-
-        //private static readonly string[,] combinationsUSA = {
-        //    //{ "Fixed30yrsUSA", "Fixed15yrsUSA" },
-        //    //{"Fixed20yrsUSA", "7.1ARMUSA" },
-        //    //{ "Fixed20yrsUSA", "Fixed15yrsUSA" }
-        //    /*{ "Fixed30yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" }  , */
-        //    { "Fixed30yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" } /*,
-        //    { "Fixed30yrsUSA", "Fixed20yrsUSA", "5.1ARMUSA" },
-        //    { "Fixed30yrsUSA", "Fixed20yrsUSA", "7.1ARMUSA" },
-        //    { "Fixed30yrsUSA", "Fixed10yrsUSA", "5.1ARMUSA" },
-        //    { "Fixed30yrsUSA", "Fixed10yrsUSA", "7.1ARMUSA" },
-        //    { "Fixed30yrsUSA", "Fixed20yrsUSA", "Fixed15yrsUSA" },
-        //    { "Fixed30yrsUSA", "Fixed20yrsUSA", "Fixed10yrsUSA" } ,
-        //    { "Fixed20yrsUSA", "Fixed15yrsUSA", "Fixed10yrsUSA" },
-        //    { "Fixed30yrsUSA", "Fixed15yrsUSA", "Fixed10yrsUSA" },
-        //    { "Fixed20yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" },
-        //    { "Fixed20yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" } */
-        //};
-
-        //private static readonly string[,] combinationsUSA = {
-        //    { "Fixed30yrsUSA", "Fixed20yrsUSA", "5.1ARMUSA" },
-        //    { "Fixed30yrsUSA", "Fixed20yrsUSA", "7.1ARMUSA" },
-        //    { "Fixed30yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" }  ,
-        //    { "Fixed30yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" } ,
-        //    { "Fixed30yrsUSA", "Fixed10yrsUSA", "5.1ARMUSA" },
-        //    { "Fixed30yrsUSA", "Fixed10yrsUSA", "7.1ARMUSA" },
-        //    { "Fixed30yrsUSA", "Fixed20yrsUSA", "Fixed15yrsUSA" },
-        //    { "Fixed30yrsUSA", "Fixed20yrsUSA", "Fixed10yrsUSA" } ,
-        //    { "Fixed20yrsUSA", "Fixed15yrsUSA", "Fixed10yrsUSA" },
-        //    { "Fixed30yrsUSA", "Fixed15yrsUSA", "Fixed10yrsUSA" },
-        //    { "Fixed20yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" },
-        //    { "Fixed20yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" },
-        //    //{ "Fixed30yrsUSA", "Fixed30yrsUSA", "5.1ARMUSA" },
-        //    //{ "Fixed30yrsUSA", "Fixed30yrsUSA", "7.1ARMUSA" },
-        //    //{ "Fixed30yrsUSA", "Fixed20yrsUSA", "5.1ARMUSA" },
-        //    //{ "Fixed30yrsUSA", "Fixed20yrsUSA", "7.1ARMUSA" },
-        //    //{ "Fixed20yrsUSA", "Fixed20yrsUSA", "5.1ARMUSA" },
-        //    //{ "Fixed20yrsUSA", "Fixed20yrsUSA", "7.1ARMUSA" },
-        //    //{ "Fixed15yrsUSA", "Fixed15yrsUSA", "5.1ARMUSA" },
-        //    //{ "Fixed15yrsUSA", "Fixed15yrsUSA", "7.1ARMUSA" } 
-        //    { "3.1ARMUSA", "5.1ARMUSA", "10.1ARMUSA" }
-        //};
-
-
-
         // enum markets { USA, UK, ISRAEL, OTHER , NONE}
-        public static string[,] GetCombination(markets market)
-        {
-            string[,] combination = { { } };
-
-            combination = MiscUtilities.GetCombination(market);
-
-            //switch (market)
-            //{
-            //    case markets.ISRAEL:
-            //        combination = combinationsIsrael;
-            //        break;
-            //    case markets.UK:
-            //        //combination = combinationsIsrael;
-            //        break;
-            //    case markets.USA:
-            //        combination = combinationsUSA;
-            //        break;
-            //    default:
-            //        WindowsUtilities.loggerMethod("ERROR: no combination founded for market: " + market.ToString());
-            //        break;
-            //}
-            return combination;
-        }
+        //public static string[,] GetCombination(markets market)
+        //{
+        //    string[,] combination = Combinations.GetCombination(market);
+        //    return combination;
+        //}
 
         public static void PrintCombination(markets theMarket)
         {
             string msg = MiscConstants.UNDEFINED_STRING;
-            string[,] com = CalculationConstants.GetCombination(theMarket);
+            string[,] com = Combinations.GetCombination(theMarket);
 
             for (int i = 0; i <= com.GetUpperBound(0); i++)
             {

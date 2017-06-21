@@ -46,7 +46,7 @@ namespace WisorLib
             WriteToOutputFile("Original loan amount : " + loan.OriginalLoanAmount);
             uint amount = loan.OriginalLoanAmount - loan.LoanAmount;
             WriteToOutputFile("Down payment amount : " + amount);
-            WriteToOutputFile("Remaing loan time : " + loan.RemaingLoanTime);
+            WriteToOutputFile("Remaing loan time : " + loan.resultReportData.RemaingLoanTime);
             WriteToOutputFile("Remainig loan amount : " + loan.LoanAmount);
              WriteToOutputFile("Monthly payment wanted : " + loan.DesiredMonthlyPayment);
             WriteToOutputFile("Property value : " + loan.PropertyValue);
@@ -58,19 +58,22 @@ namespace WisorLib
 
             //WriteToOutputFile("Execution ID : " + CheckInfo.fastCheckID);
             //WriteToOutputFile("Start time : " + DateTime.Now);
-            WriteToOutputFile("\nComposition list:");
 
-            // Shuky - add the header line 
-            WriteToOutputFile(/*"Ticks" + "," + "OrderID" + "," + "Time" + "," +*/
-                "X:optType" + "," + "X:optAmt" + "," + "X:optTime" + "," + "X:RateFirstPeriod" + "," +
-                "Y:optType" + "," + "Y:optAmt" + "," + "Y:optTime" + "," + "Y:RateFirstPeriod" + "," +
-                "Z:optType" + "," + "Z:optAmt" + "," + "Z:optTime" + "," + "Z:RateFirstPeriod" + "," +
-                "OPTX-optPmt" + "," + "OPTY-optPmt" + "," + "OPTZ-optPmt"
-                + "," + "ttlPmt" + "," + "OPTX-optTtlPay" + "," + "OPTY-optTtlPay" +
-                "," + "OPTZ-optTtlPay" + "," + "ttlPay" +
-                // bank profit data
-                "," + "X:BankTtlPay" + "," + "Y:BankTtlPay" + "," + "Z:BankTtlPay" +
-                "," + "TtlBankPay" + "," + "TtlBankProfit");
+            WriteToOutputFile(Composition.PrintHeader());
+
+            //WriteToOutputFile("\nComposition list:");
+
+            //// Shuky - add the header line 
+            //WriteToOutputFile(/*"Ticks" + "," + "OrderID" + "," + "Time" + "," +*/
+            //    "X:optType" + "," + "X:optAmt" + "," + "X:optTime" + "," + "X:RateFirstPeriod" + "," +
+            //    "Y:optType" + "," + "Y:optAmt" + "," + "Y:optTime" + "," + "Y:RateFirstPeriod" + "," +
+            //    "Z:optType" + "," + "Z:optAmt" + "," + "Z:optTime" + "," + "Z:RateFirstPeriod" + "," +
+            //    "OPTX-optPmt" + "," + "OPTY-optPmt" + "," + "OPTZ-optPmt"
+            //    + "," + "ttlPmt" + "," + "OPTX-optTtlPay" + "," + "OPTY-optTtlPay" +
+            //    "," + "OPTZ-optTtlPay" + "," + "ttlPay" +
+            //    // bank profit data
+            //    "," + "X:BankTtlPay" + "," + "Y:BankTtlPay" + "," + "Z:BankTtlPay" +
+            //    "," + "TtlBankPay" + "," + "TtlBankProfit");
 
         }
 
