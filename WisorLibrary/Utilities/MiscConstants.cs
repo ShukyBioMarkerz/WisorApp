@@ -19,6 +19,7 @@ namespace WisorLib
         public const uint       UNDEFINED_UINT = 0;
         public const double     UNDEFINED_DOUBLE = -1;
         public const string     UNDEFINED_STRING = "";
+        public const bool       UNDEFINED_BOOL = false;
 
         public static string    MIN_STR = "min";
         public static string    MAX_STR = "max";
@@ -30,9 +31,11 @@ namespace WisorLib
         public static char      DOLLAR_STR = '$';
         public static string    CRITERIA_FILENAME = "criteria.txt";
         public static string    OUTPUT_DIR = "Output";
+        public static string    REPORTS_DIR = "Reports";
         public static string    DATA_DIR = @"..\..\..\Data";
         public static char      NAME_SEP_CHAR = '-';
         public static string    CSV_EXT = ".csv";
+        public static string    XML_EXT = ".xml";
         public static string    DOTS_STR = ":";
         public static string    SEQ_STR = "#";
         public static char      SPACE_STR = ' ';
@@ -81,13 +84,43 @@ namespace WisorLib
         public const string CRETIRIA_FILENAME = "CRETIRIA_FILE";
         public const string LOAN_FILENAME = "LOAN_FILE";
 
+        // configuration settings
         public const string RATES_FILENAME = "RATES_FILE";
+        public const string BANK_RATES_FILENAME = "BANK_RATES_FILE";
         public const string HISTORIC_FILENAME = "HISTORIC_FILE";
         public const string COMBINATIONS_FILENAME = "COMBINATIONS_FILE";
         public const string RISK_LIQUIDITY_FILENAME = "RISK_LIQUIDITY_FILE";
         public const string PRODUCTS_FILENAME = "PRODUCTS_FILE";
+        public const string RISK_FACTOR = "RISKFACTOR";
+        public const string LIQUIDITY_FACTOR = "LIQUIDITYFACTOR";
+        public const string BENEFIT_FACTOR = "BENEFITFACTOR";
+        public const string BENEFIT_THRESHOLD = "BENEFITTHRESHOLD";
+        public const string MAX_COMBINATIONS = "MAX_COMBINATIONS";
+        public const string SHOULD_CREATE_REPORT = "SHOULD_CREATE_REPORT";
+        public const string SHOULD_STORE_REPORT_IN_DB = "SHOULD_STORE_REPORT_IN_DB";
+        public const string SHOULD_STORE_REPORT_AS_HTML = "SHOULD_STORE_REPORT_AS_HTML";
+        internal static string LENDER_REPORT_PREFIX = "LenderReport";
+        internal static string BORROWER_REPORT_PREFIX = "BorrowerReport";
 
-
+        internal static string shouldConsider = "shouldConsider";
+        internal static string Product = "Product";
+        internal static string market = "market";
+        internal static string name = "name";
+        internal static string indexUsedFirstTimePeriod = "indexUsedFirstTimePeriod";
+        internal static string indexUsedSecondTimePeriod = "indexUsedSecondTimePeriod";
+        internal static string indexJumpFirstTimePeriod = "indexJumpFirstTimePeriod";
+        internal static string indexJumpSecondTimePeriod = "indexJumpSecondTimePeriod";
+        internal static string minTime = "minTime";
+        internal static string maxTime = "maxTime";
+        internal static string timeJump = "timeJump";
+        internal static string firstTimePeriod = "firstTimePeriod";
+        internal static string maxPercentageOfLoan = "maxPercentageOfLoan";
+        internal static string benefit = "benefit";
+        internal static string fixOrAdjustable = "FixOrAdjustable";
+        internal static string risk = "risk";
+        internal static string liquidity = "liquidity";
+        internal static string mustBeUsed = "mustBeUsed";
+        
         public static uint DEFAULT_PERCANTAGE_OF_MONTHLY_PAYMENT = 30;
 
         public static uint NUM_OF_PRODUCTS_IN_COMBINATION = 3;
@@ -108,8 +141,18 @@ namespace WisorLib
         public const int RISK_LIQUIDITY_HEADER = 3;
         public enum Risk { MinimumRisk1, LessRisk2, MediumRisk3, MoreRisk4, MaximumRisk5, NONERisk}; 
         public enum Liquidity { MinimumLiquidity1, LessLiquidity2, MediumLiquidity3, MoreLiquidity4, MaximumLiquidity5 , NONELiquidity};
-        public const string RISK_LIQUIDITY_FILE = "RiskLiquidityCiti.xlsx"; 
+        public const string RISK_LIQUIDITY_FILE = "RiskLiquidityCiti.xlsx";
         
+
+        public enum Benefit { Benefit1, Benefit2, Benefit3, Benefit4, Benefit5, NONEBenefit };
+        public enum FixOrAdjustable { FIX, ADJUSTABLE };
+        public enum markets { USA, UK, ISRAEL, OTHER, NONE }; // Are the options in the code or pulled from outside DB?
+        public enum indexJumps
+        {
+            DAY, WEEK, MONTHS1, MONTHS3, MONTHS6, MONTHS12, MONTHS24, MONTHS30, MONTHS36, MONTHS60,
+            MONTHS84, MONTHS120, OTHER, NONE
+        };
+
     }
 
 }
