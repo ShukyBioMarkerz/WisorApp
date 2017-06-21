@@ -9,7 +9,7 @@ using System.Windows.Forms;
 namespace WisorLib
 {
 
-    public delegate void MyDelegate(string s);
+    public delegate void MyDelegate(string s, bool write2console = true);
 
     public delegate RunLoanDetails MyRunDelegate(loanDetails loan);
 
