@@ -34,7 +34,6 @@ namespace WisorLib
         public static bool shouldRunSync { get; set; }
         public static bool shouldRunLogicSync { get; set; }
 
-
         public static SelectionType theSelectionType { get; set; }
        
         public static bool shouldRunFake { get; set; }
@@ -52,6 +51,19 @@ namespace WisorLib
         public static double[] theBankRates;
 
         public static double[] riskAndLiquidity { get; set; }
+
+        public static double RiskFactor;
+        public static double LiquidityFactor;
+        public static double BenefitFactor;
+
+        public static uint ProductBeneficialScoreCriteria { get; set; }
+        public static uint MaxCombinationNumber { get; set; }
+
+        // Reports
+        public static bool ShouldStoreInDB { get; set; }
+        public static bool ShouldCreateReport { get; set; }
+        public static bool ShouldStoreHTMLReport { get; set; }
+
 
         /// <summary>
         /// Print some counters for performance benchmark
@@ -133,6 +145,22 @@ namespace WisorLib
             {
                 //if (File.Exists(value))
                     ratesFileName = value;
+            }
+        }
+
+        private static string bankRatesFileName;
+        public static string BankRatesFileName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(bankRatesFileName))
+                    return MiscConstants.BANK_RATES_FILE;
+                return bankRatesFileName;
+            }
+            set
+            {
+                //if (File.Exists(value))
+                bankRatesFileName = value;
             }
         }
 
