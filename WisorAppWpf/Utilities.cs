@@ -338,6 +338,8 @@ namespace WisorAppWpf
 
         public static void RunTheLogic()
         {
+            MiscUtilities.OpenMiscLogger();
+
             bool rc = Utilities.PrepareRun();
 
             // Read customers load data and fire the calculation to all
@@ -354,6 +356,7 @@ namespace WisorAppWpf
                 Utilities.RunTheLoansWraperASync(loans);
 
             //WindowsUtilities.loggerMethod("Complete calculate the entire " + loans.Count + " loans");
+            MiscUtilities.CloseMiscLogger();
         }
 
 
@@ -769,7 +772,7 @@ namespace WisorAppWpf
             DateTime dateTaken = DateTime.Now;
             uint desireTerminationMonth, sequentialNumber;
             //string originalProduct = MiscConstants.UNDEFINED_STRING;
-            double originalRate = MiscConstants.UNDEFINED_DOUBLE;
+            double originalRate = MiscConstants.UNDEFINED_DOUBLE, originalMargin = MiscConstants.UNDEFINED_DOUBLE;
             uint originalTime = MiscConstants.UNDEFINED_UINT;
             Risk risk = Risk.NONERisk;
             Liquidity liquidity = Liquidity.NONELiquidity;
@@ -785,7 +788,7 @@ namespace WisorAppWpf
                 
                 if (! (c is System.Windows.Forms.Button || c is System.Windows.Forms.Label))
                 {
-                    string txt = c.Text;
+                    string txt = c.Text.Replace(MiscConstants.COMMA_STR, MiscConstants.UNDEFINED_STRING);  // cleanup
                     string name = c.Name;
                     switch (name.ToLower())
                     {
@@ -843,6 +846,9 @@ namespace WisorAppWpf
                         case MiscConstants.ORIGINAL_RATE:
                             originalRate = Convert.ToDouble(txt);
                             break;
+                        case MiscConstants.ORIGINAL_MARGIN:
+                            originalMargin = Convert.ToDouble(txt);
+                            break;
                         case MiscConstants.ORIGINAL_TIME:
                             originalTime = Convert.ToUInt32(txt);
                             break;
@@ -855,17 +861,6 @@ namespace WisorAppWpf
                         case MiscConstants.PRODUCT_NAME:
                             product = new ProductID(MiscConstants.UNDEFINED_INT, txt);
                             break;
-                            
-
-                        //    case MiscConstants.MORTGAGE_TYPE:
-                        //        mortgageType = Convert.ToUInt32(txt);
-                        //        break;
-                        //    case MiscConstants.PAYMENT_TYPE:
-                        //        paymentType = Convert.ToUInt32(txt);
-                        //        break;
-                        //    case MiscConstants.MORTGAGE_PRODUCT:
-                        //        mortgageProduct = Convert.ToUInt32(txt);
-                        //        break;
                         default:
                             Console.WriteLine("StartButton_Clicked Illegal control name: " + name);
                             break;
@@ -878,7 +873,7 @@ namespace WisorAppWpf
             loanDetails loan = new loanDetails(id.ToString(), loanAmount, desiredMonthlyPayment,
                 propertyValue, yearlyIncome, borrowerAge, fico,
                 dateTaken, product, true /*shouldCalculate*/, originalRate, originalTime,
-                /*desireTerminationMonth,*/ sequentialNumber, risk, liquidity);
+                originalMargin, sequentialNumber, risk, liquidity);
            
             WindowsUtilities.runLoanMethod(loan);
         }
