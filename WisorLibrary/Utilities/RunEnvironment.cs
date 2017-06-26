@@ -39,6 +39,8 @@ namespace WisorLib
 
         public Composition bestDiffComposition, bestBankComposition, bestBorrowerComposition;
 
+        public LogCombinationResults theMiscLogger { get; }
+
         // Hold the entire running environment data
         public RunEnvironment(loanDetails loan)
             //string orderid, double loanAmtWanted, double monthlyPmtWanted,
@@ -64,12 +66,12 @@ namespace WisorLib
             MaxProfit = MaxBankPay = MinBorrowerPay = 0;
 
             resultsOutput = new ResultsOutput();
-
-            bestDiffCompositionList = new List<Composition>();
-            bestBankCompositionList = new List<Composition>();
-            bestBorrowerCompositionList = new List<Composition>();
+            
+            //bestDiffCompositionList = new List<Composition>();
+            //bestBankCompositionList = new List<Composition>();
+            //bestBorrowerCompositionList = new List<Composition>();
         }
-
+        
         public void CreateTheOutputFiles(loanDetails loan, int borrowerProfile, string additionalName = MiscConstants.UNDEFINED_STRING) {
             // no need to create output file to each composition
             //CloseTheOutputFiles();
@@ -116,6 +118,8 @@ namespace WisorLib
             //OutputFile = null;
             if (null != Logger)
                 Logger.CloseLog2CSV();
+            if (null != theMiscLogger)
+                theMiscLogger.CloseLog2CSV();
             //Logger = null;
         }
 
@@ -141,43 +145,40 @@ namespace WisorLib
         }
 
         // store the entire best results
-        public List<Composition> bestDiffCompositionList { get; }
-        public List<Composition> bestBankCompositionList { get; }
-        public List<Composition> bestBorrowerCompositionList { get; }
+        //public List<Composition> bestDiffCompositionList { get; }
+        //public List<Composition> bestBankCompositionList { get; }
+        //public List<Composition> bestBorrowerCompositionList { get; }
 
        
 
-        public void AddBestDiffComposition(Composition c)
-        {
-            if (!bestDiffCompositionList.Exists(Composition.CompositionPredicate(c)))
-                bestDiffCompositionList.Add(c);
-        }
-        public void AddBestBankComposition(Composition c)
-        {
-            if (!bestBankCompositionList.Exists(Composition.CompositionPredicate(c)))
-                bestBankCompositionList.Add(c);
-        }
-        public void AddBestBorroweComposition(Composition c)
-        {
-            if (!bestBorrowerCompositionList.Exists(Composition.CompositionPredicate(c)))
-                bestBorrowerCompositionList.Add(c);
-        }
+        //public void AddBestDiffComposition(Composition c)
+        //{
+        //    if (!bestDiffCompositionList.Exists(Composition.CompositionPredicate(c)))
+        //        bestDiffCompositionList.Add(c);
+        //}
+        //public void AddBestBankComposition(Composition c)
+        //{
+        //    if (!bestBankCompositionList.Exists(Composition.CompositionPredicate(c)))
+        //        bestBankCompositionList.Add(c);
+        //}
+        //public void AddBestBorroweComposition(Composition c)
+        //{
+        //    if (!bestBorrowerCompositionList.Exists(Composition.CompositionPredicate(c)))
+        //        bestBorrowerCompositionList.Add(c);
+        //}
 
         // store the results in the DB and create the reports
         public void CompleteCalculation()
         {
            
             // check if should create the report
-            if (Share.ShouldCreateReport || Share.ShouldStoreInDB)
+            if (Share.shouldCreateHTMLReport || Share.ShouldStoreInDB)
             {
                 theLoan.CompleteCalculation(new Composition[] 
                     { bestDiffComposition, bestBankComposition, bestBorrowerComposition }, 
-                    Share.ShouldStoreInDB, Share.ShouldCreateReport);
-             }
-
-
+                    Share.ShouldStoreInDB, Share.shouldCreateHTMLReport, Share.shouldCreatePDFReport);
+            }
             
-
         }
 
     }

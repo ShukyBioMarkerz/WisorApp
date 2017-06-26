@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WisorLibrary.DataObjects;
 using static WisorLib.GenericProduct;
 using static WisorLib.MiscConstants;
 
@@ -61,10 +62,12 @@ namespace WisorLib
 
         // Reports
         public static bool ShouldStoreInDB { get; set; }
-        public static bool ShouldCreateReport { get; set; }
+        public static bool shouldCreateHTMLReport { get; set; }
+        public static bool shouldCreatePDFReport { get; set; }
         public static bool ShouldStoreHTMLReport { get; set; }
-
-
+        public static uint LoansLoadFromLine { get; set; }
+        public static uint LoansLoadToLine { get; set; }
+ 
         /// <summary>
         /// Print some counters for performance benchmark
         /// </summary>
@@ -84,6 +87,13 @@ namespace WisorLib
         public static string CustomerName { get; set; }
 
         public static markets theMarket { get; set; }
+
+        public static string tempLogFile
+        {
+            get { return @"C:\tmp\LogNewLoans"; }
+        }
+
+        public static LogCombinationResults theMiscLogger { get; set; }
 
         private static string criteriaFileName;
         public static string CriteriaFileName
@@ -243,6 +253,19 @@ namespace WisorLib
             //theSelectedProducts = theNewList;
         }
 
-        
+        // output log settings
+        public static bool printMainInConsole;
+        public static bool printToOutputFile;
+        public static bool printFunctionsInConsole;
+        public static bool printSubFunctionsInConsole;
+        public static bool printPercentageDone;
+
+        // Loan settings
+        internal static uint maximumTimeForLoan = 360;
+        internal const double optionMinimumAmount = 3000;
+        internal const double jumpBetweenAmounts = 1000;
+        internal const uint minimumTimeForLoan = 48;
+        public const double largeDev = 20;
+        internal const double smallDev = 1;
     }
 }
