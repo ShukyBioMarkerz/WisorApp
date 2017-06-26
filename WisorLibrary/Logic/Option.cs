@@ -423,7 +423,7 @@ namespace WisorLib
             
         }
 
-        public uint GetBankTtlPay()
+        public uint CalculateLuahSilukinBank()
         {
            return Calculations.CalculateLuahSilukin2(optBankRateFirstPeriod, optBankRateSecondPeriod,
                 (int) product.firstTimePeriod, product.indexUsedFirstTimePeriod,

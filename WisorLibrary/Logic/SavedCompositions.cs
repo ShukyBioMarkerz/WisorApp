@@ -100,7 +100,8 @@ namespace WisorLib
             if (ttlPayChecker == (int)ttlPayRange.SMALLER)
             {
                 env.resultsOutput.bestCompositionSoFar = new Composition(matchingPoint[(int)Options.options.OPTX],
-                                                                        matchingPoint[(int)Options.options.OPTY], fixedOptZ, env);
+                                   matchingPoint[(int)Options.options.OPTY], fixedOptZ, env,
+                                   "bestCompositionSoFar");
             }
         }
 
@@ -127,10 +128,10 @@ namespace WisorLib
                 // get the Bank interset value
                 Calculations.CalculateTheBankProfit(optX, optY, optZ, env.BorrowerProfile.profile);
 
-                double optXBankTtlPay = optX.GetBankTtlPay();
-                double optYBankTtlPay = optY.GetBankTtlPay();
-                double optZBankTtlPay = optZ.GetBankTtlPay();
-                int ttlBankPayPayk = Convert.ToInt32(optX.GetBankTtlPay() + optY.GetBankTtlPay() + optZ.GetBankTtlPay());
+                double optXBankTtlPay = optX.CalculateLuahSilukinBank();
+                double optYBankTtlPay = optY.CalculateLuahSilukinBank();
+                double optZBankTtlPay = optZ.CalculateLuahSilukinBank();
+                int ttlBankPayPayk = Convert.ToInt32(optX.CalculateLuahSilukinBank() + optY.CalculateLuahSilukinBank() + optZ.CalculateLuahSilukinBank());
                 int ttlPayForCheck = Convert.ToInt32(optX.optTtlPay + optY.optTtlPay + optZ.optTtlPay);
 
                 string productNameX = GenericProduct.GetProductName(optX.optType);
@@ -164,22 +165,22 @@ namespace WisorLib
                     if (env.MaxProfit < Convert.ToInt32(diff))
                     {
                         env.MaxProfit = Convert.ToInt32(diff);
-                        env.bestDiffComposition = new Composition(optX, optY, optZ, env);
+                        env.bestDiffComposition = new Composition(optX, optY, optZ, env, MiscConstants.BEST_DIFF_COMPOSITION);
                     }
                     if (env.MaxBankPay < Convert.ToInt32(totalBank))
                     {
                         env.MaxBankPay = Convert.ToInt32(totalBank);
-                        env.bestBankComposition = new Composition(optX, optY, optZ, env);
+                        env.bestBankComposition = new Composition(optX, optY, optZ, env, MiscConstants.BEST_BANK_COMPOSITION);
                     }
                     if (0 >= env.MinBorrowerPay)
                     {
                         env.MinBorrowerPay = Convert.ToInt32(totalBorrower);
-                        env.bestBorrowerComposition = new Composition(optX, optY, optZ, env);
+                        env.bestBorrowerComposition = new Composition(optX, optY, optZ, env, MiscConstants.BEST_BORROWER_COMPOSITION);
                     }
                     if (env.MinBorrowerPay > Convert.ToInt32(totalBorrower))
                     {
                         env.MinBorrowerPay = Convert.ToInt32(totalBorrower);
-                        env.bestBorrowerComposition = new Composition(optX, optY, optZ, env);
+                        env.bestBorrowerComposition = new Composition(optX, optY, optZ, env, MiscConstants.BEST_BORROWER_COMPOSITION);
                     }
                 //}
                

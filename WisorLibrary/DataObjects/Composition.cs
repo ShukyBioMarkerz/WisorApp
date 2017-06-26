@@ -13,7 +13,7 @@ namespace WisorLib
     public class Composition
     {
         // General Parameters
-        public string name;
+        public string name { get; set; }
         public Option[] opts = {null, null, null};
         private bool[] ttlPayCalculated = {false, false, false};
         public double ttlPmt = 0;
@@ -34,8 +34,9 @@ namespace WisorLib
         {
         }
 
-        public Composition(Option optionX, Option optionY, Option optionZ, RunEnvironment env)
+        public Composition(Option optionX, Option optionY, Option optionZ, RunEnvironment env, string name)
         {
+            this.name = name;
             opts[(int)Options.options.OPTX] = optionX;
             opts[(int)Options.options.OPTY] = optionY;
             opts[(int)Options.options.OPTZ] = optionZ;
@@ -51,9 +52,9 @@ namespace WisorLib
             Calculations.CalculateTheBankProfit(opts[(int)Options.options.OPTX], opts[(int)Options.options.OPTY],
                 opts[(int)Options.options.OPTZ], env.BorrowerProfile.profile);
 
-            optXBankTtlPay = opts[(int)Options.options.OPTX].GetBankTtlPay();
-            optYBankTtlPay = opts[(int)Options.options.OPTY].GetBankTtlPay();
-            optZBankTtlPay = opts[(int)Options.options.OPTZ].GetBankTtlPay();
+            optXBankTtlPay = opts[(int)Options.options.OPTX].CalculateLuahSilukinBank();
+            optYBankTtlPay = opts[(int)Options.options.OPTY].CalculateLuahSilukinBank();
+            optZBankTtlPay = opts[(int)Options.options.OPTZ].CalculateLuahSilukinBank();
          }
 
    
