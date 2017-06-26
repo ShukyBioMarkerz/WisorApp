@@ -134,7 +134,7 @@ namespace WisorLibrary.DataObjects
                     if (1 == lineNumber++)
                         continue;
 
-                    entities = line.Split(MiscConstants.COMMA_SEERATOR_STR);
+                    entities = line.Split(MiscConstants.COMMA);
                     if (String.IsNullOrEmpty(entities[0]))
                     {
                         continue;

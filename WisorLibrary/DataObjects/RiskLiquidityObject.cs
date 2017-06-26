@@ -128,7 +128,7 @@ namespace WisorLibrary.DataObjects
                     if (String.IsNullOrEmpty(line))
                         continue;
 
-                    entities = line.Split(MiscConstants.COMMA_SEERATOR_STR);
+                    entities = line.Split(MiscConstants.COMMA);
                     // some lines have the Liquidity value, some don't. So treat it properly
                     productLocation = entities.Length - lineElemntsNum - 1;
                     string productName = entities[productLocation].Trim();

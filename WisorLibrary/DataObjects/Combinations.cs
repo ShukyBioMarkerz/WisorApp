@@ -84,7 +84,7 @@ namespace WisorLibrary.DataObjects
                         if (String.IsNullOrEmpty(line))
                             continue;
 
-                        entities = line.Split(MiscConstants.COMMA_SEERATOR_STR);
+                        entities = line.Split(MiscConstants.COMMA);
                         for (int j = 0; j < MiscConstants.NUM_OF_PRODUCTS_IN_COMBINATION; j++)
                         {
                             allCombination[i, j] = entities[j].Trim();

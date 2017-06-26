@@ -102,14 +102,14 @@ namespace WisorLibrary.Utilities
                                     pos = 0;
 
                                 if (0 < pos)
-                                    line += str.Remove(pos).Trim() + MiscConstants.COMMA_SEERATOR_STR;
+                                    line += str.Remove(pos).Trim() + MiscConstants.COMMA;
                                 else
-                                    line += str + MiscConstants.COMMA_SEERATOR_STR;
+                                    line += str + MiscConstants.COMMA;
                             }
                             else
                             {
                                 // it is a date
-                                line += str + MiscConstants.COMMA_SEERATOR_STR;
+                                line += str + MiscConstants.COMMA;
                             }
                         }
                     }
@@ -121,7 +121,7 @@ namespace WisorLibrary.Utilities
                     if (null != line)
                     {
                         // remove the trailing comma
-                        line = line.Remove(line.LastIndexOf(MiscConstants.COMMA_SEERATOR_STR));
+                        line = line.Remove(line.LastIndexOf(MiscConstants.COMMA));
                         lines.Add(line);
                     }
                 }
