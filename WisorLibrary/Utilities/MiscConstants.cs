@@ -17,7 +17,7 @@ namespace WisorLib
         public const int        UNDEFINED_INT = -1;
         public const int        ILLEGAL_RATE_VALUE = -1;
         public const uint       UNDEFINED_UINT = 0;
-        public const double     UNDEFINED_DOUBLE = -1;
+        public const double     UNDEFINED_DOUBLE = 0;
         public const string     UNDEFINED_STRING = "";
         public const bool       UNDEFINED_BOOL = false;
 
@@ -25,7 +25,7 @@ namespace WisorLib
         public static string    MAX_STR = "max";
         public static string    EQUAL_STR = "=";
         public static char      SEERATOR_STR = ';';
-        public static char      COMMA_SEERATOR_STR = ',';
+        public static char      COMMA = ',';
         public static char      DOT_STR = '.';
         public static char      PERCANTAGE_STR = '%';
         public static char      DOLLAR_STR = '$';
@@ -36,10 +36,13 @@ namespace WisorLib
         public static char      NAME_SEP_CHAR = '-';
         public static string    CSV_EXT = ".csv";
         public static string    XML_EXT = ".xml";
+        public static string    PDF_EXT = ".PDF";
+        public static string    HTML_EXT = ".html";
         public static string    DOTS_STR = ":";
         public static string    SEQ_STR = "#";
         public static char      SPACE_STR = ' ';
         public static string    DATE_FORMAT  = "d/M/yyyy";
+        public static string    COMMA_STR = ",";
 
         // files to load from
 
@@ -77,6 +80,7 @@ namespace WisorLib
         public const string ORIGINAL_PRODUCT = "original product";
         public const string ORIGINAL_RATE = "rate";
         public const string ORIGINAL_TIME = "time";
+        public const string ORIGINAL_MARGIN = "margin";
         public const string CUSTOMER_NAME = "CUSTOMER_NAME";
         public const string RISK_VALUE = "risk";
         public const string LIQUIDITY_VALUE = "liquidity";
@@ -99,6 +103,8 @@ namespace WisorLib
         public const string SHOULD_CREATE_REPORT = "SHOULD_CREATE_REPORT";
         public const string SHOULD_STORE_REPORT_IN_DB = "SHOULD_STORE_REPORT_IN_DB";
         public const string SHOULD_STORE_REPORT_AS_HTML = "SHOULD_STORE_REPORT_AS_HTML";
+        public const string SHOULD_STORE_REPORT_AS_PDF = "SHOULD_STORE_REPORT_AS_PDF";
+        public const string FROM_TO_LINES_TO_LOAD_LOANS = "FROM_TO_LINES_TO_LOAD_LOANS";
         internal static string LENDER_REPORT_PREFIX = "LenderReport";
         internal static string BORROWER_REPORT_PREFIX = "BorrowerReport";
 
@@ -129,11 +135,19 @@ namespace WisorLib
         public const int NumberOfYearsFrProduct = 27;
 
         public static double BANK_RATE = 0.005;
+        public static double MADAD_Inflation = 0.018;
+
+        // enable to select the right composition by name
+        internal static string BEST_DIFF_COMPOSITION = "bestDiffComposition";
+        internal static string BEST_BANK_COMPOSITION = "bestBankComposition";
+        internal static string BEST_BORROWER_COMPOSITION = "bestBorrowerComposition";
 
         // type of the selection window
         public enum SelectionType { ReadCretiria = 0, ReadProducts , ReadRates , ReadLoansFile};
-        
-  
+
+        // file name types
+        public enum FileType { XML = 0, HTML, PDF, CSV};
+
         // TBD - shuky
         public enum indices { MADAD, PRIME, CPI, FED, LIBOR, EUROBOR, BBBR, MAKAM, OTHER, NONE }; // Are the options in the code or pulled from outside DB?
 
@@ -142,7 +156,6 @@ namespace WisorLib
         public enum Risk { MinimumRisk1, LessRisk2, MediumRisk3, MoreRisk4, MaximumRisk5, NONERisk}; 
         public enum Liquidity { MinimumLiquidity1, LessLiquidity2, MediumLiquidity3, MoreLiquidity4, MaximumLiquidity5 , NONELiquidity};
         public const string RISK_LIQUIDITY_FILE = "RiskLiquidityCiti.xlsx";
-        
 
         public enum Benefit { Benefit1, Benefit2, Benefit3, Benefit4, Benefit5, NONEBenefit };
         public enum FixOrAdjustable { FIX, ADJUSTABLE };

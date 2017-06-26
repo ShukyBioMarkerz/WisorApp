@@ -110,7 +110,7 @@ namespace WisorLib
         public int fico;
 
         // Time restriction from age of youngest lender
-        public uint maximumTimeForLoan = 360;
+        public uint maximumTimeForLoan = Share.maximumTimeForLoan; // 360;
 
         // Option Types Chosen for calculation
         public OptionTypes optTypes = null;
@@ -151,22 +151,19 @@ namespace WisorLib
         //public const double maximumLoanAmount = 5000000;
 
         // Minimum Amount possible in a single Option
-        public const double optionMinimumAmount = 30000; // 40000;
+        public const double optionMinimumAmount = Share.optionMinimumAmount; // 30000; // 40000;
 
         // Jump between amounts for check
-        public const double jumpBetweenAmounts = 1000;
+        public const double jumpBetweenAmounts = Share.jumpBetweenAmounts; // 1000;
 
         // Minimum Time to take a loan
-        public const uint minimumTimeForLoan = 48;
-
-        // Yearly inflation for calculation
-        //public const double inflation = 0.018;
+        public const uint minimumTimeForLoan = Share.minimumTimeForLoan; // 48;
 
         // Large deviation from target monthly payment
-        public const double largeDev = 20.0;
+        public const double largeDev = Share.largeDev; // 20.0;
 
         // Small deviation from target monthly payment
-        public const double smallDev = 1.0;
+        public const double smallDev = Share.smallDev; // 1.0;
 
         // Size of Round for fractions - number of digits after decimal
         //public const int fractionRound = 100000000;
@@ -224,34 +221,13 @@ namespace WisorLib
 
         public PrintOptions()
         {
-            printMainInConsole = true;
-            printToOutputFile = true;
-
-            printFunctionsInConsole = false;
-            printSubFunctionsInConsole = false;
-            printPercentageDone = false;
+            printMainInConsole = Share.printMainInConsole;
+            printToOutputFile = Share.printToOutputFile;
+            printFunctionsInConsole = Share.printFunctionsInConsole;
+            printSubFunctionsInConsole = Share.printSubFunctionsInConsole;
+            printPercentageDone = Share.printPercentageDone;
         }
     }
-
-
-    //class PrintOptions
-    //{
-    //    // Print main function text - without internal functions
-    //    public const bool printMainInConsole = true;
-
-    //    // Print as program runs on console or not
-    //    public const bool printFunctionsInConsole = false;
-
-    //    // Print sub functions on console
-    //    public const bool printSubFunctionsInConsole = false;
-
-    //    // Print percentage done
-    //    public const bool printPercentageDone = true;
-
-    //    // Print saved matches to output file or not
-    //    public const bool printToOutputFile = true;
-    //}
-
 
 
     public class ResultsOutput
@@ -266,37 +242,4 @@ namespace WisorLib
             bestComposition = null;
         }
     }
-
-
-
-
-    //class InterestRates
-    //{
-    //    double[] fixedTsamudRates = null;
-    //    double[] fixedNoTsamudRates = null;
-    //    double[] alternatingRates = null;
-    //}
-
-
-
-
-    //class OutputConstants
-    //{
-
-    //    public static OutputFile outputFile = null;
-        
-    //    // Lenovo
-    //    // public const string filePath = "C:\\Business\\Software\\Test Runs\\FastThreeOptionSearchV3_2_1\\";
-    //    public const string filePath = ".\\output\\";
-
-    //    // Desktop       
-    //    //public const string filePath = "C:\\Optimmizer Software\\Three Options\\Test Runs\\ExperimentThree\\";
-
-    //    // Amit Marzel Laptop
-    //    //public const string filePath = "C:\\Users\\Amitma\\Desktop\\Wisor\\Orders\\Optimization Results\\";
-
-    //}
-
-  
-
 }
