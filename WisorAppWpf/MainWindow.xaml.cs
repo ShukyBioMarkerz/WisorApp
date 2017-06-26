@@ -13,6 +13,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 using WisorLib;
+using WisorLibrary.DataObjects;
 using WisorLibrary.Testings;
 using WisorLibrary.Utilities;
 using static WisorLib.GenericProduct;
@@ -45,6 +46,7 @@ namespace WisorAppWpf
 
         private void InitSettings()
         {
+
             //SetRunLoanFunc(LoanCalculation);
             SetRunLoanFunc(Utilities.RunTheLoanASync);
 
@@ -53,7 +55,7 @@ namespace WisorAppWpf
             Share.shouldShowProductSelectionWindow = false;
             Share.shouldShowProductSelectionContinue = false;
             Share.shouldShowRatesSelectionWindow = false;
-            Share.shouldShowLoansSelectionWindow = true;
+            Share.shouldShowLoansSelectionWindow = false;
             
             Share.shouldRunSync = true;
             Share.shouldRunLogicSync = true;
@@ -76,15 +78,27 @@ namespace WisorAppWpf
             Share.ShouldEachCombinationRunSeparetly = false;
             Share.ShouldStoreAllCombinations = false;
 
-            Share.ShouldCreateReport = true;
+            Share.shouldCreateHTMLReport = true;
+            Share.shouldCreatePDFReport = true;
             Share.ShouldStoreInDB = true;
             Share.ShouldStoreHTMLReport = true;
+            Share.LoansLoadFromLine = MiscConstants.UNDEFINED_UINT;
 
             // load the configuration file
             MiscUtilities.LoadXMLConfigurationFile(MiscConstants.CONFIGURATION_FILE);
 
+            // output log level settings
+            Share.printMainInConsole = true;
+            Share.printToOutputFile = true;
+            Share.printFunctionsInConsole = false;
+            Share.printSubFunctionsInConsole = false;
+            Share.printPercentageDone = false;
+
+
             // testing area
-            Tests.TestRegularExpression();
+            //Tests.TestPDFCreation();
+            //Tests.TestReportCreation();
+            //Tests.TestRegularExpression();
             //Tests.TestXMLFunctionality("123");
             //Tests.TestHistoricIndexRate();
             //Tests.TestRatesLoading();
@@ -93,7 +107,7 @@ namespace WisorAppWpf
 
         }
 
-    private void SetLogger(MyDelegate func)
+        private void SetLogger(MyDelegate func)
         {
             WindowsUtilities.loggerMethod = func;
         }
