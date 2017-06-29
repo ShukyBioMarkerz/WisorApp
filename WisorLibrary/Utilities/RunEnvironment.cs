@@ -31,7 +31,7 @@ namespace WisorLib
         public int MaxBankPay { get; set; }
         public int MinBorrowerPay { get; set; }
 
-        public LogCombinationResults Logger  { get; internal set; }
+        public LoggerFile Logger  { get; internal set; }
 
         public loanDetails theLoan { get; }
 
@@ -39,7 +39,7 @@ namespace WisorLib
 
         public Composition bestDiffComposition, bestBankComposition, bestBorrowerComposition;
 
-        public LogCombinationResults theMiscLogger { get; }
+        public LoggerFile theMiscLogger { get; set; }
 
         // Hold the entire running environment data
         public RunEnvironment(loanDetails loan)
@@ -86,7 +86,7 @@ namespace WisorLib
             {
                 if (null != Logger)
                     Logger.CloseLog2CSV();
-                Logger = new LogCombinationResults(OutputFile.OutputFilename, additionalName);
+                Logger = new LoggerFile(OutputFile.OutputFilename, additionalName);
             }
         }
 
@@ -118,8 +118,9 @@ namespace WisorLib
             //OutputFile = null;
             if (null != Logger)
                 Logger.CloseLog2CSV();
-            if (null != theMiscLogger)
-                theMiscLogger.CloseLog2CSV();
+            //if (null != theMiscLogger)
+            //    theMiscLogger.CloseLog2CSV();
+            //theMiscLogger = null;
             //Logger = null;
         }
 
@@ -176,7 +177,8 @@ namespace WisorLib
             {
                 theLoan.CompleteCalculation(new Composition[] 
                     { bestDiffComposition, bestBankComposition, bestBorrowerComposition }, 
-                    Share.ShouldStoreInDB, Share.shouldCreateHTMLReport, Share.shouldCreatePDFReport);
+                    Share.ShouldStoreInDB, Share.shouldCreateHTMLReport, Share.shouldCreatePDFReport,
+                    this /* enable to print in the output file*/);
             }
             
         }

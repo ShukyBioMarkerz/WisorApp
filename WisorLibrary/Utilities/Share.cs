@@ -92,8 +92,14 @@ namespace WisorLib
         {
             get { return @"C:\tmp\LogNewLoans"; }
         }
+        public static string summaryLogFile
+        {
+            get { return @"C:\tmp\SummaryLoans"; }
+        }
+        public static LoggerFile theMiscLogger { get; set; }
+        public static LoggerFile theSummaryFile { get; set; }
 
-        public static LogCombinationResults theMiscLogger { get; set; }
+         
 
         private static string criteriaFileName;
         public static string CriteriaFileName
