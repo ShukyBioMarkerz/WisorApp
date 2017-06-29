@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using WisorLib;
 using WisorLibrary.DataObjects;
 using WisorLibrary.Logic;
+using WisorLibrary.Utilities;
 
 namespace WisorLibrary.Reporting
 {
@@ -88,27 +89,39 @@ namespace WisorLibrary.Reporting
             }
 
             // get the 3 compositions
-            CompositionReportData[] compData = reportData.GetCompositionData();
+            Composition[] compData = reportData.compositions;
+            //CompositionReportData[] compData = reportData.GetCompositionData();
             for (int i = 0; i < compData.Length; i++)
             {
+                if (null == compData[i])
+                    continue;
+
+                uint ttlBankPay, ttlBorrowerPay, ttlProfit;
+                MiscUtilities.CalcaulateProfit(compData[i], out ttlBankPay, out ttlBorrowerPay, out ttlProfit);
+
                 Console.WriteLine(
                     " Composition: " + compData[i].name +
                     " XBankTtlPay: " + compData[i].optXBankTtlPay +
                     " YBankTtlPay: " + compData[i].optYBankTtlPay +
                     " ZBankTtlPay: " + compData[i].optZBankTtlPay +
                     " ttlPay: " + compData[i].ttlPay +
-                    " ttlPmt: " + compData[i].ttlPmt
-                    );
+                    " ttlPmt: " + compData[i].ttlPmt +
+                    " borrower saving: " + (compData[i].ttlPay - reportData.PayFuture).ToString() +
+                    " lender profit: " + ttlProfit
+                );
 
-                for (int j = 0; j < compData[i].optionReportData.Length; j++)
+                //for (int j = 0; j < compData[i].optionReportData.Length; j++)
+                for (int j = 0; j < compData[i].opts.Length; j++)
                 {
                     Console.WriteLine(
-                        " Option: " + compData[i].optionReportData[j].optTypeName +
-                        " Amt: " + compData[i].optionReportData[j].optAmt +
-                        " Rate: " + compData[i].optionReportData[j].optRateFirstPeriod +
-                        " Time: " + compData[i].optionReportData[j].optTime +
-                        " PMT: " + compData[i].optionReportData[j].optPmt +
-                        " TTLPay: " + compData[i].optionReportData[j].optTtlPay
+                        " Option: " + compData[i].opts[j].product.name +
+                        " Amt: " + compData[i].opts[j].optAmt +
+                        " Rate: " + compData[i].opts[j].optRateFirstPeriod +
+                        " Time: " + compData[i].opts[j].optTime +
+                        " PMT: " + compData[i].opts[j].optPmt +
+                        " TTLPay: " + compData[i].opts[j].optTtlPay +
+                        " Lender profit: " + ttlProfit +
+                        " Lender % profit: " + (ttlProfit / reportData.RemaingLoanAmount).ToString() 
                     );
                 }
             }
