@@ -85,18 +85,11 @@ namespace WisorLib
             tempOptY.GetTtlPay(env);
             ttlPayForCheck = tempOptX.optTtlPay + tempOptY.optTtlPay + fixedOptZ.optTtlPay;
 
-            CalcTheBankProfit(tempOptX, tempOptY, fixedOptZ, env);
-            
-            // Print to file
-            // tempOptX.toString, tempOptY.tostring, fixedOptZ.ToString, 
-            // tempOptX.optTtlPay.toString, tempOptY.optTtlPay.tostring, fixedOptZ.optTtlPay.ToString,
-            // ttlPayForCheck
+            CalculateTheCompositionProfit(tempOptX, tempOptY, fixedOptZ, env);
             
             // 2 - Check total pay if smaller than the lowest so far
             int ttlPayChecker = CheckTotalPay(ttlPayForCheck, env);
             
-            // TBD. Add also the max bank option
-
             if (ttlPayChecker == (int)ttlPayRange.SMALLER)
             {
                 env.resultsOutput.bestCompositionSoFar = new Composition(matchingPoint[(int)Options.options.OPTX],
@@ -120,10 +113,10 @@ namespace WisorLib
             }        
         }
 
-        private void CalcTheBankProfit(Option optX, Option optY, Option optZ, RunEnvironment env)
+        private void CalculateTheCompositionProfit(Option optX, Option optY, Option optZ, RunEnvironment env)
         {
-            if (0 < Share.numberOfPrintResultsInList || Share.ShouldStoreAllCombinations)
-            {
+            //if (0 < Share.numberOfPrintResultsInList || Share.ShouldStoreAllCombinations)
+            //{
                 // Checking lender profit
                 // get the Bank interset value
                 Calculations.CalculateTheBankProfit(optX, optY, optZ, env.BorrowerProfile.profile);
@@ -209,7 +202,7 @@ namespace WisorLib
                 }
 
 
-            }
+            //}
 
         }
 

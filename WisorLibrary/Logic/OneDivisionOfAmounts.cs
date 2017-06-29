@@ -81,7 +81,6 @@ namespace WisorLib
             Option optionZ0 = null;
             //Console.WriteLine("FindZ0 optTypes: " + optTypes.ToString() + ", pmtLimits: " + pmtLimits.ToString() + ", timeZ: " + timeZ);
 
-
             double ttlpmtmaxT = pmtLimits.opts[(int)Options.options.OPTX].times[(int)Options.pmtLimits.MAXTIME].optPmt
                                 + pmtLimits.opts[(int)Options.options.OPTY].times[(int)Options.pmtLimits.MAXTIME].optPmt
                                 + pmtLimits.opts[(int)Options.options.OPTZ].times[(int)Options.pmtLimits.MAXTIME].optPmt;
