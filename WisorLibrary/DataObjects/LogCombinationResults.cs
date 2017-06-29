@@ -8,7 +8,7 @@ using WisorLib;
 
 namespace WisorLibrary.DataObjects
 {
-    public class LogCombinationResults
+    public class LoggerFile
     {
         /// <summary>
         /// Enable to write logs
@@ -17,11 +17,12 @@ namespace WisorLibrary.DataObjects
         private StreamWriter fileStream;
         private string filename;
 
-        public LogCombinationResults(string outputFilename, string additionalName = MiscConstants.UNDEFINED_STRING)
+        public LoggerFile(string outputFilename, string additionalName = MiscConstants.UNDEFINED_STRING, 
+            bool mustCreate = false, bool append = true)
         {
             fileStream = null;
     
-            if (Share.ShouldStoreAllCombinations)
+            if (Share.ShouldStoreAllCombinations || mustCreate)
             {
                 string fn = System.IO.Path.GetFileNameWithoutExtension(outputFilename);
                 string ext = System.IO.Path.GetExtension(outputFilename);
@@ -31,20 +32,20 @@ namespace WisorLibrary.DataObjects
                 if (!Directory.Exists(Path.GetDirectoryName(filename)))
                     Directory.CreateDirectory(Path.GetDirectoryName(filename));
 
-                fileStream = new StreamWriter(filename);
+                fileStream = new StreamWriter(filename, append);
             }
         }
 
         public void PrintLog2CSV(string[] msg)
         {
-            if (Share.ShouldStoreAllCombinations && null != fileStream)
+            if (/*Share.ShouldStoreAllCombinations && */null != fileStream)
             {
                 try
                 {
                     string msg2write = null;
                     for (int i = 0; i < msg.Length; i++)
                     {
-                        msg2write += msg[i] + MiscConstants.COMMA_SEERATOR_STR;
+                        msg2write += msg[i] + MiscConstants.COMMA;
                     }
 
                     fileStream.WriteLine(msg2write);
@@ -56,9 +57,24 @@ namespace WisorLibrary.DataObjects
             }
         }
 
+        public void PrintLog(string msg)
+        {
+            if (/*Share.ShouldStoreAllCombinations &&*/ null != fileStream)
+            {
+                try
+                {
+                   fileStream.WriteLine(msg);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("ERROR: PrintLog got Exception: " + e.ToString());
+                }
+            }
+        }
+
         public void CloseLog2CSV()
         {
-            if (Share.ShouldStoreAllCombinations && null != fileStream)
+            if (/*Share.ShouldStoreAllCombinations && */null != fileStream)
             {
                 fileStream.Close();
             }

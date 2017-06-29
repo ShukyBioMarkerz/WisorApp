@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -42,8 +43,8 @@ namespace WisorLibrary.Utilities
             string fn = AppDomain.CurrentDomain.BaseDirectory // + Path.DirectorySeparatorChar
                 + MiscConstants.OUTPUT_DIR + Path.DirectorySeparatorChar +
                 Share.CustomerName + seq + /* orderid + MiscConstants.NAME_SEP_CHAR + */
-                 loanAmtWanted.ToString() + MiscConstants.NAME_SEP_CHAR +
-                monthlyPmtWanted.ToString() + MiscConstants.NAME_SEP_CHAR + add +
+                 orderid.ToString() + MiscConstants.NAME_SEP_CHAR +
+                loanAmtWanted.ToString() + MiscConstants.NAME_SEP_CHAR + add +
                 DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT;
 
             return fn;
@@ -213,7 +214,7 @@ namespace WisorLibrary.Utilities
             Share.theSelectionType = SelectionType.ReadLoansFile;
             //string filename = @"..\..\..\Data\Test Cases.xlsx";
             string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
-            string filename = dir + Share.LoansFileName; // MiscConstants.LOAN_FILE; 
+            string filename = /*dir + */Share.LoansFileName; // MiscConstants.LOAN_FILE; 
             if (Share.shouldShowLoansSelectionWindow)
                 filename = MiscUtilities.GetFilenameFromUser();
             if (null != filename)
@@ -272,7 +273,16 @@ namespace WisorLibrary.Utilities
         }
 
 
-
+        public static uint CalculateLuahSilukinBank(double rateFirstPeriod, double rateSecondPeriod,
+            int productFirstTimePeriod, /*indices*/ double productIndexUsedFirstTimePeriod,
+            double optAmt, int optTime, double optPmt,
+            double indexFirstPeriod, double indexSecondPeriod, int optType, bool printOrNo)
+        {
+            return Calculations.CalculateLuahSilukin2(rateFirstPeriod, rateSecondPeriod,
+                 productFirstTimePeriod, productIndexUsedFirstTimePeriod,
+                 optAmt, (int)optTime, optPmt,
+                 indexFirstPeriod, indexSecondPeriod, optType, printOrNo);
+        }
 
         public static uint CalculateMonthlyPayment(uint loanAmount, uint propertyValue, uint yearlyIncome, uint borrowerAge)
         {
@@ -289,7 +299,7 @@ namespace WisorLibrary.Utilities
             switch (indic)
             {
                 case indices.MADAD:
-                    index = 0.018;
+                    index = MiscConstants.MADAD_Inflation;
                     break;
                 case indices.PRIME:
                     index = 0;
@@ -314,7 +324,7 @@ namespace WisorLibrary.Utilities
             switch (indic)
             {
                 case indices.MADAD:
-                    index = 0.018;
+                    index = MiscConstants.MADAD_Inflation;
                     break;
                 case indices.PRIME:
                     // ensure the file was loaded
@@ -351,46 +361,36 @@ namespace WisorLibrary.Utilities
             return index;
         }
 
-        public static double GetHistoricIndexRateForDate(indices indic, DateTime dateLoanTaken)
+        public static double GetHistoricIndexRateForDate(indices indic, DateTime dateLoanTaken, 
+            double originalRate, out double primeMargin)
         {
             double index = 0;
 
-            switch (indic)
+            if (indices.PRIME == indic)
             {
-                case indices.MADAD:
-                    index = 0.018;
-                    break;
-                case indices.PRIME:
-                    // ensure the file was loaded
-                    if (null == HistoricRate.Instance || !HistoricRate.Instance.Status)
-                        MiscUtilities.SetHistoricRatesFilename();
-                    index = HistoricRate.GetHistoricIndex(indic, dateLoanTaken);
-                    break;
-                case indices.CPI:
-                    index = 0;
-                    break;
-                case indices.FED:
-                    index = 0;
-                    break;
-                case indices.LIBOR:
-                    index = 0;
-                    break;
-                case indices.EUROBOR:
-                    index = 0;
-                    break;
-                case indices.BBBR:
-                    index = 0;
-                    break;
-                case indices.MAKAM:
-                    index = 0;
-                    break;
-                default:
-                    index = 0;
-                    //WindowsUtilities.loggerMethod("NOTICE: GetIndexRateForOption undefined for indic: " + indic);
-                    break;
+                // ensure the file was loaded
+                if (null == HistoricRate.Instance || !HistoricRate.Instance.Status)
+                    MiscUtilities.SetHistoricRatesFilename();
+                index = HistoricRate.GetHistoricIndex(indic, dateLoanTaken);
+                // should calculate the actuall rate the borrower got , based on the Prime + Actuall rate
+                primeMargin =  originalRate - index;
             }
+            else
+            {
+                index = originalRate;
+                primeMargin = 0;
+            }
+            //  case indices.MADAD:
+            //        index = 0.018; MiscConstants.MADAD_Inflation
 
             return index;
+        }
+
+
+        public static int CalculateYearsBetweenDates(DateTime fromDate, DateTime toDate)
+        {
+            int years = toDate.Year - fromDate.Year;
+            return years;
         }
 
         public static int CalculateMonthBetweenDates(DateTime fromDate, DateTime toDate)
@@ -532,11 +532,22 @@ namespace WisorLibrary.Utilities
                                 case MiscConstants.MAX_COMBINATIONS:
                                     Share.MaxCombinationNumber = System.Convert.ToUInt32(node.Value);
                                     break;
-                                case SHOULD_CREATE_REPORT:
-                                    Share.ShouldCreateReport = "yes" == node.Value ? true : false;
+                                case SHOULD_STORE_REPORT_AS_HTML:
+                                    Share.shouldCreateHTMLReport = "yes" == node.Value ? true : false;
+                                    break;
+                                 case SHOULD_STORE_REPORT_AS_PDF:
+                                    Share.shouldCreatePDFReport = "yes" == node.Value ? true : false;
                                     break;
                                 case SHOULD_STORE_REPORT_IN_DB:
                                     Share.ShouldStoreInDB = "yes" == node.Value ? true : false;
+                                    break;
+                                case FROM_TO_LINES_TO_LOAD_LOANS:
+                                    //<from_line>,<to_line>
+                                    string[] lines = node.Value.Split(MiscConstants.COMMA);
+                                    if (! String.IsNullOrEmpty(lines[0]))
+                                        Share.LoansLoadFromLine = System.Convert.ToUInt32(lines[0]);
+                                    if (!String.IsNullOrEmpty(lines[1]))
+                                        Share.LoansLoadToLine = System.Convert.ToUInt32(lines[1]);
                                     break;
                                 default:
                                     Console.WriteLine("LoadXMLConfigurationFile Illegal input: " + child.Name);
@@ -703,11 +714,150 @@ namespace WisorLibrary.Utilities
             foreach (T t in data)
             {
                 // Console.WriteLine(t.ToString());
-                s += t.ToString() + MiscConstants.COMMA_SEERATOR_STR;
+                s += t.ToString() + MiscConstants.COMMA;
             }
             return s;
         }
 
+        public static Composition GetBestBorrowerComposition(Composition[] compositions)
+        {
+            Composition c = null;
+            for (int i = 0; i < compositions.Length; i++)
+                if (null != compositions[i])
+                    if (MiscConstants.BEST_BORROWER_COMPOSITION == compositions[i].name)
+                    {
+                        c = compositions[i];
+                        break;
+                    }
+
+            return c;
+        }
+
+        public static Composition GetBestBankComposition(Composition[] compositions)
+        {
+            Composition c = null;
+            for (int i = 0; i < compositions.Length; i++)
+                if (null != compositions[i])
+                    if (MiscConstants.BEST_BANK_COMPOSITION == compositions[i].name)
+                    {
+                        c = compositions[i];
+                        break;
+                    }
+
+            return c;
+        }
+
+        public static Composition GetBestDiffComposition(Composition[] compositions)
+        {
+            Composition c = null;
+            for (int i = 0; i < compositions.Length; i++)
+                if (null != compositions[i])
+                    if (MiscConstants.BEST_DIFF_COMPOSITION == compositions[i].name)
+                    {
+                        c = compositions[i];
+                        break;
+                    }
+
+            return c;
+        }
+
+        public static void CalcaulateProfit(Composition comp, out uint ttlBankPay,
+            out uint ttlBorrowerPay, out uint ttlProfit)
+        {
+            ttlBankPay = comp.optXBankTtlPay + comp.optYBankTtlPay + comp.optZBankTtlPay;
+            ttlBorrowerPay = (uint) Math.Round(comp.opts[(int)Options.options.OPTX].optTtlPay +
+                comp.opts[(int)Options.options.OPTY].optTtlPay + comp.opts[(int)Options.options.OPTZ].optTtlPay);
+            ttlProfit = (uint)comp.ttlPay - ttlBankPay;
+        }
+
+        public static string GetFileTypeExtension(FileType fileType)
+        {
+            string ext = MiscConstants.UNDEFINED_STRING;
+
+            switch (fileType)
+            {
+                case FileType.CSV:
+                    ext = MiscConstants.CSV_EXT;
+                    break;
+                case FileType.PDF:
+                    ext = MiscConstants.PDF_EXT;
+                    break;
+                case FileType.HTML:
+                    ext = MiscConstants.HTML_EXT;
+                    break;
+                case FileType.XML:
+                    ext = MiscConstants.XML_EXT;
+                    break;
+            }
+            return ext;
+        }
+
+        public static string GetResourceStream(string resourcePath)
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            List<string> resourceNames = new List<string>(assembly.GetManifestResourceNames());
+
+            string outRsourcePath = resourcePath.Replace(@"/", ".");
+            outRsourcePath = resourceNames.FirstOrDefault(r => r.Contains(outRsourcePath));
+
+            return outRsourcePath;
+        }
+
+
+        // TBD - bad practice
+        // start some log files for misc. logging
+        public static void OpenMiscLogger()
+        {
+            Share.theMiscLogger = new LoggerFile(Share.tempLogFile /*+ OrderID*/ + ".txt",
+               MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
+        }
+
+        public static void CloseMiscLogger()
+        {
+            if (null != Share.theMiscLogger)
+                Share.theMiscLogger.CloseLog2CSV();
+            Share.theMiscLogger = null;
+        }
+
+        ////////////////////
+        
+        public static void OpenSummaryFile()
+        {
+            Share.theSummaryFile = new LoggerFile(Share.summaryLogFile +
+                DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT,
+               MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
+
+            // add the header
+            string[] msg = {
+                        "Loan ID",
+                        "Original Loan Amount",
+                        "Date Taken",
+                        "Remaining Amount",
+                        "Borrower Paid So Far",
+                        "Bank Profit So Far",
+                        "Borrower Future Payment",
+                        "Lender Future Profit",
+                        "Refinance Or No",
+                        "Can Save Borrower Money",
+                        "Can Increase Lender Profit",
+                        "Minimum Borrower Total Payment",
+                        "Maximim Lender Profit"
+                        };
+            PrintSummaryFile(msg);
+        }
+
+        public static void CloseSummaryFile()
+        {
+            if (null != Share.theSummaryFile)
+                Share.theSummaryFile.CloseLog2CSV();
+            Share.theSummaryFile = null;
+        }
+
+        public static void PrintSummaryFile(string[] msg)
+        {
+            if (null != Share.theSummaryFile)
+                Share.theSummaryFile.PrintLog2CSV(msg);
+        }
 
     }
 
