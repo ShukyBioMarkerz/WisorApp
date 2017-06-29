@@ -188,29 +188,43 @@ namespace WisorLibrary.DataObjects
 
         public bool FindRiskLiquidity(RiskLiquidityValue riskLiquidityValue)
         {
-            // what is the calculation:
-            // the product index * # of loaded products * Liquidity + Risk 
-            int productIndex = GetProductIndex(riskLiquidityValue.productID.stringTypeId);
-            int liquidityVal = Array.IndexOf(Enum.GetValues(riskLiquidityValue.liquidity.GetType()), riskLiquidityValue.liquidity);
-            int riskVal = Array.IndexOf(Enum.GetValues(riskLiquidityValue.risk.GetType()), riskLiquidityValue.risk);
-            int indexInArray = liquidityVal * Share.theLoadedProducts.Count *
-                (Enum.GetNames(typeof(Risk)).Length - 1) *          // NONE
-                2 /*min, max*/ +
-                productIndex * (Enum.GetNames(typeof(Risk)).Length - 1) * 2 +
-                riskVal * 2;
             bool rc = false;
-
-            if (Share.riskAndLiquidity.Length > indexInArray+1)
+            int indexInArray = MiscConstants.UNDEFINED_INT;
+            try
             {
-                riskLiquidityValue.min = Share.riskAndLiquidity[indexInArray];
-                riskLiquidityValue.max = Share.riskAndLiquidity[indexInArray+1];
-                rc = true;
-            }
-            else
-            {
-                WindowsUtilities.loggerMethod("ERROR: FindRiskLiquidity illegal indexInArray: " + indexInArray + " while riskAndLiquidity include: " + Share.riskAndLiquidity.Length);
-            }
+                // what is the calculation:
+                // the product index * # of loaded products * Liquidity + Risk 
+                int productIndex = GetProductIndex(riskLiquidityValue.productID.stringTypeId);
+                if (0 > productIndex)
+                {
+                    WindowsUtilities.loggerMethod("ERROR: FindRiskLiquidity illegal productID: " + riskLiquidityValue.productID.stringTypeId);
+                }
+                else
+                {
+                    int liquidityVal = Array.IndexOf(Enum.GetValues(riskLiquidityValue.liquidity.GetType()), riskLiquidityValue.liquidity);
+                    int riskVal = Array.IndexOf(Enum.GetValues(riskLiquidityValue.risk.GetType()), riskLiquidityValue.risk);
+                    indexInArray = liquidityVal * Share.theLoadedProducts.Count *
+                        (Enum.GetNames(typeof(Risk)).Length - 1) *          // NONE
+                        2 /*min, max*/ +
+                        productIndex * (Enum.GetNames(typeof(Risk)).Length - 1) * 2 +
+                        riskVal * 2;
 
+                    if (0 <= indexInArray && Share.riskAndLiquidity.Length > indexInArray + 1)
+                    {
+                        riskLiquidityValue.min = Share.riskAndLiquidity[indexInArray];
+                        riskLiquidityValue.max = Share.riskAndLiquidity[indexInArray + 1];
+                        rc = true;
+                    }
+                    else
+                    {
+                        WindowsUtilities.loggerMethod("ERROR: FindRiskLiquidity illegal indexInArray: " + indexInArray + " while riskAndLiquidity include: " + Share.riskAndLiquidity.Length);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("ERROR: FindRiskLiquidity got Exception: " + e.ToString() + ", indexInArray: " + indexInArray + ", riskLiquidityValue: " + riskLiquidityValue.ToString());
+            }
             return rc;
         }
 
