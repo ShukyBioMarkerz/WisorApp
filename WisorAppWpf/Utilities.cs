@@ -280,6 +280,10 @@ namespace WisorAppWpf
         private static bool PrepareRun()
         {
             bool rc = false;
+         
+            // enable log debug
+            MiscUtilities.OpenMiscLogger();
+            MiscUtilities.OpenSummaryFile();
 
             ProductsList products = Utilities.GetProductsFromFile();
             if (null == Share.theLoadedProducts)
@@ -332,16 +336,15 @@ namespace WisorAppWpf
             {
                 BuildControls bc = new BuildControls(Share.theSelectedCriteriaFields);
             }
-        }
+
+         }
 
 
 
         public static void RunTheLogic()
         {
-            MiscUtilities.OpenMiscLogger();
-
             bool rc = Utilities.PrepareRun();
-
+  
             // Read customers load data and fire the calculation to all
             LoanList loans = MiscUtilities.GetLoansFromFile(Share.theSelectedCriteriaFields);
             if (null == loans || 0 >= loans.Count)
@@ -354,9 +357,8 @@ namespace WisorAppWpf
                 Utilities.RunTheLoansWraperSync(loans);
             else
                 Utilities.RunTheLoansWraperASync(loans);
-
+     
             //WindowsUtilities.loggerMethod("Complete calculate the entire " + loans.Count + " loans");
-            MiscUtilities.CloseMiscLogger();
         }
 
 
@@ -513,7 +515,7 @@ namespace WisorAppWpf
 
             // start the time elapse counter
             Utilities.StartPerformanceCalculation();
-
+ 
             int count = 1;
             foreach (loanDetails loan in loans)
             {
@@ -615,9 +617,14 @@ namespace WisorAppWpf
             // Shuky - measure the elapse time. Stop
             watch.Stop();
             WindowsUtilities.loggerMethod("*** Calculation time in milliseconds*** " + String.Format("{0:#,###,###}", watch.ElapsedMilliseconds));
+
+            // ugly but short...
+            // close log debug
+            MiscUtilities.CloseMiscLogger();
+            MiscUtilities.CloseSummaryFile();
         }
 
-  
+
     }
 
     //public class MainViewModel : ViewModelBase
