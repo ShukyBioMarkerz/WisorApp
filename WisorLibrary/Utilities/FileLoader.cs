@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using WisorLibrary.Logic;
 using WisorLibrary.Utilities;
 using static WisorLib.GenericProduct;
 using static WisorLib.MiscConstants;
@@ -134,124 +135,147 @@ namespace WisorLib
 
         private static LoanList LoadLoans(string[] loanLines, FieldList fieldsDef, string filename)
         {
-            LoanList loans = new LoanList();
-            string line;
+            //LoanList loans = new LoanList();
+            LoanContainer loanContainer = new LoanContainer();
+            string line = MiscConstants.UNDEFINED_STRING;
             int lineNumber = 1;
-            int id = MiscUtilities.GetLoanID();
-
-            for (int i = 0; i < loanLines.Length; i++)
+            try
             {
-                line = loanLines[i];
-                //curr = line;
-                if (String.IsNullOrEmpty(line))
-                    continue;
+                int id = MiscUtilities.GetLoanID();
 
-                // skip the first line
-                // TBD: should read the headers and relate to it
-                //if (1 == lineNumber++)
-                //    continue;
-             
-                string[] entities = line.Split(MiscConstants.COMMA_SEERATOR_STR);
-
-                if (String.IsNullOrEmpty(entities[0]))
+                // check the configured lines to load 
+                int fromLine = 0, toLine = loanLines.Length;
+                if (MiscConstants.UNDEFINED_UINT != Share.LoansLoadFromLine)
+                    fromLine = (int)Share.LoansLoadFromLine;
+                if (MiscConstants.UNDEFINED_UINT != Share.LoansLoadToLine)
+                    toLine = (int)Share.LoansLoadToLine;
+                for (int i = fromLine; i < toLine; i++)
                 {
-                    continue;
-                }
+                    line = loanLines[i];
+                    //curr = line;
+                    if (String.IsNullOrEmpty(line))
+                        continue;
 
-                // skip the header
-                decimal number = 0;
-                if (! decimal.TryParse(entities[0], out number))
-                {
-                    continue;
-                }
+                    // skip the first line
+                    // TBD: should read the headers and relate to it
+                    //if (1 == lineNumber++)
+                    //    continue;
 
-                if (entities.Length != fieldsDef.Count)
-                {
-                    WindowsUtilities.loggerMethod("ERROR: LoadLoans for loans file: " + filename + " is in a wrong syntax.");
-                    return loans;
-                }
+                    string[] entities = line.Split(MiscConstants.COMMA);
 
-                int loanAmountIndex = fieldsDef.GetIndexOf(MiscConstants.LOAN_AMOUNT); // // there is a index in the excel file
-                int monthlyPaymentIndex = fieldsDef.GetIndexOf(MiscConstants.MONTHLY_PAYMENT); // + INDEX_ADD;
-                int propertyValueIndex = fieldsDef.GetIndexOf(MiscConstants.PROPERTY_VALUE); // + INDEX_ADD;
-                int yearlyIncomeIndex = fieldsDef.GetIndexOf(MiscConstants.YEARLY_INCOME); // + INDEX_ADD;
-                int ageIndex = fieldsDef.GetIndexOf(MiscConstants.AGE); // + INDEX_ADD;
-                int ficoIndex = fieldsDef.GetIndexOf(MiscConstants.LOAN_FICO);
-                int dateTakenIndex = fieldsDef.GetIndexOf(MiscConstants.DATE_TAKEN);
-                //int desireTerminationMonthIndex = fieldsDef.GetIndexOf(MiscConstants.DESIRE_TERMINATION_MONTH);
-                int sequentialNumberIndex = fieldsDef.GetIndexOf(MiscConstants.SEQ_NUMBER);
-                //int originalProductIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_PRODUCT);
-                int originalRateIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_RATE);
-                int originalTimeIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_TIME);
-                int riskIndex = fieldsDef.GetIndexOf(MiscConstants.RISK_VALUE);
-                int liquidityIndex = fieldsDef.GetIndexOf(MiscConstants.LIQUIDITY_VALUE);
-                int productNameIndex = fieldsDef.GetIndexOf(MiscConstants.PRODUCT_NAME);
-
-                if (MiscConstants.UNDEFINED_INT < loanAmountIndex /*&& INDEX_ADD <= monthlyPaymentIndex*/ && MiscConstants.UNDEFINED_INT < propertyValueIndex &&
-                    MiscConstants.UNDEFINED_INT < yearlyIncomeIndex /*&& INDEX_ADD < ficoIndex*/)
-                {
-                    uint uyearlyIncomeIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, yearlyIncomeIndex));
-                    uint uloanAmountIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, loanAmountIndex));
-                    uint umonthlyPaymentIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, monthlyPaymentIndex));
-                    uint upropertyValueIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, propertyValueIndex));
-                    uint uageIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, ageIndex));
-                    int ficoIndexV = Convert.ToInt32(CleanupRedundantChars(entities, ficoIndex));
-                    //uint desireTerminationMonthIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, desireTerminationMonthIndex));
-                    uint sequentialNumberIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, sequentialNumberIndex));
-                    // clean percantage etc.
-                    double originalRateIndexV =
-                        (originalRateIndex >= entities.Length) ? MiscConstants.UNDEFINED_DOUBLE :
-                            Convert.ToDouble(CleanupRedundantChars(entities, originalRateIndex, true /*allowDot*/));
-                    uint originalTimeIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, originalTimeIndex));
-                    if (MiscConstants.UNDEFINED_UINT == sequentialNumberIndexV && MiscConstants.UNDEFINED_INT < sequentialNumberIndex)
+                    if (String.IsNullOrEmpty(entities[0]))
                     {
-                        CriteriaField cf = fieldsDef.GetField(MiscConstants.SEQ_NUMBER);
-                        sequentialNumberIndexV = Convert.ToUInt32(cf.value) + (uint)lineNumber;
+                        continue;
                     }
 
-                    DateTime dateTakenIndexV =
-                        (0 > dateTakenIndex || dateTakenIndex >= entities.Length) ? DateTime.Now : 
-                        Convert.ToDateTime(entities[dateTakenIndex]);
+                    // skip the header
+                    decimal number = 0;
+                    if (!decimal.TryParse(entities[0], out number))
+                    {
+                        continue;
+                    }
 
-                    Risk risk = Risk.NONERisk; // (Risk)Enum.Parse(typeof(Risk), CleanupRedundantChars(entities, riskIndex), true);
-                    Liquidity liquidity = Liquidity.NONELiquidity; // (Liquidity)Enum.Parse(typeof(Liquidity), CleanupRedundantChars(entities, liquidityIndex), true);
-                    
-                    string productName =
-                        (0 > productNameIndex || productNameIndex >= entities.Length) ? 
-                        MiscConstants.UNDEFINED_STRING : entities[productNameIndex];
-                    ProductID product = new ProductID(MiscConstants.UNDEFINED_INT, productName);
+                    if (entities.Length != fieldsDef.Count)
+                    {
+                        WindowsUtilities.loggerMethod("ERROR: LoadLoans for loans file: " + filename + " is in a wrong syntax.");
+                        return null;
+                    }
 
-                    if (0 < sequentialNumberIndexV)
-                        id = (int) sequentialNumberIndexV;
+                    int loanAmountIndex = fieldsDef.GetIndexOf(MiscConstants.LOAN_AMOUNT); // // there is a index in the excel file
+                    int monthlyPaymentIndex = fieldsDef.GetIndexOf(MiscConstants.MONTHLY_PAYMENT); // + INDEX_ADD;
+                    int propertyValueIndex = fieldsDef.GetIndexOf(MiscConstants.PROPERTY_VALUE); // + INDEX_ADD;
+                    int yearlyIncomeIndex = fieldsDef.GetIndexOf(MiscConstants.YEARLY_INCOME); // + INDEX_ADD;
+                    int ageIndex = fieldsDef.GetIndexOf(MiscConstants.AGE); // + INDEX_ADD;
+                    int ficoIndex = fieldsDef.GetIndexOf(MiscConstants.LOAN_FICO);
+                    int dateTakenIndex = fieldsDef.GetIndexOf(MiscConstants.DATE_TAKEN);
+                    //int desireTerminationMonthIndex = fieldsDef.GetIndexOf(MiscConstants.DESIRE_TERMINATION_MONTH);
+                    int sequentialNumberIndex = fieldsDef.GetIndexOf(MiscConstants.SEQ_NUMBER);
+                    //int originalProductIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_PRODUCT);
+                    int originalRateIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_RATE);
+                    int originalTimeIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_TIME);
+                    int originalMarginIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_MARGIN);
 
-                    loans.Add(new loanDetails(id.ToString(),
-                        uloanAmountIndexV, umonthlyPaymentIndexV, upropertyValueIndexV,
-                        uyearlyIncomeIndexV, uageIndexV, ficoIndexV,
-                        dateTakenIndexV, product, true /*shouldCalculate*/,
-                        originalRateIndexV, originalTimeIndexV,
-                        /*desireTerminationMonthIndexV,*/ sequentialNumberIndexV, risk, liquidity));
-                    id++;
-                    
-                }
-                else
-                {
-                    string err = null;
-                    if (0 > loanAmountIndex)
-                        err += " illegal loanAmountIndex value: " + loanAmountIndex.ToString();
-                    if (0 > monthlyPaymentIndex)
-                        err += " illegal monthlyPaymentIndex value: " + monthlyPaymentIndex.ToString();
-                    if (0 > propertyValueIndex)
-                        err += " illegal propertyValueIndex value: " + propertyValueIndex.ToString();
-                    if (0 > yearlyIncomeIndex)
-                        err += " illegal yearlyIncomeIndex value: " + yearlyIncomeIndex.ToString();
-                    //if (INDEX_ADD > ageIndex)
-                    //    err += " illegal ageIndex value: " + ageIndex.ToString();
+                    int riskIndex = fieldsDef.GetIndexOf(MiscConstants.RISK_VALUE);
+                    int liquidityIndex = fieldsDef.GetIndexOf(MiscConstants.LIQUIDITY_VALUE);
+                    int productNameIndex = fieldsDef.GetIndexOf(MiscConstants.PRODUCT_NAME);
 
-                    WindowsUtilities.loggerMethod("NOTICE: LoadLoans file: illegal index of the mandatory parameters. Probably missing some cretiria. " + err);
+                    if (MiscConstants.UNDEFINED_INT < loanAmountIndex /*&& INDEX_ADD <= monthlyPaymentIndex*/ && MiscConstants.UNDEFINED_INT < propertyValueIndex &&
+                        MiscConstants.UNDEFINED_INT < yearlyIncomeIndex /*&& INDEX_ADD < ficoIndex*/)
+                    {
+                        uint uyearlyIncomeIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, yearlyIncomeIndex));
+                        uint uloanAmountIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, loanAmountIndex));
+                        uint umonthlyPaymentIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, monthlyPaymentIndex));
+                        uint upropertyValueIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, propertyValueIndex));
+                        uint uageIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, ageIndex));
+                        //uint desireTerminationMonthIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, desireTerminationMonthIndex));
+                        uint sequentialNumberIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, sequentialNumberIndex));
+                        // clean percantage etc.
+                        double originalRateIndexV =
+                            (originalRateIndex >= entities.Length) ? MiscConstants.UNDEFINED_DOUBLE :
+                                Convert.ToDouble(CleanupRedundantChars(entities, originalRateIndex, true /*allowDot*/));
+                        uint originalTimeIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, originalTimeIndex));
+                        double originalMarginIndexV =
+                            (originalMarginIndex >= entities.Length) ? MiscConstants.UNDEFINED_DOUBLE :
+                                Convert.ToDouble(CleanupRedundantChars(entities, originalMarginIndex, true /*allowDot*/));
+
+                        if (MiscConstants.UNDEFINED_UINT == sequentialNumberIndexV && MiscConstants.UNDEFINED_INT < sequentialNumberIndex)
+                        {
+                            CriteriaField cf = fieldsDef.GetField(MiscConstants.SEQ_NUMBER);
+                            sequentialNumberIndexV = Convert.ToUInt32(cf.value) + (uint)lineNumber;
+                        }
+                        int ficoIndexV = (MiscConstants.UNDEFINED_INT < ficoIndex) ? Convert.ToInt32(CleanupRedundantChars(entities, ficoIndex)) : MiscConstants.UNDEFINED_INT;
+
+                        DateTime dateTakenIndexV =
+                            (0 > dateTakenIndex || dateTakenIndex >= entities.Length) ? DateTime.Now :
+                                Convert.ToDateTime(entities[dateTakenIndex]);
+                        //DateTime dateS = MiscUtilities.ConvertDate(entities[dateTakenIndex]);
+
+                        Risk risk = Risk.NONERisk; // (Risk)Enum.Parse(typeof(Risk), CleanupRedundantChars(entities, riskIndex), true);
+                        Liquidity liquidity = Liquidity.NONELiquidity; // (Liquidity)Enum.Parse(typeof(Liquidity), CleanupRedundantChars(entities, liquidityIndex), true);
+
+                        string productName =
+                            (0 > productNameIndex || productNameIndex >= entities.Length) ?
+                            MiscConstants.UNDEFINED_STRING : entities[productNameIndex];
+                        ProductID product = new ProductID(MiscConstants.UNDEFINED_INT, productName);
+
+                        if (0 < sequentialNumberIndexV)
+                            id = (int)sequentialNumberIndexV;
+
+                        /*loans*/
+                        loanContainer.Add(new loanDetails(id.ToString(),
+                            uloanAmountIndexV, umonthlyPaymentIndexV, upropertyValueIndexV,
+                            uyearlyIncomeIndexV, uageIndexV, ficoIndexV,
+                            dateTakenIndexV, product, true /*shouldCalculate*/,
+                            originalRateIndexV, originalTimeIndexV, originalMarginIndexV,
+                            /*desireTerminationMonthIndexV,*/ sequentialNumberIndexV, risk, liquidity));
+                        id++;
+
+                    }
+                    else
+                    {
+                        string err = null;
+                        if (0 > loanAmountIndex)
+                            err += " illegal loanAmountIndex value: " + loanAmountIndex.ToString();
+                        if (0 > monthlyPaymentIndex)
+                            err += " illegal monthlyPaymentIndex value: " + monthlyPaymentIndex.ToString();
+                        if (0 > propertyValueIndex)
+                            err += " illegal propertyValueIndex value: " + propertyValueIndex.ToString();
+                        if (0 > yearlyIncomeIndex)
+                            err += " illegal yearlyIncomeIndex value: " + yearlyIncomeIndex.ToString();
+                        //if (INDEX_ADD > ageIndex)
+                        //    err += " illegal ageIndex value: " + ageIndex.ToString();
+
+                        WindowsUtilities.loggerMethod("NOTICE: LoadLoans file: illegal index of the mandatory parameters. Probably missing some cretiria. " + err);
+                    }
                 }
             }
- 
-            return loans;
+            catch (Exception e)
+            {
+                WindowsUtilities.loggerMethod("ERROR: LoadLoans got Exception: " + e.ToString() + ". line: " + line);
+            }
+
+            LoanList ll = loanContainer.GroupLoansByID();
+            return ll;
         }
 
         static string CleanupRedundantChars(string[] entities, int index, bool allowDot = false, string defaultValue = "0")
