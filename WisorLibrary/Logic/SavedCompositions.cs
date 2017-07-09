@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using WisorLibrary.Logic;
+using WisorLibrary.Utilities;
 using static WisorLib.Options;
 
 namespace WisorLib
@@ -117,16 +118,33 @@ namespace WisorLib
         {
             //if (0 < Share.numberOfPrintResultsInList || Share.ShouldStoreAllCombinations)
             //{
-                // Checking lender profit
-                // get the Bank interset value
-                Calculations.CalculateTheBankProfit(optX, optY, optZ, env.BorrowerProfile.profile);
+            // Checking lender profit
+            // get the Bank interset value
+            Calculations.CalculateTheBankProfit(optX, optY, optZ, env.BorrowerProfile.profile);
 
-                double optXBankTtlPay = optX.CalculateLuahSilukinBank();
-                double optYBankTtlPay = optY.CalculateLuahSilukinBank();
-                double optZBankTtlPay = optZ.CalculateLuahSilukinBank();
-                int ttlBankPayPayk = Convert.ToInt32(optX.CalculateLuahSilukinBank() + optY.CalculateLuahSilukinBank() + optZ.CalculateLuahSilukinBank());
-                int ttlPayForCheck = Convert.ToInt32(optX.optTtlPay + optY.optTtlPay + optZ.optTtlPay);
+            double optXBankTtlPay = optX.CalculateLuahSilukinBank();
+            double optYBankTtlPay = optY.CalculateLuahSilukinBank();
+            double optZBankTtlPay = optZ.CalculateLuahSilukinBank();
+            int ttlBankPayPayk = Convert.ToInt32(optXBankTtlPay + optYBankTtlPay + optZBankTtlPay);
+            int ttlPayForCheck = Convert.ToInt32(optX.optTtlPay + optY.optTtlPay + optZ.optTtlPay);
+            int diff = ttlPayForCheck - ttlBankPayPayk;
 
+            // for debug only - print the luch silukin results to a file
+            if (Share.shouldDebugLuchSilukin)
+            {
+                string msg = ttlPayForCheck + "," + ttlBankPayPayk;
+                MiscUtilities.PrintMiscLogger(msg);
+            }
+
+            //string totalBorrower = ttlPayForCheck.ToString();
+            //string totalBank = ttlBankPayPayk.ToString();
+
+            // save it anyway in order to store the best from borrower and from the bank sides
+            //if (0 < Share.numberOfPrintResultsInList)
+            //{
+            //add the result to the oredered list
+            if (1 < Share.numberOfPrintResultsInList)
+            {
                 string productNameX = GenericProduct.GetProductName(optX.optType);
                 string resultX = productNameX + MiscConstants.DOTS_STR + optX.optAmt +
                     MiscConstants.DOTS_STR + optX.optTime + MiscConstants.DOTS_STR + optX.optRateFirstPeriod;
@@ -136,74 +154,106 @@ namespace WisorLib
                 string productNameZ = GenericProduct.GetProductName(optZ.optType);
                 string resultZ = productNameZ + MiscConstants.DOTS_STR + optZ.optAmt +
                     MiscConstants.DOTS_STR + optZ.optTime + MiscConstants.DOTS_STR + optZ.optRateFirstPeriod;
-                string totalBorrower = ttlPayForCheck.ToString();
-                string totalBank = ttlBankPayPayk.ToString();
-                string diff = (ttlPayForCheck - ttlBankPayPayk).ToString();
 
-                // save it anyway in order to store the best from borrower and from the bank sides
-                //if (0 < Share.numberOfPrintResultsInList)
-                //{
-                //add the result to the oredered list
-                    if (1 < Share.numberOfPrintResultsInList)
-                    {
-                        ChosenComposition comp = new ChosenComposition()
-                            { resultX, resultY, resultZ, totalBorrower, totalBank, diff };
-                        comp.SetBorrowerPay(ttlPayForCheck);
-                        comp.SetBankPay(ttlBankPayPayk);
-                        comp.SetBankProfit(Convert.ToInt32(ttlPayForCheck - ttlBankPayPayk));
+                ChosenComposition comp = new ChosenComposition()
+                    { resultX, resultY, resultZ, ttlPayForCheck.ToString(), ttlBankPayPayk.ToString(), diff.ToString() };
+                comp.SetBorrowerPay(ttlPayForCheck);
+                comp.SetBankPay(ttlBankPayPayk);
+                comp.SetBankProfit(Convert.ToInt32(ttlPayForCheck - ttlBankPayPayk));
                 
-                        env.listOfSelectedCompositions.Add(comp);
-                    }
+                env.listOfSelectedCompositions.Add(comp);
+            }
             
-                    if (env.MaxProfit < Convert.ToInt32(diff))
-                    {
-                        env.MaxProfit = Convert.ToInt32(diff);
-                        env.bestDiffComposition = new Composition(optX, optY, optZ, env, MiscConstants.BEST_DIFF_COMPOSITION);
-                    }
-                    if (env.MaxBankPay < Convert.ToInt32(totalBank))
-                    {
-                        env.MaxBankPay = Convert.ToInt32(totalBank);
-                        env.bestBankComposition = new Composition(optX, optY, optZ, env, MiscConstants.BEST_BANK_COMPOSITION);
-                    }
-                    if (0 >= env.MinBorrowerPay)
-                    {
-                        env.MinBorrowerPay = Convert.ToInt32(totalBorrower);
-                        env.bestBorrowerComposition = new Composition(optX, optY, optZ, env, MiscConstants.BEST_BORROWER_COMPOSITION);
-                    }
-                    if (env.MinBorrowerPay > Convert.ToInt32(totalBorrower))
-                    {
-                        env.MinBorrowerPay = Convert.ToInt32(totalBorrower);
-                        env.bestBorrowerComposition = new Composition(optX, optY, optZ, env, MiscConstants.BEST_BORROWER_COMPOSITION);
-                    }
+            // now, the bank rate may be negative and the diff as well
+            int absDiff = Math.Abs(diff);
+            if (env.MaxProfit < absDiff /*Convert.ToInt32(diff)*/)
+            {
+                env.MaxProfit = absDiff /*Convert.ToInt32(diff)*/;
+                env.bestDiffComposition = new Composition(optX, optY, optZ, env, MiscConstants.BEST_DIFF_COMPOSITION);
+            }
+            if (env.MaxBankPay < ttlBankPayPayk)
+            {
+                env.MaxBankPay = ttlBankPayPayk;
+                env.bestBankComposition = new Composition(optX, optY, optZ, env, MiscConstants.BEST_BANK_COMPOSITION);
+            }
+            if (0 >= env.MinBorrowerPay)
+            {
+                env.MinBorrowerPay = ttlPayForCheck;
+                env.bestBorrowerComposition = new Composition(optX, optY, optZ, env, MiscConstants.BEST_BORROWER_COMPOSITION);
+            }
+            if (env.MinBorrowerPay > ttlPayForCheck)
+            {
+                env.MinBorrowerPay = ttlPayForCheck;
+                env.bestBorrowerComposition = new Composition(optX, optY, optZ, env, MiscConstants.BEST_BORROWER_COMPOSITION);
+            }
+
+            // calculate the beneficial of the borrower and the bank
+            // by the factor to each of them
+            // UPON the actuall known data from the loan' calculation
+            int borrowerProfitCalc, bankProfitCalc, totalBenefit;
+            MiscUtilities.CalcaulateProfitAll(ttlBankPayPayk, ttlPayForCheck, diff, env.theLoan,
+                out borrowerProfitCalc, out bankProfitCalc, out totalBenefit);
+            if (0 < borrowerProfitCalc && 0 < bankProfitCalc && 0 < totalBenefit)
+            {
+                //if (0 >= env.MaxBorrowerProfitCalc)
+                //{
+                //    env.MaxBorrowerProfitCalc = borrowerProfitCalc;
                 //}
-               
-                if (Share.ShouldStoreAllCombinations)
+                // which side do we prefer - consider the factor 
+                // bank side
+                if (env.MaxBankProfitCalc < bankProfitCalc 
+                    //&& env.MaxBorrowerProfitCalc >= borrowerProfitCalc
+                    /*env.MaxTotalBenefit < totalBenefit &&*/)
                 {
-                    // truncate the numbers
-                    string[] msg2write = {
-                        /*"X: " + */optX.ToString(),
-                        /*"Y: " + */optY.ToString(),
-                        /*"Z: " + */optZ.ToString(),
-                        /*"X_pmt: " +*/ Convert.ToInt32(optX.optPmt).ToString() + ":" +
-                        /*"Y_pmt: " +*/ Convert.ToInt32(optY.optPmt).ToString() + ":" +
-                        /*"Z_pmt: " +*/ Convert.ToInt32(optZ.optPmt).ToString() + "=" +
-                        /*"Ttl_pmt: " +*/ Convert.ToInt32(optX.optPmt + optY.optPmt + optZ.optPmt).ToString(),
-                        /*"X_Ttl: " +*/ Convert.ToInt32(optX.optTtlPay).ToString() + ":" +
-                        /*"Y_Ttl: " +*/ Convert.ToInt32(optY.optTtlPay).ToString() + ":" +
-                        /*"Z_Ttl: " +*/ Convert.ToInt32(optZ.optTtlPay).ToString(),
-                        /*"ttlPay: " +*/ Convert.ToInt32(ttlPayForCheck).ToString(),
-                        /*"X_TtlBank: " +*/ Convert.ToInt32(optXBankTtlPay).ToString() + ":" +
-                        /*"Y_TtlBank: " +*/ Convert.ToInt32(optYBankTtlPay).ToString() + ":" +
-                        /*"Z_TtlBank: " +*/ Convert.ToInt32(optZBankTtlPay).ToString(),
-                        /*"ttlPayBank: " +*/ Convert.ToInt32(ttlBankPayPayk).ToString()
-                        };
-
-                    env.Logger.PrintLog2CSV(msg2write);
+                    env.MaxBankProfitCalc = bankProfitCalc;
+                    //env.MaxTotalBenefit = totalBenefit;
+                    //env.MaxBorrowerProfitCalc = borrowerProfitCalc;
+                    env.bestAllProfitCompositionBank = new Composition(optX, optY, optZ, env, MiscConstants.BEST_ALL_PROFIT_COMPOSITION_BANK);
                 }
+                if (/*env.MaxBankProfitCalc < bankProfitCalc &&*/
+                    env.MaxBorrowerProfitCalc /*>=*/ < borrowerProfitCalc
+                    /*env.MaxTotalBenefit < totalBenefit &&*/)
+                {
+                    //env.MaxBankProfitCalc = bankProfitCalc;
+                    //env.MaxTotalBenefit = totalBenefit;
+                    env.MaxBorrowerProfitCalc = borrowerProfitCalc;
+                    env.bestAllProfitCompositionBorrower = new Composition(optX, optY, optZ, env, MiscConstants.BEST_ALL_PROFIT_COMPOSITION_BORROWER);
+                }
+                //if (env.MaxBankProfitCalc < bankProfitCalc &&
+                //    env.MaxBorrowerProfitCalc >= borrowerProfitCalc
+                //    /*env.MaxTotalBenefit < totalBenefit &&*/)
+                //{
+                //    env.MaxBankProfitCalc = bankProfitCalc;
+                //    env.MaxTotalBenefit = totalBenefit;
+                //    env.MaxBorrowerProfitCalc = borrowerProfitCalc;
+                //    env.bestAllProfitComposition = new Composition(optX, optY, optZ, env, MiscConstants.BEST_ALL_PROFIT_COMPOSITION);
+                //}
 
+            }
 
-            //}
+            if (Share.ShouldStoreAllCombinations)
+            {
+                // truncate the numbers
+                string[] msg2write = {
+                    /*"X: " + */optX.ToString(),
+                    /*"Y: " + */optY.ToString(),
+                    /*"Z: " + */optZ.ToString(),
+                    /*"X_pmt: " +*/ Convert.ToInt32(optX.optPmt).ToString() + ":" +
+                    /*"Y_pmt: " +*/ Convert.ToInt32(optY.optPmt).ToString() + ":" +
+                    /*"Z_pmt: " +*/ Convert.ToInt32(optZ.optPmt).ToString() + "=" +
+                    /*"Ttl_pmt: " +*/ Convert.ToInt32(optX.optPmt + optY.optPmt + optZ.optPmt).ToString(),
+                    /*"X_Ttl: " +*/ Convert.ToInt32(optX.optTtlPay).ToString() + ":" +
+                    /*"Y_Ttl: " +*/ Convert.ToInt32(optY.optTtlPay).ToString() + ":" +
+                    /*"Z_Ttl: " +*/ Convert.ToInt32(optZ.optTtlPay).ToString(),
+                    /*"ttlPay: " +*/ Convert.ToInt32(ttlPayForCheck).ToString(),
+                    /*"X_TtlBank: " +*/ Convert.ToInt32(optXBankTtlPay).ToString() + ":" +
+                    /*"Y_TtlBank: " +*/ Convert.ToInt32(optYBankTtlPay).ToString() + ":" +
+                    /*"Z_TtlBank: " +*/ Convert.ToInt32(optZBankTtlPay).ToString(),
+                    /*"ttlPayBank: " +*/ Convert.ToInt32(ttlBankPayPayk).ToString()
+                    };
 
+                env.Logger.PrintLog2CSV(msg2write);
+            }
         }
 
 
