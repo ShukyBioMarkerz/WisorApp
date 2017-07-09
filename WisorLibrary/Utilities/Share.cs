@@ -67,10 +67,15 @@ namespace WisorLib
         public static bool ShouldStoreHTMLReport { get; set; }
         public static uint LoansLoadFromLine { get; set; }
         public static uint LoansLoadToLine { get; set; }
- 
-        /// <summary>
-        /// Print some counters for performance benchmark
-        /// </summary>
+        // load specific loan' IDs
+        public static string LoansLoadIDsFromLine { get; set; }
+
+        public static bool shouldDebugLoans { get; set; }
+        public static bool shouldDebugLuchSilukin { get; set; }
+
+    /// <summary>
+    /// Print some counters for performance benchmark
+    /// </summary>
         public static bool shouldPrintCounters { get; set; }
 
         public static long counterOfOneDivisionOfAmounts;
@@ -83,6 +88,10 @@ namespace WisorLib
         public static long CalculateLuahSilukinCounterNOTInFirstTimePeriod;
         public static long CalculateLuahSilukinCounterInFirstTimePeriod;
         public static long CalculateLuahSilukinCounterIndexUsedFirstTimePeriod;
+
+        public static int TotalNumberOfLoans { get; set; }
+        public static int NumberOfCanRefininceLoans { get; set; }
+        public static int NumberOfPositiveBeneficialLoans { get; set; }
 
         public static string CustomerName { get; set; }
 
@@ -98,8 +107,10 @@ namespace WisorLib
         }
         public static LoggerFile theMiscLogger { get; set; }
         public static LoggerFile theSummaryFile { get; set; }
-
-         
+        public static LoggerFile theWinWinSummaryFile { get; set; }
+        public static LoggerFile theBorrowerWinSummaryFile { get; set; }
+        public static LoggerFile theBankWinSummaryFile { get; set; }
+        public static LoggerFile theTotalWinSummaryFile { get; set; }
 
         private static string criteriaFileName;
         public static string CriteriaFileName
@@ -227,7 +238,8 @@ namespace WisorLib
                     riskAndLiquidityFileName = value;
             }
         }
-        
+
+ 
 
         // Once the user select the order, update the loaded list accordingly
         public static void OrderTheCriteriaFields()
@@ -268,7 +280,7 @@ namespace WisorLib
 
         // Loan settings
         internal static uint maximumTimeForLoan = 360;
-        internal const double optionMinimumAmount = 3000;
+        internal const double optionMinimumAmount = 30000;
         internal const double jumpBetweenAmounts = 1000;
         internal const uint minimumTimeForLoan = 48;
         public const double largeDev = 20;
