@@ -14,7 +14,7 @@ using WisorLibrary.Utilities;
 namespace WisorLibrary.Logic
 {
  
-    class LoanContainer
+    public class LoanContainer
     {
         LoanList _loans;
 
@@ -32,12 +32,12 @@ namespace WisorLibrary.Logic
         {
             LoanList tmpLoans = new LoanList(), returnLoans = new LoanList();
             string id = MiscConstants.UNDEFINED_STRING;
-            loanDetails calcLoan;
-
+            loanDetails calcLoan = null;
+            bool failedInCalculation = false;
             // TBD - print log . Should be removed
             //PrintOriginalLoanLuahSilukin(loans);
 
-            for (int i = 0; i < _loans.Count; i++)
+            for (int i = 0; i < _loans.Count; i++, failedInCalculation = false)
             {
                 // is it the same ID
                 if (MiscConstants.UNDEFINED_STRING == id || id == _loans[i].ID)
@@ -46,17 +46,40 @@ namespace WisorLibrary.Logic
                 }
                 else
                 {
-                    calcLoan = AccumulaLoanData(tmpLoans);
-                    returnLoans.Add(calcLoan);
+                    try
+                    {
+                        calcLoan = AccumulaLoanData(tmpLoans);
+                    }
+                    catch (ArgumentOutOfRangeException aoore)
+                    {
+                        WindowsUtilities.loggerMethod("NOTICE: GroupLoansByID ArgumentOutOfRangeException occured: " /*+ aoore.ToString()*/ +
+                            ". Skiping Loan id: " + id);
+                        failedInCalculation = true;
+                    }
+                    if (! failedInCalculation)
+                        returnLoans.Add(calcLoan);
                     tmpLoans.Clear();
                     tmpLoans.Add(_loans[i]);
                 }
                 id = _loans[i].ID;
             }
+
+
             if (0 < tmpLoans.Count)
             {
-                calcLoan = AccumulaLoanData(tmpLoans);
-                returnLoans.Add(calcLoan);
+                try
+                {
+                    calcLoan = AccumulaLoanData(tmpLoans);
+                    returnLoans.Add(calcLoan);
+                }
+                catch (ArgumentOutOfRangeException aoore)
+                {
+                    WindowsUtilities.loggerMethod("NOTICE: GroupLoansByID ArgumentOutOfRangeException occured: " + aoore.Message +
+                        " in Loans id: " + tmpLoans[0].ID);
+                    string[] msg = { "NOTICE: GroupLoansByID ArgumentOutOfRangeException occured: " + aoore.Message +
+                        " in Loans id: " + tmpLoans[0].ID };
+                    MiscUtilities.PrintSummaryFile(msg);
+                }
             }
 
             WindowsUtilities.loggerMethod("NOTICE: LoanContainer got: " + _loans.Count + " loans, convert to: " + returnLoans.Count);
@@ -71,15 +94,15 @@ namespace WisorLibrary.Logic
             {
                 Console.WriteLine("Loan: " + (i + 1).ToString() + " : " + returnLoans[i].ToString());
                 // debug print
-                if (null != Share.theMiscLogger)
+                if (Share.shouldDebugLoans)
                 {
-                    Share.theMiscLogger.PrintLog("The oroginal Loan: " + (i + 1).ToString() + " : " + returnLoans[i].ToString());
-                    Share.theMiscLogger.PrintLog(returnLoans[i].resultReportData.ToString());
+                    MiscUtilities.PrintMiscLogger("The original Loan: " + (i + 1).ToString() + " : " + returnLoans[i].ToString());
+                    MiscUtilities.PrintMiscLogger("The luch silkin: " + returnLoans[i].resultReportData.ToString());
                 }
             }
+
             // calculate the luaah silukin 
             //GetTheLuahSilukin(ref returnLoans);
-
 
             return returnLoans;
         }
@@ -104,20 +127,30 @@ namespace WisorLibrary.Logic
                     BankPayUntilToday = MiscConstants.UNDEFINED_UINT,
                     BankPayFuture = MiscConstants.UNDEFINED_UINT;
 
-                try
-                {
+                //try
+                //{
                     for (int i = 0; i < collectedLoans.Count; i++)
                     {
                         yearlyIncome = collectedLoans[i].YearlyIncome;
                         originalAmount += collectedLoans[i].OriginalLoanAmount;
                         monthlyPayment += collectedLoans[i].DesiredMonthlyPayment;
-                        // calculate luch silukim
+                    // calculate luch silukim
+
+                    //try
+                    //{
                         Calculations.CalculateLuahSilukinFullAll(collectedLoans[i].indices,
                              collectedLoans[i].OriginalRate, collectedLoans[i].OriginalMargin, collectedLoans[i].OriginalInflation,
                              collectedLoans[i].OriginalLoanAmount, collectedLoans[i].OriginalTime,
-                             collectedLoans[i].DateTaken, ref resultData);
+                             collectedLoans[i].DateTaken, collectedLoans[i].ID, ref resultData);
+                    //}
+                    //catch (ArgumentOutOfRangeException aoore)
+                    //{
+                    //    WindowsUtilities.loggerMethod("NOTICE: AccumulaLoanData ArgumentOutOfRangeException occured: " + aoore.ToString() +
+                    //        " in load: " + collectedLoans[i].ID);
+                    //    continue;
+                    //}
 
-                        // borrower data
+                    // borrower data
                         PayUntilToday += resultData.PayUntilToday;
                         PayFuture += resultData.PayFuture;
                         RemaingLoanAmount += resultData.RemaingLoanAmount;
@@ -130,17 +163,18 @@ namespace WisorLibrary.Logic
                     UpdateLoanData(ref ld, collectedLoans[0], PayUntilToday, PayFuture, RemaingLoanAmount,
                         MonthlyPaymentCalc, BankPayUntilToday, BankPayFuture, yearlyIncome, originalAmount);
 
-                }
-                catch (Exception e)
-                {
-                    WindowsUtilities.loggerMethod("ERROR: AccumulaLoandata got Exception: " + e.ToString());
-                }
+                //}
+                //catch (Exception e)
+                //{
+                //    WindowsUtilities.loggerMethod("ERROR: AccumulaLoandata got Exception: " + e.ToString());
+                //}
 
             }
-            if (null != Share.theMiscLogger)
+
+            if (Share.shouldDebugLoans)
             {
-                Share.theMiscLogger.PrintLog("\n\nThe Accumulated loan:\n");
-                Share.theMiscLogger.PrintLog(ld.ToString());
+                MiscUtilities.PrintMiscLogger("\n\nThe Accumulated loan:\n");
+                MiscUtilities.PrintMiscLogger(ld.ToString());
             }
         
             return ld;
@@ -169,7 +203,6 @@ namespace WisorLibrary.Logic
             ld.liquidity = loan.liquidity;
             ld.risk = loan.risk;
             ld.OriginalDateTaken = loan.OriginalDateTaken;
-            ld.resultReportData.DesireTerminationMonth = ld.DesireTerminationMonth = loan.DesireTerminationMonth;
             ld.resultReportData.OriginalInflation = ld.OriginalInflation = loan.OriginalInflation;
             ld.resultReportData.OriginalMargin = ld.OriginalMargin = loan.OriginalMargin;
             ld.resultReportData.StartTime = loan.resultReportData.StartTime;
@@ -187,19 +220,59 @@ namespace WisorLibrary.Logic
             ld.resultReportData.BankPayUntilToday = BankPayUntilToday;
             ld.resultReportData.BankPayFuture = BankPayFuture;
             ld.resultReportData.EstimateFuturePay = ld.resultReportData.PayFuture;
-            ld.resultReportData.EstimateProfitSoFar =
-                ld.resultReportData.PayUntilToday - ld.resultReportData.BankPayUntilToday;
-            ld.resultReportData.EstimateProfitPercantageSoFar =
-                (double)ld.resultReportData.EstimateProfitSoFar / ld.OriginalLoanAmount;
-            ld.resultReportData.EstimateTotalProfit =
-                ld.resultReportData.PayUntilToday + ld.resultReportData.PayFuture -
-                ld.resultReportData.BankPayUntilToday - ld.resultReportData.BankPayFuture;
-            ld.resultReportData.EstimateTotalProfitPercantage =
-                (double)ld.resultReportData.EstimateTotalProfit / ld.OriginalLoanAmount;
-            ld.resultReportData.EstimateFutureProfit =
-                ld.resultReportData.PayFuture - ld.resultReportData.BankPayFuture;
-            ld.resultReportData.EstimateFutureProfitPercantage =
-                (double)ld.resultReportData.EstimateFutureProfit / ld.OriginalLoanAmount;
+            // make consistancy checks
+            if (ld.resultReportData.BankPayUntilToday > ld.resultReportData.PayUntilToday)
+            {
+                WindowsUtilities.loggerMethod("NOTICE: loan.ID: " + loan.ID + " the bank pay until today is larger than the borrower: " +
+                    ld.resultReportData.BankPayUntilToday + " , " + ld.resultReportData.PayUntilToday);
+                ld.resultReportData.EstimateProfitSoFar = 0;
+            }
+            else
+            {
+                ld.resultReportData.EstimateProfitSoFar =
+                    ld.resultReportData.PayUntilToday - ld.resultReportData.BankPayUntilToday;
+            }
+            if (0 >= ld.OriginalLoanAmount)
+            {
+                WindowsUtilities.loggerMethod("NOTICE: loan.ID: " + loan.ID + " illega OriginalLoanAmount: " +
+                    ld.OriginalLoanAmount);
+                ld.resultReportData.EstimateProfitPercantageSoFar = 0;
+                ld.resultReportData.EstimateTotalProfitPercantage = 0;
+                ld.resultReportData.EstimateFutureProfitPercantage = 0;
+            }
+            else
+            {
+                ld.resultReportData.EstimateProfitPercantageSoFar =
+                     (double)ld.resultReportData.EstimateProfitSoFar / ld.OriginalLoanAmount;
+                ld.resultReportData.EstimateTotalProfitPercantage =
+                    (double)ld.resultReportData.EstimateTotalProfit / ld.OriginalLoanAmount;
+                ld.resultReportData.EstimateFutureProfitPercantage =
+                    (double)ld.resultReportData.EstimateFutureProfit / ld.OriginalLoanAmount;
+            }
+            int sum = (int) ld.resultReportData.PayUntilToday + (int) ld.resultReportData.PayFuture -
+                (int) ld.resultReportData.BankPayUntilToday - (int) ld.resultReportData.BankPayFuture;
+            if (0 >= sum)
+            {
+                WindowsUtilities.loggerMethod("NOTICE: loan.ID: " + loan.ID + " illega EstimateTotalProfit which sum to: " +
+                    sum);
+                ld.resultReportData.EstimateTotalProfit = 0;
+            }
+            else
+            {
+                ld.resultReportData.EstimateTotalProfit = (uint) sum;
+            }
+
+            if (ld.resultReportData.BankPayFuture > ld.resultReportData.PayFuture)
+            {
+                WindowsUtilities.loggerMethod("NOTICE: loan.ID: " + loan.ID + " the bank pay future is larger than the borrower: " +
+                    ld.resultReportData.BankPayFuture + " , " + ld.resultReportData.PayFuture);
+                ld.resultReportData.EstimateProfitSoFar = 0;
+            }
+            else
+            {
+                ld.resultReportData.EstimateFutureProfit =
+                    ld.resultReportData.PayFuture - ld.resultReportData.BankPayFuture;
+            }
         }
 
         //void PrintOriginalLoanLuahSilukin(LoanList loans/*, LoanList groupedLoans*/)
