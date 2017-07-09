@@ -107,10 +107,10 @@ namespace WisorLib
                         indices = gp.originalIndexUsedFirstTimePeriod;
                         OriginalInflation = gp.indexUsedFirstTimePeriod;
                     }
-                    else
-                    {
-                        Console.WriteLine("ERROR: loanDetails can't recognize the product: " + product.stringTypeId);
-                    }
+                    //else
+                    //{
+                    //    Console.WriteLine("ERROR: loanDetails can't recognize the product: " + product.stringTypeId);
+                    //}
                 }
 
                 if (!shouldCalculate || DateTime.Now == dateTaken
