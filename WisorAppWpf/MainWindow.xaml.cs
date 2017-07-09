@@ -34,6 +34,9 @@ namespace WisorAppWpf
         {
             InitializeComponent();
 
+            // cleanup
+            AppDomain.CurrentDomain.ProcessExit += new EventHandler(on_processExit);
+
             // the logger window          
             DataContext = LogEntries = new ObservableCollection<LogEntry>();
 
@@ -44,11 +47,19 @@ namespace WisorAppWpf
             LoadMarket.Visibility = Visibility.Hidden;
         }
 
+        static void on_processExit(object sender, EventArgs e)
+        {
+            Console.WriteLine("Exiting.....");
+            MiscUtilities.CleanUp();
+        }
+
         private void InitSettings()
         {
 
-            //SetRunLoanFunc(LoanCalculation);
+            //SetRunLoanFunc(Utilities.RunTheLoansSync);
             SetRunLoanFunc(Utilities.RunTheLoanASync);
+            SetRunLoanFuncSync(Utilities.RunTheLoansWraperSync);
+            SetRunLoanFuncASync(Utilities.RunTheLoansWraperASync);
 
             Share.shouldShowCriteriaSelectionWindow = false;
             Share.shouldShowCriteriaSelectionContinue = false;
@@ -56,9 +67,9 @@ namespace WisorAppWpf
             Share.shouldShowProductSelectionContinue = false;
             Share.shouldShowRatesSelectionWindow = false;
             Share.shouldShowLoansSelectionWindow = false;
-            
-            Share.shouldRunSync = true;
-            Share.shouldRunLogicSync = true;
+
+            Share.shouldRunSync = false; //  true;
+            Share.shouldRunLogicSync = false; //  true;
 
             Share.shouldRunFake = false;
 
@@ -83,6 +94,10 @@ namespace WisorAppWpf
             Share.ShouldStoreInDB = true;
             Share.ShouldStoreHTMLReport = true;
             Share.LoansLoadFromLine = MiscConstants.UNDEFINED_UINT;
+            Share.LoansLoadIDsFromLine = MiscConstants.UNDEFINED_STRING;
+            Share.shouldDebugLoans = false;
+            Share.shouldDebugLuchSilukin = false;
+
 
             // load the configuration file
             MiscUtilities.LoadXMLConfigurationFile(MiscConstants.CONFIGURATION_FILE);
@@ -93,9 +108,15 @@ namespace WisorAppWpf
             Share.printFunctionsInConsole = false;
             Share.printSubFunctionsInConsole = false;
             Share.printPercentageDone = false;
+            Share.NumberOfCanRefininceLoans = 0;
+            Share.NumberOfPositiveBeneficialLoans = 0;
 
 
             // testing area
+            //Tests.TestLuchSilukinCalculation();
+            //Tests.TestTimeCulture();
+            //Tests.TestCompositionLogic();
+            //Tests.TestSizeSortedList();
             //Tests.TestPDFCreation();
             //Tests.TestReportCreation();
             //Tests.TestRegularExpression();
@@ -115,6 +136,15 @@ namespace WisorAppWpf
         private void SetRunLoanFunc(MyRunDelegate func)
         {
             WindowsUtilities.runLoanMethod = func;
+        }
+
+        private void SetRunLoanFuncSync(MyRunDelegateListOfLoans func)
+        {
+            WindowsUtilities.runLoanMethodSync = func;
+        }
+        private void SetRunLoanFuncASync(MyRunDelegateListOfLoans func)
+        {
+            WindowsUtilities.runLoanMethodASync = func;
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -138,27 +168,40 @@ namespace WisorAppWpf
         }
 
 
-        public void Log2Window(string msg, bool write2console = true)
+        public void Log2Window(string msg, bool write2console = true, bool shouldColor = false)
         {
             AddEntry(msg);
             if (write2console)
+            {
+                if (shouldColor)
+                {
+                    Console.BackgroundColor = ConsoleColor.Blue;
+                }
                 Console.WriteLine(msg);
+                if (shouldColor)
+                {
+                    Console.ResetColor();
+                }
+            }
         }
 
          private void Button_Click(object sender, RoutedEventArgs e)
         {
             //Share.numberOfPrintResultsInList = 0;
-            Share.shouldRunSync = true;
             SetButtonEnable(false);
             Utilities.RunTheLogic();
+            //// tbd shuky
+            //MiscUtilities.CloseSummaryFile();
+
         }
 
 
         private void AskInput_Button_Click(object sender, RoutedEventArgs e)
         {
-            Share.shouldRunSync = true;
             SetButtonEnable(false);
             Utilities.Ask4Input();
+            // tbd shuky
+            //MiscUtilities.CloseSummaryFile();
         }
 
         
