@@ -128,7 +128,8 @@ namespace WisorLibrary.Logic
             }
             else
             {
-                Console.WriteLine("ERROR: FindRateForKeyAsNumber illegal indexInRatesArray: " + indexInRatesArray + " while theProductsRates include: " + Share.theProductsRates.Length);
+                Console.WriteLine("ERROR: FindRateForKeyAsNumber illegal indexInRatesArray: " + indexInRatesArray 
+                    + " while theProductsRates include: " + Share.theProductsRates.Length + ", productID: " + GenericProduct.GetProductName(productID) + ", profile: " + profile);
             }
 
             if (0 > result)
@@ -283,11 +284,12 @@ namespace WisorLibrary.Logic
                 Console.WriteLine("ERROR: GetBankRate illegal indexInRatesArray: " + indexInRatesArray + " while theProductsRates include: " + Share.theProductsRates.Length);
             }
 
-            if (0 > result)
-            {
-                Console.WriteLine("ERROR: GetBankRate illegal rate for key: " + productID + ", " + GenericProduct.GetProductName(productID) + " and index: " + index + ", indexInRatesArray: " + indexInRatesArray);
-                result = MiscConstants.BANK_RATE;
-            }
+            // allow negative bank rate
+            //if (0 > result)
+            //{
+            //    Console.WriteLine("ERROR: GetBankRate illegal rate for key: " + productID + ", " + GenericProduct.GetProductName(productID) + " and index: " + index + ", indexInRatesArray: " + indexInRatesArray);
+            //    result = MiscConstants.BANK_RATE;
+            //}
 
             //Console.WriteLine("--- GetBankRate productID: " + productID.ToString() + ", profile: "
             //    + profile.ToString() + ", index: " + index + ", result: " + result);
