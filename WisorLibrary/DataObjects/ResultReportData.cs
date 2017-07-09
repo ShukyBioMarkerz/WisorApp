@@ -146,39 +146,6 @@ namespace WisorLibrary.DataObjects
             {
                 // for the sake of storing as XML
                 this.compositions = compositions;
-
-                //// prepare the data for reporting
-                //compositionReportData = new CompositionReportData[compositions.Length];
-                //for (int i = 0; i < compositions.Length; i++)
-                //{
-                //    if (null == compositions[i])
-                //        continue;
- 
-                //    compositionReportData[i] = new CompositionReportData();
-                //    compositionReportData[i].name = compositions[i].name;
-                //    compositionReportData[i].optXBankTtlPay = compositions[i].optXBankTtlPay;
-                //    compositionReportData[i].optYBankTtlPay = compositions[i].optYBankTtlPay;
-                //    compositionReportData[i].optZBankTtlPay = compositions[i].optZBankTtlPay;
-                //    compositionReportData[i].ttlBankPay = 
-                //        compositions[i].optXBankTtlPay + compositions[i].optYBankTtlPay + compositions[i].optZBankTtlPay;
-                //    compositionReportData[i].ttlPay = (uint)Math.Round(compositions[i].ttlPay);
-                //    compositionReportData[i].ttlPmt = (uint)Math.Round(compositions[i].ttlPmt);
-                //    compositionReportData[i].optionReportData = new OptionReportData[compositions[i].opts.Length];
-                //    for (int j = 0; j < compositions[i].opts.Length; j++)
-                //    {
-                //        compositionReportData[i].optionReportData[j] = new OptionReportData();
-                //        compositionReportData[i].optionReportData[j].optAmt = (uint)Math.Round(compositions[i].opts[j].optAmt);
-                //        compositionReportData[i].optionReportData[j].optPmt = (uint)Math.Round(compositions[i].opts[j].optPmt);
-                //        compositionReportData[i].optionReportData[j].optRateFirstPeriod = compositions[i].opts[j].optRateFirstPeriod;
-                //        compositionReportData[i].optionReportData[j].optTime = compositions[i].opts[j].optTime;
-                //        compositionReportData[i].optionReportData[j].optTtlPay = (uint)Math.Round(compositions[i].opts[j].optTtlPay);
-                //        compositionReportData[i].optionReportData[j].optType = compositions[i].opts[j].optType;
-                //        compositionReportData[i].optionReportData[j].optTypeName = compositions[i].opts[j].product.name;
-                //        compositionReportData[i].ttlBorrowerPay += (uint)Math.Round(compositions[i].opts[j].optTtlPay);
-                //    }
-                //    compositionReportData[i].ttlProfit = 
-                //        (uint)compositionReportData[i].ttlBorrowerPay - compositionReportData[i].ttlBankPay;
-                //}
             }
             
         }
@@ -203,11 +170,11 @@ namespace WisorLibrary.DataObjects
                 if (! String.IsNullOrEmpty(HTMLfilename) || ! String.IsNullOrEmpty(PDFfilename))
                     Reporter.LenderReport(this, HTMLfilename, PDFfilename /*, CultureInfo cultureInfo*/);
 
-                // store in XML file
-                if (shouldStoreInDB)
-                {
-                    StoreResultsInDB();
-                }
+                //// store in XML file
+                //if (shouldStoreInDB)
+                //{
+                //    StoreResultsInDB();
+                //}
 
                 UpdateGeneralResults();
                 
@@ -224,22 +191,43 @@ namespace WisorLibrary.DataObjects
         // TBD - omri.
         void UpdateGeneralResults()
         {
+            bool shouldThisLoanReFinance = false, totalBenefitPerLoan = false;
+            bool noCompositionFounded = true;
+
             foreach (Composition comp in compositions)
             {
                 if (null != comp)
                 {
-                    uint ttlBankPay , ttlBorrowerPay, ttlProfit;
+                    noCompositionFounded = false;
+                    int ttlBankPay, ttlBorrowerPay, ttlProfit;
                     MiscUtilities.CalcaulateProfit(comp, out ttlBankPay, out ttlBorrowerPay, out ttlProfit);
+                    //// borrower benefit = diff between wisor composition and the original bank
+                    //int borrowerProfitCalc = (int)theLoan.resultReportData.PayFuture - (int)ttlBorrowerPay;
+                    //// original bank profit: diff between orig borrower pay and orig bank pay
+                    //int bankOptionProfit = (int)theLoan.resultReportData.PayFuture - (int)theLoan.resultReportData.BankPayFuture;
+                    //// total bank profit: diff between wisor option profit and original bank profit
+                    //int bankProfitCalc = ttlProfit - bankOptionProfit;
+                    //// total benefit: sum of the borrower profit and the bank profit
+                    //int totalBenefit = borrowerProfitCalc + bankProfitCalc;
+                    int borrowerProfitCalc, bankProfitCalc, totalBenefit;
+                    MiscUtilities.CalcaulateProfitAll(comp, theLoan, 
+                        out borrowerProfitCalc, out bankProfitCalc, out totalBenefit);
+                    
+                    //uint origProfit = theLoan.resultReportData.PayFuture - theLoan.resultReportData.BankPayFuture;
+                    //string borPayMsg = "ttlBorrowerPay difference. Wisor: " + comp.ttlPay + " while original: " + theLoan.resultReportData.PayFuture;
+                    //string bankPayMsg = "TtlBankPay difference. Wisor: " + ttlBankPay + " while original: " + theLoan.resultReportData.BankPayFuture;
+                    //string bankProfit = "TtlBankProfit difference. Wisor: " + ttlProfit + " while original: " + origProfit;
 
-                    uint origProfit = theLoan.resultReportData.PayFuture - theLoan.resultReportData.BankPayFuture;
-                    string borPayMsg = "ttlBorrowerPay difference. Wisor: " + comp.ttlPay + " while original: " + theLoan.resultReportData.PayFuture;
-                    string bankPayMsg = "TtlBankPay difference. Wisor: " + ttlBankPay + " while original: " + theLoan.resultReportData.BankPayFuture;
-                    string bankProfit = "TtlBankProfit difference. Wisor: " + ttlProfit + " while original: " + origProfit;
-
-                    bool shouldReFinance, canBorrowerSave, canLenderProfit;
-                    canBorrowerSave = (theLoan.resultReportData.PayFuture >= ttlBorrowerPay);
-                    canLenderProfit = (theLoan.resultReportData.BankPayFuture <= ttlProfit);
+                    bool shouldReFinance, canBorrowerSave, canLenderProfit, canIncreaseTotalProfit;
+                    double totalProfitPercantage;
+                    canBorrowerSave = (0 < borrowerProfitCalc); // (theLoan.resultReportData.PayFuture >= ttlBorrowerPay);
+                    canLenderProfit = (0 < bankProfitCalc); // (bankOptionProfit <= ttlProfit);
                     shouldReFinance = canBorrowerSave && canLenderProfit;
+                    shouldThisLoanReFinance = shouldThisLoanReFinance || shouldReFinance;
+                    totalBenefitPerLoan = totalBenefitPerLoan || (0 < totalBenefit);
+                    totalProfitPercantage = ((double) totalBenefit / theLoan.LoanAmount * 100);
+                    canIncreaseTotalProfit = (0 < totalBenefit);
+
                     if (null != Share.summaryLogFile)
                     {
                         string[] msg = {
@@ -250,49 +238,91 @@ namespace WisorLibrary.DataObjects
                             theLoan.resultReportData.PayUntilToday.ToString(), // "Borrower Paid So Far",
                             theLoan.resultReportData.BankPayUntilToday.ToString(), // "Bank Profit So Far",
                             theLoan.resultReportData.PayFuture.ToString(), // "Borrower Future Payment",
-                            theLoan.resultReportData.BankPayFuture.ToString(), // "Lender Future Profit",
+                            theLoan.resultReportData.BankPayFuture.ToString(), // "Lender Future Payment",
+                            (theLoan.resultReportData.PayFuture - theLoan.resultReportData.BankPayFuture).ToString(), // "Orig Bank Future Profit",
                             (shouldReFinance ? "Yes" : "No" ), // "Refinance Or No",
                             (canBorrowerSave ? "Yes" : "No" ), // "Can Save Borrower Money",
                             (canLenderProfit ? "Yes" : "No" ), // "Can Increase Lender Profit",
+                            (canIncreaseTotalProfit ? "Yes" : "No" ), // "Can Increase total Profit",
                             ttlBorrowerPay.ToString(), // "Minimum Borrower Total Payment",
+                            ttlBankPay.ToString(), // "Lender pay"
                             ttlProfit.ToString(), // "Maximim Lender Profit"
+                            borrowerProfitCalc.ToString(), // diff of Borrower Future between the 2 options
+                            ((double) borrowerProfitCalc / theLoan.LoanAmount * 100).ToString(),// Borrower beneficial%
+                            bankProfitCalc.ToString(), // diff of Bank Future between the 2 options
+                            ((double) bankProfitCalc / theLoan.LoanAmount * 100).ToString(),// Bank beneficial%
+                            totalBenefit.ToString(), // total benefit
+                            totalProfitPercantage.ToString(), // total benefit percantage
+                            comp.name, // for debug - print the composition name
+                            theLoan.BorrowerAge.ToString(), // "Age",
+                            theLoan.resultReportData.LTV.ToString(), //"LTV",
+                            theLoan.resultReportData.PTI.ToString(), // "PTI",
+                            theLoan.YearlyIncome.ToString(), //"Income"
+                            theLoan.fico.ToString() // fico
                         };
 
                         MiscUtilities.PrintSummaryFile(msg);
+
+                        // print on the various summary files
+                        if (shouldReFinance)
+                        {
+                            MiscUtilities.PrintSummaryFileS(Share.theWinWinSummaryFile, msg);
+                        }
+                        else
+                        {
+                            if (canBorrowerSave)
+                            {
+                                MiscUtilities.PrintSummaryFileS(Share.theBorrowerWinSummaryFile, msg);
+                            }
+                            if (canLenderProfit)
+                            {
+                                MiscUtilities.PrintSummaryFileS(Share.theBankWinSummaryFile, msg);
+                            }
+                            if (canIncreaseTotalProfit)
+                            {
+                                MiscUtilities.PrintSummaryFileS(Share.theTotalWinSummaryFile, msg);
+                            }
+                        }
                     }
 
-                    if (null != Share.theMiscLogger) { 
-                        Share.theMiscLogger.PrintLog("\n\nSummery file updating the bulk of loans results");
-                        Share.theMiscLogger.PrintLog(comp.name);
-                        Share.theMiscLogger.PrintLog(borPayMsg);
-                        Share.theMiscLogger.PrintLog(bankPayMsg);
-                        Share.theMiscLogger.PrintLog(bankProfit);
-                        Share.theMiscLogger.PrintLog(comp.ToString());
-                    }
-                    if (null != env)
-                    {
-                        env.WriteToOutputFile("\n\nSummery file updating the bulk of loans results");
-                        env.WriteToOutputFile(comp.name);
-                        env.WriteToOutputFile(borPayMsg);
-                        env.WriteToOutputFile(bankPayMsg);
-                        env.WriteToOutputFile(bankProfit);
-                    }
-                    else
-                    {
-                        Console.WriteLine("\n\nSummery file updating the bulk of loans results");
-                        Console.WriteLine(comp.name);
-                        Console.WriteLine(borPayMsg);
-                        Console.WriteLine(bankPayMsg);
-                        Console.WriteLine(bankProfit);
-                    }
+                    //MiscUtilities.PrintMiscLogger("\n\nSummery file updating the bulk of loans results");
+                    //MiscUtilities.PrintMiscLogger(comp.name);
+                    //MiscUtilities.PrintMiscLogger(borPayMsg);
+                    //MiscUtilities.PrintMiscLogger(bankPayMsg);
+                    //MiscUtilities.PrintMiscLogger(bankProfit);
+                    //MiscUtilities.PrintMiscLogger(comp.ToString());
+          
+                    //if (null != env)
+                    //{
+                    //    env.WriteToOutputFile("\n\nSummery file updating the bulk of loans results");
+                    //    env.WriteToOutputFile(comp.name);
+                    //    env.WriteToOutputFile(borPayMsg);
+                    //    env.WriteToOutputFile(bankPayMsg);
+                    //    env.WriteToOutputFile(bankProfit);
+                    //}
+                    //else
+                    //{
+                    //    Console.WriteLine("\n\nSummery file updating the bulk of loans results");
+                    //    Console.WriteLine(comp.name);
+                    //    Console.WriteLine(borPayMsg);
+                    //    Console.WriteLine(bankPayMsg);
+                    //    Console.WriteLine(bankProfit);
+                    //}
                 }
+
             }
 
-            //Composition bestBorrower = MiscUtilities.GetBestBorrowerComposition(compositions);
-            //string summeryLine;
-            //if (null != bestBorrower)
-            //    summeryLine = DateTime.Now.ToString("M/d/yyyy") + MiscConstants.COMMA + ID + MiscConstants.COMMA +
-            //    bestBorrower.ttlPay + MiscConstants.COMMA + CalculationTime;
+           if (noCompositionFounded) // no composition was found
+           {
+                string[] msg = { theLoan.ID, "No composition founded for load id: " };
+                MiscUtilities.PrintSummaryFile(msg);
+           }
+
+            // count the refinince 
+            if (shouldThisLoanReFinance)
+                Share.NumberOfCanRefininceLoans++;
+            if (totalBenefitPerLoan)
+                Share.NumberOfPositiveBeneficialLoans++;
         }
 
         void StoreResultsInDB()
