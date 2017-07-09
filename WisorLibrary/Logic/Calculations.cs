@@ -161,7 +161,8 @@ namespace WisorLibrary.Logic
                     }
                     return monthlyPmt;
                 }
-                else if (currInterest > 0)
+                else /*if (currInterest > 0)*/
+                // bank rate can be negative
                 {
                     double r = ((currInterest / 12 * 100000000) - ((currInterest / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
                     // TBD - suspected as performance bottleneck
@@ -175,10 +176,10 @@ namespace WisorLibrary.Logic
                     }
                     return monthlyPmt;
                 }
-                else
-                {
-                    Console.WriteLine("ERROR: CalculatePmt2 Rate Out of Range. currInterest: " + currInterest);
-                }
+                //else
+                //{
+                //    Console.WriteLine("ERROR: CalculatePmt2 Rate Out of Range. currInterest: " + currInterest);
+                //}
 
             }
             else
@@ -273,21 +274,33 @@ namespace WisorLibrary.Logic
 
                 return monthlyPmt;
             }
-            else if (originalRate > 0)
+            // the rate now can be negative as well
+            else /*if (originalRate > 0)*/
             {
                 double r = ((originalRate / 12 * 100000000) - ((originalRate / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
                 double calcPow = Math.Pow((1 + r), timeForCalc);
-                double monthlyPmt = ((amtForCalc * (1 + i)) * (r * calcPow) / (calcPow - 1));
-                monthlyPmt = ((monthlyPmt * 100000) - ((monthlyPmt * 100000) % 1)) / 100000; // Instead of Math.Round
+                // be carfull here...
+                double upperSide = (amtForCalc * (1 + i)) * (r * calcPow);
+                double monthlyPmt = MiscConstants.UNDEFINED_DOUBLE;
+                if (0 == upperSide)
+                {
+                    monthlyPmt = ((amtForCalc * (1 + i)) / timeForCalc);
+                    monthlyPmt = ((monthlyPmt * 100000) - ((monthlyPmt * 100000) % 1)) / 100000; // Instead of Math.Round
+                }
+                else
+                {
+                    monthlyPmt = (upperSide / (calcPow - 1));
+                    monthlyPmt = ((monthlyPmt * 100000) - ((monthlyPmt * 100000) % 1)) / 100000; // Instead of Math.Round
+                }
 
                 return monthlyPmt;
             }
-            else
-            {
-                Console.WriteLine("NOTICE: CalculateMonthlyPmt got illegal originalRate: " + originalRate);
-                return 0;
-                //throw new System.ArgumentOutOfRangeException("Rate Out of Range");
-            }
+            //else
+            //{
+            //    Console.WriteLine("ERROR: CalculateMonthlyPmt got illegal originalRate: " + originalRate);
+            //    // return 0;
+            //    throw new System.ArgumentOutOfRangeException("(CalculateMonthlyPmt) Rate Out of Range. originalRate: " + originalRate.ToString());
+            //}
         }
         
 
@@ -350,15 +363,9 @@ namespace WisorLibrary.Logic
 
         static void Log(string msg)
         {
-            bool debugLog = false;
-
-            if (debugLog)
+            if (Share.shouldDebugLoans)
             {
-                //if (null != env)
-                //    env.WriteToOutputFile(msg);
-                //else
-                if (null != Share.theMiscLogger)
-                    Share.theMiscLogger.PrintLog(msg);
+                MiscUtilities.PrintMiscLogger(msg);
             }
         }
 
@@ -367,11 +374,11 @@ namespace WisorLibrary.Logic
          * This calculation is manily for the products which have a rate dependency 
          * actually the Israel PRIME and the ARM products
          */
-        private static void CalculateLuahSilukinFull(indices indices,
+        public static void CalculateLuahSilukinFull(indices indices,
             double originalRate, double originalInflation,
             double originalLoanAmount, uint originalLoanTime,
             DateTime dateLoanTaken, ref ResultReportData calculationData,
-            RunEnvironment env)
+            RunEnvironment env, bool IsBank)
         {
             double interestPaidSoFar = MiscConstants.UNDEFINED_DOUBLE, 
                 totalPaidSoFar = MiscConstants.UNDEFINED_DOUBLE, 
@@ -380,108 +387,140 @@ namespace WisorLibrary.Logic
             calculationData.RemaingLoanTime = originalLoanTime;
             double primeMargin = MiscConstants.UNDEFINED_DOUBLE;
             double historicRate = MiscUtilities.GetHistoricIndexRateForDate(indices, dateLoanTaken, originalRate,
-                out primeMargin);
+                out primeMargin, IsBank);
             historicRate += primeMargin;
             // the difference between the original rate and the historic rate define the base for the product
-            double productPlanRate = originalRate - historicRate;
-            double r = ((originalRate / 12 * 100000000) - ((originalRate / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
+            double productPlanRate = historicRate - originalRate;
+            double rate2calculateR = (IsBank ? historicRate : originalRate);
+            double r = ((rate2calculateR / 12 * 100000000) - ((rate2calculateR / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
             double i = ((originalInflation / 12 * 100000000) - ((originalInflation / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
             double monthlyPmt = CalculateMonthlyPmt(originalLoanAmount, originalLoanTime, historicRate, originalInflation); ;
             calculationData.FirstMonthlyPMT = (uint)Math.Round(monthlyPmt);
             int numOfMonths = MiscUtilities.CalculateMonthBetweenDates(dateLoanTaken, DateTime.Now);
-            double currentRate = originalRate, ratePmt, principalPmt;
+            double currentRate = originalRate, ratePmt = MiscConstants.UNDEFINED_DOUBLE, principalPmt = MiscConstants.UNDEFINED_DOUBLE;
             DateTime currentDate = dateLoanTaken;
             int m;
-            double ratePmtFuture, principalPmtFuture, principalPayFuture = MiscConstants.UNDEFINED_DOUBLE,
+            double ratePmtFuture = MiscConstants.UNDEFINED_DOUBLE, principalPmtFuture = MiscConstants.UNDEFINED_DOUBLE, principalPayFuture = MiscConstants.UNDEFINED_DOUBLE,
                  optTtlRatePayFuture = MiscConstants.UNDEFINED_DOUBLE,
                  totalPaidFuture = MiscConstants.UNDEFINED_DOUBLE,
                  startingAmountFuture, monthlyPmtFuture;
             double redundantValue;
+            string msg;
 
-           try
+            //try
+            //{
+            // calculate till now
+            bool shouldLog = true;
+            for (m = 1; m <= numOfMonths; m++)
             {
-                // calculate till now
-                for (m = 1; m <= numOfMonths; m++)
-                {
-                    ratePmt = Math.Round((startingAmount * (1 + i) * r), 2);
-                    principalPmt = monthlyPmt - ratePmt;
-                    principalPaidSoFar += principalPmt;
-                    interestPaidSoFar += ratePmt;
-                    totalPaidSoFar += monthlyPmt;
-                    calculationData.RemaingLoanTime--;
+                ratePmt = Math.Round((startingAmount * (1 + i) * r), 2);
+                principalPmt = monthlyPmt - ratePmt;
+                principalPaidSoFar += principalPmt;
+                interestPaidSoFar += ratePmt;
+                totalPaidSoFar += monthlyPmt;
+                calculationData.RemaingLoanTime--;
 
-                    //// for debug:
-                    string msg = m + "," + startingAmount + "," + ratePmt + "," + principalPmt + "," + r + "," + 
-                        historicRate + "," + currentRate + "," + monthlyPmt  + "," + i + "," + totalPaidSoFar;
+                //// for debug:
+                if (shouldLog)
+                {
+                    msg = m + "," + startingAmount + "," + ratePmt + "," + principalPmt + "," + r + "," +
+                      historicRate + "," + currentRate + "," + monthlyPmt + "," + i + "," + totalPaidSoFar + "," + numOfMonths;
+                    //shouldLog = false;
+                    //Log("First run of CalculateLuahSilukinFull past");
                     Log(msg);
+                }
                     
-                    // calculate the exact historical rate 
-                    currentDate = dateLoanTaken.AddMonths(m);
-                    //historicRate = MiscUtilities.GetHistoricIndexRateForPeriod(indices, currentDate);
-                    historicRate = MiscUtilities.GetHistoricIndexRateForDate(indices, currentDate, originalRate, out redundantValue);
-                    historicRate += primeMargin;
-                    currentRate = historicRate + productPlanRate;
-                    r = ((currentRate / 12 * 100000000) - ((currentRate / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
-                    startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
-                    monthlyPmt = Math.Round(CalculateMonthlyPmt(startingAmount, (uint)(originalLoanTime - m),
-                            currentRate, originalInflation), 2);
-                }
-
-                startingAmountFuture = startingAmount;
-                monthlyPmtFuture = monthlyPmt;
-
-                Log("\nAnd now for the futur\n");
-
-                // calculate from now till the end loan' time
-                for (/*m = numOfMonths*/; m <= originalLoanTime; m++)
-                {
-                    ratePmtFuture = Math.Round((startingAmountFuture * (1 + i) * r), 2);
-                    principalPmtFuture = monthlyPmtFuture - ratePmtFuture;
-                    principalPayFuture += principalPmtFuture;
-                    optTtlRatePayFuture += ratePmtFuture;
-                    totalPaidFuture += monthlyPmtFuture;
-                    startingAmountFuture = Math.Round((((startingAmountFuture) * (1 + i)) - principalPmtFuture), 2);
-                    monthlyPmtFuture = Math.Round(
-                        CalculateMonthlyPmt(startingAmountFuture, (uint)(originalLoanTime - m),
+                // calculate the exact historical rate 
+                currentDate = dateLoanTaken.AddMonths(m);
+                //historicRate = MiscUtilities.GetHistoricIndexRateForPeriod(indices, currentDate);
+                historicRate = MiscUtilities.GetHistoricIndexRateForDate(indices, currentDate, originalRate, 
+                    out redundantValue, IsBank);
+                historicRate += primeMargin;
+                currentRate = (IsBank ? historicRate : historicRate + productPlanRate);
+                r = ((currentRate / 12 * 100000000) - ((currentRate / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
+                startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
+                monthlyPmt = Math.Round(CalculateMonthlyPmt(startingAmount, (uint)(originalLoanTime - m),
                         currentRate, originalInflation), 2);
+                if (0 >= (uint)Math.Round(monthlyPmt) || 0 >= (uint)Math.Round(totalPaidSoFar))
+                {
+                    int a = 2;
+                }
+            }
 
-                    // for debug:
-                    string msg = m + "," + startingAmountFuture + "," + ratePmtFuture + "," + principalPmtFuture + "," + r + ","
-                            + historicRate + "," + currentRate + "," + monthlyPmtFuture  + "," + i + "," + totalPaidFuture;
+            //msg = m + "," + startingAmount + "," + ratePmt + "," + principalPmt + "," + r + "," +
+            //        historicRate + "," + currentRate + "," + monthlyPmt + "," + i + "," + totalPaidSoFar + "," + numOfMonths;
+            //Log("Last run of CalculateLuahSilukinFull past");
+            //Log(msg);
+  
+            startingAmountFuture = startingAmount;
+            monthlyPmtFuture = monthlyPmt;
+
+            Log("\nAnd now for the futur\n");
+            shouldLog = true;
+
+            // calculate from now till the end loan' time
+            for (/*m = numOfMonths*/; m <= originalLoanTime; m++)
+            {
+                ratePmtFuture = Math.Round((startingAmountFuture * (1 + i) * r), 2);
+                principalPmtFuture = monthlyPmtFuture - ratePmtFuture;
+                principalPayFuture += principalPmtFuture;
+                optTtlRatePayFuture += ratePmtFuture;
+                totalPaidFuture += monthlyPmtFuture;
+                startingAmountFuture = Math.Round((((startingAmountFuture) * (1 + i)) - principalPmtFuture), 2);
+                monthlyPmtFuture = Math.Round(
+                    CalculateMonthlyPmt(startingAmountFuture, (uint)(originalLoanTime - m),
+                    currentRate, originalInflation), 2);
+
+                // for debug:
+                 if (shouldLog)
+                {
+                    msg = m + "," + startingAmountFuture + "," + ratePmtFuture + "," + principalPmtFuture + "," + r + ","
+                          + historicRate + "," + currentRate + "," + monthlyPmtFuture + "," + i + "," + totalPaidFuture
+                          + "," + m + "," + originalLoanTime;
+                    //shouldLog = false;
+                    //Log("First run of CalculateLuahSilukinFull future");
                     Log(msg);
                 }
+            }
 
-                calculationData.PayUntilToday = (uint)Math.Round(totalPaidSoFar);
-                calculationData.PayFuture = (uint)Math.Round(totalPaidFuture);
-                calculationData.RemaingLoanAmount = (uint)Math.Round(startingAmount);
-                calculationData.MonthlyPaymentCalc = (uint)Math.Round(monthlyPmt);
-            }
-            catch (Exception ex)
-            {
-                WindowsUtilities.loggerMethod("ERROR: CalculateLuahSilukinSoFar2 got Exception: " + ex.ToString());
-            }
+            //msg = m + "," + startingAmountFuture + "," + ratePmtFuture + "," + principalPmtFuture + "," + r + ","
+            //            + historicRate + "," + currentRate + "," + monthlyPmtFuture + "," + i + "," + totalPaidFuture
+            //            + "," + m + "," + originalLoanTime;
+            //Log("Last run of CalculateLuahSilukinFull future");
+            //Log(msg);
+
+            calculationData.PayUntilToday = (uint)Math.Round(totalPaidSoFar);
+            calculationData.PayFuture = (uint)Math.Round(totalPaidFuture);
+            calculationData.RemaingLoanAmount = (uint)Math.Round(startingAmount);
+            calculationData.MonthlyPaymentCalc = (uint)Math.Round(monthlyPmt);
+            //}
+            //catch (Exception ex)
+            //{
+            //    WindowsUtilities.loggerMethod("ERROR: CalculateLuahSilukinSoFar2 got Exception: " + ex.ToString());
+            //    throw;
+            //}
         }
 
         public static void CalculateLuahSilukinFullAll(indices indices,
             double originalBorrowerRate, double originalbankRate, double originalInflation,
             double originalLoanAmount, uint originalLoanTime,
-            DateTime dateLoanTaken, ref ResultReportData calculationData,
+            DateTime dateLoanTaken, string loanID, ref ResultReportData calculationData,
             RunEnvironment env = null)
         {
             ResultReportData calculationBorrowerData = new ResultReportData();
             ResultReportData calculationBankData = new ResultReportData();
  
-            try
-            {
+            //try
+            //{
                 // write to log file
                 Log("\nCalculate Luah Silukin for Borrower:\n");
                  // the borrower side
                 CalculateLuahSilukinFull(indices, originalBorrowerRate, originalInflation, originalLoanAmount, originalLoanTime,
-                    dateLoanTaken, ref calculationBorrowerData, env);
+                    dateLoanTaken, ref calculationBorrowerData, env, false /*IsBank*/);
                 // the bank side
                 Log("\nCalculate Luah Silukin for Bank:\n");
                 CalculateLuahSilukinFull(indices, originalbankRate, originalInflation, originalLoanAmount, originalLoanTime,
-                    dateLoanTaken, ref calculationBankData, env);
+                    dateLoanTaken, ref calculationBankData, env, true /*IsBank*/);
 
                 // return the borrower data
                 calculationData.PayUntilToday = calculationBorrowerData.PayUntilToday;
@@ -502,26 +541,37 @@ namespace WisorLibrary.Logic
                 if (0 < originalLoanAmount)
                     calculationData.EstimateProfitPercantageSoFar = calculationData.EstimateProfitSoFar / originalLoanAmount;
 
-                 // EstimateTotalProfit = total borrower - total bank
+            // EstimateTotalProfit = total borrower - total bank
+            // check the amounts correctness
+            uint totalBorowerPay = calculationBorrowerData.PayUntilToday + calculationBorrowerData.PayFuture;
+            uint totalBankPay = calculationBankData.PayUntilToday + calculationBankData.PayFuture;
+            if (totalBorowerPay > totalBankPay)
+            {
                 calculationData.EstimateTotalProfit =
                     calculationBorrowerData.PayUntilToday + calculationBorrowerData.PayFuture -
                     calculationBankData.PayUntilToday - calculationBankData.PayFuture;
-                // EstimateTotalProfitPercantage = EstimateTotalProfit / loan amount
-                if (0 < originalLoanAmount)
-                    calculationData.EstimateTotalProfitPercantage = calculationData.EstimateTotalProfit / originalLoanAmount;
-
-                // 
-                calculationData.EstimateFutureProfit = calculationBorrowerData.PayFuture - calculationBankData.PayFuture;
-                if (0 < originalLoanAmount)
-                    calculationData.EstimateFutureProfitPercantage = calculationData.EstimateFutureProfit / originalLoanAmount;
             }
-            catch (Exception e)
+            else
             {
-                WindowsUtilities.loggerMethod("ERROR: CalculateLuahSilukinFullAll got Exception: " + e.ToString());
+                WindowsUtilities.loggerMethod("ERROR: CalculateLuahSilukinFullAll the borrower pay: " + totalBorowerPay +
+                    " less than the bank: " + totalBankPay);
             }
+            // EstimateTotalProfitPercantage = EstimateTotalProfit / loan amount
+            if (0 < originalLoanAmount)
+                calculationData.EstimateTotalProfitPercantage = calculationData.EstimateTotalProfit / originalLoanAmount;
+
+            // 
+            calculationData.EstimateFutureProfit = calculationBorrowerData.PayFuture - calculationBankData.PayFuture;
+            if (0 < originalLoanAmount)
+                calculationData.EstimateFutureProfitPercantage = calculationData.EstimateFutureProfit / originalLoanAmount;
+            //}
+            //catch (Exception e)
+            //{
+            //    WindowsUtilities.loggerMethod("ERROR: CalculateLuahSilukinFullAll got Exception: " + e.ToString());
+            //}
 
             string msg =
-                "\nLoan details: " +
+                "\nLoan details: " + loanID +
                 "\nDate taken: " + dateLoanTaken +
                 "\nAmount: " + originalLoanAmount +
                 "\nTerm: " + originalLoanTime +
