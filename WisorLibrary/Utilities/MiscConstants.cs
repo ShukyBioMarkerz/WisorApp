@@ -42,6 +42,7 @@ namespace WisorLib
         public static string    SEQ_STR = "#";
         public static char      SPACE_STR = ' ';
         public static string    DATE_FORMAT  = "d/M/yyyy";
+        public static string    DATE_FORMAT_US = "M/d/yyyy";
         public static string    COMMA_STR = ",";
 
         // files to load from
@@ -105,6 +106,7 @@ namespace WisorLib
         public const string SHOULD_STORE_REPORT_AS_HTML = "SHOULD_STORE_REPORT_AS_HTML";
         public const string SHOULD_STORE_REPORT_AS_PDF = "SHOULD_STORE_REPORT_AS_PDF";
         public const string FROM_TO_LINES_TO_LOAD_LOANS = "FROM_TO_LINES_TO_LOAD_LOANS";
+        public const string FROM_IDS_LOAD_LOANS = "FROM_IDS_LOAD_LOANS";
         internal static string LENDER_REPORT_PREFIX = "LenderReport";
         internal static string BORROWER_REPORT_PREFIX = "BorrowerReport";
 
@@ -134,13 +136,18 @@ namespace WisorLib
         public const int NumberOfProfiles = 6;
         public const int NumberOfYearsFrProduct = 27;
 
-        public static double BANK_RATE = 0.005;
-        public static double MADAD_Inflation = 0.018;
+        //public static double BANK_RATE = 0.005;
+        public static double MADAD_Inflation = 0.005; /*0.018;*/
+        public static double BANK_PRIME_RATE_FACTOR = 0.001;
 
         // enable to select the right composition by name
         internal static string BEST_DIFF_COMPOSITION = "bestDiffComposition";
         internal static string BEST_BANK_COMPOSITION = "bestBankComposition";
         internal static string BEST_BORROWER_COMPOSITION = "bestBorrowerComposition";
+        internal static string BEST_ALL_PROFIT_COMPOSITION = "allProfitComposition";
+        internal static string BEST_ALL_PROFIT_COMPOSITION_BORROWER = "allProfitCompositionBorrower";
+        internal static string BEST_ALL_PROFIT_COMPOSITION_BANK = "allProfitCompositionBank";
+        
 
         // type of the selection window
         public enum SelectionType { ReadCretiria = 0, ReadProducts , ReadRates , ReadLoansFile};

@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
@@ -362,18 +363,26 @@ namespace WisorLibrary.Utilities
         }
 
         public static double GetHistoricIndexRateForDate(indices indic, DateTime dateLoanTaken, 
-            double originalRate, out double primeMargin)
+            double originalRate, out double primeMargin, bool IsBank)
         {
             double index = 0;
 
             if (indices.PRIME == indic)
             {
-                // ensure the file was loaded
-                if (null == HistoricRate.Instance || !HistoricRate.Instance.Status)
-                    MiscUtilities.SetHistoricRatesFilename();
-                index = HistoricRate.GetHistoricIndex(indic, dateLoanTaken);
-                // should calculate the actuall rate the borrower got , based on the Prime + Actuall rate
-                primeMargin =  originalRate - index;
+                if (IsBank)
+                {
+                    primeMargin = MiscConstants.BANK_PRIME_RATE_FACTOR - originalRate;
+                    index = originalRate;
+                }
+                else
+                {
+                    // ensure the file was loaded
+                    if (null == HistoricRate.Instance || !HistoricRate.Instance.Status)
+                        MiscUtilities.SetHistoricRatesFilename();
+                    index = HistoricRate.GetHistoricIndex(indic, dateLoanTaken);
+                    // should calculate the actuall rate the borrower got , based on the Prime + Actuall rate
+                    primeMargin = originalRate - index;
+                }
             }
             else
             {
@@ -381,7 +390,7 @@ namespace WisorLibrary.Utilities
                 primeMargin = 0;
             }
             //  case indices.MADAD:
-            //        index = 0.018; MiscConstants.MADAD_Inflation
+            //      MiscConstants.MADAD_Inflation
 
             return index;
         }
@@ -548,6 +557,9 @@ namespace WisorLibrary.Utilities
                                         Share.LoansLoadFromLine = System.Convert.ToUInt32(lines[0]);
                                     if (!String.IsNullOrEmpty(lines[1]))
                                         Share.LoansLoadToLine = System.Convert.ToUInt32(lines[1]);
+                                    break;
+                                case FROM_IDS_LOAD_LOANS:
+                                    Share.LoansLoadIDsFromLine = node.Value;
                                     break;
                                 default:
                                     Console.WriteLine("LoadXMLConfigurationFile Illegal input: " + child.Name);
@@ -761,13 +773,41 @@ namespace WisorLibrary.Utilities
             return c;
         }
 
-        public static void CalcaulateProfit(Composition comp, out uint ttlBankPay,
-            out uint ttlBorrowerPay, out uint ttlProfit)
+        public static void CalcaulateProfit(Composition comp, out int ttlBankPay,
+            out int ttlBorrowerPay, out int ttlProfit)
         {
-            ttlBankPay = comp.optXBankTtlPay + comp.optYBankTtlPay + comp.optZBankTtlPay;
-            ttlBorrowerPay = (uint) Math.Round(comp.opts[(int)Options.options.OPTX].optTtlPay +
+            ttlBankPay = (int) (comp.optXBankTtlPay + comp.optYBankTtlPay + comp.optZBankTtlPay);
+            ttlBorrowerPay = (int) Math.Round(comp.opts[(int)Options.options.OPTX].optTtlPay +
                 comp.opts[(int)Options.options.OPTY].optTtlPay + comp.opts[(int)Options.options.OPTZ].optTtlPay);
-            ttlProfit = (uint)comp.ttlPay - ttlBankPay;
+            ttlProfit = /*(int)comp.ttlPay*/ ttlBorrowerPay - ttlBankPay; 
+        }
+
+        public static void CalcaulateProfitAll(Composition comp, loanDetails loan,
+                        out int borrowerProfit, out int bankProfit, out int totalProfit)
+        {
+            int ttlBankPay, ttlBorrowerPay, ttlProfit;
+            CalcaulateProfit(comp, out ttlBankPay, out ttlBorrowerPay, out ttlProfit);
+            // borrower benefit = diff between wisor composition and the original bank
+            borrowerProfit = (int)loan.resultReportData.PayFuture - (int)ttlBorrowerPay;
+            // original bank profit: diff between orig borrower pay and orig bank pay
+            int bankOptionProfit = (int)loan.resultReportData.PayFuture - (int)loan.resultReportData.BankPayFuture;
+            // total bank profit: diff between wisor option profit and original bank profit
+            bankProfit = ttlProfit - bankOptionProfit;
+            // total benefit: sum of the borrower profit and the bank profit
+            totalProfit = borrowerProfit + bankProfit;
+        }
+
+        public static void CalcaulateProfitAll(int ttlBankPay, int ttlBorrowerPay, int ttlProfit, loanDetails loan,
+                        out int borrowerProfit, out int bankProfit, out int totalProfit)
+        {
+            // borrower benefit = diff between wisor composition and the original bank
+            borrowerProfit = (int)loan.resultReportData.PayFuture - (int)ttlBorrowerPay;
+            // original bank profit: diff between orig borrower pay and orig bank pay
+            int bankOptionProfit = (int)loan.resultReportData.PayFuture - (int)loan.resultReportData.BankPayFuture;
+            // total bank profit: diff between wisor option profit and original bank profit
+            bankProfit = ttlProfit - bankOptionProfit;
+            // total benefit: sum of the borrower profit and the bank profit
+            totalProfit = borrowerProfit + bankProfit;
         }
 
         public static string GetFileTypeExtension(FileType fileType)
@@ -803,12 +843,13 @@ namespace WisorLibrary.Utilities
             return outRsourcePath;
         }
 
+        ////////////////////
 
         // TBD - bad practice
         // start some log files for misc. logging
         public static void OpenMiscLogger()
         {
-            Share.theMiscLogger = new LoggerFile(Share.tempLogFile /*+ OrderID*/ + ".txt",
+            Share.theMiscLogger = new LoggerFile(Share.tempLogFile /*+ OrderID*/ + MiscConstants.CSV_EXT /*".txt"*/,
                MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
         }
 
@@ -819,8 +860,50 @@ namespace WisorLibrary.Utilities
             Share.theMiscLogger = null;
         }
 
+        public static void PrintMiscLogger(string msg)
+        {
+            if (null != Share.theMiscLogger)
+                Share.theMiscLogger.PrintLog(msg);
+         }
+
         ////////////////////
-        
+
+        public static string[] summaryHeader()
+        {
+            string[] msg = {
+                        "Loan ID",
+                        "Original Loan Amount",
+                        "Date Taken",
+                        "Remaining Amount",
+                        "Borrower Paid So Far",
+                        "Bank Payment So Far",
+                        "Orig Borrower Future Payment",
+                        "Orig Bank Future Payment",
+                        "Orig Bank Future Profit",
+                        "Refinance Or No",
+                        "Can Save Borrower Money",
+                        "Can Increase Bank Profit",
+                        "Can Increase total Profit",
+                        "Wisor Borrower Payment",
+                        "Wisor Bank Payment",
+                        "Wisor Bank Profit",
+                        "Borrower beneficial",
+                        "Borrower beneficial%",
+                        "Bank beneficial",
+                        "Bank beneficial%",
+                        "Total beneficial",
+                        "Total beneficial%",
+                        "Name",
+                        "Age",
+                        "LTV",
+                        "PTI",
+                        "Income",
+                        "FICO"
+                        };
+            return msg;
+
+        }
+
         public static void OpenSummaryFile()
         {
             Share.theSummaryFile = new LoggerFile(Share.summaryLogFile +
@@ -828,29 +911,32 @@ namespace WisorLibrary.Utilities
                MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
 
             // add the header
-            string[] msg = {
-                        "Loan ID",
-                        "Original Loan Amount",
-                        "Date Taken",
-                        "Remaining Amount",
-                        "Borrower Paid So Far",
-                        "Bank Profit So Far",
-                        "Borrower Future Payment",
-                        "Lender Future Profit",
-                        "Refinance Or No",
-                        "Can Save Borrower Money",
-                        "Can Increase Lender Profit",
-                        "Minimum Borrower Total Payment",
-                        "Maximim Lender Profit"
-                        };
+            string[] msg = summaryHeader();
             PrintSummaryFile(msg);
+
+            // Ugly but short...
+            OpenSummaryFileS();
         }
 
         public static void CloseSummaryFile()
         {
+            string[] msg = {
+                "\nRun bulk with TotalNumberOfLoans: " + Share.TotalNumberOfLoans +
+                    " can re-finince: " + Share.NumberOfCanRefininceLoans + " which means: " +
+                    (double) Share.NumberOfCanRefininceLoans / Share.TotalNumberOfLoans * 100 +
+                    " and NumberOfPositiveBeneficialLoans: " + Share.NumberOfPositiveBeneficialLoans +
+                    " (" + (double) Share.NumberOfPositiveBeneficialLoans / Share.TotalNumberOfLoans * 100 +
+                    "%)"
+            };
+            // print the total numbers
+            PrintSummaryFile(msg);
+
             if (null != Share.theSummaryFile)
                 Share.theSummaryFile.CloseLog2CSV();
             Share.theSummaryFile = null;
+
+            // Ugly but short...
+            CloseSummaryFileS();
         }
 
         public static void PrintSummaryFile(string[] msg)
@@ -858,6 +944,235 @@ namespace WisorLibrary.Utilities
             if (null != Share.theSummaryFile)
                 Share.theSummaryFile.PrintLog2CSV(msg);
         }
+
+        ////////////////////////////////////////////////////
+        // maintain few log files for win-win, only borrower, only lender and overall profit
+
+        public static void OpenSummaryFileS()
+        {
+            Share.theWinWinSummaryFile = new LoggerFile(Share.summaryLogFile + "WinWin" +
+                DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT,
+               MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
+            Share.theBorrowerWinSummaryFile = new LoggerFile(Share.summaryLogFile + "BorrowerWin" +
+                DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT,
+               MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
+            Share.theBankWinSummaryFile = new LoggerFile(Share.summaryLogFile + "BankWin" +
+                DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT,
+               MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
+            Share.theTotalWinSummaryFile = new LoggerFile(Share.summaryLogFile + "TotalWin" +
+                DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT,
+               MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
+
+            // add the header
+            string[] msg = summaryHeader();
+            PrintSummaryFileS(Share.theWinWinSummaryFile, msg);
+            PrintSummaryFileS(Share.theBorrowerWinSummaryFile, msg);
+            PrintSummaryFileS(Share.theBankWinSummaryFile, msg);
+            PrintSummaryFileS(Share.theTotalWinSummaryFile, msg);
+
+        }
+
+        public static void PrintSummaryFileS(LoggerFile file, string[] msg)
+        {
+            if (null != Share.theSummaryFile)
+                file.PrintLog2CSV(msg);
+        }
+
+        public static void CloseSummaryFileS()
+        {
+            string[] msg = {
+                "\nRun bulk with TotalNumberOfLoans: " + Share.TotalNumberOfLoans +
+                    " can re-finince: " + Share.NumberOfCanRefininceLoans + " which means: " +
+                    (double) Share.NumberOfCanRefininceLoans / Share.TotalNumberOfLoans * 100 +
+                    " and NumberOfPositiveBeneficialLoans: " + Share.NumberOfPositiveBeneficialLoans +
+                    " (" + (double) Share.NumberOfPositiveBeneficialLoans / Share.TotalNumberOfLoans * 100 +
+                    "%)"
+            };
+            // print the total numbers
+            PrintSummaryFileS(Share.theWinWinSummaryFile, msg);
+            PrintSummaryFileS(Share.theBorrowerWinSummaryFile, msg);
+            PrintSummaryFileS(Share.theBankWinSummaryFile, msg);
+            PrintSummaryFileS(Share.theTotalWinSummaryFile, msg);
+
+            if (null != Share.theWinWinSummaryFile)
+                Share.theWinWinSummaryFile.CloseLog2CSV();
+            Share.theWinWinSummaryFile = null;
+            if (null != Share.theBorrowerWinSummaryFile)
+                Share.theBorrowerWinSummaryFile.CloseLog2CSV();
+            Share.theBorrowerWinSummaryFile = null;
+            if (null != Share.theBankWinSummaryFile)
+                Share.theBankWinSummaryFile.CloseLog2CSV();
+            Share.theBankWinSummaryFile = null;
+            if (null != Share.theTotalWinSummaryFile)
+                Share.theTotalWinSummaryFile.CloseLog2CSV();
+            Share.theTotalWinSummaryFile = null;
+        }
+
+        ////////////////////////////////////////////////////
+
+        public static void CleanUp()
+        {
+            // close log debug
+            CloseMiscLogger();
+            CloseSummaryFile();
+        }
+
+
+        public static ProductsList ReadProductsFromFile()
+        {
+            ProductsList products = null;
+            Share.theSelectionType = SelectionType.ReadProducts;
+
+            string filename = MiscUtilities.GetFilenameFromUser();
+
+            if (null != filename)
+            {
+                products = GenericProduct.LoadXMLProductsFile(filename);
+            }
+            return products;
+        }
+
+        public static FieldList GetCriteriaFromFile()
+        {
+            FieldList fields = null;
+            Share.theSelectionType = SelectionType.ReadCretiria;
+
+            string filename = MiscUtilities.GetFilenameFromUser();
+            if (null != filename)
+            {
+                fields = FileUtils.LoadXMLFileData(filename);
+            }
+
+            return fields;
+        }
+
+        public static bool PrepareRuning()
+        {
+            bool rc = false;
+
+            // enable log debug
+            MiscUtilities.OpenMiscLogger();
+            MiscUtilities.OpenSummaryFile();
+
+            ProductsList products = ReadProductsFromFile();
+            if (null == Share.theLoadedProducts)
+            {
+                WindowsUtilities.loggerMethod("NOTICE: PrepareRuning Failed to upload products definitions.");
+            }
+            else
+            {
+                rc = Combinations.SetCombinationsFilename();
+                if (!rc)
+                {
+                    WindowsUtilities.loggerMethod("NOTICE: PrepareRuning Failed to load combination file.");
+                    return rc;
+                }
+
+                // ensure the rates file is located
+                rc = MiscUtilities.SetRatesFilename();
+                if (!rc)
+                {
+                    WindowsUtilities.loggerMethod("NOTICE: PrepareRuning Failed to load rates file.");
+                    return rc;
+                }
+
+                // Build the input controls from the xml file
+                // Load the loan' parameters from a file
+                FieldList fields = GetCriteriaFromFile();
+                if (null == Share.theSelectedCriteriaFields)
+                {
+                    WindowsUtilities.loggerMethod("NOTICE: PrepareRuning Failed to upload criteria definitions.");
+                }
+                else
+                {
+                    rc = MiscUtilities.SetRiskAndLiquidityFilename();
+                    if (!rc)
+                    {
+                        WindowsUtilities.loggerMethod("NOTICE: PrepareRuning Failed in SetRiskAndLiquidityFilename.");
+                        return rc;
+                    }
+                }
+            }
+
+            return rc;
+        }
+
+        public static void RunTheLogic(LoanList listOfLoans = null, bool shouldCallPrepare = true)
+        {
+            LoanList loans;
+            bool rc;
+            try
+            {
+                if (shouldCallPrepare)
+                {
+                    rc = PrepareRuning();
+                }
+
+                if (null != listOfLoans)
+                {
+                    loans = listOfLoans;
+                }
+                else
+                {
+                    // Read customers load data and fire the calculation to all
+                    loans = MiscUtilities.GetLoansFromFile(Share.theSelectedCriteriaFields);
+                    if (null == loans || 0 >= loans.Count)
+                    {
+                        WindowsUtilities.loggerMethod("NOTICE: RunTheLogic Failed to upload loans definitions.");
+                        return;
+                    }
+                }
+
+                if (Share.shouldRunSync)
+                    WindowsUtilities.runLoanMethodSync(loans);
+                //Utilities.RunTheLoansWraperSync(loans);
+                else
+                    WindowsUtilities.runLoanMethodASync(loans);
+                //Utilities.RunTheLoansWraperASync(loans);
+            }
+            catch (ArgumentOutOfRangeException aoore)
+            {
+                WindowsUtilities.loggerMethod("NOTICE: RunTheLogic ArgumentOutOfRangeException occured: " + aoore.ToString());
+            }
+            catch (Exception ex)
+            {
+                WindowsUtilities.loggerMethod("NOTICE: RunTheLogic Exception occured: " + ex.ToString());
+            }
+            //WindowsUtilities.loggerMethod("Complete calculate the entire " + loans.Count + " loans");
+        }
+
+        public static string CleanupRedundantChars(string[] entities, int index, bool allowDot = false, string defaultValue = "0")
+        {
+            string value = MiscConstants.UNDEFINED_STRING;
+            if (0 <= index && index < entities.Length)
+            {
+                string trimed;
+                int loc;
+                if (!allowDot)
+                {
+                    loc = entities[index].IndexOf(MiscConstants.DOT_STR);
+                    trimed = (0 <= loc) ? entities[index].Remove(loc) : entities[index];
+                }
+                else
+                {
+                    trimed = entities[index];
+                }
+                loc = trimed.IndexOf(MiscConstants.PERCANTAGE_STR);
+                trimed = (0 <= loc) ? trimed.Remove(loc) : trimed;
+
+                // remove currency symbole
+                string pattern = @"(\p{Sc}\s?)?";
+                Regex rgx = new Regex(pattern);
+                value = rgx.Replace(trimed, "");
+            }
+            else
+            {
+                value = defaultValue;
+            }
+            return value;
+        }
+
+
 
     }
 
