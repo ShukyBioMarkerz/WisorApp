@@ -44,6 +44,7 @@ namespace WisorLib
                                                 amts[(int)Options.options.OPTY], env);
             opts[(int)Options.options.OPTZ] = new OneOption(env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ],
                                                 amts[(int)Options.options.OPTZ], env);
+            
         }
 
 
