@@ -40,6 +40,13 @@ namespace WisorLib
 
             if (CanRunCalculation)
             {
+                // for debug
+                if (Share.shouldDebugLoans)
+                {
+                    MiscUtilities.PrintMiscLogger("\nRuning calculation with loan:");
+                    MiscUtilities.PrintMiscLogger(env.theLoan.ToString());
+                }
+
                 // Get start time for software
                 env.CheckInfo.softwareOpenTime = DateTime.Now;
                     
@@ -167,6 +174,12 @@ namespace WisorLib
                 env.WriteToOutputFile("Best bank payment composition:\n" + env.bestBankComposition.ToString());
             if (null != env.bestBorrowerComposition)
                 env.WriteToOutputFile("Best borrower composition:\n" + env.bestBorrowerComposition.ToString());
+            if (null != env.bestAllProfitCompositionBank)
+                env.WriteToOutputFile("Best All Profit Composition Bank:\n" + env.bestAllProfitCompositionBank.ToString());
+            if (null != env.bestAllProfitCompositionBorrower)
+                env.WriteToOutputFile("Best All Profit Composition Borrower:\n" + env.bestAllProfitCompositionBorrower.ToString());
+            if (null != env.bestAllProfitComposition)
+                env.WriteToOutputFile("Best All Profit Composition:\n" + env.bestAllProfitComposition.ToString());
 
             env.WriteToOutputFile("\nCalculation ended at " + env.CheckInfo.softwareCloseTime);
             env.WriteToOutputFile("Software runtime " + (env.CheckInfo.softwareCloseTime - env.CheckInfo.softwareOpenTime));
