@@ -135,12 +135,16 @@ namespace WisorLib
             {
                 if (MiscConstants.UNDEFINED_INT == optType)
                 {
-                    throw new System.ArgumentOutOfRangeException("Option Type Out of Range. optType: " + optType);
+                    Console.WriteLine("(FindInterestRate) Option Type Out of Range.optType: " + optType);
+                    throw new System.ArgumentOutOfRangeException("(FindInterestRate) Option Type Out of Range. optType: " + optType);
 
                 }
                 else
                 {
-                    throw new System.ArgumentOutOfRangeException("Option Time Out of Range. optTime: " + optTime.ToString());
+                    Console.WriteLine("(FindInterestRate)Option Time Out of Range.optTime: " + optTime.ToString() + 
+                        " while min: " + CalculationConstants.minimumTimeForLoan);
+                    throw new System.ArgumentOutOfRangeException("(FindInterestRate) Option Time Out of Range. optTime: " + optTime.ToString() + 
+                        " while min: " + CalculationConstants.minimumTimeForLoan);
                 }
             }
 
@@ -169,18 +173,21 @@ namespace WisorLib
                 }              
                 else
                 {
-                    throw new System.ArgumentOutOfRangeException("Option Rate Out of Range");
+                    Console.WriteLine("(ShowRate) Option Rate Out of Range optRateFirstPeriod: " + optRateFirstPeriod);
+                    throw new System.ArgumentOutOfRangeException("(ShowRate) Option Rate Out of Range optRateFirstPeriod: " + optRateFirstPeriod);
                 }
             }
             else
             {
                 if (MiscConstants.UNDEFINED_INT == optType)
                 {
-                    throw new System.ArgumentOutOfRangeException("Option Type Out of Range");
+                    Console.WriteLine("(ShowRate) Option Type Out of Range optRateFirstPeriod: " + optType);
+                    throw new System.ArgumentOutOfRangeException("(ShowRate) Option Type Out of Range optRateFirstPeriod: " + optType);
                 }
                 else
                 {
-                    throw new System.ArgumentOutOfRangeException("Option Time Out of Range");
+                    Console.WriteLine("(ShowRate) Option Time Out of Range optRateFirstPeriod: " + optTime);
+                    throw new System.ArgumentOutOfRangeException("(ShowRate) Option Time Out of Range optRateFirstPeriod: " + optTime);
                 }
             }
         }
@@ -258,7 +265,8 @@ namespace WisorLib
                 }
                 else
                 {
-                    throw new System.ArgumentOutOfRangeException("Rate Out of Range");
+                    Console.WriteLine("(CalculatePmt) Rate Out of Range currInterest: " + currInterest);
+                    throw new System.ArgumentOutOfRangeException("(CalculatePmt) Rate Out of Range currInterest: " + currInterest);
                 }                
 
             }
@@ -266,15 +274,18 @@ namespace WisorLib
             {
                 if (MiscConstants.UNDEFINED_INT == optType)
                 {
-                    throw new System.ArgumentOutOfRangeException("Option Type Out of Range");
+                    Console.WriteLine("(CalculatePmt) Option Type Out of Range optType: " + optType);
+                    throw new System.ArgumentOutOfRangeException("(CalculatePmt) Option Type Out of Range optType: " + optType);
                 }
                 else if (optAmt <= CalculationConstants.optionMinimumAmount)
                 {
-                    throw new System.ArgumentOutOfRangeException("Option Amount Out of Range");
+                    Console.WriteLine("(CalculatePmt) Option Amount Out of Range currInterest: " + optAmt);
+                    throw new System.ArgumentOutOfRangeException("(CalculatePmt) Option Amount Out of Range currInterest: " + optAmt);
                 }
                 else
                 {
-                    throw new System.ArgumentOutOfRangeException("Option Time Out of Range");
+                    Console.WriteLine("(CalculatePmt) Option Time Out of Range timeForCalc: " + timeForCalc);
+                    throw new System.ArgumentOutOfRangeException("(CalculatePmt) Option Time Out of Range timeForCalc: " + timeForCalc);
                 }
             }
         }
@@ -406,31 +417,32 @@ namespace WisorLib
         
         public void SetBankRate(double margin)
         {
-            optBankRateFirstPeriod = optRateFirstPeriod - margin;
+            optBankRateFirstPeriod = optRateFirstPeriod + margin;
             if (-1 == optRateSecondPeriod)
             {
                 optBankRateSecondPeriod = optBankRateFirstPeriod;
             }
             else
             {
-                optBankRateSecondPeriod = optRateSecondPeriod - margin;
+                optBankRateSecondPeriod = optRateSecondPeriod + margin;
             }
 
-            if (0 > optBankRateFirstPeriod || 0 > optBankRateSecondPeriod)
-            {
-                Console.WriteLine("NOTICE: SetBankRate illegal value to optBankRateFirstPeriod: " + optBankRateFirstPeriod);
-            }
+            // bank rate can be negative
+            //if (0 > optBankRateFirstPeriod || 0 > optBankRateSecondPeriod)
+            //{
+            //    Console.WriteLine("NOTICE: SetBankRate illegal value to optBankRateFirstPeriod: " + optBankRateFirstPeriod);
+            //}
             
         }
 
         public uint CalculateLuahSilukinBank()
         {
-           return Calculations.CalculateLuahSilukin2(optBankRateFirstPeriod, optBankRateSecondPeriod,
+           return MiscUtilities.CalculateLuahSilukinBank(optBankRateFirstPeriod, optBankRateSecondPeriod,
                 (int) product.firstTimePeriod, product.indexUsedFirstTimePeriod,
                 optAmt, (int) optTime, optPmt,
                 indexFirstPeriod, indexSecondPeriod, optType, printOrNo);
         }
-        
+       
 
 
 
