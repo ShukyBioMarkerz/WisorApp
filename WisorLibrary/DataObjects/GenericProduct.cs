@@ -379,14 +379,14 @@ namespace WisorLib
             else
                 WindowsUtilities.loggerMethod("GetProductByName: Share.theLoadedProducts in null!!! ");
 
-            if (null == product)
-            {
-                WindowsUtilities.loggerMethod("GetProductByName: failed to find productName: " + productName);
-            }
-            else
-            {
-                // TBD: check product correctess
-            }
+            //if (null == product)
+            //{
+            //    WindowsUtilities.loggerMethod("GetProductByName: failed to find productName: " + productName);
+            //}
+            //else
+            //{
+            //    // TBD: check product correctess
+            //}
 
             return product;
         }
