@@ -88,7 +88,22 @@ namespace WisorLib
                         if (Share.shouldRunLogicSync)
                         {
                             // Omri - what do we do with the searchOneDivisionOfAmounts object?
-                            searchOneDivisionOfAmounts = new OneDivisionOfAmounts(opt1Amt, opt2Amt, opt3Amt, env);
+                            try
+                            {
+                                searchOneDivisionOfAmounts = new OneDivisionOfAmounts(opt1Amt, opt2Amt, opt3Amt, env);
+                            }
+                            catch (ArgumentOutOfRangeException aoore)
+                            {
+                                Console.WriteLine("NOTICE: PerformFullThreeOptionSearch ArgumentOutOfRangeException occured: " /* + aoore.ToString() */ +
+                                    " for opt1Amt: " + opt1Amt + ", opt2Amt: " + opt2Amt + ", opt3Amt: " + opt3Amt);
+                                continue;
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine("NOTICE: PerformFullThreeOptionSearch Exception occured: "  + ex.Message  +
+                                    " for opt1Amt: " + opt1Amt + ", opt2Amt: " + opt2Amt + ", opt3Amt: " + opt3Amt);
+                                continue;
+                            }
                         }
                         else
                         {
