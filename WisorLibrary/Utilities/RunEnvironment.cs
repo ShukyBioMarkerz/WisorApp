@@ -27,9 +27,15 @@ namespace WisorLib
         public List<ChosenComposition> listOfSelectedCompositions { get; set; }
         public List<string> headerOfListOfSelectedCompositions  {  get; }
 
+        // choose the best composition
         public int MaxProfit { get; set; }
         public int MaxBankPay { get; set; }
         public int MinBorrowerPay { get; set; }
+        // compare to the known loan' profit
+        public int MaxBorrowerProfitCalc { get; set; }
+        public int MaxBankProfitCalc { get; set; }
+        public int MaxTotalBenefit { get; set; }
+        
 
         public LoggerFile Logger  { get; internal set; }
 
@@ -38,6 +44,7 @@ namespace WisorLib
         public ResultsOutput resultsOutput { get; set; }
 
         public Composition bestDiffComposition, bestBankComposition, bestBorrowerComposition;
+        public Composition bestAllProfitCompositionBank, bestAllProfitCompositionBorrower, bestAllProfitComposition;
 
         public LoggerFile theMiscLogger { get; set; }
 
@@ -55,6 +62,8 @@ namespace WisorLib
 
             // Set borrower risk profile for choosing interest rates
             BorrowerProfile = new BorrowerProfile(CalculationParameters, loan.fico);
+            // update the fico result
+            loan.fico = BorrowerProfile.profile;
 
             PrintOptions = new PrintOptions();
 
@@ -64,6 +73,7 @@ namespace WisorLib
                 "ProductX", "ProductY", "ProductZ", "Borrower pay", "Bank amount", "Profit"
             };
             MaxProfit = MaxBankPay = MinBorrowerPay = 0;
+            MaxBorrowerProfitCalc = MaxBankProfitCalc = MaxTotalBenefit = 0;
 
             resultsOutput = new ResultsOutput();
             
@@ -176,7 +186,8 @@ namespace WisorLib
             if (Share.shouldCreateHTMLReport || Share.ShouldStoreInDB)
             {
                 theLoan.CompleteCalculation(new Composition[] 
-                    { bestDiffComposition, bestBankComposition, bestBorrowerComposition }, 
+                    { bestDiffComposition, bestBankComposition, bestBorrowerComposition,
+                        bestAllProfitComposition, bestAllProfitCompositionBank, bestAllProfitCompositionBorrower }, 
                     Share.ShouldStoreInDB, Share.shouldCreateHTMLReport, Share.shouldCreatePDFReport,
                     this /* enable to print in the output file*/);
             }
