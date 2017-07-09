@@ -80,13 +80,20 @@ namespace WisorLib
         {
             Option optionZ0 = null;
             //Console.WriteLine("FindZ0 optTypes: " + optTypes.ToString() + ", pmtLimits: " + pmtLimits.ToString() + ", timeZ: " + timeZ);
-
-            double ttlpmtmaxT = pmtLimits.opts[(int)Options.options.OPTX].times[(int)Options.pmtLimits.MAXTIME].optPmt
-                                + pmtLimits.opts[(int)Options.options.OPTY].times[(int)Options.pmtLimits.MAXTIME].optPmt
-                                + pmtLimits.opts[(int)Options.options.OPTZ].times[(int)Options.pmtLimits.MAXTIME].optPmt;
-            double ttlpmtminT = pmtLimits.opts[(int)Options.options.OPTX].times[(int)Options.pmtLimits.MINTIME].optPmt
-                                + pmtLimits.opts[(int)Options.options.OPTY].times[(int)Options.pmtLimits.MINTIME].optPmt
-                                + pmtLimits.opts[(int)Options.options.OPTZ].times[(int)Options.pmtLimits.MINTIME].optPmt;
+            double ttlpmtmaxT = 0, ttlpmtminT = 0;
+            try
+            {
+                ttlpmtmaxT = pmtLimits.opts[(int)Options.options.OPTX].times[(int)Options.pmtLimits.MAXTIME].optPmt
+                                    + pmtLimits.opts[(int)Options.options.OPTY].times[(int)Options.pmtLimits.MAXTIME].optPmt
+                                    + pmtLimits.opts[(int)Options.options.OPTZ].times[(int)Options.pmtLimits.MAXTIME].optPmt;
+                ttlpmtminT = pmtLimits.opts[(int)Options.options.OPTX].times[(int)Options.pmtLimits.MINTIME].optPmt
+                                    + pmtLimits.opts[(int)Options.options.OPTY].times[(int)Options.pmtLimits.MINTIME].optPmt
+                                    + pmtLimits.opts[(int)Options.options.OPTZ].times[(int)Options.pmtLimits.MINTIME].optPmt;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("ERROR FindZ0 got Exception: " + ex.ToString());
+            }
 
             if ((ttlpmtmaxT > env.CalculationParameters.monthlyPmtWanted + CalculationConstants.smallDev) ||
                     (ttlpmtminT < env.CalculationParameters.monthlyPmtWanted - CalculationConstants.largeDev))
