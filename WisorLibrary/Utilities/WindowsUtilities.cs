@@ -9,16 +9,20 @@ using System.Windows.Forms;
 namespace WisorLib
 {
 
-    public delegate void MyDelegate(string s, bool write2console = true);
+    public delegate void MyDelegate(string s, bool write2console = true, bool shouldColor = false);
 
     public delegate RunLoanDetails MyRunDelegate(loanDetails loan);
+    public delegate void MyRunDelegateListOfLoans(LoanList loan);
 
-  
+
     public class WindowsUtilities
     {
         static public MyDelegate loggerMethod { get; set; }
 
         static public MyRunDelegate runLoanMethod { get; set; }
+        static public MyRunDelegateListOfLoans runLoanMethodSync { get; set; }
+        static public MyRunDelegateListOfLoans runLoanMethodASync { get; set; }
+
 
 
         static public string displayFileDialog(string header)
