@@ -10,7 +10,7 @@ namespace WisorLib
     public class BorrowerProfile
     {
         // Borrower Index
-        public /* static */ int profile = (int)CalculationConstants.borrowerProfiles.NOTSET;
+        public int profile = (int)CalculationConstants.borrowerProfiles.NOTSET;
 
         // General Parameters
         // Local market
@@ -102,9 +102,18 @@ namespace WisorLib
                         // TBD. to be on the safe side
                         profile = (int)CalculationConstants.borrowerProfiles.AVERAGE;
                     }
+       
                 }
             }
-         }
+
+            if ((int)CalculationConstants.borrowerProfiles.BAD < profile || (int)CalculationConstants.borrowerProfiles.BEST > profile)
+            {
+                Console.WriteLine("NOTICE: set to defult profile. ficoScore: " + ficoScore +
+                    ", CalculationParameters.pti: " + CalculationParameters.pti +
+                    ", CalculationParameters.ltv: " + CalculationParameters.ltv);
+                profile = (int)CalculationConstants.borrowerProfiles.AVERAGE;
+            }
+        }
 
         // **************************************************************************************************************************** //
         // ************************************ Getting Borrower Profile According to LTV and PTI ************************************* //
