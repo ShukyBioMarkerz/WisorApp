@@ -19,6 +19,7 @@ using WisorLibrary.DataObjects;
 using WisorLibrary.Utilities;
 using static WisorLib.GenericProduct;
 using static WisorLib.MiscConstants;
+using WisorLibrary.Logic;
 
 namespace WisorAppWpf
 {
@@ -343,26 +344,38 @@ namespace WisorAppWpf
 
         public static void RunTheLogic()
         {
-            bool rc = Utilities.PrepareRun();
-  
-            // Read customers load data and fire the calculation to all
-            LoanList loans = MiscUtilities.GetLoansFromFile(Share.theSelectedCriteriaFields);
-            if (null == loans || 0 >= loans.Count)
-            {
-                WindowsUtilities.loggerMethod("NOTICE: RunTheLogic Failed to upload loans definitions.");
-                return;
-            }
+            MiscUtilities.RunTheLogic();
 
-            if (Share.shouldRunSync)
-                Utilities.RunTheLoansWraperSync(loans);
-            else
-                Utilities.RunTheLoansWraperASync(loans);
-     
-            //WindowsUtilities.loggerMethod("Complete calculate the entire " + loans.Count + " loans");
+            //try
+            //{
+            //    bool rc = Utilities.PrepareRun();
+
+            //    // Read customers load data and fire the calculation to all
+            //    LoanList loans = MiscUtilities.GetLoansFromFile(Share.theSelectedCriteriaFields);
+            //    if (null == loans || 0 >= loans.Count)
+            //    {
+            //        WindowsUtilities.loggerMethod("NOTICE: RunTheLogic Failed to upload loans definitions.");
+            //        return;
+            //    }
+
+            //    if (Share.shouldRunSync)
+            //        Utilities.RunTheLoansWraperSync(loans);
+            //    else
+            //        Utilities.RunTheLoansWraperASync(loans);
+            //}
+            //catch (ArgumentOutOfRangeException aoore)
+            //{
+            //    WindowsUtilities.loggerMethod("NOTICE: RunTheLogic ArgumentOutOfRangeException occured: " + aoore.ToString());
+            //}
+            //catch (Exception ex)
+            //{
+            //    WindowsUtilities.loggerMethod("NOTICE: RunTheLogic Exception occured: " + ex.ToString());
+            //}
+            ////WindowsUtilities.loggerMethod("Complete calculate the entire " + loans.Count + " loans");
         }
 
 
-        private static async void RunTheLoansWraperASync(LoanList loans/*, FieldList fields*/)
+        public static async void RunTheLoansWraperASync(LoanList loans/*, FieldList fields*/)
         {
             await Task.Run(() =>
             {
@@ -388,6 +401,7 @@ namespace WisorAppWpf
 
             // start the time elapse counter
             Utilities.StartPerformanceCalculation();
+            Share.TotalNumberOfLoans = loans.Count;
 
             foreach (loanDetails loan in loans)
             {
@@ -418,26 +432,51 @@ namespace WisorAppWpf
             // is the loan ready to be calculated?
             if (loan.Status)
             {
-                if (1 == Interlocked.Add(ref GlobalCurrentLoanCounter, 1))
+                if (1 == Interlocked.Add(ref GlobalConcurrentLoanCounter, 1))
                 {
                     // start the time elapse counter
                     Utilities.StartPerformanceCalculation();
                 }
 
-                WindowsUtilities.loggerMethod("+++ LoanCalculation Running a new task with: " + loan.ToString() + ", Task.CurrentId: " + Task.CurrentId + ", GlobalCurrentLoanCounter: " + GlobalCurrentLoanCounter);
+                WindowsUtilities.loggerMethod("+++ LoanCalculation Running a new task with: " + loan.ToString() + ", Task.CurrentId: " + Task.CurrentId + ", GlobalCurrentLoanCounter: " + GlobalConcurrentLoanCounter);
                 RunEnvironment env = new RunEnvironment(loan);
                 //env.risk = 1;
                 //env.liquidity = 2;
 
                 FastSearch fs = new FastSearch(env);
-                result = fs.runSearch();
+                
+                try
+                {
+                    result = fs.runSearch();
+                }
+                catch (ArgumentOutOfRangeException aoore)
+                {
+                    Console.WriteLine("ERROR: LoanCalculation ArgumentOutOfRangeException occured: " /* + aoore.ToString() */ +
+                        " for loan id: " + loan.ID);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("ERROR: LoanCalculation ArgumentOutOfRangeException occured: " /* + aoore.ToString() */ +
+                        " for loan id: " + loan.ID);
+                }
 
-                Interlocked.Decrement(ref GlobalCurrentLoanCounter);
-                long c = Interlocked.Read(ref GlobalCurrentLoanCounter);
+                // for counting the amount of completed loans
+                Interlocked.Add(ref GlobalCompletedLoansCounter, 1);
+                Interlocked.Decrement(ref GlobalConcurrentLoanCounter);
+                long c = Interlocked.Read(ref GlobalConcurrentLoanCounter);
                 if (0 >= c)
                     Utilities.StopPerformanceCalculation();
 
-                WindowsUtilities.loggerMethod("--- LoanCalculation Complete running the engine with: " + loan.ToString() + ", result: " + result.ToString() + ", Task.CurrentId: " + Task.CurrentId + ", GlobalCurrentLoanCounter: " + GlobalCurrentLoanCounter);
+                string infoStrs = " .Can re-finince: " + Share.NumberOfCanRefininceLoans + " which means: " +
+                    ((double)Share.NumberOfCanRefininceLoans / GlobalCompletedLoansCounter * 100).ToString() +
+                    " and NumberOfPositiveBeneficialLoans: " + Share.NumberOfPositiveBeneficialLoans.ToString() +
+                    " (" + ((double)Share.NumberOfPositiveBeneficialLoans / GlobalCompletedLoansCounter * 100).ToString() + "%)";
+
+                WindowsUtilities.loggerMethod("--- Complete running the engine with loan ID: " + loan.ID +
+                    //+ loan.ToString() + ", result: " + result.ToString() + ", Task.CurrentId: " + Task.CurrentId + 
+                    ", Completed Counter: " + GlobalCompletedLoansCounter +
+                    " out of total: " + Share.TotalNumberOfLoans + infoStrs, 
+                    true /*write to console*/, true /*color*/);
 
                 Utilities.PrintResultsInList(env);
             }
@@ -488,6 +527,16 @@ namespace WisorAppWpf
             WindowsUtilities.loggerMethod("Running the engine for the loan: " + loan.ToString());
             RunLoanDetails result = null;
 
+            // calculate the luch silumkn for comparison
+            LoanContainer loanContainer = new LoanContainer();
+            loanContainer.Add(loan);
+            LoanList ll = loanContainer.GroupLoansByID();
+            if (0 >= ll.Count)
+            {
+                WindowsUtilities.loggerMethod("ERROR: RunTheLoanASync failed in loanContainer.GroupLoansByID");
+                return result;
+            }
+
             // start the time elapse counter
             Utilities.StartPerformanceCalculation();
 
@@ -495,7 +544,7 @@ namespace WisorAppWpf
             {
                 try
                 {
-                    result = await Task.Run(() => LoanCalculation(loan));
+                    result = await Task.Run(() => LoanCalculation(/*loan*/ ll[0]));
                     //WindowsUtilities.loggerMethod("--- Complete ASYNC running the engine with: " + loan.ToString() + ", result: " + result.ToString());
                 }
                 catch (Exception ex)
@@ -508,13 +557,14 @@ namespace WisorAppWpf
             return result;
         }
 
-        private static void RunTheLoansSync(LoanList loans/*, FieldList fields*/)
+        public static void RunTheLoansSync(LoanList loans/*, FieldList fields*/)
         {
             WindowsUtilities.loggerMethod("Running the engine for the: " + loans.Count + " loans.");
             List<Task> tasks = new List<Task>();
 
             // start the time elapse counter
             Utilities.StartPerformanceCalculation();
+             Share.TotalNumberOfLoans = loans.Count;
  
             int count = 1;
             foreach (loanDetails loan in loans)
@@ -526,6 +576,10 @@ namespace WisorAppWpf
                     {
                         RunLoanDetails result = LoanCalculation(loan);
                         //WindowsUtilities.loggerMethod("--- Complete SYNC running the engine with: " + loan.ToString() + ", result: " + result.ToString());
+                    }
+                    catch (ArgumentOutOfRangeException aoore)
+                    {
+                        WindowsUtilities.loggerMethod("NOTICE: RunTheLoansSync ArgumentOutOfRangeException occured: " + aoore.ToString());
                     }
                     catch (Exception ex)
                     {
@@ -546,55 +600,54 @@ namespace WisorAppWpf
             Task.WaitAll(tasks.ToArray());
             Console.WriteLine("--- AFTER SYNC Task.WaitAll");
             Utilities.StopPerformanceCalculation();
-
             //SetButtonEnable(true);
 
             // WindowsUtilities.loggerMethod("Complete calculate the entire " + loans.Count + " loans");
         }
 
-        private static void RunTheLoansSync2(LoanList loans/*, FieldList fields*/)
-        {
-            WindowsUtilities.loggerMethod("Running the engine for the: " + loans.Count + " loans.");
-            List<Task> tasks = new List<Task>();
+        //private static void RunTheLoansSync2(LoanList loans/*, FieldList fields*/)
+        //{
+        //    WindowsUtilities.loggerMethod("Running the engine for the: " + loans.Count + " loans.");
+        //    List<Task> tasks = new List<Task>();
 
-            // start the time elapse counter
-            Utilities.StartPerformanceCalculation();
+        //    // start the time elapse counter
+        //    Utilities.StartPerformanceCalculation();
 
-            int count = 1;
-            foreach (loanDetails loan in loans)
-            {
+        //    int count = 1;
+        //    foreach (loanDetails loan in loans)
+        //    {
 
-                tasks.Add(Task.Factory.StartNew(/*async*/ () =>
-                {
-                    try
-                {
-                    RunLoanDetails result = LoanCalculation(loan);
-                    //WindowsUtilities.loggerMethod("--- Complete SYNC running the engine with: " + loan.ToString() + ", result: " + result.ToString());
-                }
-                catch (Exception ex)
-                {
-                    WindowsUtilities.loggerMethod("NOTICE: RunTheLoansSync Exception occured: " + ex.ToString());
-                }
+        //        tasks.Add(Task.Factory.StartNew(/*async*/ () =>
+        //        {
+        //            try
+        //        {
+        //            RunLoanDetails result = LoanCalculation(loan);
+        //            //WindowsUtilities.loggerMethod("--- Complete SYNC running the engine with: " + loan.ToString() + ", result: " + result.ToString());
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            WindowsUtilities.loggerMethod("NOTICE: RunTheLoansSync Exception occured: " + ex.ToString());
+        //        }
 
-                }
-                ));
+        //        }
+        //        ));
 
-                count++;
+        //        count++;
 
-                // fake completion
-                //if (3 <= count)
-                //    break;
-            }
+        //        // fake completion
+        //        //if (3 <= count)
+        //        //    break;
+        //    }
 
-            Console.WriteLine("--- BEFORE SYNC Task.WaitAll");
-            Task.WaitAll(tasks.ToArray());
-            Console.WriteLine("--- AFTER SYNC Task.WaitAll");
-            Utilities.StopPerformanceCalculation();
+        //    Console.WriteLine("--- BEFORE SYNC Task.WaitAll");
+        //    Task.WaitAll(tasks.ToArray());
+        //    Console.WriteLine("--- AFTER SYNC Task.WaitAll");
+        //    Utilities.StopPerformanceCalculation();
 
-            //SetButtonEnable(true);
+        //    //SetButtonEnable(true);
 
-            // WindowsUtilities.loggerMethod("Complete calculate the entire " + loans.Count + " loans");
-        }
+        //    // WindowsUtilities.loggerMethod("Complete calculate the entire " + loans.Count + " loans");
+        //}
 
 
         /// <summary>
@@ -602,7 +655,8 @@ namespace WisorAppWpf
         /// </summary>
         /// 
 
-        static long GlobalCurrentLoanCounter = 0;
+        static long GlobalConcurrentLoanCounter = 0;
+        static long GlobalCompletedLoansCounter = 0;
 
         static System.Diagnostics.Stopwatch watch = null;
 
@@ -616,12 +670,9 @@ namespace WisorAppWpf
         {
             // Shuky - measure the elapse time. Stop
             watch.Stop();
-            WindowsUtilities.loggerMethod("*** Calculation time in milliseconds*** " + String.Format("{0:#,###,###}", watch.ElapsedMilliseconds));
+            WindowsUtilities.loggerMethod("\n\n*** Calculation time in milliseconds*** " + String.Format("{0:#,###,###}", watch.ElapsedMilliseconds));
 
-            // ugly but short...
-            // close log debug
-            MiscUtilities.CloseMiscLogger();
-            MiscUtilities.CloseSummaryFile();
+            MiscUtilities.CleanUp();
         }
 
 
@@ -795,83 +846,91 @@ namespace WisorAppWpf
                 
                 if (! (c is System.Windows.Forms.Button || c is System.Windows.Forms.Label))
                 {
-                    string txt = c.Text.Replace(MiscConstants.COMMA_STR, MiscConstants.UNDEFINED_STRING);  // cleanup
-                    string name = c.Name;
-                    switch (name.ToLower())
-                    {
-                        case MiscConstants.LOAN_AMOUNT:
-                            loanAmount = Convert.ToUInt32(txt);
-                            break;
-                        case MiscConstants.MONTHLY_PAYMENT:
-                            desiredMonthlyPayment = Convert.ToUInt32(txt);
-                            break;
-                        case MiscConstants.PROPERTY_VALUE:
-                            propertyValue = Convert.ToUInt32(txt);
-                            break;
-                        case MiscConstants.YEARLY_INCOME:
-                            yearlyIncome = Convert.ToUInt32(txt);
-                            break;
-                        case MiscConstants.AGE:
-                            borrowerAge = Convert.ToUInt32(txt);
-                            break;
-                        case MiscConstants.LOAN_FICO:
-                            fico = Convert.ToInt32(txt);
-                            break;
-                        case MiscConstants.CUSTOMER_NAME:
-                            if (! String.IsNullOrEmpty(txt))
-                                Share.CustomerName = txt;
-                            break;
-                        case MiscConstants.DATE_TAKEN:
-                            DateTime value;
-                            if (!DateTime.TryParse(txt, out value))
-                            {
-                                string[] formats = { "MM/dd/yyyy" };
-                                if (!DateTime.TryParseExact(txt, formats, new CultureInfo("en-US"),
-                                       DateTimeStyles.None, out value))
-                                {
-                                    dateTaken = DateTime.Now;
-                                }
-                                else
-                                {
-                                    dateTaken = value;
-                                }
-                            }
-                            else
-                            {
-                                dateTaken = value;
-                            }
-                            break;
-                        case MiscConstants.DESIRE_TERMINATION_MONTH:
-                            desireTerminationMonth = Convert.ToUInt32(txt);
-                            break;
-                        case MiscConstants.SEQ_NUMBER:
-                            sequentialNumber = Convert.ToUInt32(txt);
-                            break;
-                        //case MiscConstants.ORIGINAL_PRODUCT:
-                        //    originalProduct = txt;
-                        //    break;
-                        case MiscConstants.ORIGINAL_RATE:
-                            originalRate = Convert.ToDouble(txt);
-                            break;
-                        case MiscConstants.ORIGINAL_MARGIN:
-                            originalMargin = Convert.ToDouble(txt);
-                            break;
-                        case MiscConstants.ORIGINAL_TIME:
-                            originalTime = Convert.ToUInt32(txt);
-                            break;
-                        case MiscConstants.RISK_VALUE:
-                            risk = (Risk)Enum.Parse(typeof(Risk), txt, true);
-                            break;
-                        case MiscConstants.LIQUIDITY_VALUE:
-                            liquidity = (Liquidity)Enum.Parse(typeof(Liquidity), txt, true);
-                            break;
-                        case MiscConstants.PRODUCT_NAME:
-                            product = new ProductID(MiscConstants.UNDEFINED_INT, txt);
-                            break;
-                        default:
-                            Console.WriteLine("StartButton_Clicked Illegal control name: " + name);
-                            break;
-                    }
+                    AnalayzeParameters.AnalayzeCretiriaParameters(
+                        c.Text, c.Name,
+                        ref loanAmount, ref desiredMonthlyPayment, ref propertyValue,
+                        ref yearlyIncome, ref borrowerAge, ref fico, ref dateTaken,
+                        ref desireTerminationMonth, ref sequentialNumber,
+                        ref originalRate, ref originalMargin, ref originalTime,
+                        ref risk, ref liquidity, ref product);
+
+                    //string txt = c.Text.Replace(MiscConstants.COMMA_STR, MiscConstants.UNDEFINED_STRING);  // cleanup
+                    //string name = c.Name;
+                    //switch (name.ToLower())
+                    //{
+                    //    case MiscConstants.LOAN_AMOUNT:
+                    //        loanAmount = Convert.ToUInt32(txt);
+                    //        break;
+                    //    case MiscConstants.MONTHLY_PAYMENT:
+                    //        desiredMonthlyPayment = Convert.ToUInt32(txt);
+                    //        break;
+                    //    case MiscConstants.PROPERTY_VALUE:
+                    //        propertyValue = Convert.ToUInt32(txt);
+                    //        break;
+                    //    case MiscConstants.YEARLY_INCOME:
+                    //        yearlyIncome = Convert.ToUInt32(txt);
+                    //        break;
+                    //    case MiscConstants.AGE:
+                    //        borrowerAge = Convert.ToUInt32(txt);
+                    //        break;
+                    //    case MiscConstants.LOAN_FICO:
+                    //        fico = Convert.ToInt32(txt);
+                    //        break;
+                    //    case MiscConstants.CUSTOMER_NAME:
+                    //        if (! String.IsNullOrEmpty(txt))
+                    //            Share.CustomerName = txt;
+                    //        break;
+                    //    case MiscConstants.DATE_TAKEN:
+                    //        DateTime value;
+                    //        if (!DateTime.TryParse(txt, out value))
+                    //        {
+                    //            string[] formats = { "MM/dd/yyyy" };
+                    //            if (!DateTime.TryParseExact(txt, formats, new CultureInfo("en-US"),
+                    //                   DateTimeStyles.None, out value))
+                    //            {
+                    //                dateTaken = DateTime.Now;
+                    //            }
+                    //            else
+                    //            {
+                    //                dateTaken = value;
+                    //            }
+                    //        }
+                    //        else
+                    //        {
+                    //            dateTaken = value;
+                    //        }
+                    //        break;
+                    //    case MiscConstants.DESIRE_TERMINATION_MONTH:
+                    //        desireTerminationMonth = Convert.ToUInt32(txt);
+                    //        break;
+                    //    case MiscConstants.SEQ_NUMBER:
+                    //        sequentialNumber = Convert.ToUInt32(txt);
+                    //        break;
+                    //    //case MiscConstants.ORIGINAL_PRODUCT:
+                    //    //    originalProduct = txt;
+                    //    //    break;
+                    //    case MiscConstants.ORIGINAL_RATE:
+                    //        originalRate = Convert.ToDouble(txt);
+                    //        break;
+                    //    case MiscConstants.ORIGINAL_MARGIN:
+                    //        originalMargin = Convert.ToDouble(txt);
+                    //        break;
+                    //    case MiscConstants.ORIGINAL_TIME:
+                    //        originalTime = Convert.ToUInt32(txt);
+                    //        break;
+                    //    case MiscConstants.RISK_VALUE:
+                    //        risk = (Risk)Enum.Parse(typeof(Risk), txt, true);
+                    //        break;
+                    //    case MiscConstants.LIQUIDITY_VALUE:
+                    //        liquidity = (Liquidity)Enum.Parse(typeof(Liquidity), txt, true);
+                    //        break;
+                    //    case MiscConstants.PRODUCT_NAME:
+                    //        product = new ProductID(MiscConstants.UNDEFINED_INT, txt);
+                    //        break;
+                    //    default:
+                    //        Console.WriteLine("StartButton_Clicked Illegal control name: " + name);
+                    //        break;
+                    //}
                 }
             }
             uil.Hide();
