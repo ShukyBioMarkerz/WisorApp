@@ -232,6 +232,13 @@ namespace WisorLib
             }
 
             optTypeForCheck.product.maxTime = remainingTimePossible;
+            if (optTypeForCheck.product.maxTime <= CalculationConstants.minimumTimeForLoan)
+            {
+                Console.WriteLine("NOTICE: Option Type = " + optTypeForCheck.product.name + "\nMaximum time for option type = " + optTypeForCheck.product.maxTime
+                                    + "\nMaximum time possible for loaner = " + env.CalculationParameters.maximumTimeForLoan
+                                    + "\nNew maximum time for option type = " + remainingTimePossible);
+
+            }
 
         }
 
