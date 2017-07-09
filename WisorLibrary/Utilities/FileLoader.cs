@@ -103,8 +103,8 @@ namespace WisorLib
             string[] lines = null;
             LoanList loans = new LoanList();
 
-            try
-            {
+            //try
+            //{
                 if (File.Exists(filename))
                 {
                     string ext = Path.GetExtension(filename);
@@ -124,31 +124,53 @@ namespace WisorLib
                 {
                     WindowsUtilities.loggerMethod("LoadLoansFileData file: " + filename + " does not exists!!!");
                 }
-            }
-            catch (Exception e)
-            {
-                WindowsUtilities.loggerMethod("ERROR: LoadLoansFileData got Exception: " + e.ToString()/* + ". line: " + line*/);
-            }
+            //}
+            //catch (Exception e)
+            //{
+            //    WindowsUtilities.loggerMethod("ERROR: LoadLoansFileData got Exception: " + e.ToString()/* + ". line: " + line*/);
+            //}
 
             return loans;
         }
 
+        /*
+         * Loading the loand can be asked to be from-line and to-line or by defining the exact loan-ids
+         */
         private static LoanList LoadLoans(string[] loanLines, FieldList fieldsDef, string filename)
         {
-            //LoanList loans = new LoanList();
             LoanContainer loanContainer = new LoanContainer();
             string line = MiscConstants.UNDEFINED_STRING;
             int lineNumber = 1;
             try
             {
-                int id = MiscUtilities.GetLoanID();
-
-                // check the configured lines to load 
                 int fromLine = 0, toLine = loanLines.Length;
-                if (MiscConstants.UNDEFINED_UINT != Share.LoansLoadFromLine)
-                    fromLine = (int)Share.LoansLoadFromLine;
-                if (MiscConstants.UNDEFINED_UINT != Share.LoansLoadToLine)
-                    toLine = (int)Share.LoansLoadToLine;
+                int id = MiscUtilities.GetLoanID();
+                string[] ids = null;
+
+                // check the configured to load only specific IDs
+                if (MiscConstants.UNDEFINED_STRING != Share.LoansLoadIDsFromLine)
+                {
+                    ids = Share.LoansLoadIDsFromLine.Split(MiscConstants.COMMA);
+                }
+                else
+                {
+                    // check the configured lines to load 
+                    if (MiscConstants.UNDEFINED_UINT != Share.LoansLoadFromLine)
+                        fromLine = (int)Share.LoansLoadFromLine;
+                    if (MiscConstants.UNDEFINED_UINT != Share.LoansLoadToLine)
+                        toLine = (int)Share.LoansLoadToLine;
+                    if (fromLine > loanLines.Length)
+                    {
+                        WindowsUtilities.loggerMethod("NOTICE: LoadLoans ask to read from line: " + fromLine
+                            + " while file have only: " + loanLines.Length);
+                        return null;
+                    }
+                    if (toLine > loanLines.Length)
+                    {
+                        toLine = loanLines.Length;
+                    }
+                }
+
                 for (int i = fromLine; i < toLine; i++)
                 {
                     line = loanLines[i];
@@ -181,6 +203,13 @@ namespace WisorLib
                         return null;
                     }
 
+                    // if asked for specific IDs, ensure correctness
+                    if (null != ids)
+                    {
+                        if (!ids.Contains(entities[0]))
+                            continue;
+                    }
+
                     int loanAmountIndex = fieldsDef.GetIndexOf(MiscConstants.LOAN_AMOUNT); // // there is a index in the excel file
                     int monthlyPaymentIndex = fieldsDef.GetIndexOf(MiscConstants.MONTHLY_PAYMENT); // + INDEX_ADD;
                     int propertyValueIndex = fieldsDef.GetIndexOf(MiscConstants.PROPERTY_VALUE); // + INDEX_ADD;
@@ -202,33 +231,42 @@ namespace WisorLib
                     if (MiscConstants.UNDEFINED_INT < loanAmountIndex /*&& INDEX_ADD <= monthlyPaymentIndex*/ && MiscConstants.UNDEFINED_INT < propertyValueIndex &&
                         MiscConstants.UNDEFINED_INT < yearlyIncomeIndex /*&& INDEX_ADD < ficoIndex*/)
                     {
-                        uint uyearlyIncomeIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, yearlyIncomeIndex));
-                        uint uloanAmountIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, loanAmountIndex));
-                        uint umonthlyPaymentIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, monthlyPaymentIndex));
-                        uint upropertyValueIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, propertyValueIndex));
-                        uint uageIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, ageIndex));
+                        uint uyearlyIncomeIndexV = Convert.ToUInt32(MiscUtilities.CleanupRedundantChars(entities, yearlyIncomeIndex));
+                        uint uloanAmountIndexV = Convert.ToUInt32(MiscUtilities.CleanupRedundantChars(entities, loanAmountIndex));
+                        uint umonthlyPaymentIndexV = Convert.ToUInt32(MiscUtilities.CleanupRedundantChars(entities, monthlyPaymentIndex));
+                        uint upropertyValueIndexV = Convert.ToUInt32(MiscUtilities.CleanupRedundantChars(entities, propertyValueIndex));
+                        uint uageIndexV = Convert.ToUInt32(MiscUtilities.CleanupRedundantChars(entities, ageIndex));
                         //uint desireTerminationMonthIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, desireTerminationMonthIndex));
-                        uint sequentialNumberIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, sequentialNumberIndex));
+                        uint sequentialNumberIndexV = Convert.ToUInt32(MiscUtilities.CleanupRedundantChars(entities, sequentialNumberIndex));
                         // clean percantage etc.
                         double originalRateIndexV =
                             (originalRateIndex >= entities.Length) ? MiscConstants.UNDEFINED_DOUBLE :
-                                Convert.ToDouble(CleanupRedundantChars(entities, originalRateIndex, true /*allowDot*/));
-                        uint originalTimeIndexV = Convert.ToUInt32(CleanupRedundantChars(entities, originalTimeIndex));
+                                Convert.ToDouble(MiscUtilities.CleanupRedundantChars(entities, originalRateIndex, true /*allowDot*/));
+                        uint originalTimeIndexV = Convert.ToUInt32(MiscUtilities.CleanupRedundantChars(entities, originalTimeIndex));
                         double originalMarginIndexV =
                             (originalMarginIndex >= entities.Length) ? MiscConstants.UNDEFINED_DOUBLE :
-                                Convert.ToDouble(CleanupRedundantChars(entities, originalMarginIndex, true /*allowDot*/));
+                                Convert.ToDouble(MiscUtilities.CleanupRedundantChars(entities, originalMarginIndex, true /*allowDot*/));
+                        DateTime dateTakenIndexV = new DateTime(); 
 
                         if (MiscConstants.UNDEFINED_UINT == sequentialNumberIndexV && MiscConstants.UNDEFINED_INT < sequentialNumberIndex)
                         {
                             CriteriaField cf = fieldsDef.GetField(MiscConstants.SEQ_NUMBER);
                             sequentialNumberIndexV = Convert.ToUInt32(cf.value) + (uint)lineNumber;
                         }
-                        int ficoIndexV = (MiscConstants.UNDEFINED_INT < ficoIndex) ? Convert.ToInt32(CleanupRedundantChars(entities, ficoIndex)) : MiscConstants.UNDEFINED_INT;
+                        int ficoIndexV = (MiscConstants.UNDEFINED_INT < ficoIndex) ? Convert.ToInt32(MiscUtilities.CleanupRedundantChars(entities, ficoIndex)) : MiscConstants.UNDEFINED_INT;
 
-                        DateTime dateTakenIndexV =
-                            (0 > dateTakenIndex || dateTakenIndex >= entities.Length) ? DateTime.Now :
-                                Convert.ToDateTime(entities[dateTakenIndex]);
-                        //DateTime dateS = MiscUtilities.ConvertDate(entities[dateTakenIndex]);
+                        try
+                        {
+                            dateTakenIndexV =
+                                (0 > dateTakenIndex || dateTakenIndex >= entities.Length) ? DateTime.Now :
+                                    Convert.ToDateTime(entities[dateTakenIndex]);
+                            //DateTime dateS = MiscUtilities.ConvertDate(entities[dateTakenIndex]);
+                        }
+                        catch (Exception e)
+                        {
+                            WindowsUtilities.loggerMethod("ERROR: LoadLoans got date Exception: " + e.ToString() + ". line: " + line);
+                        }
+
 
                         Risk risk = Risk.NONERisk; // (Risk)Enum.Parse(typeof(Risk), CleanupRedundantChars(entities, riskIndex), true);
                         Liquidity liquidity = Liquidity.NONELiquidity; // (Liquidity)Enum.Parse(typeof(Liquidity), CleanupRedundantChars(entities, liquidityIndex), true);
@@ -278,37 +316,7 @@ namespace WisorLib
             return ll;
         }
 
-        static string CleanupRedundantChars(string[] entities, int index, bool allowDot = false, string defaultValue = "0")
-        {
-            string value = MiscConstants.UNDEFINED_STRING;
-            if (0 <= index && index < entities.Length)
-            {
-                string trimed;
-                int loc;
-                if (! allowDot)
-                {
-                    loc = entities[index].IndexOf(MiscConstants.DOT_STR);
-                    trimed = (0 <= loc) ? entities[index].Remove(loc) : entities[index];
-                }
-                else
-                {
-                    trimed = entities[index];
-                }
-                loc = trimed.IndexOf(MiscConstants.PERCANTAGE_STR);
-                trimed = (0 <= loc) ? trimed.Remove(loc) : trimed;
-
-                // remove currency symbole
-                string pattern = @"(\p{Sc}\s?)?";
-                Regex rgx = new Regex(pattern);
-                value = rgx.Replace(trimed, "");
-             }
-            else
-            {
-                value = defaultValue;
-            }
-            return value;
-        }
-
+ 
         static uint GetValue(string[] entities, int index)
         {
             uint value = MiscConstants.UNDEFINED_UINT;
