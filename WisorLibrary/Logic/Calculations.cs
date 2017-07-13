@@ -265,6 +265,12 @@ namespace WisorLibrary.Logic
         public static double CalculateMonthlyPmt(double amtForCalc, uint timeForCalc, /*double interestRateForCalc,*/
             double originalRate, double originalInflation)
         {
+            if (0 >= timeForCalc)
+            {
+                //Console.WriteLine("ERROR: CalculateMonthlyPmt got illegal timeForCalc: " + timeForCalc);
+                return 0;
+            }
+
             double i = ((originalInflation / 12 * 100000000) - ((originalInflation / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
 
             if (originalRate == 0)
@@ -411,6 +417,7 @@ namespace WisorLibrary.Logic
             //{
             // calculate till now
             bool shouldLog = true;
+            double monthlyPmtCalc;
             for (m = 1; m <= numOfMonths; m++)
             {
                 ratePmt = Math.Round((startingAmount * (1 + i) * r), 2);
@@ -439,11 +446,11 @@ namespace WisorLibrary.Logic
                 currentRate = (IsBank ? historicRate : historicRate + productPlanRate);
                 r = ((currentRate / 12 * 100000000) - ((currentRate / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
                 startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
-                monthlyPmt = Math.Round(CalculateMonthlyPmt(startingAmount, (uint)(originalLoanTime - m),
+                monthlyPmtCalc = Math.Round(CalculateMonthlyPmt(startingAmount, (uint)(originalLoanTime - m),
                         currentRate, originalInflation), 2);
-                if (0 >= (uint)Math.Round(monthlyPmt) || 0 >= (uint)Math.Round(totalPaidSoFar))
+                if (0 < (uint)Math.Round(monthlyPmtCalc))
                 {
-                    int a = 2;
+                    monthlyPmt = monthlyPmtCalc;
                 }
             }
 
@@ -467,12 +474,16 @@ namespace WisorLibrary.Logic
                 optTtlRatePayFuture += ratePmtFuture;
                 totalPaidFuture += monthlyPmtFuture;
                 startingAmountFuture = Math.Round((((startingAmountFuture) * (1 + i)) - principalPmtFuture), 2);
-                monthlyPmtFuture = Math.Round(
+                monthlyPmtCalc = Math.Round(
                     CalculateMonthlyPmt(startingAmountFuture, (uint)(originalLoanTime - m),
                     currentRate, originalInflation), 2);
+                if (0 < (uint)Math.Round(monthlyPmtCalc))
+                {
+                    monthlyPmtFuture = monthlyPmtCalc;
+                }
 
                 // for debug:
-                 if (shouldLog)
+                if (shouldLog)
                 {
                     msg = m + "," + startingAmountFuture + "," + ratePmtFuture + "," + principalPmtFuture + "," + r + ","
                           + historicRate + "," + currentRate + "," + monthlyPmtFuture + "," + i + "," + totalPaidFuture
@@ -527,6 +538,7 @@ namespace WisorLibrary.Logic
                 calculationData.PayFuture = calculationBorrowerData.PayFuture;
                 calculationData.RemaingLoanAmount = calculationBorrowerData.RemaingLoanAmount;
                 calculationData.MonthlyPaymentCalc = calculationBorrowerData.MonthlyPaymentCalc;
+                calculationData.FirstMonthlyPMT = calculationBorrowerData.FirstMonthlyPMT;
 
                 // return the bank data
                 calculationData.BankPayUntilToday = calculationBankData.PayUntilToday;
