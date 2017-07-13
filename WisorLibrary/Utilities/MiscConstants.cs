@@ -114,6 +114,7 @@ namespace WisorLib
         internal static string Product = "Product";
         internal static string market = "market";
         internal static string name = "name";
+        internal static string hebrewName = "hebrewName";
         internal static string indexUsedFirstTimePeriod = "indexUsedFirstTimePeriod";
         internal static string indexUsedSecondTimePeriod = "indexUsedSecondTimePeriod";
         internal static string indexJumpFirstTimePeriod = "indexJumpFirstTimePeriod";
@@ -141,12 +142,12 @@ namespace WisorLib
         public static double BANK_PRIME_RATE_FACTOR = 0.001;
 
         // enable to select the right composition by name
-        internal static string BEST_DIFF_COMPOSITION = "bestDiffComposition";
-        internal static string BEST_BANK_COMPOSITION = "bestBankComposition";
-        internal static string BEST_BORROWER_COMPOSITION = "bestBorrowerComposition";
-        internal static string BEST_ALL_PROFIT_COMPOSITION = "allProfitComposition";
-        internal static string BEST_ALL_PROFIT_COMPOSITION_BORROWER = "allProfitCompositionBorrower";
-        internal static string BEST_ALL_PROFIT_COMPOSITION_BANK = "allProfitCompositionBank";
+        internal const string BEST_DIFF_COMPOSITION = "bestDiffComposition";
+        internal const string BEST_BANK_COMPOSITION = "bestBankComposition";
+        internal const string BEST_BORROWER_COMPOSITION = "bestBorrowerComposition";
+        internal const string BEST_ALL_PROFIT_COMPOSITION = "allProfitComposition";
+        internal const string BEST_ALL_PROFIT_COMPOSITION_BORROWER = "allProfitCompositionBorrower";
+        internal const string BEST_ALL_PROFIT_COMPOSITION_BANK = "allProfitCompositionBank";
         
 
         // type of the selection window
