@@ -125,7 +125,8 @@ namespace WisorLibrary.Logic
                     RemaingLoanAmount = MiscConstants.UNDEFINED_UINT,
                     MonthlyPaymentCalc = MiscConstants.UNDEFINED_UINT,
                     BankPayUntilToday = MiscConstants.UNDEFINED_UINT,
-                    BankPayFuture = MiscConstants.UNDEFINED_UINT;
+                    BankPayFuture = MiscConstants.UNDEFINED_UINT,
+                    FirstMonthlyPMT = MiscConstants.UNDEFINED_UINT;
 
                 //try
                 //{
@@ -158,10 +159,11 @@ namespace WisorLibrary.Logic
                         // bank data
                         BankPayUntilToday += resultData.BankPayUntilToday;
                         BankPayFuture += resultData.BankPayFuture;
+                        FirstMonthlyPMT += resultData.FirstMonthlyPMT;
                     }
 
                     UpdateLoanData(ref ld, collectedLoans[0], PayUntilToday, PayFuture, RemaingLoanAmount,
-                        MonthlyPaymentCalc, BankPayUntilToday, BankPayFuture, yearlyIncome, originalAmount);
+                        MonthlyPaymentCalc, BankPayUntilToday, BankPayFuture, yearlyIncome, originalAmount, FirstMonthlyPMT);
 
                 //}
                 //catch (Exception e)
@@ -185,7 +187,7 @@ namespace WisorLibrary.Logic
         void  UpdateLoanData(ref /*not needed but for the sake of god will...*/ 
                         loanDetails ld, loanDetails loan, uint PayUntilToday, uint PayFuture,
                         uint RemaingLoanAmount, uint MonthlyPaymentCalc, uint BankPayUntilToday, uint BankPayFuture,
-                        uint yearlyIncome, uint originalAmount)
+                        uint yearlyIncome, uint originalAmount, uint FirstMonthlyPMT)
         {
             //ld.LoanAmount = originalAmount;
             ld.resultReportData.BankName = Share.CustomerName;
@@ -196,7 +198,8 @@ namespace WisorLibrary.Logic
             ld.resultReportData.OriginalRate = ld.OriginalRate = loan.OriginalRate;
             ld.resultReportData.OriginalTime = ld.OriginalTime = loan.OriginalTime;
             ld.resultReportData.fico = ld.fico = loan.fico;
-            ld.resultReportData.FirstMonthlyPMT = loan.resultReportData.FirstMonthlyPMT;
+            ld.resultReportData.FirstMonthlyPMT = FirstMonthlyPMT;
+            ld.resultReportData.OriginalDateTaken = loan.OriginalDateTaken;
             ld.resultReportData.DateTaken = ld.DateTaken = DateTime.Now; // loan.DateTaken;
             ld.resultReportData.PropertyValue = ld.PropertyValue = loan.PropertyValue;
             ld.indices = loan.indices;
@@ -219,6 +222,7 @@ namespace WisorLibrary.Logic
             ld.resultReportData.PayFuture = PayFuture;
             ld.resultReportData.BankPayUntilToday = BankPayUntilToday;
             ld.resultReportData.BankPayFuture = BankPayFuture;
+            ld.resultReportData.FirstMonthlyPMT = FirstMonthlyPMT;
             ld.resultReportData.EstimateFuturePay = ld.resultReportData.PayFuture;
             // make consistancy checks
             if (ld.resultReportData.BankPayUntilToday > ld.resultReportData.PayUntilToday)
@@ -232,23 +236,7 @@ namespace WisorLibrary.Logic
                 ld.resultReportData.EstimateProfitSoFar =
                     ld.resultReportData.PayUntilToday - ld.resultReportData.BankPayUntilToday;
             }
-            if (0 >= ld.OriginalLoanAmount)
-            {
-                WindowsUtilities.loggerMethod("NOTICE: loan.ID: " + loan.ID + " illega OriginalLoanAmount: " +
-                    ld.OriginalLoanAmount);
-                ld.resultReportData.EstimateProfitPercantageSoFar = 0;
-                ld.resultReportData.EstimateTotalProfitPercantage = 0;
-                ld.resultReportData.EstimateFutureProfitPercantage = 0;
-            }
-            else
-            {
-                ld.resultReportData.EstimateProfitPercantageSoFar =
-                     (double)ld.resultReportData.EstimateProfitSoFar / ld.OriginalLoanAmount;
-                ld.resultReportData.EstimateTotalProfitPercantage =
-                    (double)ld.resultReportData.EstimateTotalProfit / ld.OriginalLoanAmount;
-                ld.resultReportData.EstimateFutureProfitPercantage =
-                    (double)ld.resultReportData.EstimateFutureProfit / ld.OriginalLoanAmount;
-            }
+            
             int sum = (int) ld.resultReportData.PayUntilToday + (int) ld.resultReportData.PayFuture -
                 (int) ld.resultReportData.BankPayUntilToday - (int) ld.resultReportData.BankPayFuture;
             if (0 >= sum)
@@ -272,6 +260,24 @@ namespace WisorLibrary.Logic
             {
                 ld.resultReportData.EstimateFutureProfit =
                     ld.resultReportData.PayFuture - ld.resultReportData.BankPayFuture;
+            }
+
+            if (0 >= ld.OriginalLoanAmount)
+            {
+                WindowsUtilities.loggerMethod("NOTICE: loan.ID: " + loan.ID + " illega OriginalLoanAmount: " +
+                    ld.OriginalLoanAmount);
+                ld.resultReportData.EstimateProfitPercantageSoFar = 0;
+                ld.resultReportData.EstimateTotalProfitPercantage = 0;
+                ld.resultReportData.EstimateFutureProfitPercantage = 0;
+            }
+            else
+            {
+                ld.resultReportData.EstimateProfitPercantageSoFar =
+                     (double)ld.resultReportData.EstimateProfitSoFar / ld.OriginalLoanAmount;
+                ld.resultReportData.EstimateTotalProfitPercantage =
+                    (double)ld.resultReportData.EstimateTotalProfit / ld.OriginalLoanAmount;
+                ld.resultReportData.EstimateFutureProfitPercantage =
+                    (double)ld.resultReportData.EstimateFutureProfit / ld.OriginalLoanAmount;
             }
         }
 
