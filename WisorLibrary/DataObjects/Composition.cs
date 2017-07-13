@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using WisorLibrary.Logic;
 
-
 namespace WisorLib
 {
     [Serializable]
@@ -28,6 +27,13 @@ namespace WisorLib
         public uint optXBankTtlPay, optYBankTtlPay, optZBankTtlPay;
         [XmlIgnoreAttribute]
         public bool calcTtlPayOrNo = false;
+
+        // store the benefits
+        public int BorrowerProfitCalc { get; set; }
+        public int BankProfitCalc { get; set; }
+        public int TotalBenefit { get; set; }
+        public int BankOriginalProfit { get; set; }
+        public bool IsWinWin { get; internal set; }
 
         // for the sake of serialization.....
         public Composition()
