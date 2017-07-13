@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -139,19 +140,17 @@ namespace WisorLib
         {
             bool rc = true;
             Share.theMarket = market;
-            //// ensure there are combination for this market
-            //string[,] combination = CalculationConstants.GetCombination(market);
 
-            //if (null == combination || 0 == combination.Length)
-            //{
-            //    WindowsUtilities.loggerMethod("ERROR: no combination founded for market: " + market.ToString());
-            //}
-            //else
-            //{
-            //    rc = true;
-            //    WindowsUtilities.loggerMethod("NOTICE: running for market: " + market.ToString() + ", #of combination: " + combination.Length);
-            //    Console.WriteLine("NOTICE: running for market: " + market.ToString() + ", #of combination: " + combination.Length);
-            //}
+            // create the culture for the pdf reports
+            if (markets.ISRAEL == market)
+            {
+                Share.cultureInfo = CultureInfo.CreateSpecificCulture("he-IL");
+            }
+            else
+            {
+                Share.cultureInfo = CultureInfo.CreateSpecificCulture("en-US");
+            }
+          
             return rc;
         }
 
