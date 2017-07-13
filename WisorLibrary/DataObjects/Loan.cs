@@ -170,7 +170,8 @@ namespace WisorLib
             resultReportData.LoanAmount = LoanAmount;
             resultReportData.OriginalLoanAmount = OriginalLoanAmount;
             resultReportData.fico = fico;
-            resultReportData.DateTaken = DateTaken;
+            resultReportData.DateTaken = DateTime.Parse(DateTaken.ToShortDateString()); // skip the hours
+            resultReportData.OriginalDateTaken = DateTime.Parse(OriginalDateTaken.ToShortDateString());  // skip the hours
             resultReportData.DesireTerminationMonth = DesireTerminationMonth;
             resultReportData.BorrowerAge = BorrowerAge;
             if (MiscConstants.UNDEFINED_UINT == BorrowerAge)

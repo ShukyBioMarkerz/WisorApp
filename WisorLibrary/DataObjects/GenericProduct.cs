@@ -67,7 +67,7 @@ namespace WisorLib
         public uint minTime;    // If product is only available for a single time then minTime = maxTime
         public uint maxTime;    // If product is only available for a single time then minTime = maxTime
         public uint timeJump;       // If product is only available for a single time then jump is not relevant
-        public string /*typeId, */name;
+        public string /*typeId, */name, hebrewName;
 
         public uint firstTimePeriod;    // If product is completely fixed rate then firstTimePeriod is not relevant
         public uint secondTimePeriod;   // If product is completely fixed rate then secondTimePeriod is not relevant
@@ -80,7 +80,7 @@ namespace WisorLib
         public uint Score { get; set; }
 
         public GenericProduct(ProductID productID, markets localMarket = markets.NONE, // USA, UK, ISRAEL, OTHER
-            string name = MiscConstants.UNDEFINED_STRING, 
+            string name = MiscConstants.UNDEFINED_STRING, string hebrewName = MiscConstants.UNDEFINED_STRING,
             indices indexUsedFirstTimePeriod = indices.NONE, indices indexUsedSecondTimePeriod = indices.NONE, // PRIME, FED, LIBOR, EUROBOR, BBBR, OTHER, NONE
             indexJumps indexJumpFirstTimePeriod = indexJumps.NONE, indexJumps indexJumpSecondTimePeriod = indexJumps.NONE, // AY, WEEK, MONTHS1, MONTHS3, MONTHS6, MONTHS12, MONTHS24, MONTHS30, MONTHS36, MONTHS60, MONTHS84, MONTHS120, OTHER
             uint minTime = MiscConstants.UNDEFINED_UINT, uint maxTime = MiscConstants.UNDEFINED_UINT,
@@ -93,6 +93,7 @@ namespace WisorLib
             this.productID = productID;
             this.localMarket = localMarket;
             this.name = name;
+            this.hebrewName = hebrewName;
             this.originalIndexUsedFirstTimePeriod = indexUsedFirstTimePeriod;
             this.indexUsedFirstTimePeriod = MiscUtilities.GetIndexRateForOption(indexUsedFirstTimePeriod);
             this.indexUsedSecondTimePeriod = MiscUtilities.GetIndexRateForOption(indexUsedSecondTimePeriod);
@@ -159,7 +160,7 @@ namespace WisorLib
             ProductsList products = new ProductsList();
             XElement currProduct = null;
             markets market;
-            string name, typeId;
+            string name, typeId, hebrewName = MiscConstants.UNDEFINED_STRING;
             indices iftp, istp;
             indexJumps ijftp, ijstp;
             uint minTime, maxTime, timeJump, firstTimePeriod;
@@ -203,6 +204,8 @@ namespace WisorLib
                         if (market != Share.theMarket)
                             continue;
                         name = product.Element(MiscConstants.name).Value;
+                        if (null != product.Element(MiscConstants.hebrewName))
+                            hebrewName = product.Element(MiscConstants.hebrewName).Value;
                         iftp = (indices)Enum.Parse(typeof(indices), product.Element(MiscConstants.indexUsedFirstTimePeriod).Value, true);
                         istp = (indices)Enum.Parse(typeof(indices), product.Element(MiscConstants.indexUsedSecondTimePeriod).Value, true);
                         ijftp = (indexJumps)Enum.Parse(typeof(indexJumps), product.Element(MiscConstants.indexJumpFirstTimePeriod).Value, true);
@@ -246,7 +249,7 @@ namespace WisorLib
                         if (/*MiscConstants.UNDEFINED_INT < index &&*/ beneficial)
                         {
                             ProductID productID = new ProductID(index, typeId);
-                            products.Add(index++, new GenericProduct(productID /*ID*/, market /*localMarket*/, name,
+                            products.Add(index++, new GenericProduct(productID, market, name, hebrewName,
                                 iftp /*indices*/, istp /*indices*/,
                                 ijftp /*indexJumps*/, ijstp /*indexJumps*/,
                                 minTime, maxTime, timeJump, firstTimePeriod, maxPercentageLoan,
