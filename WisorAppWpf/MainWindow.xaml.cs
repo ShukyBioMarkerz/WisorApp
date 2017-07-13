@@ -57,9 +57,9 @@ namespace WisorAppWpf
         {
 
             //SetRunLoanFunc(Utilities.RunTheLoansSync);
-            SetRunLoanFunc(Utilities.RunTheLoanASync);
-            SetRunLoanFuncSync(Utilities.RunTheLoansWraperSync);
-            SetRunLoanFuncASync(Utilities.RunTheLoansWraperASync);
+            SetRunLoanFunc(MultiThreadingManagment.RunTheLoanASync);
+            SetRunLoanFuncSync(MultiThreadingManagment.RunTheLoansWraperSync);
+            SetRunLoanFuncASync(MultiThreadingManagment.RunTheLoansWraperASync);
 
             Share.shouldShowCriteriaSelectionWindow = false;
             Share.shouldShowCriteriaSelectionContinue = false;
@@ -67,9 +67,9 @@ namespace WisorAppWpf
             Share.shouldShowProductSelectionContinue = false;
             Share.shouldShowRatesSelectionWindow = false;
             Share.shouldShowLoansSelectionWindow = false;
-
-            Share.shouldRunSync = false; //  true;
-            Share.shouldRunLogicSync = false; //  true;
+            
+            Share.shouldRunSync = true;
+            Share.shouldRunLogicSync = true;
 
             Share.shouldRunFake = false;
 

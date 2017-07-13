@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<employees>
+<products>
 	<item>
 		<type>TextBox</type>
-		<name>Loan amount</name>
+		<name>loan amount</name>
 		<default>199200</default>
 		<mandatory>yes</mandatory>
 	</item>
@@ -14,13 +14,13 @@
 	</item>
 	<item>
 		<type>TextBox</type>
-		<name>Yearly income</name>
+		<name>income</name>
 		<default>17714</default>
 		<mandatory>yes</mandatory>
 	</item>
 	<item>
 		<type>TextBox</type>
-		<name>Borrower age</name>
+		<name>age</name>
 		<ToCheck>min=35</ToCheck>
 		<ToCheck>max=100</ToCheck>
 		<default>35</default>
@@ -28,7 +28,7 @@
 	</item>
  	<item>
 		<type>TextBox</type>
-		<name>Desired monthly payment</name>
+		<name>monthly payment</name>
 		<default>1300</default>
 		<mandatory>yes</mandatory>
 	</item>
@@ -42,19 +42,19 @@
  
 	<item>
 		<type>TextBox</type>
-		<name>Date Taken</name>
+		<name>Date</name>
 		<default>3/25/2016</default>
 		<mandatory>yes</mandatory>
 	</item>
 	<item>
 		<type>TextBox</type>
-		<name>Original Rate</name>
+		<name>Rate</name>
 		<default>0.03875</default>
 		<mandatory>yes</mandatory>
 	</item>
 	<item>
 		<type>TextBox</type>
-		<name>Original Time</name>
+		<name>Time</name>
 		<default>360</default>
 		<mandatory>yes</mandatory>
 	</item>
@@ -145,4 +145,4 @@
 		<name>Moyshalach</name>
 		<default>1000000</default>
 	</item>
-</employees>  
+</products>  

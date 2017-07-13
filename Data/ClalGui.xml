@@ -15,7 +15,7 @@
 	</item>
  	<item>
 		<type>TextBox</type>
-		<name>Desired monthly payment</name>
+		<name>monthly payment</name>
 		<default>5500</default>
 		<mandatory>yes</mandatory>
 	</item>
@@ -27,7 +27,7 @@
 	</item>
 	<item>
 		<type>TextBox</type>
-		<name>Yearly income</name>
+		<name>income</name>
 		<default>24000</default>
 		<mandatory>yes</mandatory>
 	</item>
@@ -35,13 +35,13 @@
 	<item>
 		<type>TextBox</type>
 		<name>FICO</name>
-		<default>1</default>
+		<default>-1</default>
 		<mandatory>yes</mandatory>
 	</item>
 
 	<item>
 		<type>TextBox</type>
-		<name>Borrower age</name>
+		<name>age</name>
 		<ToCheck>min=35</ToCheck>
 		<ToCheck>max=100</ToCheck>
 		<default>35</default>
@@ -50,37 +50,38 @@
 	
 	<item>
 		<type>TextBox</type>
-		<name>Original Time</name>
-		<default>360</default>
-		<mandatory>no</mandatory>
+		<name>Product name</name>
+		<default>PrimeIsrael</default>
+		<mandatory>yes</mandatory>
 	</item>
+	
+	<item>
+		<type>TextBox</type>
+		<name>Rate</name>
+		<default>0.03875</default>
+		<mandatory>yes</mandatory>
+	</item>
+
 
 	<item>
 		<type>TextBox</type>
-		<name>Date Taken</name>
+		<name>Date</name>
 		<default>3/25/2016</default>
-		<mandatory>no</mandatory>
+		<mandatory>yes</mandatory>
 	</item>
 
 
-	<item>
-		<type>TextBox</type>
-		<name>Borrower age</name>
-		<ToCheck>min=35</ToCheck>
-		<ToCheck>max=100</ToCheck>
-		<default>35</default>
-		<mandatory>no</mandatory>
-	</item>
-
+	
 
  <!-- optional -->
- 
-	<item>
+ 	<item>
 		<type>TextBox</type>
-		<name>Original Rate</name>
-		<default>0.03875</default>
-		<mandatory>no</mandatory>
+		<name>Time</name>
+		<default>360</default>
+		<mandatory>yes</mandatory>
 	</item>
+
+
 
 
 	<item>
@@ -91,61 +92,4 @@
 	</item>
 
 	
-	
-	<item>
-		<type>ComboBox</type>
-		<name>Mortgage type</name>
-		<options>First time buyer</options> 
-		<options>Reordering</options>
-		<options>For fun</options>
-		<default>First time buyer</default>
-	</item>
-
-	<item>
-		<type>ComboBox</type>
-		<name>Payment type</name>
-		<options>Full amortization</options> 
-		<options>interest only</options>
-		<options>Baloon</options>
-		<default>interest only</default>
-	</item>
-	<item>
-		<type>DatePicker</type>
-		<name>Date taken (MM/YY)</name>
-		<default>today</default>
-	</item>
-	<item>
-		<type>ComboBox</type>
-		<name>Mortgage product</name>
-		<options>30 year fixed</options> 
-		<options>20 year fixed</options>
-		<options>10 year fixed</options>
-		<options>5/1 plan</options>
-		<default>10 year fixed</default>
-	</item>
-	<item>
-		<type>TextBox</type>
-		<name>Interest rate (yearly)</name>
-		<default>4%</default>
-	</item>
-	<item>
-		<type>TextBox</type>
-		<name>Term in years</name>
-		<default>25</default>
-	</item>
-	<item>
-		<type>ComboBox</type>
-		<name>Credit class when loan was taken</name>
-		<options>low</options> 
-		<options>medium</options>
-		<options>very good</options>
-		<options>exelent</options>
-		<default>medium</default>
-	</item>
-	
-		<item>
-		<type>TextBox</type>
-		<name>Moyshalach</name>
-		<default>1000000</default>
-	</item>
 </employees>  

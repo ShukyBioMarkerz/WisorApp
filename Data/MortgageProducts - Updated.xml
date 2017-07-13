@@ -1,44 +1,43 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!-- 
 markets { USA, UK, ISRAEL, OTHER } 
-localMarket
 
 indices { 0 = 0, PRIME, FED, LIBOR, EUROBOR, BBBR, OTHER};
-indexUsedFirstTimePeriod
-indexUsedSecondTimePeriod
 
 indexJumps { 0 = 0, DAY, WEEK, MONTHS1, MONTHS3, MONTHS6, MONTHS12, MONTHS24, MONTHS30, MONTHS36, MONTHS60, MONTHS84, MONTHS120, OTHER };
-indexJumpFirstTimePeriod
-indexJumpSecondTimePeriod
 
-operators { 0 = 0, PLUS, MINUS, OTHER };
-operatorUsedFirstTimePeriod
-operatorUsedSecondTimePeriod
-
-   // General Parameters
-        public uint typeId;
-        public uint minTime;    // If product is only available for a single time then minTime = maxTime
-        public uint maxTime;    // If product is only available for a single time then minTime = maxTime
-        public uint timeJump;       // If product is only available for a single time then jump is not relevant
-        public string optName;
-
-        public uint firstTimePeriod;    // If product is completely fixed rate then firstTimePeriod is not relevant
-        public uint secondTimePeriod;   // If product is completely fixed rate then secondTimePeriod is not relevant
-
-        public double rateFormulaFirstTimePeriod;   // If product is completely fixed rate then rateFormulaFirstTimePeriod is not relevant
-        public double rateFormulaSecondTimePeriod;  // If product is completely fixed rate then rateFormulaSecondTimePeriod is not relevant
-		
-				How to calculate the Luch Silukin and Monthly payment 
-			(indexUsedFirstTimePeriod) + (operatorUsedFirstTimePeriod) + rateAdditionFirstTimePeriod
-
-	NO NEED ANY MORE:
-		<operatorUsedFirstTimePeriod>PLUS</operatorUsedFirstTimePeriod>
-		<operatorUsedSecondTimePeriod>MINUS</operatorUsedSecondTimePeriod>
-		<rateFormulaFirstTimePeriod>number</rateFormulaFirstTimePeriod>
-		<rateFormulaSecondTimePeriod>number</rateFormulaSecondTimePeriod>
-
-		<secondTimePeriod>number</secondTimePeriod> 
-		
+List of products:
+USA
+1. Fixed 30 yrs
+2. Fixed 25 yrs
+3. Fixed 20 yrs
+4. Fixed 15 yrs
+5. Fixed 10 yrs
+6. Fixed 5 yrs
+7. 3/1 ARM
+8. 5/1 ARM
+9. 7/1 ARM
+10. 10/1 ARM
+UK
+11. 2 yr fixed
+12. 3 yr fixed
+13. 5 yr fixed
+14. 7 yr fixed
+15. 10 yr fixed
+ISRAEL
+16. Prime
+17. Fix Tsamud
+18. Alt 60 Tsamud
+19. Fixed no Tsamud
+20. Fixed no rate Tsamud
+21. Fixed no rate No Tsamud
+22. Alt 12 months
+23. Alt 24 months
+24. Alt 30 months
+25. Alt 60 No Tsamud
+26. Alt 84 months
+27. Alt 120 months
+28. Makam
 	
 -->
 
@@ -66,6 +65,12 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>0</firstTimePeriod>	
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>		
+		
+		<FixOrAdjustable>fix</FixOrAdjustable>
+		<risk>1.7</risk>
+		<liquidity>1.7</liquidity>
+		<benefit>3.3</benefit>
+		
 	</Product>
 
 	<Product>
@@ -84,7 +89,13 @@ operatorUsedSecondTimePeriod
 		<timeJump>12</timeJump>
 		
 		<firstTimePeriod>0</firstTimePeriod>
-		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
+		<maxPercentageOfLoan>100</maxPercentageOfLoan>
+		
+		<FixOrAdjustable>fix</FixOrAdjustable>
+		<risk>1.7</risk>
+		<liquidity>1.7</liquidity>
+		<benefit>3.3</benefit>
+		
 	</Product>
 
 	<Product>
@@ -107,6 +118,12 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>0</firstTimePeriod>
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable>fix</FixOrAdjustable>
+		<risk>1.7</risk>
+		<liquidity>1.7</liquidity>
+		<benefit>3.3</benefit>
+		
 	</Product>
 
 	<Product>
@@ -126,6 +143,12 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>0</firstTimePeriod>
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable>fix</FixOrAdjustable>
+		<risk>1.7</risk>
+		<liquidity>1.7</liquidity>
+		<benefit>3.3</benefit>		
+		
 	</Product>
 
 	<Product>
@@ -145,6 +168,12 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>0</firstTimePeriod>
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable>fix</FixOrAdjustable>
+		<risk>1.2</risk>
+		<liquidity>1.2</liquidity>
+		<benefit>4.3</benefit>		
+		
 	</Product>
 
 	<Product>
@@ -164,9 +193,40 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>0</firstTimePeriod>
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable>fix</FixOrAdjustable>
+		<risk>1</risk>
+		<liquidity>1</liquidity>
+		<benefit>4.3</benefit>		
+		
 	</Product>
 	
 	// ADJUSTABLE RATE PRODUCTS (ARM)
+	
+		<Product>
+		<market>USA</market>
+		<name>3/1 ARM</name>
+		<typeId>3.1ARMUSA</typeId>
+
+		<indexUsedFirstTimePeriod>FED</indexUsedFirstTimePeriod>
+		<indexUsedSecondTimePeriod>FED</indexUsedSecondTimePeriod>
+		
+		<indexJumpFirstTimePeriod>0</indexJumpFirstTimePeriod>
+		<indexJumpSecondTimePeriod>12</indexJumpSecondTimePeriod>
+
+		<minTime>48</minTime>
+		<maxTime>360</maxTime>
+		<timeJump>12</timeJump>
+		
+		<firstTimePeriod>36</firstTimePeriod>
+		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable></FixOrAdjustable>
+		<risk>3.7</risk>
+		<liquidity>3.7</liquidity>
+		<benefit>2.3</benefit>			
+		
+	</Product>
 
 	<Product>
 		<market>USA</market>
@@ -185,6 +245,12 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>60</firstTimePeriod>
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable></FixOrAdjustable>
+		<risk>3.2</risk>
+		<liquidity>3.2</liquidity>
+		<benefit>2.8</benefit>			
+		
 	</Product>
 
 	<Product>
@@ -204,6 +270,37 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>84</firstTimePeriod>
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable></FixOrAdjustable>
+		<risk>2.9</risk>
+		<liquidity>2.9</liquidity>
+		<benefit>2.8</benefit>			
+		
+	</Product>
+	
+		<Product>
+		<market>USA</market>
+		<name>10/1 ARM</name>
+		<typeId>10.1ARMUSA</typeId>
+
+		<indexUsedFirstTimePeriod>FED</indexUsedFirstTimePeriod>
+		<indexUsedSecondTimePeriod>FED</indexUsedSecondTimePeriod>
+		
+		<indexJumpFirstTimePeriod>0</indexJumpFirstTimePeriod>
+		<indexJumpSecondTimePeriod>12</indexJumpSecondTimePeriod>
+
+		<minTime>132</minTime>
+		<maxTime>360</maxTime>
+		<timeJump>12</timeJump>
+		
+		<firstTimePeriod>120</firstTimePeriod>
+		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable></FixOrAdjustable>
+		<risk>2.7</risk>
+		<liquidity>2.7</liquidity>
+		<benefit>2.8</benefit>			
+		
 	</Product>
 
 	// UK ONLY
@@ -229,6 +326,12 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>24</firstTimePeriod>
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable></FixOrAdjustable>
+		<risk>3.7</risk>
+		<liquidity>3.7</liquidity>
+		<benefit>2.3</benefit>			
+		
 	</Product>
 
 	<Product>
@@ -248,6 +351,12 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>36</firstTimePeriod>
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable></FixOrAdjustable>
+		<risk>2.9</risk>
+		<liquidity>2.9</liquidity>
+		<benefit>2.3</benefit>			
+		
 	</Product>
 
 	<Product>
@@ -267,6 +376,12 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>60</firstTimePeriod>
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable></FixOrAdjustable>
+		<risk>2.4</risk>
+		<liquidity>2.4</liquidity>
+		<benefit>2.8</benefit>			
+		
 	</Product>
 
 	<Product>
@@ -286,6 +401,12 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>84</firstTimePeriod>
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable></FixOrAdjustable>
+		<risk>2.2</risk>
+		<liquidity>2.2</liquidity>
+		<benefit>2.8</benefit>	
+		
 	</Product>
 
 	<Product>
@@ -305,11 +426,45 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>120</firstTimePeriod>
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable></FixOrAdjustable>
+		<risk>1.9</risk>
+		<liquidity>1.9</liquidity>
+		<benefit>2.8</benefit>			
+		
 	</Product>
 	
 	// ISRAEL ONLY
 
 	// FIXED RATE PRODUCTS
+	
+	<Product>
+		<market>ISRAEL</market>
+		<name>Prime</name>
+		<typeId>PrimeIsrael</typeId>
+
+		<indexUsedFirstTimePeriod>PRIME</indexUsedFirstTimePeriod>
+		<indexUsedSecondTimePeriod>PRIME</indexUsedSecondTimePeriod>
+		
+		<indexJumpFirstTimePeriod>1</indexJumpFirstTimePeriod>
+		<indexJumpSecondTimePeriod>1</indexJumpSecondTimePeriod>
+
+		<minTime>48</minTime>
+		<maxTime>360</maxTime>
+		<timeJump>12</timeJump>
+		
+		<firstTimePeriod>0</firstTimePeriod>
+		<maxPercentageOfLoan>50</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable></FixOrAdjustable>
+		<risk>4.5</risk>
+		<liquidity>4.5</liquidity>
+		<benefit>4.1</benefit>	
+
+		<must>yes</must>
+		<should>no</should>		
+		
+	</Product>
 	
 	<Product>
 		<market>ISRAEL</market>
@@ -328,7 +483,39 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>0</firstTimePeriod>
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable>fix</FixOrAdjustable>
+		<risk>1.7</risk>
+		<liquidity>1.7</liquidity>
+		<benefit>3.3</benefit>	
+		
 	</Product>
+	
+		<Product>
+		<market>ISRAEL</market>
+		<name>Alternate 60 months</name>
+		<typeId>Alt60TsamudIsrael</typeId>
+
+		<indexUsedFirstTimePeriod>MADAD</indexUsedFirstTimePeriod>
+		<indexUsedSecondTimePeriod>MADAD</indexUsedSecondTimePeriod>
+		
+		<indexJumpFirstTimePeriod>60</indexJumpFirstTimePeriod>
+		<indexJumpSecondTimePeriod>60</indexJumpSecondTimePeriod>
+
+		<minTime>120</minTime>
+		<maxTime>360</maxTime>
+		<timeJump>60</timeJump>
+		
+		<firstTimePeriod>60</firstTimePeriod>
+		<maxPercentageOfLoan>50</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable></FixOrAdjustable>
+		<risk>2.9</risk>
+		<liquidity>2.9</liquidity>
+		<benefit>3.8</benefit>			
+		
+	</Product>
+	
 	
 	<Product>
 		<market>ISRAEL</market>
@@ -347,6 +534,14 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>0</firstTimePeriod>
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable>fix</FixOrAdjustable>
+		
+		<FixOrAdjustable>fix</FixOrAdjustable>
+		<risk>1.7</risk>
+		<liquidity>1.7</liquidity>
+		<benefit>3.3</benefit>			
+		
 	</Product>
 		
 	<Product>
@@ -366,6 +561,12 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>0</firstTimePeriod>
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable>fix</FixOrAdjustable>
+		<risk>1.7</risk>
+		<liquidity>1.7</liquidity>
+		<benefit>3.3</benefit>			
+		
 	</Product>
 			
 	<Product>
@@ -385,6 +586,12 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>0</firstTimePeriod>
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable>fix</FixOrAdjustable>
+		<risk>1.7</risk>
+		<liquidity>1.7</liquidity>
+		<benefit>3.3</benefit>	
+		
 	</Product>
 		
 	// ADJUSTABLE RATE PRODUCTS
@@ -406,6 +613,12 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>0</firstTimePeriod>
 		<maxPercentageOfLoan>30</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable></FixOrAdjustable>
+		<risk>4.2</risk>
+		<liquidity>4.2</liquidity>
+		<benefit>2.8</benefit>			
+		
 	</Product>
 		
 	<Product>
@@ -425,6 +638,12 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>24</firstTimePeriod>
 		<maxPercentageOfLoan>30</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable></FixOrAdjustable>
+		<risk>3.7</risk>
+		<liquidity>3.7</liquidity>
+		<benefit>3.1</benefit>			
+		
 	</Product>
 			
 	<Product>
@@ -444,26 +663,15 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>30</firstTimePeriod>
 		<maxPercentageOfLoan>30</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable></FixOrAdjustable>
+		<risk>3.7</risk>
+		<liquidity>3.7</liquidity>
+		<benefit>3.1</benefit>			
+		
 	</Product>
 				
-	<Product>
-		<market>ISRAEL</market>
-		<name>Alternate 60 months</name>
-		<typeId>Alt60TsamudIsrael</typeId>
 
-		<indexUsedFirstTimePeriod>MADAD</indexUsedFirstTimePeriod>
-		<indexUsedSecondTimePeriod>MADAD</indexUsedSecondTimePeriod>
-		
-		<indexJumpFirstTimePeriod>60</indexJumpFirstTimePeriod>
-		<indexJumpSecondTimePeriod>60</indexJumpSecondTimePeriod>
-
-		<minTime>120</minTime>
-		<maxTime>360</maxTime>
-		<timeJump>60</timeJump>
-		
-		<firstTimePeriod>60</firstTimePeriod>
-		<maxPercentageOfLoan>30</maxPercentageOfLoan>	
-	</Product>
 					
 	<Product>
 		<market>ISRAEL</market>
@@ -482,6 +690,12 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>60</firstTimePeriod>
 		<maxPercentageOfLoan>30</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable></FixOrAdjustable>
+		<risk>2.9</risk>
+		<liquidity>2.9</liquidity>
+		<benefit>3.8</benefit>			
+		
 	</Product>
 						
 	<Product>
@@ -501,6 +715,12 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>84</firstTimePeriod>
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable></FixOrAdjustable>
+		<risk>2.2</risk>
+		<liquidity>2.2</liquidity>
+		<benefit>3.6</benefit>			
+		
 	</Product>
 							
 	<Product>
@@ -520,27 +740,15 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>120</firstTimePeriod>
 		<maxPercentageOfLoan>100</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable></FixOrAdjustable>
+		<risk>1.9</risk>
+		<liquidity>1.9</liquidity>
+		<benefit>3.8</benefit>	
+		
 	</Product>
 								
-	<Product>
-		<market>ISRAEL</market>
-		<name>Prime</name>
-		<typeId>PrimeIsrael</typeId>
-
-		<indexUsedFirstTimePeriod>PRIME</indexUsedFirstTimePeriod>
-		<indexUsedSecondTimePeriod>PRIME</indexUsedSecondTimePeriod>
-		
-		<indexJumpFirstTimePeriod>1</indexJumpFirstTimePeriod>
-		<indexJumpSecondTimePeriod>1</indexJumpSecondTimePeriod>
-
-		<minTime>48</minTime>
-		<maxTime>360</maxTime>
-		<timeJump>12</timeJump>
-		
-		<firstTimePeriod>0</firstTimePeriod>
-		<maxPercentageOfLoan>30</maxPercentageOfLoan>	
-	</Product>
-									
+								
 	<Product>
 		<market>ISRAEL</market>
 		<name>Makam</name>
@@ -558,6 +766,12 @@ operatorUsedSecondTimePeriod
 		
 		<firstTimePeriod>0</firstTimePeriod>
 		<maxPercentageOfLoan>30</maxPercentageOfLoan>	
+		
+		<FixOrAdjustable></FixOrAdjustable>
+		<risk>4.5</risk>
+		<liquidity>4.5</liquidity>
+		<benefit>4.1</benefit>			
+		
 	</Product>
 	
 </MortgageProducts>  
