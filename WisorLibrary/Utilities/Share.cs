@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -96,6 +97,8 @@ namespace WisorLib
         public static string CustomerName { get; set; }
 
         public static markets theMarket { get; set; }
+
+        public static CultureInfo cultureInfo;
 
         public static string tempLogFile
         {
