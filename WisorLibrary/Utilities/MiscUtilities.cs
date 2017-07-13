@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
@@ -783,16 +784,16 @@ namespace WisorLibrary.Utilities
         }
 
         public static void CalcaulateProfitAll(Composition comp, loanDetails loan,
-                        out int borrowerProfit, out int bankProfit, out int totalProfit)
+                        out int borrowerProfit, out int bankProfit, out int totalProfit, out int bankOriginalProfit)
         {
             int ttlBankPay, ttlBorrowerPay, ttlProfit;
             CalcaulateProfit(comp, out ttlBankPay, out ttlBorrowerPay, out ttlProfit);
             // borrower benefit = diff between wisor composition and the original bank
             borrowerProfit = (int)loan.resultReportData.PayFuture - (int)ttlBorrowerPay;
             // original bank profit: diff between orig borrower pay and orig bank pay
-            int bankOptionProfit = (int)loan.resultReportData.PayFuture - (int)loan.resultReportData.BankPayFuture;
+            bankOriginalProfit = (int)loan.resultReportData.PayFuture - (int)loan.resultReportData.BankPayFuture;
             // total bank profit: diff between wisor option profit and original bank profit
-            bankProfit = ttlProfit - bankOptionProfit;
+            bankProfit = ttlProfit - bankOriginalProfit;
             // total benefit: sum of the borrower profit and the bank profit
             totalProfit = borrowerProfit + bankProfit;
         }
@@ -1046,6 +1047,25 @@ namespace WisorLibrary.Utilities
             return fields;
         }
 
+        public static bool IsProductTsamud(indices indexUsedFirstTimePeriod)
+        {
+            return (indices.MADAD == indexUsedFirstTimePeriod);
+        }
+
+        public static bool IsProductFix(FixOrAdjustable fixOrAdjustable)
+        {
+            return (FixOrAdjustable.FIX == fixOrAdjustable);
+        }
+
+        // ריבית משתנה אשר אינם פריים 
+        public static bool IsProductAdjustableInterest(indices indices, FixOrAdjustable fixOrAdjustable, indexJumps indexJumpFirstTimePeriod)
+        {
+            // TBD - Omri what is the: 1 < (int) indexJumpFirstTimePeriod, it is enumarator!!!
+            return (indices.PRIME == indices && FixOrAdjustable.FIX == fixOrAdjustable && 1 < (int) indexJumpFirstTimePeriod );
+        }
+
+        ////////////////////////////////////
+
         public static bool PrepareRuning()
         {
             bool rc = false;
@@ -1141,6 +1161,11 @@ namespace WisorLibrary.Utilities
             //WindowsUtilities.loggerMethod("Complete calculate the entire " + loans.Count + " loans");
         }
 
+     
+        /////////////////////////////////////////////////
+
+        /////////////////////////////////////////////////
+
         public static string CleanupRedundantChars(string[] entities, int index, bool allowDot = false, string defaultValue = "0")
         {
             string value = MiscConstants.UNDEFINED_STRING;
@@ -1173,6 +1198,15 @@ namespace WisorLibrary.Utilities
         }
 
 
+        static public string GetReportFileName(string id, FileType fileType)
+        {
+            string ext = MiscUtilities.GetFileTypeExtension(fileType);
+            string fn = AppDomain.CurrentDomain.BaseDirectory
+                + MiscConstants.REPORTS_DIR + Path.DirectorySeparatorChar +
+                MiscConstants.LENDER_REPORT_PREFIX + MiscConstants.NAME_SEP_CHAR + id + MiscConstants.NAME_SEP_CHAR +
+                DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + ext;
+            return fn;
+        }
 
     }
 
