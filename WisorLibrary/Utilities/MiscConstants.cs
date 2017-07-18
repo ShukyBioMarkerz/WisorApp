@@ -32,7 +32,7 @@ namespace WisorLib
         public static string    CRITERIA_FILENAME = "criteria.txt";
         public static string    OUTPUT_DIR = "Output";
         public static string    REPORTS_DIR = "Reports";
-        public static string    DATA_DIR = @"..\..\..\Data";
+        public static string    DATA_DIR = @"..\Data"; // @"..\..\..\Data";
         public static char      NAME_SEP_CHAR = '-';
         public static string    CSV_EXT = ".csv";
         public static string    XML_EXT = ".xml";
@@ -114,7 +114,7 @@ namespace WisorLib
         internal static string Product = "Product";
         internal static string market = "market";
         internal static string name = "name";
-        internal static string hebrewName = "hebrewName";
+        internal static string hebrewName = "nameHeb";
         internal static string indexUsedFirstTimePeriod = "indexUsedFirstTimePeriod";
         internal static string indexUsedSecondTimePeriod = "indexUsedSecondTimePeriod";
         internal static string indexJumpFirstTimePeriod = "indexJumpFirstTimePeriod";
@@ -157,7 +157,7 @@ namespace WisorLib
         public enum FileType { XML = 0, HTML, PDF, CSV};
 
         // TBD - shuky
-        public enum indices { MADAD, PRIME, CPI, FED, LIBOR, EUROBOR, BBBR, MAKAM, OTHER, NONE }; // Are the options in the code or pulled from outside DB?
+        public enum indices { NONE, MADAD, PRIME, CPI, FED, LIBOR, EUROBOR, BBBR, MAKAM, OTHER }; // Are the options in the code or pulled from outside DB?
 
         // Risk and Liquidity
         public const int RISK_LIQUIDITY_HEADER = 3;
