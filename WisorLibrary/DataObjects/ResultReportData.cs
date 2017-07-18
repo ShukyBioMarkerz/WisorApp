@@ -33,9 +33,9 @@ namespace WisorLibrary.DataObjects
 
     public class ResultReportData
     {
-        loanDetails theLoan;
+        public loanDetails theLoan { get; set; }
 
-        RunEnvironment env;
+        public RunEnvironment env { get; set; }
 
         // Loan data
         public string BankName;
@@ -144,37 +144,47 @@ namespace WisorLibrary.DataObjects
 
         public void Activate(bool shouldStoreInDB, bool shouldCreateHTMLReport, bool shouldCreatePDFReport)
         {
-            
-            UpdateGeneralResults();
+            bool shouldThisLoanReFinance;
 
-            try
+            UpdateGeneralResults(out shouldThisLoanReFinance);
+
+            WindowsUtilities.loggerMethod("\nCreating report for loan: " + this.ID + " shouldThisLoanReFinance: " + shouldThisLoanReFinance +
+                ", shouldCreatePDFReport: " + shouldCreatePDFReport);
+            if (shouldThisLoanReFinance && (shouldCreateHTMLReport || shouldCreatePDFReport))
             {
-                // TBD - calculate the time of creating the reposts
-                string HTMLfilename = null, PDFfilename = null;
-                
-                // create the report
-                if (shouldCreateHTMLReport)
-                {
-                    HTMLfilename = MiscUtilities.GetReportFileName(ID, FileType.HTML);
-                }
-                if (shouldCreatePDFReport)
-                {
-                     PDFfilename = MiscUtilities.GetReportFileName(ID, FileType.PDF);
-                }
 
-                if (! String.IsNullOrEmpty(HTMLfilename) || ! String.IsNullOrEmpty(PDFfilename))
-                    Reporter.LenderReport(this, HTMLfilename, PDFfilename , Share.cultureInfo);
+                try
+                {
+                    // TBD - calculate the time of creating the reposts
+                    string HTMLfilename = null, PDFfilename = null;
 
-                //// store in XML file
-                //if (shouldStoreInDB)
-                //{
-                //    StoreResultsInDB();
-                //}
-                
+                    // create the report
+                    if (shouldCreateHTMLReport)
+                    {
+                        HTMLfilename = MiscUtilities.GetReportFileName(ID, FileType.HTML);
+                    }
+                    if (shouldCreatePDFReport)
+                    {
+                        PDFfilename = MiscUtilities.GetReportFileName(ID, FileType.PDF);
+                    }
+
+                    if (!String.IsNullOrEmpty(HTMLfilename) || !String.IsNullOrEmpty(PDFfilename))
+                        Reporter.LenderReport(this, HTMLfilename, PDFfilename, Share.cultureInfo);
+
+                    //// store in XML file
+                    //if (shouldStoreInDB)
+                    //{
+                    //    StoreResultsInDB();
+                    //}
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("ResultReportData::Activate ex: " + ex.ToString());
+                }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine("ResultReportData::Activate ex: " + ex.ToString());
+            else {
+                 //WindowsUtilities.loggerMethod("Activate loan: " + this.ID + " should not be refininced");
             }
         
         }
@@ -182,10 +192,32 @@ namespace WisorLibrary.DataObjects
         // manage the summery file updating the bulk of loans results
         // store for each loan: id, amount, savings, calculation time
         // TBD - omri.
-        void UpdateGeneralResults()
+        void UpdateGeneralResults(out bool shouldThisLoanReFinance)
         {
-            bool shouldThisLoanReFinance = false, totalBenefitPerLoan = false;
+            bool totalBenefitPerLoan = false;
             bool noCompositionFounded = true;
+            shouldThisLoanReFinance = false;
+            int maxBorrowerPayment, maxBorrowerPayment_corrspondLenderPayment, maxBorrowerPayment_corrspondBorrowerSaving,
+                maxBorrowerPayment_corrspondLenderProfit;
+            string maxBorrowerPayment_corrspondName;
+            int minBorrowerPayment, minBorrowerPayment_corrspondLenderPayment, minBorrowerPayment_corrspondBorrowerSaving,
+                minBorrowerPayment_corrspondLenderProfit;
+            string minBorrowerPayment_corrspondName;
+
+            int maxLenderProfit, maxLenderProfit_corrspondBorrowerPayment, maxLenderProfit_corrspondBorrowerSaving,
+                maxLenderProfit_corrspondLenderPayment;
+            string maxLenderProfit_corrspondName;
+            int minLenderProfit, minLenderProfit_corrspondBorrowerPayment, minLenderProfit_corrspondBorrowerSaving,
+                minLenderProfit_corrspondLenderPayment;
+            string minLenderProfit_corrspondName;
+            maxBorrowerPayment = maxBorrowerPayment_corrspondLenderPayment = maxBorrowerPayment_corrspondBorrowerSaving =
+                maxBorrowerPayment_corrspondLenderProfit = minBorrowerPayment = minBorrowerPayment_corrspondLenderPayment =
+                minBorrowerPayment_corrspondBorrowerSaving = minBorrowerPayment_corrspondLenderProfit =
+                maxLenderProfit = maxLenderProfit_corrspondBorrowerPayment = maxLenderProfit_corrspondBorrowerSaving =
+                maxLenderProfit_corrspondLenderPayment = minLenderProfit = minLenderProfit_corrspondBorrowerPayment =
+                minLenderProfit_corrspondBorrowerSaving = minLenderProfit_corrspondLenderPayment = MiscConstants.UNDEFINED_INT;
+            maxBorrowerPayment_corrspondName = minBorrowerPayment_corrspondName = maxLenderProfit_corrspondName =
+                minLenderProfit_corrspondName = MiscConstants.UNDEFINED_STRING;
 
             foreach (Composition comp in compositions)
             {
@@ -246,74 +278,76 @@ namespace WisorLibrary.DataObjects
                         theLoan.fico.ToString() // fico
                     };
 
-                        MiscUtilities.PrintSummaryFile(msg);
+                    MiscUtilities.PrintSummaryFile(msg);
 
-                        // print on the various summary files
-                        if (shouldReFinance)
+                    // print on the various summary files
+                    if (shouldReFinance)
+                    {
+                        // ensure only one composition 
+                        // TBD Shuky. Choose the "right" one, what is the cretiria?
+                        // Accumulate the all cases to one entry in the file
+                      
+                        if (ttlBorrowerPay > maxBorrowerPayment) // found new max...
                         {
-                            MiscUtilities.PrintSummaryFileS(Share.theWinWinSummaryFile, msg);
-
-                            // now we want only the win-win but in different files according to the names
-                            switch(comp.name)
-                            {
-                                case MiscConstants.BEST_BANK_COMPOSITION:
-                                case MiscConstants.BEST_ALL_PROFIT_COMPOSITION_BANK:
-                                    MiscUtilities.PrintSummaryFileS(Share.theBankWinSummaryFile, msg);
-                                    break;
-                                case MiscConstants.BEST_BORROWER_COMPOSITION:
-                                case MiscConstants.BEST_ALL_PROFIT_COMPOSITION_BORROWER:
-                                    MiscUtilities.PrintSummaryFileS(Share.theBorrowerWinSummaryFile, msg);
-                                    break;
-                             }
+                            maxBorrowerPayment = ttlBorrowerPay;
+                            maxBorrowerPayment_corrspondLenderPayment = ttlBankPay;
+                            maxBorrowerPayment_corrspondBorrowerSaving = borrowerProfitCalc;
+                            maxBorrowerPayment_corrspondLenderProfit = ttlProfit;
+                            maxBorrowerPayment_corrspondName = comp.name;
                         }
-                        //else
-                        //{
-                        //    if (canBorrowerSave)
-                        //    {
-                        //        MiscUtilities.PrintSummaryFileS(Share.theBorrowerWinSummaryFile, msg);
-                        //    }
-                        //    if (canLenderProfit)
-                        //    {
-                        //        MiscUtilities.PrintSummaryFileS(Share.theBankWinSummaryFile, msg);
-                        //    }
-                        //    if (canIncreaseTotalProfit)
-                        //    {
-                        //        MiscUtilities.PrintSummaryFileS(Share.theTotalWinSummaryFile, msg);
-                        //    }
-                        //}
-                    
+                        if (MiscConstants.UNDEFINED_INT == minBorrowerPayment || ttlBorrowerPay < minBorrowerPayment) // found new min...
+                        {
+                            minBorrowerPayment = ttlBorrowerPay;
+                            minBorrowerPayment_corrspondLenderPayment = ttlBankPay;
+                            minBorrowerPayment_corrspondBorrowerSaving = borrowerProfitCalc;
+                            minBorrowerPayment_corrspondLenderProfit = ttlProfit;
+                            minBorrowerPayment_corrspondName = comp.name;
+                        }
+                        // and for the lender
+                        if (ttlProfit > maxLenderProfit) // found new max...
+                        {
+                            maxLenderProfit = ttlProfit;
+                            maxLenderProfit_corrspondBorrowerPayment = ttlBorrowerPay;
+                            maxLenderProfit_corrspondBorrowerSaving = borrowerProfitCalc;
+                            maxLenderProfit_corrspondLenderPayment = ttlBankPay;
+                            maxLenderProfit_corrspondName = comp.name;
+                        }
+                        if (MiscConstants.UNDEFINED_INT == minLenderProfit || ttlProfit < minLenderProfit) // found new min...
+                        {
+                            minLenderProfit = ttlProfit;
+                            minLenderProfit_corrspondBorrowerPayment = ttlBorrowerPay;
+                            minLenderProfit_corrspondBorrowerSaving = borrowerProfitCalc;
+                            minLenderProfit_corrspondLenderPayment = ttlBankPay;
+                            minLenderProfit_corrspondName = comp.name;
+                        }
 
-                    //MiscUtilities.PrintMiscLogger("\n\nSummery file updating the bulk of loans results");
-                    //MiscUtilities.PrintMiscLogger(comp.name);
-                    //MiscUtilities.PrintMiscLogger(borPayMsg);
-                    //MiscUtilities.PrintMiscLogger(bankPayMsg);
-                    //MiscUtilities.PrintMiscLogger(bankProfit);
-                    //MiscUtilities.PrintMiscLogger(comp.ToString());
-          
-                    //if (null != env)
-                    //{
-                    //    env.WriteToOutputFile("\n\nSummery file updating the bulk of loans results");
-                    //    env.WriteToOutputFile(comp.name);
-                    //    env.WriteToOutputFile(borPayMsg);
-                    //    env.WriteToOutputFile(bankPayMsg);
-                    //    env.WriteToOutputFile(bankProfit);
-                    //}
-                    //else
-                    //{
-                    //    Console.WriteLine("\n\nSummery file updating the bulk of loans results");
-                    //    Console.WriteLine(comp.name);
-                    //    Console.WriteLine(borPayMsg);
-                    //    Console.WriteLine(bankPayMsg);
-                    //    Console.WriteLine(bankProfit);
-                    //}
+                        MiscUtilities.PrintSummaryFileS(Share.theTotalWinSummaryFile, msg);
+
+                        //// now we want only the win-win but in different files according to the names
+                        //switch(comp.name)
+                        //{
+                        //    case MiscConstants.BEST_BANK_COMPOSITION:
+                        //    case MiscConstants.BEST_ALL_PROFIT_COMPOSITION_BANK:
+                        //        MiscUtilities.PrintSummaryFileS(Share.theBankWinSummaryFile, msg);
+                        //        break;
+                        //    case MiscConstants.BEST_BORROWER_COMPOSITION:
+                        //    case MiscConstants.BEST_ALL_PROFIT_COMPOSITION_BORROWER:
+                        //        MiscUtilities.PrintSummaryFileS(Share.theBorrowerWinSummaryFile, msg);
+                        //        break;
+                        //    default:
+                        //        MiscUtilities.PrintSummaryFileS(Share.theTotalWinSummaryFile, msg);
+                        //        break;
+                        //}
+                    }
+                  
                 }
 
             }
 
            if (noCompositionFounded) // no composition was found
            {
-                string[] msg = { theLoan.ID, "No composition founded for load id: " };
-                MiscUtilities.PrintSummaryFile(msg);
+                string[] ms = { theLoan.ID, "No composition founded for load id: " };
+                MiscUtilities.PrintSummaryFile(ms);
            }
 
             // count the refinince 
@@ -321,6 +355,43 @@ namespace WisorLibrary.DataObjects
                 Share.NumberOfCanRefininceLoans++;
             if (totalBenefitPerLoan)
                 Share.NumberOfPositiveBeneficialLoans++;
+
+            // update all the accumulative data
+            string[] msgn = {
+                        theLoan.ID, // "Loan ID",
+                        theLoan.OriginalLoanAmount.ToString(), // "Original Loan Amount",
+                        theLoan.OriginalDateTaken.ToString(), // "Date Taken",
+                        theLoan.LoanAmount.ToString(), // "Remaining Amount",
+                        theLoan.resultReportData.PayUntilToday.ToString(), // "Borrower Paid So Far",
+                        theLoan.resultReportData.BankPayUntilToday.ToString(), // "Bank Profit So Far",
+                        theLoan.resultReportData.PayFuture.ToString(), // "Borrower Future Payment",
+                        theLoan.resultReportData.BankPayFuture.ToString(), // "Lender Future Payment",
+                        (theLoan.resultReportData.PayFuture - theLoan.resultReportData.BankPayFuture).ToString(), // "Orig Bank Future Profit",
+
+                        // add the accululate data
+                        maxBorrowerPayment.ToString() ,
+                        maxBorrowerPayment_corrspondLenderPayment.ToString() ,
+                        maxBorrowerPayment_corrspondBorrowerSaving.ToString() ,
+                        maxBorrowerPayment_corrspondLenderProfit.ToString(),
+                        maxBorrowerPayment_corrspondName.ToString() ,
+                        minBorrowerPayment.ToString(),
+                        minBorrowerPayment_corrspondLenderPayment.ToString(),
+                        minBorrowerPayment_corrspondBorrowerSaving.ToString(),
+                        minBorrowerPayment_corrspondLenderProfit.ToString(),
+                        minBorrowerPayment_corrspondName,
+                        maxLenderProfit.ToString(),
+                        maxLenderProfit_corrspondBorrowerPayment.ToString(),
+                        maxLenderProfit_corrspondBorrowerSaving.ToString(),
+                        maxLenderProfit_corrspondLenderPayment.ToString(),
+                        maxLenderProfit_corrspondName,
+                        minLenderProfit.ToString(),
+                        minLenderProfit_corrspondBorrowerPayment.ToString(),
+                        minLenderProfit_corrspondBorrowerSaving.ToString(),
+                        minLenderProfit_corrspondLenderPayment.ToString(),
+                        minLenderProfit_corrspondName
+                    };
+            MiscUtilities.PrintSummaryFileS(Share.theWinWinSummaryFile, msgn);
+
         }
 
         void StoreResultsInDB()
