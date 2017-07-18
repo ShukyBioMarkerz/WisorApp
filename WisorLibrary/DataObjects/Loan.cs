@@ -56,6 +56,7 @@ namespace WisorLib
 
         [XmlIgnoreAttribute]
         public bool Status { set; get; }
+        public LoanList OriginalLoanDetaild { get; internal set; }
 
         // for the sake of serialization.....
         public loanDetails()
@@ -245,11 +246,14 @@ namespace WisorLib
         public void CompleteCalculation(Composition[]composition, bool shouldStoreInDB, 
             bool shouldCreateHTMLReport, bool shouldCreatePDFReport, RunEnvironment env)
         {
+            Composition[] cleanComp = MiscUtilities.CleanComposition(composition);
+
             resultReportData.CalculationTime = DateTime.Now - resultReportData.StartTime;
-            resultReportData.SetCompositionData(composition);
+            resultReportData.SetCompositionData(cleanComp);
             resultReportData.SetLoanData(this);
             resultReportData.SetEnvData(env);
             resultReportData.Activate(shouldStoreInDB, shouldCreateHTMLReport, shouldCreatePDFReport);
+            //resultReportData.CalculationTime = DateTime.Now - resultReportData.CalculationTime;
          }
     }
 
