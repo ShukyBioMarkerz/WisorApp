@@ -158,6 +158,7 @@ namespace WisorLib
         public static ProductsList LoadXMLProductsFile(string filename)
         {
             ProductsList products = new ProductsList();
+            ProductsList productsAll = new ProductsList();
             XElement currProduct = null;
             markets market;
             string name, typeId, hebrewName = MiscConstants.UNDEFINED_STRING;
@@ -165,7 +166,7 @@ namespace WisorLib
             indexJumps ijftp, ijstp;
             uint minTime, maxTime, timeJump, firstTimePeriod;
             double maxPercentageLoan = MiscConstants.UNDEFINED_DOUBLE;
-            int index = 0;
+            int index = 0, productsAllIndex = 0;
             /*Benefit*/ double benefit;
             FixOrAdjustable fixOrAdjustable;
             /*Risk*/ double risk;
@@ -191,12 +192,17 @@ namespace WisorLib
                         // check if the product should be loaded
                         shouldConsider = MiscConstants.UNDEFINED_BOOL;
                         if (null != product.Element(MiscConstants.shouldConsider) && MiscConstants.UNDEFINED_STRING != product.Element(MiscConstants.shouldConsider).Value)
-                            shouldConsider = Convert.ToBoolean(product.Element(MiscConstants.shouldConsider).Value);
+                            shouldConsider = MiscUtilities.IsTrue(product.Element(MiscConstants.shouldConsider).Value);
+                                // Convert.ToBoolean(product.Element(MiscConstants.shouldConsider).Value);
                         if (!shouldConsider)
                         {
-                            WindowsUtilities.loggerMethod("LoadXMLProductsFile producs: " + typeId +
-                            " shouldConsider not be used. Skip it.");
-                            continue;
+                            // Since there are products which the bank use and should be display in the report,
+                            // we should load all the products, even those which should not be used.
+                            // If we build the combination dynamickly, then we will use the 'shouldConsider' flag CreateCombination function.
+                            // If we use a static combination list from the file, then the other will be ignored anyway
+                            //WindowsUtilities.loggerMethod("LoadXMLProductsFile producs: " + typeId +
+                            //" shouldConsider not be used. Skip it.");
+                            //continue;
                         }
 
                         market = (markets)Enum.Parse(typeof(markets), product.Element(MiscConstants.market).Value, true);
@@ -232,8 +238,9 @@ namespace WisorLib
                             liquidity = Convert.ToDouble(product.Element(MiscConstants.liquidity).Value); // (Liquidity)Enum.Parse(typeof(Liquidity), product.Element("liquidity").Value, true);
                         mustBeUsed = MiscConstants.UNDEFINED_BOOL;
                         if (null != product.Element(MiscConstants.mustBeUsed) && MiscConstants.UNDEFINED_STRING != product.Element(MiscConstants.mustBeUsed).Value)
-                            mustBeUsed = Convert.ToBoolean(product.Element(MiscConstants.mustBeUsed).Value);
-                        
+                            mustBeUsed = MiscUtilities.IsTrue(product.Element(MiscConstants.mustBeUsed).Value);
+                        //mustBeUsed = Convert.ToBoolean(product.Element(MiscConstants.mustBeUsed).Value);
+
                         // ensure the product is needed
                         // set the index of the product later
                         //index = GenericProduct.GetProductIndex(typeId);
@@ -241,22 +248,36 @@ namespace WisorLib
                         score = MiscUtilities.CalculateProductScore(risk, liquidity, benefit);
                         beneficial = MiscUtilities.CheckBeneficialProducts(score);
                         
-                        // debug the score calculation
-                        WindowsUtilities.loggerMethod("LoadXMLProductsFile producs: " + typeId +
-                            ", risk: " + risk + ", liquidity: " + liquidity + ", benefit: " + benefit + 
-                            " , score: " + score + ", is beneficial: " + beneficial);
+                        //// debug the score calculation
+                        //WindowsUtilities.loggerMethod("LoadXMLProductsFile producs: " + typeId +
+                        //    ", risk: " + risk + ", liquidity: " + liquidity + ", benefit: " + benefit + 
+                        //    " , score: " + score + ", is beneficial: " + beneficial);
 
                         if (/*MiscConstants.UNDEFINED_INT < index &&*/ beneficial)
                         {
-                            ProductID productID = new ProductID(index, typeId);
-                            products.Add(index++, new GenericProduct(productID, market, name, hebrewName,
-                                iftp /*indices*/, istp /*indices*/,
-                                ijftp /*indexJumps*/, ijstp /*indexJumps*/,
-                                minTime, maxTime, timeJump, firstTimePeriod, maxPercentageLoan,
-                                risk, liquidity, fixOrAdjustable, benefit, mustBeUsed, shouldConsider));
 
-                            // add the product name to the indexed list
-                            productsHash.Add(typeId);
+                            // anyway add the product to the all-list in order tot enable using all 
+                            // the products that the bank uses in the report
+                            ProductID productIDAll = new ProductID(productsAllIndex, typeId);
+                            productsAll.Add(productsAllIndex++, new GenericProduct(productIDAll, market, name, hebrewName,
+                                   iftp /*indices*/, istp /*indices*/,
+                                   ijftp /*indexJumps*/, ijstp /*indexJumps*/,
+                                   minTime, maxTime, timeJump, firstTimePeriod, maxPercentageLoan,
+                                   risk, liquidity, fixOrAdjustable, benefit, mustBeUsed, shouldConsider));
+
+                            if (shouldConsider)
+                            {
+                                ProductID productID = new ProductID(index, typeId);
+                                products.Add(index++, new GenericProduct(productID, market, name, hebrewName,
+                                    iftp /*indices*/, istp /*indices*/,
+                                    ijftp /*indexJumps*/, ijstp /*indexJumps*/,
+                                    minTime, maxTime, timeJump, firstTimePeriod, maxPercentageLoan,
+                                    risk, liquidity, fixOrAdjustable, benefit, mustBeUsed, shouldConsider));
+
+                                // add the product name to the indexed list
+                                productsHash.Add(typeId);
+                            }
+   
                         }
                         // the product in the products file does not have rate so ignore it
                         // or beneficial
@@ -295,6 +316,7 @@ namespace WisorLib
                 filename.Substring(filename.LastIndexOf(Path.DirectorySeparatorChar) + 1), true);
             Share.theProductsNames = productNames;
             Share.theLoadedProducts = products;
+            Share.theAllLoadedProducts = productsAll;
             return products;
         }
 
@@ -363,6 +385,29 @@ namespace WisorLib
 
             return product;
         }
+
+       // get the product by the name. Look at the entire loaded products, including those which shoiuld not be used in the combinations
+        public static GenericProduct GetProductFromAllListByName(string productName)
+        {
+            GenericProduct product = null;
+            if (null != Share.theAllLoadedProducts)
+            {
+                foreach (KeyValuePair<int, GenericProduct> p in Share.theAllLoadedProducts)
+                {
+                    if (p.Value.productID.stringTypeId == productName)
+                    {
+                        product = p.Value;
+                        break;
+                    }
+                }
+            }
+            else
+                WindowsUtilities.loggerMethod("GetProductFromAllListByName: Share.theAllLoadedProducts in null!!! ");
+
+            return product;
+        }
+
+
 
         // get the product by the name
         public static GenericProduct GetProductByName(string productName)
