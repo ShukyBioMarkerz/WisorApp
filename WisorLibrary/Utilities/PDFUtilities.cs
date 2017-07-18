@@ -9,15 +9,25 @@ using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using System.IO;
 using WisorLib;
-
+using sharpPDF;
+using sharpPDF.Enumerators;
 
 namespace WisorLibrary.Utilities
 {
     public class PDFUtilities
     {
         private static XGraphicsState state;
+        //private static object txtOutput;
 
-        public static void WriteFile(/*string filename*/)
+        public static void PdfTesting(/*string filename*/)
+        {
+            SharpPdfFlow();
+
+            PdfSharpTesting();
+
+        }
+
+        static void PdfSharpTesting(/*string filename*/)
         {
             PdfDocument pdf = new PdfDocument();
             string filename = AppDomain.CurrentDomain.BaseDirectory + MiscConstants.OUTPUT_DIR + 
@@ -103,6 +113,108 @@ namespace WisorLibrary.Utilities
         {
             gfx.Restore(state);
         }
+
+#if DEBUG_NEW_PDF
+#else
+
+        static void SharpPdfFlow()
+        {
+            string filename = AppDomain.CurrentDomain.BaseDirectory + MiscConstants.OUTPUT_DIR +
+                Path.DirectorySeparatorChar + "firstpage2.pdf";
+
+            SharpPdfChangeObjectColor(filename);
+
+            SharpPdfDrawElemtOnPage(filename);
+
+            SharpPdfTable(filename);
+        }
+
+        static void SharpPdfChangeObjectColor(string filename)
+        {
+            pdfDocument myDoc = new pdfDocument("TUTORIAL", "I'm the authur");
+            pdfPage myPage = myDoc.addPage(100, 100);
+            /*Use the predefined Colors*/
+            myPage.addText("Hello World!", 70, 140, predefinedFont.csHelvetica, 10, new pdfColor(predefinedColor.csCyan));
+            /*Use the RGB Colors*/
+            myPage.addText("Hello World!", 70, 100, predefinedFont.csHelvetica, 10, new pdfColor(112, 27, 184));
+            /*Use the Hex Colors*/
+            myPage.addText("Hello World!", 70, 60, predefinedFont.csHelvetica, 10, new pdfColor("B81C74"));
+            myDoc.createPDF(filename);
+            myPage = null;
+            myDoc = null;
+        }
+
+        static void SharpPdfDrawElemtOnPage(string filename)
+        {
+            pdfDocument myDoc = new pdfDocument("TUTORIAL", "ME");
+            /*Creation of the first page*/
+            pdfPage myFirstPage = myDoc.addPage();
+            /*Draw the line on the first page*/
+            myFirstPage.drawLine(100, 100, 200, 200, predefinedLineStyle.csNormal, new pdfColor(predefinedColor.csBlue), 10);
+            /*Creation of the second page*/
+            pdfPage mySecondPage = myDoc.addPage();
+            /*Draw the rectangle on the second page*/
+            mySecondPage.drawRectangle(100, 100, 300, 200, new pdfColor(predefinedColor.csBlue), new pdfColor(predefinedColor.csYellow), 1, predefinedLineStyle.csNormal);
+            /*Creation of the third page*/
+            pdfPage myThirdPage = myDoc.addPage();
+            /*Draw the circle on the third page-*/
+            myThirdPage.drawCircle(200, 200, 50, new pdfColor(predefinedColor.csBlue), new pdfColor(predefinedColor.csYellow), predefinedLineStyle.csNormal, 1);
+            myDoc.createPDF(filename);
+            myFirstPage = null;
+            mySecondPage = null;
+            myThirdPage = null;
+            myDoc = null;
+        }
+
+        static void SharpPdfTable(string filename)
+        {
+            pdfDocument myDoc = new pdfDocument("Sample Application", "Me", false);
+            pdfPage myFirstPage = myDoc.addPage();
+            myFirstPage.addText("sharpPDF 1.3 - Table Sample", 100, 660, predefinedFont.csHelveticaOblique, 30, new pdfColor(predefinedColor.csCyan));
+            /*Table's creation*/
+            pdfTable myTable = new pdfTable();
+            //Set table's border
+            myTable.borderSize = 1;
+            myTable.borderColor = new pdfColor(predefinedColor.csDarkBlue);
+            /*Create table's header*/
+            myTable.tableHeader.addColumn(new pdfTableColumn("id", predefinedAlignment.csRight, 50));
+            myTable.tableHeader.addColumn(new pdfTableColumn("user", predefinedAlignment.csCenter, 150));
+            myTable.tableHeader.addColumn(new pdfTableColumn("tel", predefinedAlignment.csLeft, 80));
+            myTable.tableHeader.addColumn(new pdfTableColumn("email", predefinedAlignment.csLeft, 150));
+            /*Create table's rows*/
+            pdfTableRow myRow = myTable.createRow();
+            myRow[0].columnValue = "1";
+            myRow[1].columnValue = "Andrew Red";
+            myRow[2].columnValue = "898-0210989";
+            myRow[3].columnValue = "Andrew.red@sharppdf.net";
+            myTable.addRow(myRow);
+            myRow = myTable.createRow();
+            myRow[0].columnValue = "2";
+            myRow[1].columnValue = "Andrew Green";
+            myRow[2].columnValue = "298-55109";
+            myRow[3].columnValue = "Andrew.green@sharppdf.net";
+            myTable.addRow(myRow);
+            myRow = myTable.createRow();
+            myRow[0].columnValue = "3";
+            myRow[1].columnValue = "Andrew White";
+            myRow[2].columnValue = "24-5510943";
+            myRow[3].columnValue = "Andrew.white@sharppdf.net";
+            /*Set Header's Style*/
+            myTable.tableHeaderStyle = new pdfTableRowStyle(predefinedFont.csCourierBoldOblique, 12, new pdfColor(predefinedColor.csBlack), new pdfColor(predefinedColor.csLightCyan));
+            /*Set Row's Style*/
+            myTable.rowStyle = new pdfTableRowStyle(predefinedFont.csCourier, 8, new pdfColor(predefinedColor.csBlack), new pdfColor(predefinedColor.csWhite));
+            /*Set Alternate Row's Style*/
+            myTable.alternateRowStyle = new pdfTableRowStyle(predefinedFont.csCourier, 8, new pdfColor(predefinedColor.csBlack), new pdfColor(predefinedColor.csLightYellow));
+            /*Set Cellpadding*/
+            myTable.cellpadding = 20;
+            /*Put the table on the page object*/
+            myFirstPage.addTable(myTable, 100, 600);
+            myTable = null;
+
+            myDoc.createPDF(filename);
+            // Process.Start(filename);
+        }
+#endif
 
     }
 }
