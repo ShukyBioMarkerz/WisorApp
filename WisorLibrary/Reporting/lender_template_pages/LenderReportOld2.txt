@@ -1,0 +1,23 @@
+﻿                                          // Left table
+                                          , reportData.OriginalDateTaken.ToShortDateString() // skip the hours      // Date taken
+                                          , CurrencySymbol + reportData.OriginalLoanAmount.ToString("N0")           // Amount taken
+                                          , CurrencySymbol + reportData.FirstMonthlyPMT.ToString("N0")              // First monthly payment
+                                          , CurrencySymbol + reportData.PayUntilToday.ToString("N0")                // Paid until today
+                                                                                                                    //, CurrencySymbol + reportData.YearlyIncome          // Total income
+                                          , CurrencySymbol + reportData.RemaingLoanAmount.ToString("N0")            // remaining amount
+                                          , CurrencySymbol + reportData.PayFuture.ToString("N0")                    // Left to pay
+                                          , CurrencySymbol + reportData.YearlyIncome.ToString("N0")                 // Total income
+                                          , Math.Round(reportData.PTI * 100, 3) + "%"                               // PTI
+                                          , Math.Round(reportData.EstimateProfitPercantageSoFar * 100, 3) + "%"     // Estimated % profits so far
+                                          , CurrencySymbol + reportData.EstimateProfitSoFar.ToString("N0")          // Estimated profit so far
+                                          , Math.Round(reportData.EstimateTotalProfitPercantage * 100, 3) + "%"     // Estimated total % profit
+                                          , CurrencySymbol + reportData.EstimateTotalProfit.ToString("N0")          // Estimated total profit
+                                          , Math.Round(reportData.EstimateFutureProfitPercantage * 100, 3) + "%"   // Estimated future % profit
+                                          , CurrencySymbol + reportData.EstimateFutureProfit.ToString("N0")         // Estimated future profit
+
+
+
+                                          , productsUsedInAnalysisRows
+
+                           //, CurrencySymbol + reportData.EstimateFuturePay     // Estimated future payment
+                           //, reportData.OriginalMargin + "%"                   // Product margin      
