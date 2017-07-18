@@ -60,7 +60,7 @@ namespace WisorLibrary.Utilities
             }
             catch (Exception e)
             {
-                WindowsUtilities.loggerMethod("ERROR: OpenExcelFile got Exception: " + e.ToString()/* + ". line: " + currLine*/);
+                WindowsUtilities.loggerMethod("ERROR: OpenExcelFile file: " + filename + " got Exception: " + e.ToString()/* + ". line: " + currLine*/);
             }
 
             return excelLines;
