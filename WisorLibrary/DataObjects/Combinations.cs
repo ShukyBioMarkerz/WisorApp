@@ -51,51 +51,54 @@ namespace WisorLibrary.DataObjects
         {
             //allCombination = null;
 
-
-            // no more static combination file but rather building the combination dynamickly from the beneficial products
-            allCombination = CreateCombination();
- 
-            return;
-
-            if (String.IsNullOrEmpty(filename))
+            if (Share.ShouldCreateCombinationDynamickly)
             {
-                filename = Combinations.GetCombinationsFilename();
-            }
-
-            if (!String.IsNullOrEmpty(filename))
-            {
-                string[] comb = LoadCombinationsFileData(filename);
-                if (null == comb || 0 >= comb.Length)
-                {
-                    //WindowsUtilities.loggerMethod("ERROR Combinations failed to load from file: " + filename);
-                    //Console.WriteLine("ERROR Combinations failed to load from file: " + filename);
-                }
-                else
-                {
-                    //string[] oneCombination = new string[MiscConstants.NUM_OF_PRODUCTS_IN_COMBINATION];
-
-                    allCombination = new string[comb.Length, MiscConstants.NUM_OF_PRODUCTS_IN_COMBINATION]; // { { } };
-                    string[] entities;
-                    string line = null;
-
-                    for (int i = 0; i < comb.Length; i++)
-                    {
-                        line = comb[i];
-                        if (String.IsNullOrEmpty(line))
-                            continue;
-
-                        entities = line.Split(MiscConstants.COMMA);
-                        for (int j = 0; j < MiscConstants.NUM_OF_PRODUCTS_IN_COMBINATION; j++)
-                        {
-                            allCombination[i, j] = entities[j].Trim();
-                        }
-                    }
-                    //Share.combinations = allCombination;
-                }
+                // no more static combination file but rather building the combination dynamickly from the beneficial products
+                allCombination = CreateCombination();
             }
             else
             {
-                WindowsUtilities.loggerMethod("ERROR Combinations no file selected to load from.");
+
+                if (String.IsNullOrEmpty(filename))
+                {
+                    filename = Combinations.GetCombinationsFilename();
+                }
+
+                if (!String.IsNullOrEmpty(filename))
+                {
+                    string[] comb = LoadCombinationsFileData(filename);
+                    if (null == comb || 0 >= comb.Length)
+                    {
+                        WindowsUtilities.loggerMethod("ERROR Combinations failed to load from file: " + filename);
+                        //Console.WriteLine("ERROR Combinations failed to load from file: " + filename);
+                    }
+                    else
+                    {
+                        //string[] oneCombination = new string[MiscConstants.NUM_OF_PRODUCTS_IN_COMBINATION];
+
+                        allCombination = new string[comb.Length, MiscConstants.NUM_OF_PRODUCTS_IN_COMBINATION]; // { { } };
+                        string[] entities;
+                        string line = null;
+
+                        for (int i = 0; i < comb.Length; i++)
+                        {
+                            line = comb[i];
+                            if (String.IsNullOrEmpty(line))
+                                continue;
+
+                            entities = line.Split(MiscConstants.COMMA);
+                            for (int j = 0; j < MiscConstants.NUM_OF_PRODUCTS_IN_COMBINATION; j++)
+                            {
+                                allCombination[i, j] = entities[j].Trim();
+                            }
+                        }
+                        //Share.combinations = allCombination;
+                    }
+                }
+                else
+                {
+                    WindowsUtilities.loggerMethod("ERROR Combinations no file selected to load from.");
+                }
             }
         }
 
@@ -145,21 +148,21 @@ namespace WisorLibrary.DataObjects
 
         public static bool SetCombinationsFilename()
         {
-            string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
-            string filename = dir + MiscConstants.COMBINATIONS_FILE;
-
+            string filename = MiscUtilities.GetFilename(Share.CombinationFileName, MiscConstants.COMBINATIONS_FILE);
             bool rc = Combinations.SetFilename(filename);
 
+            if (rc)
             // number all the combination
-            ConvertProductsNaming();
+                rc = ConvertProductsNaming();
 
             return rc;
         }
 
         public static string GetCombinationsFilename()
         {
-            string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
-            string filename = dir + MiscConstants.COMBINATIONS_FILE;
+            //string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
+            //string filename = dir + MiscConstants.COMBINATIONS_FILE;
+            string filename = MiscUtilities.GetFilename(Share.CombinationFileName, MiscConstants.COMBINATIONS_FILE);
 
             return filename;
         }
@@ -190,7 +193,7 @@ namespace WisorLibrary.DataObjects
                     {
                         mustProducts.Add(p.Value.productID.stringTypeId);
                     }
-                    else
+                    else if (p.Value.shouldConsider)
                     {
                         products.Add(p.Value.productID.stringTypeId);
                     }
@@ -356,30 +359,47 @@ namespace WisorLibrary.DataObjects
             return result;
         }
 
-        private static void ConvertProductsNaming()
+        private static bool ConvertProductsNaming()
         {
             // the index of the product is set now for the entire run, instead of the name (string)
             //string[] productNames = products.ToArray();
-            int[,] combinationsAsNumbers = new int[
-                GetCombination(Share.theMarket).GetUpperBound(0) + 1,
-                GetCombination(Share.theMarket).GetUpperBound(1) + 1];
-            string[,] combinationsAsString = new string[
-                GetCombination(Share.theMarket).GetUpperBound(0) + 1,
-                GetCombination(Share.theMarket).GetUpperBound(1) + 1];
-
-            for (int i = 0; i <= GetCombination(Share.theMarket).GetUpperBound(0); i++)
+            int index = MiscConstants.UNDEFINED_INT;
+            string[,] comb = GetCombination(Share.theMarket);
+            bool rc = false;
+            if (null != comb)
             {
-                for (int o = 0; o <= GetCombination(Share.theMarket).GetUpperBound(1); o++)
+                int[,] combinationsAsNumbers = new int[
+                    GetCombination(Share.theMarket).GetUpperBound(0) + 1,
+                    GetCombination(Share.theMarket).GetUpperBound(1) + 1];
+                string[,] combinationsAsString = new string[
+                    GetCombination(Share.theMarket).GetUpperBound(0) + 1,
+                    GetCombination(Share.theMarket).GetUpperBound(1) + 1];
+
+                for (int i = 0; i <= GetCombination(Share.theMarket).GetUpperBound(0); i++)
                 {
-                    //string item = GetCombination(Share.theMarket)[i, o];
-                    //int ind = Array.IndexOf(Share.theProductsNames, item);
-                    combinationsAsNumbers[i, o] = Array.IndexOf(Share.theProductsNames, GetCombination(Share.theMarket)[i, o]);
-                    combinationsAsString[i, o] = GetCombination(Share.theMarket)[i, o];
+                    for (int o = 0; o <= GetCombination(Share.theMarket).GetUpperBound(1); o++)
+                    {
+                        //string item = GetCombination(Share.theMarket)[i, o];
+                        //int ind = Array.IndexOf(Share.theProductsNames, item);
+                        index = Array.IndexOf(Share.theProductsNames, GetCombination(Share.theMarket)[i, o]);
+                        if (0 > index)
+                        {
+                            WindowsUtilities.loggerMethod("ERROR Combinations::ConvertProductsNaming un-defined product: " + GetCombination(Share.theMarket)[i, o]);
+                        }
+                        combinationsAsNumbers[i, o] = index;
+                        combinationsAsString[i, o] = GetCombination(Share.theMarket)[i, o];
+                    }
                 }
+                Share.combinations4market = combinationsAsNumbers;
+                Share.combinationsAsString = combinationsAsString;
+                rc = true;
             }
-            Share.combinations4market = combinationsAsNumbers;
-            Share.combinationsAsString = combinationsAsString;
+            else
+            {
+                WindowsUtilities.loggerMethod("ERROR Combinations::ConvertProductsNaming no combination were loaded.");
+            }
             //Share.theProductsNames = productNames;
+            return rc;
         }
 
     }
