@@ -180,8 +180,12 @@ namespace WisorLib
 
         public static Predicate<Composition> CompositionPredicate(Composition c)
         {
+
             return delegate (Composition comp)
             {
+                if (null == c)
+                    return true; // avoid to add a null value
+
                 return
                     comp.opts[(int)Options.options.OPTX].optAmt == c.opts[(int)Options.options.OPTX].optAmt &&
                     comp.opts[(int)Options.options.OPTX].optTime == c.opts[(int)Options.options.OPTX].optTime &&
