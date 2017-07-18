@@ -42,14 +42,18 @@ namespace WisorLibrary.Utilities
         {
             string seq = (MiscConstants.UNDEFINED_UINT == sequenceID) ? MiscConstants.UNDEFINED_STRING : MiscConstants.SEQ_STR + sequenceID + MiscConstants.SEQ_STR;
             string add = (String.IsNullOrEmpty(additionalName)) ? MiscConstants.UNDEFINED_STRING : MiscConstants.NAME_SEP_CHAR + additionalName + MiscConstants.NAME_SEP_CHAR;
-            string fn = AppDomain.CurrentDomain.BaseDirectory // + Path.DirectorySeparatorChar
-                + MiscConstants.OUTPUT_DIR + Path.DirectorySeparatorChar +
+            string fn = MiscUtilities.GetOutputDirectory() + Path.DirectorySeparatorChar +
                 Share.CustomerName + seq + /* orderid + MiscConstants.NAME_SEP_CHAR + */
                  orderid.ToString() + MiscConstants.NAME_SEP_CHAR +
                 loanAmtWanted.ToString() + MiscConstants.NAME_SEP_CHAR + add +
                 DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT;
 
             return fn;
+        }
+
+        public static string GetOutputDirectory()
+        {
+            return AppDomain.CurrentDomain.BaseDirectory + MiscConstants.OUTPUT_DIR;
         }
 
         public static bool SetRatesFilename()
@@ -81,8 +85,9 @@ namespace WisorLibrary.Utilities
 
         public static bool SetHistoricRatesFilename()
         {
-            string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
-            string filename = dir + MiscConstants.HISTORIC_FILE;
+            //string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
+            //string filename = dir + MiscConstants.HISTORIC_FILE;
+            string filename = MiscUtilities.GetFilename(Share.HistoricFileName, MiscConstants.HISTORIC_FILE);
 
             bool rc = HistoricRate.SetFilename(filename);
 
@@ -91,8 +96,9 @@ namespace WisorLibrary.Utilities
 
         public static bool SetRiskAndLiquidityFilename()
         {
-            string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
-            string filename = dir + MiscConstants.RISK_LIQUIDITY_FILE;
+            //string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
+            //string filename = dir + MiscConstants.RISK_LIQUIDITY_FILE;
+            string filename = MiscUtilities.GetFilename(Share.RiskAndLiquidityFileName, MiscConstants.RISK_LIQUIDITY_FILE);
 
             bool rc = RiskLiquidityObject.SetFilename(filename);
 
@@ -105,26 +111,7 @@ namespace WisorLibrary.Utilities
             return rc;
         }
 
-        public static void TestRiskLiquidity()
-        {
-            RiskLiquidityValue riskLiquidityValue = new RiskLiquidityValue();
-            string[] products = { "3.1ARMUSA", "10.1ARMUSA", "Fixed15yrsUSA", "7.1ARMUSA",
-                "5.1ARMUSA" };
-            riskLiquidityValue.liquidity = Liquidity.MoreLiquidity4; //  MinimumLiquidity1; // LessLiquidity2; 
-            riskLiquidityValue.risk = Risk.MaximumRisk5; //  MinimumRisk1;  // LessRisk2; // MaximumRisk5
-            bool rc = false;
-
-            for (int i = 0; i < products.Length; i++)
-            {
-                riskLiquidityValue.productID = new ProductID(i, products[i]);
-                rc = MiscUtilities.FindRiskLiquidity(riskLiquidityValue);
-                if (rc)
-                    Console.WriteLine("TestRiskLiquidity succedded for: " + riskLiquidityValue.ToString());
-                else
-                    Console.WriteLine("TestRiskLiquidity failed for: " + riskLiquidityValue.ToString());
-            }
-        }
-
+   
 
         public static string GetFilenameFromUser()
         {
@@ -264,6 +251,51 @@ namespace WisorLibrary.Utilities
                     compositions.OrderBy(o => o.bankPay).ToList();
             return SortedSelectedCompositions;
         }
+
+        // cleanup the redundant composition - empty, duplicate, only win-win
+        internal static Composition[] CleanComposition(Composition[] composition)
+        {
+            List<Composition> compL = new List<Composition>();
+
+            foreach (Composition comp in composition)
+            {
+                if (!compL.Exists(Composition.CompositionPredicate(comp)))
+                    // ensure its a win-win composition
+                    //if (comp.IsWinWin)           leave it for debug purpose
+                        compL.Add(comp);
+            }
+
+            return compL.ToArray();
+        }
+
+        public static Predicate<OneOptType> OneOptTypePredicate(GenericProduct o)
+        {
+
+            return delegate (OneOptType opt)
+            {
+                if (null == o)
+                    return true; // avoid to add a null value
+
+                return
+                    opt.product.productID.numberID == o.productID.numberID;
+            };
+        }
+
+        // check if a product exisit in the list
+        internal static bool DoesProductExists(GenericProduct[] products, OneOptType[] options)
+        {
+            bool rc = true;
+            List< OneOptType> ol = options.ToList();
+
+            foreach (GenericProduct prod in products)
+            {
+                if (!ol.Exists(OneOptTypePredicate(prod)))
+                    rc = false;
+            }
+
+            return rc;
+        }
+
         public static List<ChosenComposition> OrderCompositionListByProfit(List<ChosenComposition> compositions,
             ListSortDirection order = ListSortDirection.Descending)
         {
@@ -290,7 +322,7 @@ namespace WisorLibrary.Utilities
         {
             uint desiredMonthlyPayment = 0;
 
-            desiredMonthlyPayment = (uint)yearlyIncome / 3;
+            desiredMonthlyPayment = (uint) Math.Round((double)yearlyIncome / 3);
             return desiredMonthlyPayment;
         }
 
@@ -432,6 +464,11 @@ namespace WisorLibrary.Utilities
 
         public static DateTime ConvertDate(string str)
         {
+            string formatedDate;
+
+            // dirty change still simpler...
+            return ConvertDate2(str, out formatedDate);
+
             CultureInfo provider = CultureInfo.InvariantCulture;
             DateTime dt = default(DateTime);
 
@@ -445,6 +482,77 @@ namespace WisorLibrary.Utilities
                 //CultureInfo culture = new CultureInfo("he-IL"); // ("en -US");
                 //dt = DateTime.Parse(str, culture);
                 dt = DateTime.ParseExact(str, MiscConstants.DATE_FORMAT, provider);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("ERROR ConvertDate Exception: " + ex.ToString() + " for str: " + str);
+            }
+
+            return dt;
+        }
+
+ 
+        public static DateTime ConvertDate2(string str, out string formatedDate/*, CultureInfo provider*/)
+        {
+            DateTime value;
+            formatedDate = MiscConstants.UNDEFINED_STRING;
+            string currFormat = MiscConstants.DATE_FORMAT_US;
+
+            if (!DateTime.TryParse(str, out value))
+            {
+                //string[] formats = { "MM/dd/yyyy" };
+                if (!DateTime.TryParseExact(str, MiscConstants.DATE_FORMAT_US, new CultureInfo("en-US"),
+                       DateTimeStyles.None, out value))
+                {
+                    currFormat = MiscConstants.DATE_FORMAT;
+                    if (!DateTime.TryParseExact(str, MiscConstants.DATE_FORMAT, new CultureInfo("he-IL"),
+                       DateTimeStyles.None, out value))
+                    {
+                        value = DateTime.Now;
+                    }
+                    //else
+                    //{
+                    //    value = value;
+                    //}
+                }
+                //else
+                //{
+                //    dateTaken = value;
+                //}
+            }
+            //else
+            //{
+            //    dateTaken = value;
+            //}
+
+            // formatedDate = value.ToString(currFormat);
+            currFormat = MiscConstants.DATE_FORMAT; // "MMM dd yyyy";
+            formatedDate = value.ToString(currFormat);
+            return value.Date;
+
+            DateTime dt = default(DateTime);
+            CultureInfo hebrewCulture = new CultureInfo("he-IL", true);
+            CultureInfo englishCulture = new CultureInfo("en-US", true);
+
+            // cleanup the minutes
+            int ind = str.IndexOf(MiscConstants.SPACE_STR);
+            if (0 < ind)
+                str = str.Remove(str.IndexOf(MiscConstants.SPACE_STR)).Trim();
+
+            try
+            {
+                // Parse the english date string into a date time object
+                dt = DateTime.Parse(str);
+                // dt = DateTime.ParseExact(str, MiscConstants.DATE_FORMAT, provider);
+
+                // Obtain the formatted string based on the culture passed in.
+                string hebrewFormattedDate = dt.ToString(hebrewCulture);
+                string englishFormattedDate = dt.ToString(englishCulture);
+
+                // Assign the new formatted date object back to dateToCheck
+                dt = DateTime.Parse(hebrewFormattedDate, hebrewCulture);
+                dt = DateTime.Parse(englishFormattedDate, englishCulture);
+
             }
             catch (Exception ex)
             {
@@ -477,7 +585,7 @@ namespace WisorLibrary.Utilities
 
         public static void LoadXMLConfigurationFile(string filename)
         {
-            string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
+            string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + Share.DataDirectory + Path.DirectorySeparatorChar;
             string fullFilename = dir + filename;
 
             try
@@ -580,6 +688,25 @@ namespace WisorLibrary.Utilities
                 WindowsUtilities.loggerMethod("NOTICE: LoadXMLConfigurationFile Exception occured: " + ex.ToString());
             }
 
+        }
+
+        // look if the file already set in the Shared object; if not - look for it
+        public static string GetFilename(string file2look, string file2lookFef)
+        {
+            string dir; //  = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
+            string filename; // = dir + MiscConstants.COMBINATIONS_FILE;
+
+            if (MiscConstants.UNDEFINED_STRING != file2look)
+            {
+                filename = file2look;
+            }
+            else
+            {
+                dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
+                filename = dir + file2lookFef;
+            }
+
+            return filename;
         }
 
         /*
@@ -902,7 +1029,47 @@ namespace WisorLibrary.Utilities
                         "FICO"
                         };
             return msg;
+        }
 
+
+        public static string[] summaryAccululateHeader()
+        {
+            string[] msg = {
+                        "Loan ID",
+                        "Original Loan Amount",
+                        "Date Taken",
+                        "Remaining Amount",
+                        "Borrower Paid So Far",
+                        "Bank Payment So Far",
+                        "Orig Borrower Future Payment",
+                        "Orig Bank Future Payment",
+                        "Orig Bank Future Profit",
+                        // add the accululate data
+                        "Max Bor pay",
+                        "Max Bor pay Lender pay" ,
+                        "Max Bor pay Bor save" ,
+                        "Max Bor pay Lender profi",
+                        "Max Bor pay name",
+
+                        "Min Bor pay",
+                        "Min Bor pay Lender pay" ,
+                        "Min Bor pay Bor save" ,
+                        "Min Bor pay Lender profi",
+                        "Min Bor pay name",
+
+                        "Max lender profit",
+                        "Max lender profit Bor pay" ,
+                        "Max lender profit Bor save" ,
+                        "Max lender profit Lender pay",
+                        "Max lender profit name",
+
+                        "Min lender profit",
+                        "Min lender profit Bor pay" ,
+                        "Min lender profit Bor save" ,
+                        "Min lender profit Lender pay",
+                        "Min lender profit name"
+                    };
+            return msg;
         }
 
         public static void OpenSummaryFile()
@@ -966,7 +1133,7 @@ namespace WisorLibrary.Utilities
 
             // add the header
             string[] msg = summaryHeader();
-            PrintSummaryFileS(Share.theWinWinSummaryFile, msg);
+            PrintSummaryFileS(Share.theWinWinSummaryFile, summaryAccululateHeader());
             PrintSummaryFileS(Share.theBorrowerWinSummaryFile, msg);
             PrintSummaryFileS(Share.theBankWinSummaryFile, msg);
             PrintSummaryFileS(Share.theTotalWinSummaryFile, msg);
@@ -1120,7 +1287,7 @@ namespace WisorLibrary.Utilities
         public static void RunTheLogic(LoanList listOfLoans = null, bool shouldCallPrepare = true)
         {
             LoanList loans;
-            bool rc;
+            bool rc = false;
             try
             {
                 if (shouldCallPrepare)
@@ -1128,27 +1295,35 @@ namespace WisorLibrary.Utilities
                     rc = PrepareRuning();
                 }
 
-                if (null != listOfLoans)
+                if (rc)
                 {
-                    loans = listOfLoans;
-                }
-                else
-                {
-                    // Read customers load data and fire the calculation to all
-                    loans = MiscUtilities.GetLoansFromFile(Share.theSelectedCriteriaFields);
-                    if (null == loans || 0 >= loans.Count)
-                    {
-                        WindowsUtilities.loggerMethod("NOTICE: RunTheLogic Failed to upload loans definitions.");
-                        return;
-                    }
-                }
 
-                if (Share.shouldRunSync)
-                    WindowsUtilities.runLoanMethodSync(loans);
-                //Utilities.RunTheLoansWraperSync(loans);
+                    if (null != listOfLoans)
+                    {
+                        loans = listOfLoans;
+                    }
+                    else
+                    {
+                        // Read customers load data and fire the calculation to all
+                        loans = MiscUtilities.GetLoansFromFile(Share.theSelectedCriteriaFields);
+                        if (null == loans || 0 >= loans.Count)
+                        {
+                            WindowsUtilities.loggerMethod("NOTICE: RunTheLogic Failed to upload loans definitions.");
+                            return;
+                        }
+                    }
+
+                    if (Share.shouldRunSync)
+                        WindowsUtilities.runLoanMethodSync(loans);
+                    //Utilities.RunTheLoansWraperSync(loans);
+                    else
+                        WindowsUtilities.runLoanMethodASync(loans);
+                    //Utilities.RunTheLoansWraperASync(loans);
+                }
                 else
-                    WindowsUtilities.runLoanMethodASync(loans);
-                //Utilities.RunTheLoansWraperASync(loans);
+                {
+                    WindowsUtilities.loggerMethod("NOTICE: RunTheLogic Failed in PrepareRuning.");
+                }
             }
             catch (ArgumentOutOfRangeException aoore)
             {
@@ -1208,6 +1383,12 @@ namespace WisorLibrary.Utilities
             return fn;
         }
 
+        static public bool IsTrue(string str)
+        {
+            if (!string.IsNullOrEmpty(str) && ("true" == str || "yes" == str))
+                return true;
+            return false;
+        }
     }
 
 }
