@@ -30,7 +30,7 @@ namespace WisorLibrary.Logic
 
         public LoanList GroupLoansByID()
         {
-            LoanList tmpLoans = new LoanList(), returnLoans = new LoanList();
+            LoanList originalLoans = new LoanList(), returnLoans = new LoanList();
             string id = MiscConstants.UNDEFINED_STRING;
             loanDetails calcLoan = null;
             bool failedInCalculation = false;
@@ -42,13 +42,13 @@ namespace WisorLibrary.Logic
                 // is it the same ID
                 if (MiscConstants.UNDEFINED_STRING == id || id == _loans[i].ID)
                 {
-                    tmpLoans.Add(_loans[i]);
+                    originalLoans.Add(_loans[i]);
                 }
                 else
                 {
                     try
                     {
-                        calcLoan = AccumulaLoanData(tmpLoans);
+                        calcLoan = AccumulaLoanData(originalLoans);
                     }
                     catch (ArgumentOutOfRangeException aoore)
                     {
@@ -58,26 +58,26 @@ namespace WisorLibrary.Logic
                     }
                     if (! failedInCalculation)
                         returnLoans.Add(calcLoan);
-                    tmpLoans.Clear();
-                    tmpLoans.Add(_loans[i]);
+                    originalLoans.Clear();
+                    originalLoans.Add(_loans[i]);
                 }
                 id = _loans[i].ID;
             }
 
 
-            if (0 < tmpLoans.Count)
+            if (0 < originalLoans.Count)
             {
                 try
                 {
-                    calcLoan = AccumulaLoanData(tmpLoans);
+                    calcLoan = AccumulaLoanData(originalLoans);
                     returnLoans.Add(calcLoan);
                 }
                 catch (ArgumentOutOfRangeException aoore)
                 {
                     WindowsUtilities.loggerMethod("NOTICE: GroupLoansByID ArgumentOutOfRangeException occured: " + aoore.Message +
-                        " in Loans id: " + tmpLoans[0].ID);
+                        " in Loans id: " + originalLoans[0].ID);
                     string[] msg = { "NOTICE: GroupLoansByID ArgumentOutOfRangeException occured: " + aoore.Message +
-                        " in Loans id: " + tmpLoans[0].ID };
+                        " in Loans id: " + originalLoans[0].ID };
                     MiscUtilities.PrintSummaryFile(msg);
                 }
             }
@@ -160,7 +160,31 @@ namespace WisorLibrary.Logic
                         BankPayUntilToday += resultData.BankPayUntilToday;
                         BankPayFuture += resultData.BankPayFuture;
                         FirstMonthlyPMT += resultData.FirstMonthlyPMT;
+
+                    // update the data in order to display in the report
+                    collectedLoans[i].resultReportData.PayUntilToday = resultData.PayUntilToday;
+                    collectedLoans[i].resultReportData.PayFuture = resultData.PayFuture;
+                    collectedLoans[i].resultReportData.RemaingLoanAmount = resultData.RemaingLoanAmount;
+                    collectedLoans[i].resultReportData.MonthlyPaymentCalc = resultData.MonthlyPaymentCalc;
+                    collectedLoans[i].resultReportData.BankPayUntilToday = resultData.BankPayUntilToday;
+                    collectedLoans[i].resultReportData.BankPayFuture = resultData.BankPayFuture;
+                    collectedLoans[i].resultReportData.FirstMonthlyPMT = resultData.FirstMonthlyPMT;
+                    collectedLoans[i].resultReportData.EstimateFuturePay = resultData.PayFuture;
+                    collectedLoans[i].resultReportData.EstimateProfitSoFar =
+                        collectedLoans[i].resultReportData.PayUntilToday - collectedLoans[i].resultReportData.BankPayUntilToday;
+                    collectedLoans[i].resultReportData.EstimateFutureProfit =
+                        collectedLoans[i].resultReportData.PayFuture - collectedLoans[i].resultReportData.BankPayFuture;
+
+                    if (0 < collectedLoans[i].OriginalLoanAmount) {
+                        collectedLoans[i].resultReportData.EstimateProfitPercantageSoFar =
+                             (double)collectedLoans[i].resultReportData.EstimateProfitSoFar / collectedLoans[i].OriginalLoanAmount;
+                        collectedLoans[i].resultReportData.EstimateTotalProfitPercantage =
+                            (double)collectedLoans[i].resultReportData.EstimateTotalProfit / collectedLoans[i].OriginalLoanAmount;
+                        collectedLoans[i].resultReportData.EstimateFutureProfitPercantage =
+                            (double)collectedLoans[i].resultReportData.EstimateFutureProfit / collectedLoans[i].OriginalLoanAmount;
                     }
+                
+                }
 
                     UpdateLoanData(ref ld, collectedLoans[0], PayUntilToday, PayFuture, RemaingLoanAmount,
                         MonthlyPaymentCalc, BankPayUntilToday, BankPayFuture, yearlyIncome, originalAmount, FirstMonthlyPMT);
@@ -171,6 +195,8 @@ namespace WisorLibrary.Logic
                 //    WindowsUtilities.loggerMethod("ERROR: AccumulaLoandata got Exception: " + e.ToString());
                 //}
 
+                // add the original loan' details to the calculated new loan in order to show it in the report
+                ld.OriginalLoanDetaild = collectedLoans;
             }
 
             if (Share.shouldDebugLoans)
