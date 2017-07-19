@@ -55,7 +55,6 @@ namespace WisorAppWpf
 
         private void InitSettings()
         {
-
             //SetRunLoanFunc(Utilities.RunTheLoansSync);
             SetRunLoanFunc(MultiThreadingManagment.RunTheLoanASync);
             SetRunLoanFuncSync(MultiThreadingManagment.RunTheLoansWraperSync);
@@ -67,12 +66,8 @@ namespace WisorAppWpf
             Share.shouldShowProductSelectionContinue = false;
             Share.shouldShowRatesSelectionWindow = false;
             Share.shouldShowLoansSelectionWindow = false;
-            
-            Share.shouldRunSync = true;
-            Share.shouldRunLogicSync = true;
-
+             
             Share.shouldRunFake = false;
-
             Share.numberOfOption = 3;
  
             Share.shouldPrintCounters = false;
@@ -89,18 +84,14 @@ namespace WisorAppWpf
             Share.ShouldEachCombinationRunSeparetly = false;
             Share.ShouldStoreAllCombinations = false;
 
-            Share.shouldCreateHTMLReport = true;
-            Share.shouldCreatePDFReport = true;
+            Share.shouldCreateHTMLReport = false; // true;
             Share.ShouldStoreInDB = true;
-            Share.ShouldStoreHTMLReport = true;
+            //Share.ShouldStoreHTMLReport = true;
             Share.LoansLoadFromLine = MiscConstants.UNDEFINED_UINT;
             Share.LoansLoadIDsFromLine = MiscConstants.UNDEFINED_STRING;
             Share.shouldDebugLoans = false;
             Share.shouldDebugLuchSilukin = false;
-
-
-            // load the configuration file
-            MiscUtilities.LoadXMLConfigurationFile(MiscConstants.CONFIGURATION_FILE);
+            Share.ShouldCreateCombinationDynamickly = false;
 
             // output log level settings
             Share.printMainInConsole = true;
@@ -110,6 +101,15 @@ namespace WisorAppWpf
             Share.printPercentageDone = false;
             Share.NumberOfCanRefininceLoans = 0;
             Share.NumberOfPositiveBeneficialLoans = 0;
+
+            // important settings
+            Share.shouldRunSync = true;
+            Share.shouldRunLogicSync = true;
+            Share.shouldCreatePDFReport = false; //true;
+            Share.DataDirectory =  MiscConstants.DATA_DIR;
+
+            // load the configuration file
+            MiscUtilities.LoadXMLConfigurationFile(MiscConstants.CONFIGURATION_FILE);
 
 
             // testing area
@@ -125,6 +125,7 @@ namespace WisorAppWpf
             //Tests.TestRatesLoading();
             //Tests.TestCombinations();
             //Tests.SendSimpleMessage();
+            //Tests.TestRiskLiquidity();
 
         }
 
