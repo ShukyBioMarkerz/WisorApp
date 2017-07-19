@@ -278,8 +278,11 @@ namespace WisorAppWpf
         /// Run the loans by single/multi thread
         /// </summary>
 
-        private static bool PrepareRun()
+        private static bool PrepareRunOLD()
         {
+            return MiscUtilities.PrepareRuning();
+
+            // OLD stuff. Be brave...
             bool rc = false;
          
             // enable log debug
@@ -331,7 +334,8 @@ namespace WisorAppWpf
 
         public static void Ask4Input()
         {
-            bool rc = Utilities.PrepareRun();
+            // bool rc = Utilities.PrepareRun();
+            bool rc = MiscUtilities.PrepareRuning();
 
             if (rc)
             {
