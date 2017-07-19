@@ -17,7 +17,9 @@ namespace WisorLibrary.Reporting
         public static int LenderReport(ResultReportData reportData, String HTMLfilename, String PDFfilename, CultureInfo cultureInfo)
         {
             // debug the entire data correctness
-            // LenderReportDebug(reportData);
+            if (false) {
+                LenderReportDebug(reportData);
+            }
 
             LenderReport lr = new LenderReport(cultureInfo);
 
@@ -73,8 +75,28 @@ namespace WisorLibrary.Reporting
                 " Original Margin: " + reportData.OriginalMargin +
                 "\n Profit %: " + reportData.EstimateProfitPercantageSoFar + " , Profit: " + reportData.EstimateProfitSoFar +
                 "\n Total Profit %: " + reportData.EstimateTotalProfitPercantage + " ,Total Profit: " + reportData.EstimateTotalProfit +
-                "\n Future Profit %: " + reportData.EstimateFutureProfitPercantage + " ,Future Profit : " + reportData.EstimateFutureProfit + "\n"
+                "\n Future Profit %: " + reportData.EstimateFutureProfitPercantage + " ,Future Profit : " + reportData.EstimateFutureProfit + 
+                " Proprty value: " + reportData.PropertyValue
+                
                 );
+
+            // get the entire original loan' detail
+            LoanList ll = reportData.theLoan.OriginalLoanDetaild;
+            foreach (loanDetails ld in ll)
+            {
+                Console.WriteLine(
+                    " Amount: " + ld.OriginalLoanAmount +
+                    " Product: " + ld.ProductID.stringTypeId +
+                    "\n Time: " + ld.OriginalTime +
+                    " Rate: " + ld.OriginalRate +
+                    "\n Tsamud: " + MiscUtilities.IsProductTsamud(ld.indices) +
+                    " Monthly pay: " + ld.DesiredMonthlyPayment +
+                    "\n Paid: " + ld.resultReportData.PayUntilToday +
+                    " Future pay: " + ld.resultReportData.PayFuture +
+                    " Estimate Future pay: " + ld.resultReportData.EstimateFuturePay +
+                    "\n Profit %: " + ld.resultReportData.EstimateProfitPercantageSoFar + " , Profit: " + ld.resultReportData.EstimateProfitSoFar +
+                    "\n Future Profit %: " + ld.resultReportData.EstimateFutureProfitPercantage + " ,Future Profit : " + ld.resultReportData.EstimateFutureProfit);
+            }
 
             // get the products
             string[] products = reportData.GetProducts();
