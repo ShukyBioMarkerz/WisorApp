@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WisorLibrary.DataObjects;
+using WisorLibrary.Utilities;
 using static WisorLib.GenericProduct;
 using static WisorLib.MiscConstants;
 
@@ -23,6 +24,7 @@ namespace WisorLib
 
         public static ProductsList theLoadedProducts { get; set; }
         public static ProductsList theSelectedProducts { get; set; }
+        public static ProductsList theAllLoadedProducts { get; set; }  
 
         public static string theProductsFilename { get; set; }
         public static bool shouldShowProductSelectionWindow { get; set; }
@@ -106,7 +108,8 @@ namespace WisorLib
         }
         public static string summaryLogFile
         {
-            get { return @"C:\tmp\SummaryLoans"; }
+            get { return MiscUtilities.GetOutputDirectory() + Path.DirectorySeparatorChar + "SummaryLoans";
+                /*@"C:\tmp\SummaryLoans";*/ }
         }
         public static LoggerFile theMiscLogger { get; set; }
         public static LoggerFile theSummaryFile { get; set; }
@@ -242,7 +245,11 @@ namespace WisorLib
             }
         }
 
- 
+        public static bool ShouldCreateCombinationDynamickly { get; set; }
+        public static bool ShouldPrintLog { get; internal set; }
+        public static string DataDirectory { get; set; }
+
+
 
         // Once the user select the order, update the loaded list accordingly
         public static void OrderTheCriteriaFields()
@@ -288,5 +295,6 @@ namespace WisorLib
         internal const uint minimumTimeForLoan = 48;
         public const double largeDev = 20;
         internal const double smallDev = 1;
+  
     }
 }
