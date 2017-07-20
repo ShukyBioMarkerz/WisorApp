@@ -357,7 +357,9 @@ namespace WisorLibrary.DataObjects
                 Share.NumberOfPositiveBeneficialLoans++;
 
             // update all the accumulative data
-            string[] msgn = {
+            if (shouldThisLoanReFinance)
+            {
+                string[] msgn = {
                         theLoan.ID, // "Loan ID",
                         theLoan.OriginalLoanAmount.ToString(), // "Original Loan Amount",
                         theLoan.OriginalDateTaken.ToString(), // "Date Taken",
@@ -390,7 +392,8 @@ namespace WisorLibrary.DataObjects
                         minLenderProfit_corrspondLenderPayment.ToString(),
                         minLenderProfit_corrspondName
                     };
-            MiscUtilities.PrintSummaryFileS(Share.theWinWinSummaryFile, msgn);
+                MiscUtilities.PrintSummaryFileS(Share.theWinWinSummaryFile, msgn);
+            }
 
         }
 
