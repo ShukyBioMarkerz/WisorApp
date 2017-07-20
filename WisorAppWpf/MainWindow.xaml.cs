@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -27,15 +28,82 @@ namespace WisorAppWpf
     /// </summary>
     public partial class MainWindow : Window
     {
-        
+
+#if DETECT_EXIT
+        ////////////////////////////////// 
+        // manage exiting brutaly start
+  
+        static void on_processExit(object sender, EventArgs e)
+        {
+            Console.WriteLine("Exiting.....");
+            MiscUtilities.CleanUp();
+        }
+
+  
+        [DllImport("Kernel32")]
+        public static extern bool SetConsoleCtrlHandler(HandlerRoutine Handler, bool Add);
+
+        private static bool isclosing = false;
+
+        // A delegate type to be used as the handler routine 
+        // for SetConsoleCtrlHandler.
+        public delegate bool HandlerRoutine(CtrlTypes CtrlType);
+
+        // An enumerated type for the control messages
+        // sent to the handler routine.
+        public enum CtrlTypes
+        {
+            CTRL_C_EVENT = 0,
+            CTRL_BREAK_EVENT,
+            CTRL_CLOSE_EVENT,
+            CTRL_LOGOFF_EVENT = 5,
+            CTRL_SHUTDOWN_EVENT
+        }
+
+        private static bool ConsoleCtrlCheck(CtrlTypes ctrlType)
+        {
+            // Put your own handler here
+            switch (ctrlType)
+            {
+                case CtrlTypes.CTRL_C_EVENT:
+                    isclosing = true;
+                    Console.WriteLine("CTRL+C received!");
+                    break;
+
+                case CtrlTypes.CTRL_BREAK_EVENT:
+                    isclosing = true;
+                    Console.WriteLine("CTRL+BREAK received!");
+                    break;
+
+                case CtrlTypes.CTRL_CLOSE_EVENT:
+                    isclosing = true;
+                    Console.WriteLine("Program being closed!");
+                    break;
+
+                case CtrlTypes.CTRL_LOGOFF_EVENT:
+                case CtrlTypes.CTRL_SHUTDOWN_EVENT:
+                    isclosing = true;
+                    Console.WriteLine("User is logging off!");
+                    break;
+
+            }
+            return true;
+        }
+#endif
+        // manage exiting brutaly end
+        ////////////////////////////////// 
 
 
         public MainWindow()
         {
             InitializeComponent();
 
+#if DETECT_EXIT
             // cleanup
-            AppDomain.CurrentDomain.ProcessExit += new EventHandler(on_processExit);
+            Closing += on_processExit;
+            Console.CancelKeyPress += new ConsoleCancelEventHandler(on_processExit);
+            SetConsoleCtrlHandler(new HandlerRoutine(ConsoleCtrlCheck), true);
+#endif
 
             // the logger window          
             DataContext = LogEntries = new ObservableCollection<LogEntry>();
@@ -45,13 +113,15 @@ namespace WisorAppWpf
             InitSettings();
 
             LoadMarket.Visibility = Visibility.Hidden;
+
+#if DETECT_EXIT
+            while (!isclosing)
+            {
+                Thread.Sleep(1000);
+            }
+#endif
         }
 
-        static void on_processExit(object sender, EventArgs e)
-        {
-            Console.WriteLine("Exiting.....");
-            MiscUtilities.CleanUp();
-        }
 
         private void InitSettings()
         {
@@ -256,9 +326,7 @@ namespace WisorAppWpf
 
         public ObservableCollection<LogEntry> LogEntries { get; set; }
 
-
-        
-   
+ 
     }
 
 
