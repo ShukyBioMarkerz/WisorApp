@@ -13,7 +13,7 @@ namespace WisorLib
         public int Status { get; set; }
         public long ElapsedMilliseconds { get; set; }
 
-        string Outfilename;
+        public string Outfilename { get; }
 
         public RunLoanDetails(string id, int status, long elapseTime, string outfilename)
         {
