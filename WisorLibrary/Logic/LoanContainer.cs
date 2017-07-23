@@ -196,7 +196,11 @@ namespace WisorLibrary.Logic
                 //}
 
                 // add the original loan' details to the calculated new loan in order to show it in the report
-                ld.OriginalLoanDetaild = collectedLoans;
+                ld.OriginalLoanDetaild = new LoanList();
+                foreach (loanDetails loand in collectedLoans)
+                {
+                    ld.OriginalLoanDetaild.Add(loand);
+                }
             }
 
             if (Share.shouldDebugLoans)
