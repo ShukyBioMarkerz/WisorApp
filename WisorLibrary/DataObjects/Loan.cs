@@ -107,11 +107,23 @@ namespace WisorLib
                     {
                         indices = gp.originalIndexUsedFirstTimePeriod;
                         OriginalInflation = gp.indexUsedFirstTimePeriod;
+                        product.numberID = gp.productID.numberID;
                     }
-                    //else
-                    //{
-                    //    Console.WriteLine("ERROR: loanDetails can't recognize the product: " + product.stringTypeId);
-                    //}
+                    else
+                    {
+                        // try to look at the entire products, even those which should not be selected
+                        gp = GenericProduct.GetProductFromAllListByName(product.stringTypeId);
+                        if (null != gp)
+                        {
+                            indices = gp.originalIndexUsedFirstTimePeriod;
+                            OriginalInflation = gp.indexUsedFirstTimePeriod;
+                            product.numberID = gp.productID.numberID;
+                        }
+                        else
+                        {
+                            Console.WriteLine("ERROR: loanDetails can't recognize the product: " + product.stringTypeId);
+                        }
+                    }
                 }
 
                 if (!shouldCalculate || DateTime.Now == dateTaken
