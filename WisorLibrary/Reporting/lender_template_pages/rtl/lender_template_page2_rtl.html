@@ -1,12 +1,16 @@
 ﻿
 <div class="header-bar">
-    <div class="header-logo"></div>
-    <div class="header-left-text">{0}</div>
+    <div class="header-logo">
+        <img class="wisor-logo" src="images/logo.png" />
+    </div>
+
+    <!--<div class="header-left-text">{0}</div>-->
+    <img class="header-left-logo" src="{1}" />
 </div>
 
-<div class="row" style="position: relative; top: 60px; margin-bottom: 100px;">
+<div class="row" style="position: relative; top: 60px; padding-bottom: 60px;">
     <div class="col-md-12 case-title">
-        <p class="text-center large-title" dir="rtl">מקרה מספר {1}</p>
+        <p class="text-center large-title" dir="rtl">מקרה מספר {2}</p>
     </div>
 </div>
 
@@ -36,26 +40,26 @@
 
                 <thead>
                     <tr>
-                        <th style="width:70px;">סכום כסף</th>
-                        <th style="width:140px;">סוג מסלול</th>
-                        <th style="width:50px;">תקופה</th>
-                        <th style="width:50px;">ריבית</th>
-                        <th style="width:50px;">הצמדה</th>
-                        <th style="width:70px;" >החזר חודשי</th>
-                        <th style="width:70px;">תשלום עד היום</th>
-                        <th style="width:70px;">יתרה לסילוק</th>
-                        <th style="width:80px;">תחזית תשלום עתידי</th>
+                        <th style="width:100px;">סכום כסף</th>
+                        <th style="width:200px;">סוג מסלול</th>
+                        <th style="width:60px;">תקופה</th>
+                        <th style="width:60px;">ריבית</th>
+                        <th style="width:60px;">הצמדה</th>
+                        <th style="width:90px;">החזר חודשי</th>
+                        <th style="width:120px;">תשלום עד היום</th>
+                        <th style="width:100px;">יתרה לסילוק</th>
+                        <th style="width:140px;">תחזית תשלום עתידי</th>
 
-                        <th style="width:60px; position:relative; border-top: 0px solid white; border-bottom: 0pt solid white;">&nbsp;</th>
+                        <th style="width:50px; position:relative; border-top: 0px solid white; border-bottom: 0pt solid white;">&nbsp;</th>
 
-                        <th style="width:70px;">רווח עד כה</th>
-                        <th style="width:70px;">% רווח עד כה</th>
+                        <th style="width:100px;">רווח עד כה</th>
+                        <th style="width:100px;">% רווח עד כה</th>
 
-                        <th style="width:70px;">רווח עתידי חזוי</th>
-                        <th style="width:70px;">% רווח עתידי</th>
+                        <th style="width:100px;">רווח עתידי חזוי</th>
+                        <th style="width:100px;">% רווח עתידי</th>
                 </thead>
                 <tbody>
-                {2}
+                    {3}
                 </tbody>
 
             </table>
@@ -76,7 +80,7 @@
     <div class="col-md-9" style="padding-bottom: 60px; padding-right: 100px;">
         <div style="position:relative; border-style:unset;">
 
-            <div class="hide-in-desktop-view" style="position: relative; right: 0px; padding-bottom: 6px; display: block; text-align: right; font-weight: bold; font-size: 14px; ">מוצרים לשימוש בניתוח הלוואה:</div>
+            <div class="hide-in-desktop-view" style="position: absolute; right: 0px; padding-bottom: 6px; display: block; text-align: right; font-weight: bold; font-size: 16px; ">מוצרים לשימוש בניתוח הלוואה:</div>
 
 
             <table class="composition_table" style="position: relative; width: 60%;" dir="rtl">
@@ -96,26 +100,26 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {3}
+                    {4}
                 </tbody>
             </table>
         </div>
     </div>
 
     <div class="col-md-3" style="padding-bottom: 60px;">
-        <table class="table-sm" style="font-size: 14px;" dir="rtl" align="right">
+        <table class="table-sm" style="font-size: 16px;" dir="rtl" align="right">
             <tr>
-                <td style='width:260px;'>תאריך לקיחת הלוואה</td>
-                <td style='width:85px;'>{4}</td>
-            </tr><tr>
-             <tr style='border-top: 1px solid black;'>
-              <td style='width:260px;'>שווי נכס</td>
-              <td style='width:85px;'>{5}</td>
-          </tr>
-          <tr style='border-top: 1px solid black;'>
-              <td style='width:260px;'>הכנסה חודשית נטו</td>
-              <td style='width:85px;'>{6}</td>
-          </tr>
+                <td style='width:260px;'>תאריך</td>
+                <td style='width:85px;'>{5}</td>
+            </tr>
+            <tr style='border-top: 1px solid black;'>
+                <td style='width:260px;'>שווי נכס</td>
+                <td style='width:85px;'>{6}</td>
+            </tr>
+            <tr style='border-top: 1px solid black;'>
+                <td style='width:260px;'>הכנסה חודשית נטו</td>
+                <td style='width:85px;'>{7}</td>
+            </tr>
         </table>
     </div>
 
