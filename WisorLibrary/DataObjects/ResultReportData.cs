@@ -169,7 +169,8 @@ namespace WisorLibrary.DataObjects
                     }
 
                     if (!String.IsNullOrEmpty(HTMLfilename) || !String.IsNullOrEmpty(PDFfilename))
-                        Reporter.LenderReport(this, HTMLfilename, PDFfilename, Share.cultureInfo);
+                        Reporter.LenderReport(this, HTMLfilename, PDFfilename, Share.cultureInfo,
+                            false /*isPrintCovers*/);
 
                     //// store in XML file
                     //if (shouldStoreInDB)
