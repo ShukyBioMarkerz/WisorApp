@@ -108,7 +108,7 @@ namespace WisorAppWpf
             // the logger window          
             DataContext = LogEntries = new ObservableCollection<LogEntry>();
 
-            SetLogger(Log2Window);
+            MiscUtilities.SetLogger(Log2Window);
 
             InitSettings();
 
@@ -125,62 +125,7 @@ namespace WisorAppWpf
 
         private void InitSettings()
         {
-            //SetRunLoanFunc(Utilities.RunTheLoansSync);
-            SetRunLoanFunc(MultiThreadingManagment.RunTheLoanASync);
-            SetRunLoanFuncSync(MultiThreadingManagment.RunTheLoansWraperSync);
-            SetRunLoanFuncASync(MultiThreadingManagment.RunTheLoansWraperASync);
-
-            Share.shouldShowCriteriaSelectionWindow = false;
-            Share.shouldShowCriteriaSelectionContinue = false;
-            Share.shouldShowProductSelectionWindow = false;
-            Share.shouldShowProductSelectionContinue = false;
-            Share.shouldShowRatesSelectionWindow = false;
-            Share.shouldShowLoansSelectionWindow = false;
-             
-            Share.shouldRunFake = false;
-            Share.numberOfOption = 3;
- 
-            Share.shouldPrintCounters = false;
-            Share.CalculatePmtCounter = Share.CalculateLuahSilukinCounter = Share.RateCounter =
-                Share.counterOfOneDivisionOfAmounts =  Share.CalculatePmtFromCalculateLuahSilukinCounter =
-                Share.OptionObjectCounter = Share.SavedCompositionsCounter =
-                Share.CalculateLuahSilukinCounterNOTInFirstTimePeriod =
-                Share.CalculateLuahSilukinCounterInFirstTimePeriod =
-                Share.CalculateLuahSilukinCounterIndexUsedFirstTimePeriod = 0;
-
-            //Share.ShouldCalcTheBankProfit = true;
-            Share.numberOfPrintResultsInList = 1; //  100;
-
-            Share.ShouldEachCombinationRunSeparetly = false;
-            Share.ShouldStoreAllCombinations = false;
-
-            Share.shouldCreateHTMLReport = false; // true;
-            Share.ShouldStoreInDB = true;
-            //Share.ShouldStoreHTMLReport = true;
-            Share.LoansLoadFromLine = MiscConstants.UNDEFINED_UINT;
-            Share.LoansLoadIDsFromLine = MiscConstants.UNDEFINED_STRING;
-            Share.shouldDebugLoans = false;
-            Share.shouldDebugLuchSilukin = false;
-            Share.ShouldCreateCombinationDynamickly = false;
-
-            // output log level settings
-            Share.printMainInConsole = true;
-            Share.printToOutputFile = true;
-            Share.printFunctionsInConsole = false;
-            Share.printSubFunctionsInConsole = false;
-            Share.printPercentageDone = false;
-            Share.NumberOfCanRefininceLoans = 0;
-            Share.NumberOfPositiveBeneficialLoans = 0;
-
-            // important settings
-            Share.shouldRunSync = true;
-            Share.shouldRunLogicSync = true;
-            Share.shouldCreatePDFReport = false; //true;
-            Share.DataDirectory =  MiscConstants.DATA_DIR;
-
-            // load the configuration file
-            MiscUtilities.LoadXMLConfigurationFile(MiscConstants.CONFIGURATION_FILE);
-
+            MiscUtilities.SetupAllEnv();
 
             // testing area
             //Tests.TestLuchSilukinCalculation();
@@ -198,26 +143,6 @@ namespace WisorAppWpf
             //Tests.TestRiskLiquidity();
 
         }
-
-        private void SetLogger(MyDelegate func)
-        {
-            WindowsUtilities.loggerMethod = func;
-        }
-
-        private void SetRunLoanFunc(MyRunDelegate func)
-        {
-            WindowsUtilities.runLoanMethod = func;
-        }
-
-        private void SetRunLoanFuncSync(MyRunDelegateListOfLoans func)
-        {
-            WindowsUtilities.runLoanMethodSync = func;
-        }
-        private void SetRunLoanFuncASync(MyRunDelegateListOfLoans func)
-        {
-            WindowsUtilities.runLoanMethodASync = func;
-        }
-
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Escape)
