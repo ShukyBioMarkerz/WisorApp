@@ -14,14 +14,15 @@ namespace WisorLibrary.Reporting
 {
     public class Reporter
     {
-        public static int LenderReport(ResultReportData reportData, String HTMLfilename, String PDFfilename, CultureInfo cultureInfo)
+        public static int LenderReport(ResultReportData reportData, String HTMLfilename, 
+            String PDFfilename, CultureInfo cultureInfo, bool isPrintCovers)
         {
             // debug the entire data correctness
             if (false) {
                 LenderReportDebug(reportData);
             }
 
-            LenderReport lr = new LenderReport(cultureInfo);
+            LenderReport lr = new LenderReport(cultureInfo, isPrintCovers);
 
             if (HTMLfilename != null)
             {
