@@ -652,9 +652,23 @@ namespace WisorLibrary.Utilities
                                     break;
                                 case SHOULD_STORE_REPORT_AS_HTML:
                                     Share.shouldCreateHTMLReport = "yes" == node.Value ? true : false;
+                                    // ensure the directory realy exists
+                                    if (Share.shouldCreateHTMLReport)
+                                    {
+                                        string fn = MiscUtilities.GetReportFileName("tempID", FileType.HTML);
+                                        if (!Directory.Exists(Path.GetDirectoryName(fn)))
+                                            Directory.CreateDirectory(Path.GetDirectoryName(fn));
+                                    }
                                     break;
                                  case SHOULD_STORE_REPORT_AS_PDF:
                                     Share.shouldCreatePDFReport = "yes" == node.Value ? true : false;
+                                    // ensure the directory realy exists
+                                    if (Share.shouldCreatePDFReport)
+                                    {
+                                        string fn = MiscUtilities.GetReportFileName("tempID", FileType.PDF);
+                                        if (!Directory.Exists(Path.GetDirectoryName(fn)))
+                                            Directory.CreateDirectory(Path.GetDirectoryName(fn));
+                                    }
                                     break;
                                 case SHOULD_STORE_REPORT_IN_DB:
                                     Share.ShouldStoreInDB = "yes" == node.Value ? true : false;
@@ -1346,17 +1360,22 @@ namespace WisorLibrary.Utilities
             string value = MiscConstants.UNDEFINED_STRING;
             if (0 <= index && index < entities.Length)
             {
+                string str = entities[index];
                 string trimed;
                 int loc;
                 if (!allowDot)
                 {
-                    loc = entities[index].IndexOf(MiscConstants.DOT_STR);
-                    trimed = (0 <= loc) ? entities[index].Remove(loc) : entities[index];
+                    loc = str.IndexOf(MiscConstants.DOT_STR);
+                    //trimed = (0 <= loc) ? entities[index].Remove(loc) : entities[index];
+                    // instead of triming, make round
+                    if (0 <= loc)
+                    {
+                        double d = Math.Round(Convert.ToDouble(str));
+                        str = d.ToString();
+                    }
                 }
-                else
-                {
-                    trimed = entities[index];
-                }
+                trimed = str;
+ 
                 loc = trimed.IndexOf(MiscConstants.PERCANTAGE_STR);
                 trimed = (0 <= loc) ? trimed.Remove(loc) : trimed;
 
@@ -1380,6 +1399,7 @@ namespace WisorLibrary.Utilities
                 + MiscConstants.REPORTS_DIR + Path.DirectorySeparatorChar +
                 MiscConstants.LENDER_REPORT_PREFIX + MiscConstants.NAME_SEP_CHAR + id + MiscConstants.NAME_SEP_CHAR +
                 DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + ext;
+            
             return fn;
         }
 
@@ -1389,6 +1409,88 @@ namespace WisorLibrary.Utilities
                 return true;
             return false;
         }
+
+
+        static public void SetLogger(MyDelegate func)
+        {
+            WindowsUtilities.loggerMethod = func;
+        }
+
+        static void SetRunLoanFunc(MyRunDelegate func)
+        {
+            WindowsUtilities.runLoanMethod = func;
+        }
+
+        static void SetRunLoanFuncSync(MyRunDelegateListOfLoans func)
+        {
+            WindowsUtilities.runLoanMethodSync = func;
+        }
+        static void SetRunLoanFuncASync(MyRunDelegateListOfLoans func)
+        {
+            WindowsUtilities.runLoanMethodASync = func;
+        }
+
+
+        static public void SetupAllEnv()
+        {
+            //SetRunLoanFunc(Utilities.RunTheLoansSync);
+            SetRunLoanFunc(MultiThreadingManagment.RunTheLoanASync);
+            SetRunLoanFuncSync(MultiThreadingManagment.RunTheLoansWraperSync);
+            SetRunLoanFuncASync(MultiThreadingManagment.RunTheLoansWraperASync);
+
+            Share.shouldShowCriteriaSelectionWindow = false;
+            Share.shouldShowCriteriaSelectionContinue = false;
+            Share.shouldShowProductSelectionWindow = false;
+            Share.shouldShowProductSelectionContinue = false;
+            Share.shouldShowRatesSelectionWindow = false;
+            Share.shouldShowLoansSelectionWindow = false;
+
+            Share.shouldRunFake = false;
+            Share.numberOfOption = 3;
+
+            Share.shouldPrintCounters = false;
+            Share.CalculatePmtCounter = Share.CalculateLuahSilukinCounter = Share.RateCounter =
+                Share.counterOfOneDivisionOfAmounts = Share.CalculatePmtFromCalculateLuahSilukinCounter =
+                Share.OptionObjectCounter = Share.SavedCompositionsCounter =
+                Share.CalculateLuahSilukinCounterNOTInFirstTimePeriod =
+                Share.CalculateLuahSilukinCounterInFirstTimePeriod =
+                Share.CalculateLuahSilukinCounterIndexUsedFirstTimePeriod = 0;
+
+            //Share.ShouldCalcTheBankProfit = true;
+            Share.numberOfPrintResultsInList = 1; //  100;
+
+            Share.ShouldEachCombinationRunSeparetly = false;
+            Share.ShouldStoreAllCombinations = false;
+
+            Share.shouldCreateHTMLReport = false; // true;
+            Share.ShouldStoreInDB = true;
+            //Share.ShouldStoreHTMLReport = true;
+            Share.LoansLoadFromLine = MiscConstants.UNDEFINED_UINT;
+            Share.LoansLoadIDsFromLine = MiscConstants.UNDEFINED_STRING;
+            Share.shouldDebugLoans = false;
+            Share.shouldDebugLuchSilukin = false;
+            Share.ShouldCreateCombinationDynamickly = false;
+
+            // output log level settings
+            Share.printMainInConsole = true;
+            Share.printToOutputFile = true;
+            Share.printFunctionsInConsole = false;
+            Share.printSubFunctionsInConsole = false;
+            Share.printPercentageDone = false;
+            Share.NumberOfCanRefininceLoans = 0;
+            Share.NumberOfPositiveBeneficialLoans = 0;
+
+            // important settings
+            Share.shouldRunSync = true;
+            Share.shouldRunLogicSync = true;
+            Share.shouldCreatePDFReport = false; //true;
+            Share.DataDirectory = MiscConstants.DATA_DIR;
+
+            // load the configuration file
+            MiscUtilities.LoadXMLConfigurationFile(MiscConstants.CONFIGURATION_FILE);
+        }
+
+
     }
 
 }
