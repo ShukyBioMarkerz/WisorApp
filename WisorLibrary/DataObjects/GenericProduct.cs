@@ -394,7 +394,7 @@ namespace WisorLib
             {
                 foreach (KeyValuePair<int, GenericProduct> p in Share.theAllLoadedProducts)
                 {
-                    if (p.Value.productID.stringTypeId == productName)
+                    if (p.Value.productID.stringTypeId.ToLower() == productName.ToLower())
                     {
                         product = p.Value;
                         break;
@@ -417,7 +417,7 @@ namespace WisorLib
             {
                 foreach (KeyValuePair<int, GenericProduct> p in Share.theLoadedProducts)
                 {
-                    if (p.Value.productID.stringTypeId == productName)
+                    if (p.Value.productID.stringTypeId.ToLower() == productName.ToLower())
                     {
                         product = p.Value;
                         break;
