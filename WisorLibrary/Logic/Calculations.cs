@@ -566,7 +566,8 @@ namespace WisorLibrary.Logic
             else
             {
                 WindowsUtilities.loggerMethod("ERROR: CalculateLuahSilukinFullAll the borrower pay: " + totalBorowerPay +
-                    " less than the bank: " + totalBankPay);
+                    " less than the bank: " + totalBankPay + "(originalBorrowerRate: " + originalBorrowerRate + 
+                    ", originalbankRate: " + originalbankRate);
             }
             // EstimateTotalProfitPercantage = EstimateTotalProfit / loan amount
             if (0 < originalLoanAmount)

@@ -37,8 +37,10 @@ namespace WisorLib
         public RunLoanDetails runSearch()
         {
             long elapsedMs = 0;
+            // ensure there are any combinations
+            string[,] combinations = Combinations.GetCombination(Share.theMarket);
 
-            if (CanRunCalculation)
+            if (CanRunCalculation && null != combinations)
             {
                 // for debug
                 if (Share.shouldDebugLoans)
@@ -69,6 +71,7 @@ namespace WisorLib
                     CalculationConstants.PrintCombination(Share.theMarket);
                         
                 }
+                
                 env.CheckInfo.searchStartTime = DateTime.Now;
                     
                 // Run through each combination possible for three options
@@ -93,6 +96,15 @@ namespace WisorLib
                     // Set the search range by the user' Risk and Liquidity
                     DefineOptionTypes(combinationCounter, env);
                     Console.WriteLine();
+
+                    //// TBD debug - should remove from here
+                    //Share.ShouldPrintLog = false;
+                    //MiscUtilities.PrintMiscLogger("\nProducts: " 
+                    //    + env.CalculationParameters.optTypes.optionTypes[0].product.productID.stringTypeId
+                    //    + ", " + env.CalculationParameters.optTypes.optionTypes[1].product.productID.stringTypeId
+                    //    + ", " + env.CalculationParameters.optTypes.optionTypes[2].product.productID.stringTypeId);
+                    //// debug should remove till here
+
                     ThreeOptionSearch search = new ThreeOptionSearch(env);
                     env.CheckInfo.calculationEndTime = DateTime.Now;
                     // End of three option search for one combination of option types
@@ -129,12 +141,13 @@ namespace WisorLib
             } // CanRunCalculation
             else
             {
-                Console.WriteLine("NOTICE: can't run the calculation. CanRunCalculation falge is: " + CanRunCalculation);
+                Console.WriteLine("NOTICE: can't run the calculation. CanRunCalculation is: " + CanRunCalculation);
             }
 
             PrintCounters();
 
-            return new RunLoanDetails(env.CheckInfo.orderID, Convert.ToInt32(CanRunCalculation), elapsedMs, env.GetOutputFileName());
+            return new RunLoanDetails(env.theLoan.resultReportData);
+                // RunLoanDetails(env.CheckInfo.orderID, Convert.ToInt32(CanRunCalculation), elapsedMs, env.GetOutputFileName());
         } 
 
 
