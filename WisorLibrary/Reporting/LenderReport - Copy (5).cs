@@ -140,13 +140,11 @@ namespace WisorLibrary.Reporting
 
 
 
-        public int GenerateLenderHtmlReport(string filename, RunEnvironment env)
+        public int GenerateLenderHtmlReport(string filename, ResultReportData reportData)
         {
-            //ResultReportData reportData = env.theLoan.resultReportData;
-
             try
             {
-                if (null != env)
+                if (null != reportData)
                 {
                     // HTML Header
                     var reportContent = new StringBuilder(GetHTMLHeader());
@@ -155,20 +153,20 @@ namespace WisorLibrary.Reporting
                     {
                         // Page 1
                         reportContent.Append(PagePrefix);
-                        reportContent.Append(GetPage1Body(env));
+                        reportContent.Append(GetPage1Body(reportData));
                         reportContent.Append(GetFooterBar("footer-bar-html", ""));
                         reportContent.Append(PageSuffix);
                     }
 
                     // Page 2
                     reportContent.Append(PagePrefix);
-                    reportContent.Append(GetPage2Body(env));
+                    reportContent.Append(GetPage2Body(reportData));
                     reportContent.Append(GetFooterBar("footer-bar-html", "1"));
                     reportContent.Append(PageSuffix);
 
                     // Page 3
                     reportContent.Append(PagePrefix);
-                    reportContent.Append(GetPage3Body(env));
+                    reportContent.Append(GetPage3Body(reportData));
                     reportContent.Append(GetFooterBar("footer-bar-html", "2"));
                     reportContent.Append(PageSuffix);
 
@@ -176,7 +174,7 @@ namespace WisorLibrary.Reporting
                     {
                         // Page 4
                         reportContent.Append(PagePrefix);
-                        reportContent.Append(GetPage4Body(env));
+                        reportContent.Append(GetPage4Body(reportData));
                         reportContent.Append(GetFooterBar("footer-bar-html", ""));
                         reportContent.Append(PageSuffix);
 
@@ -202,7 +200,7 @@ namespace WisorLibrary.Reporting
             return 0;
         }
 
-        public int GenerateLenderPdfReport(string filename, RunEnvironment env)
+        public int GenerateLenderPdfReport(string filename, ResultReportData reportData)
         {
             // Generate individual HTML pages
 
@@ -225,7 +223,7 @@ namespace WisorLibrary.Reporting
                     // Page 1
                     Page1Content = HtmlHeader;
                     Page1Content += PagePrefix;
-                    Page1Content += GetPage1Body(env);
+                    Page1Content += GetPage1Body(reportData);
                     Page1Content += PageSuffix;
                     Page1Content += GetFooterBar("footer-bar-pdf", "");
                     Page1Content += HtmlFooter;
@@ -234,7 +232,7 @@ namespace WisorLibrary.Reporting
                 // Page 2
                 Page2Content = HtmlHeader;
                 Page2Content += PagePrefix;
-                Page2Content += GetPage2Body(env);
+                Page2Content += GetPage2Body(reportData);
                 Page2Content += PageSuffix;
                 Page2Content += GetFooterBar("footer-bar-pdf", "1");
                 Page2Content += HtmlFooter;
@@ -242,7 +240,7 @@ namespace WisorLibrary.Reporting
                 // Page 3
                 Page3Content = HtmlHeader;
                 Page3Content += PagePrefix;
-                Page3Content += GetPage3Body(env);
+                Page3Content += GetPage3Body(reportData);
                 Page3Content += PageSuffix;
                 Page3Content += GetFooterBar("footer-bar-pdf", "2");
                 Page3Content += HtmlFooter;
@@ -253,7 +251,7 @@ namespace WisorLibrary.Reporting
                     // Page 4
                     Page4Content = HtmlHeader;
                     Page4Content += PagePrefix;
-                    Page4Content += GetPage4Body(env);
+                    Page4Content += GetPage4Body(reportData);
                     Page4Content += PageSuffix;
                     Page4Content += GetFooterBar("footer-bar-pdf", "");
                     Page4Content += HtmlFooter;
@@ -263,7 +261,7 @@ namespace WisorLibrary.Reporting
                 var cultureName = CultureInformation.Name;
 
                 cultureName = cultureName.Replace('-', '_');
-                ResultReportData reportData = env.theLoan.resultReportData;
+
 
                 if (IsPrintCovers)
                 {
@@ -377,10 +375,9 @@ namespace WisorLibrary.Reporting
         }
 
 
-        public String GetPage1Body(RunEnvironment env)
+        public String GetPage1Body(ResultReportData reportData)
         {
             string title = null;
-            ResultReportData reportData = env.theLoan.resultReportData;
 
             if (CultureInformation.Name.Equals("he-IL"))
             {
@@ -415,10 +412,9 @@ namespace WisorLibrary.Reporting
             return retStr;
         }
 
-        public String GetPage2Body(RunEnvironment env)
+        public String GetPage2Body(ResultReportData reportData)
         {
             String page = null;
-            ResultReportData reportData = env.theLoan.resultReportData;
 
             try
             {
@@ -438,15 +434,7 @@ namespace WisorLibrary.Reporting
                     i++;
 
                     gp = GenericProduct.GetProductByName(p);
-                    if (null == gp)
-                    {
-                        gp = GenericProduct.GetProductFromAllListByName(p);
-                    }
-                    if (null == gp)
-                    {
-                        WindowsUtilities.loggerMethod("ERROR: GetPage2Body unrecognized product: " + p);
-                        continue;
-                    }
+
                     double bankRateFrom = RateUtilities.Instance.GetBankRate(gp.productID.numberID, profile, minRateIndex);
                     double bankRateTo = RateUtilities.Instance.GetBankRate(gp.productID.numberID, profile, maxRateIndex);
                     double borrowerRateFrom = RateUtilities.Instance.GetBorrowerRate(gp.productID.numberID, profile, minRateIndex);
@@ -464,12 +452,7 @@ namespace WisorLibrary.Reporting
                         productName = (null != gp.hebrewName) ? gp.hebrewName : p;
                     }
                     else
-                    {
-                        if (null != gp.name)
-                            productName = gp.name;
-                        else 
-                            productName = p;
-                    }
+                        productName = p;
 #endif
                     productsUsedInAnalysisRows += String.Format("<tr dir='ltr'>\r\n"
                                                                  + "    <td>{0}</td>\r\n"
@@ -496,8 +479,8 @@ namespace WisorLibrary.Reporting
                 double percantageFutureProfit = MiscConstants.UNDEFINED_DOUBLE;
 
 
-                //if (CultureInformation.Name.Equals("he-IL"))
-                //{
+                if (CultureInformation.Name.Equals("he-IL"))
+                {
                     string compositionSummaryRows = null;
 
                     // get the entire original loan' detail
@@ -505,7 +488,7 @@ namespace WisorLibrary.Reporting
 #if WDEBUG
                     for (int j = 0; j < 3; j++)
 #else
-                    LoanList ll = env.theLoan.OriginalLoanDetaild;
+                    LoanList ll = reportData.theLoan.OriginalLoanDetaild;
 
                     // accumulate the entire loan amount and the entire remainig amount
                     foreach (loanDetails ld in ll)
@@ -524,14 +507,11 @@ namespace WisorLibrary.Reporting
 #else
                         String prodName = ld.ProductID.stringTypeId;
                         string rsamudStr = MiscUtilities.IsProductTsamud(ld.indices) ? "yes" : "no";
-                        gp = GenericProduct.GetProductByName(prodName);
-                        if (null == gp)
-                            gp = GenericProduct.GetProductFromAllListByName(prodName);
 #endif
 
-                    if (CultureInformation.Name.Equals("he-IL"))
+                        if (CultureInformation.Name.Equals("he-IL"))
                         {
-                            
+                            gp = GenericProduct.GetProductByName(prodName);
                             if (null != gp && null != gp.hebrewName)
                                 prodName = gp.hebrewName;
                             else
@@ -551,10 +531,6 @@ namespace WisorLibrary.Reporting
                             rsamudStr = MiscUtilities.IsProductTsamud(ld.indices) ? "כן" : "לא";
 #endif
 
-                        }
-                        else
-                        {
-                            prodName = gp.name;
                         }
 
 #if WDEBUG
@@ -633,10 +609,10 @@ namespace WisorLibrary.Reporting
 
                     compositionSummaryRows += String.Format("<tr style='font-weight: bold;'>\r\n"
                                          + "<td>{0}</td>\r\n"
-                                         + "<td style='position: relative;  border: 0px solid white;'>{1}</td>\r\n"
-                                         + "<td style='position: relative;  border: 0px solid white;'>{2}</td>\r\n"
-                                         + "<td style='position: relative;  border: 0px solid white;'>{3}</td>\r\n"
-                                         + "<td style='position: relative;  border: 0px solid white;'>{4}</td>\r\n"
+                                         + "<td style='position: relative;  border: 0px solid white; border-right: 1px solid black;'>{1}</td>\r\n"
+                                         + "<td style='position: relative;  border: 0px solid white; border-left: 0px solid white;'>{2}</td>\r\n"
+                                         + "<td style='position: relative;  border: 0px solid white; border-left: 0px solid white;'>{3}</td>\r\n"
+                                         + "<td style='position: relative;  border: 0px solid white; border-left: 1px solid black;'>{4}</td>\r\n"
                                          + "<td>{5}</td>\r\n"
                                          + "<td>{6}</td>\r\n"
                                          + "<td>{7}</td>\r\n"
@@ -689,6 +665,108 @@ namespace WisorLibrary.Reporting
                                           , CurrencySymbol + reportData.PropertyValue.ToString("N0")
                                           , CurrencySymbol + reportData.YearlyIncome.ToString("N0")
                                            );
+
+                    //page = String.Format(LenderPages[1]
+                    //
+                    //                  , reportData.BankName
+                    //                  , reportData.ID //CaseId
+                    //                  , reportData.ID // reportData.ID
+                    //                                  // Right table
+                    //                  // Left table
+                    //                  , reportData.OriginalDateTaken.ToShortDateString() // skip the hours      // Date taken
+                    //                  , CurrencySymbol + reportData.OriginalLoanAmount.ToString("N0")           // Amount taken
+                    //                  , CurrencySymbol + reportData.FirstMonthlyPMT.ToString("N0")              // First monthly payment
+                    //                  , CurrencySymbol + reportData.PayUntilToday.ToString("N0")                // Paid until today
+                    //                                                                                            //, CurrencySymbol + reportData.YearlyIncome          // Total income
+                    //                  , CurrencySymbol + reportData.RemaingLoanAmount.ToString("N0")            // remaining amount
+                    //                  , CurrencySymbol + reportData.PayFuture.ToString("N0")                    // Left to pay
+                    //                  , CurrencySymbol + reportData.YearlyIncome.ToString("N0")                 // Total income
+                    //                  , Math.Round(reportData.PTI * 100, 3) + "%"                               // PTI
+                    //                  , Math.Round(reportData.EstimateProfitPercantageSoFar * 100, 3) + "%"     // Estimated % profits so far
+                    //                  , CurrencySymbol + reportData.EstimateProfitSoFar.ToString("N0")          // Estimated profit so far
+                    //                  , Math.Round(reportData.EstimateTotalProfitPercantage * 100, 3) + "%"     // Estimated total % profit
+                    //                  , CurrencySymbol + reportData.EstimateTotalProfit.ToString("N0")          // Estimated total profit
+                    //                  , Math.Round(reportData.EstimateFutureProfitPercantage * 100, 3) + "%"   // Estimated future % profit
+                    //                  , CurrencySymbol + reportData.EstimateFutureProfit.ToString("N0")         // Estimated future profit
+                    //
+                    //
+                    //
+                    //                  , productsUsedInAnalysisRows
+                    //
+                    //   //, CurrencySymbol + reportData.EstimateFuturePay     // Estimated future payment
+                    //, reportData.OriginalMargin + "%"                   // Product margin      
+                }
+                else // including en-US
+                {
+#if WDEBUG
+                    page = String.Format(LenderPages[1]
+                                          , reportData.BankName
+                                          , TopBarBankLogoPath
+                                          , reportData.ID //CaseId
+
+                                          // Left table
+
+                                          , "0" //MiscUtilities.ConvertDate(reportData.DateTaken.ToShortDateString())    // Date taken
+                                          , "0" //CurrencySymbol + reportData.OriginalLoanAmount.ToString("N0")              // Amount taken
+                                          , reportData.ProductName                                      // Product                                                                        
+                                          , reportData.OriginalTime                                     // Term                                                              
+                                          , "0" //Math.Round(reportData.OriginalRate * 100, 3) + "%"                          // Rate
+                                          , "0" //CurrencySymbol + reportData.FirstMonthlyPMT.ToString("N0")                 // First monthly payment
+                                          , "0" //CurrencySymbol + reportData.YearlyIncome.ToString("N0")                    // Total income
+                                          , "0" //Math.Round(reportData.EstimateFutureProfitPercantage * 100, 3) + "%"             // Debt-to-incme
+                                          , "0" //CurrencySymbol + reportData.PayUntilToday.ToString("N0")                   // Paid until today
+                                          , "0" //CurrencySymbol + reportData.PayFuture.ToString("N0")                       // Left to pay
+                                          , "0" //CurrencySymbol + reportData.EstimateFuturePay.ToString("N0")               // Estimated future payment
+
+                                          , reportData.OriginalMargin + "%"                             // Product margin                                                              
+                                          , "0" //Math.Round(reportData.EstimateProfitPercantageSoFar * 100, 3) + "%"              // Estimated % profits so far
+                                          , "0" //CurrencySymbol + reportData.EstimateProfitSoFar.ToString("N0")             // Estimated profit so far
+                                          , "0" //Math.Round(reportData.EstimateTotalProfitPercantage * 100, 3) + "%"              // Estimated total % profit
+                                          , "0" //CurrencySymbol + reportData.EstimateTotalProfit.ToString("N0")             // Estimated total profit
+                                          , "0" //Math.Round(reportData.EstimateFutureProfitPercantage * 100, 3) + "%"             // Estimated future % profit
+                                          , CurrencySymbol + reportData.EstimateFutureProfit.ToString("N0")            // Estimated future profit
+
+                                          // Right table
+
+                                          , productsUsedInAnalysisRows
+                                          );
+#else
+                    page = String.Format(LenderPages[1]
+                                          , reportData.BankName
+                                          , TopBarBankLogoPath
+                                          , reportData.ID //CaseId
+
+
+                                          // Left table
+
+                                          , MiscUtilities.ConvertDate(reportData.DateTaken.ToShortDateString())    // Date taken
+                                          , CurrencySymbol + reportData.OriginalLoanAmount.ToString("N0")              // Amount taken
+                                          , reportData.ProductName                                      // Product                                                                        
+                                          , reportData.OriginalTime                                     // Term                                                              
+                                          , Math.Round(reportData.OriginalRate * 100, 3) + "%"                          // Rate
+                                          , CurrencySymbol + reportData.FirstMonthlyPMT.ToString("N0")                 // First monthly payment
+                                          , CurrencySymbol + reportData.YearlyIncome.ToString("N0")                    // Total income
+                                          , Math.Round(reportData.EstimateFutureProfitPercantage * 100, 3) + "%"             // Debt-to-incme
+                                          , CurrencySymbol + reportData.PayUntilToday.ToString("N0")                   // Paid until today
+                                          , CurrencySymbol + reportData.PayFuture.ToString("N0")                       // Left to pay
+                                          , CurrencySymbol + reportData.EstimateFuturePay.ToString("N0")               // Estimated future payment
+
+                                          , reportData.OriginalMargin + "%"                             // Product margin                                                              
+                                          , Math.Round(reportData.EstimateProfitPercantageSoFar * 100, 3) + "%"              // Estimated % profits so far
+                                          , CurrencySymbol + reportData.EstimateProfitSoFar.ToString("N0")             // Estimated profit so far
+                                          , Math.Round(reportData.EstimateTotalProfitPercantage * 100, 3) + "%"              // Estimated total % profit
+                                          , CurrencySymbol + reportData.EstimateTotalProfit.ToString("N0")             // Estimated total profit
+                                          , Math.Round(reportData.EstimateFutureProfitPercantage * 100, 3) + "%"             // Estimated future % profit
+                                          , CurrencySymbol + reportData.EstimateFutureProfit.ToString("N0")            // Estimated future profit
+
+                                          // Right table
+
+                                          , productsUsedInAnalysisRows
+
+                                          );
+#endif
+                }
+
             }
             catch (Exception ex)
             {
@@ -698,9 +776,9 @@ namespace WisorLibrary.Reporting
             return page;
         }
 
-        public String GetPage3Body(RunEnvironment env)
+        public String GetPage3Body(ResultReportData reportData)
         {
-            ResultReportData reportData = env.theLoan.resultReportData;
+
             List<String> CompositionTables = new List<String>();
             List<String> CompositionTableNames = new List<String>();
             List<String> CompositionSummaries = new List<String>();
@@ -785,16 +863,11 @@ namespace WisorLibrary.Reporting
                         String productName = compData[i].opts[j].product.productID.stringTypeId;
 #endif
                         String Option = productName;
-                        GenericProduct gp = GenericProduct.GetProductByName(productName);
                         if (CultureInformation.Name.Equals("he-IL"))
                         {
+                            GenericProduct gp = GenericProduct.GetProductByName(productName);
                             if (null != gp && null != gp.hebrewName)
                                 Option = gp.hebrewName;
-                        }
-                        else
-                        {
-                            if (null != gp)
-                                Option = gp.name;
                         }
 
 #if WDEBUG
@@ -828,22 +901,9 @@ namespace WisorLibrary.Reporting
                         bool Indexation = MiscUtilities.IsProductTsamud(compData[i].opts[j].product.originalIndexUsedFirstTimePeriod);
 #endif
 
-                        //if (CultureInformation.Name.Equals("he-IL"))
-                        //{
-
-                        String indexationStr = null;
-
                         if (CultureInformation.Name.Equals("he-IL"))
                         {
-                            indexationStr = Indexation ? "כן" : "לא";
-                        }
-                        else
-                        {
-                            indexationStr = Indexation ? "Yes" : "No";
-                        }
-
-
-                        CompositionDataRows += String.Format("<tr>\r\n"
+                            CompositionDataRows += String.Format("<tr>\r\n"
                                                               + "	<td>{9}{0}</td>\r\n"
                                                               + "	<td>{1}</td>\r\n"
                                                               + "	<td>{2}</td>\r\n"
@@ -855,9 +915,28 @@ namespace WisorLibrary.Reporting
                                                               + "	<td>{9}{7}</td>\r\n"
                                                               + "	<td>{8}%</td>\r\n"
                                                               + "</tr>\r\n",
-                                                              Amt.ToString("N0"), Option, Time, Math.Round(Rate * 100, 3) + "%", indexationStr,
+                                                              Amt.ToString("N0"), Option, Time, Math.Round(Rate * 100, 3) + "%", Indexation ? "כן" : "לא",
                                                               PMT.ToString("N0"), TTLPay.ToString("N0"),
                                                               TTllProfit.ToString("N0"), Math.Round(LenderProfit, 2), CurrencySymbol);
+                        }
+                        else // including en-US
+                        {
+                            CompositionDataRows += String.Format("<tr>\r\n"
+                                                              + "	<td>{0}</td>\r\n"
+                                                              + "	<td>{8}{1}</td>\r\n"
+                                                              + "	<td>{2}%</td>\r\n"
+                                                              + "	<td>{3}</td>\r\n"
+                                                              + "	<td>{8}{4}</td>\r\n"
+                                                              + "	<td>{8}{5}</td>\r\n"
+                                                              + "	<td style='position: relative;  border: 0px solid white;'>&nbsp;</td>\r\n"
+                                                              + "	<td>{8}{6}</td>\r\n"
+                                                              + "	<td>{7}%</td>\r\n"
+                                                              + "</tr>\r\n",
+                                                              Option, Amt.ToString("N0"), Rate, Time,
+                                                              PMT.ToString("N0"), TTLPay.ToString("N0"),
+                                                              TTllProfit.ToString("N0"), Math.Round(LenderProfit, 2), CurrencySymbol
+                                                              );
+                        }
                     }
 
                     // calculate the fix and adjustable numbers
@@ -900,6 +979,23 @@ namespace WisorLibrary.Reporting
                     }
 
 
+                    //if (i == 0)
+                    //{
+                    //    CompositionTableNames.Add(String.Format("תמהיל המאפשר יותר יציבות, כאשר רוב הכסף צמוד למדד ({0}% בריבית קבועה)", fixNum));
+                    //}
+                    //else if (i == 1)
+                    //{
+                    //    CompositionTableNames.Add(String.Format("תמהיל המאפשר יותר שינויים, כאשר חלק מהכסף צמוד למדד ({0}% בריבית קבועה, {1}% בריבית משתנה)", fixNum, adjustableNum));
+                    //}
+                    //else if (i == 2)
+                    //{
+                    //    CompositionTableNames.Add(String.Format("תמהיל המאפשר יותר שינויים, כאשר כל הכסף לא צמוד למדד ({0}% בריבית קבועה, {1}% בריבית משתנה)", fixNum, adjustableNum));
+                    //}
+                    //else
+                    //{
+                    //    CompositionTableNames.Add("");
+                    //}
+
                     // Summary tables
                     String summary;
 
@@ -922,21 +1018,23 @@ namespace WisorLibrary.Reporting
                         summary = String.Format("<tr style='font-weight: bold;'>\r\n"
                                              + "    <td style='width:260px;'>Borrower can save</td>\r\n"
                                              + "    <td style='width:85px;'>{4}{0}</td>\r\n"
-                                             + "    <td style='width:85px;'>{1}%</td>\r\n"
+                                             + "    <td style='width:85px;'>{1}</td>\r\n"
                                              + "</tr>\r\n"
                                              + "<tr style='font-weight: bold; border-top: 1px solid black;'>\r\n"
                                              + "    <td style='width:260px;'>Lender can increase profit by</td>\r\n"
                                              + "    <td style='width:85px;'>{4}{2}</td>\r\n"
-                                             + "    <td style='width:85px;'>{3}%</td>\r\n"
+                                             + "    <td style='width:85px;'>{3}</td>\r\n"
                                              + "</tr>\r\n",
                                              compData[i].BorrowerProfitCalc.ToString("N0"),
-                                             Math.Round((double)compData[i].BorrowerProfitCalc / reportData.RemaingLoanAmount * 100, 2),
+                                             Math.Round((double)compData[i].BorrowerProfitCalc / reportData.LoanAmount * 100, 2),
                                              compData[i].BankProfitCalc.ToString("N0"),
-                                             Math.Round((double)compData[i].BankProfitCalc / reportData.EstimateFutureProfit * 100, 2), CurrencySymbol);
+                                             Math.Round((double)compData[i].BankProfitCalc / reportData.LoanAmount * 100, 2), CurrencySymbol);
 
                     CompositionSummaries.Add(summary);
 
-                    /* Bold summary rows (at the bottom) */
+                    if (CultureInformation.Name.Equals("he-IL"))
+                    {
+                        /* Bold summary rows (at the bottom) */
 
                         CompositionDataRows += String.Format("<tr style='font-weight: bold;'>\r\n"
                                       + "	<td style='weight: bold;'>{6}{0}</td>\r\n"
@@ -954,10 +1052,43 @@ namespace WisorLibrary.Reporting
                                       sumMonthly.ToString("N0"), sumTTLPay.ToString("N0"),
                                       sumTTllProfit.ToString("N0"), Math.Round(sumLenderProfit, 2), CurrencySymbol
                                       );
+                    }
+                    else // including en-US
+                    {
+                        /* Bold summary rows (at the bottom) */
+                        CompositionDataRows += String.Format("<tr style='font-weight: bold;'>\r\n"
+                                      + "	<td style='weight: bold;'><span class='hide-in-desktop-view'>{0}&nbsp;</span></td>\r\n"
+                                      + "	<td>{8}{1}</td>\r\n"
+                                      + "	<td>{2}</td>\r\n"
+                                      + "	<td>{3}</td>\r\n"
+                                      + "	<td>{8}{4}</td>\r\n"
+                                      + "	<td>{8}{5}</td>\r\n"
+                                      + "	<td style='position: relative;  border: 0px solid white;'>&nbsp;</td>\r\n"
+                                      + "	<td>{8}{6}</td>\r\n"
+                                      + "	<td>{7}%</td>\r\n"
+                                      + "</tr>\r\n",
+                                      SummaryStr, sumAmount.ToString("N0"), "&nbsp;", "&nbsp;",
+                                      sumMonthly.ToString("N0"), sumTTLPay.ToString("N0"),
+                                      sumTTLPay, Math.Round(sumLenderProfit, 2), CurrencySymbol
+                                      );
+                    }
+
                     CompositionTables.Add(CompositionDataRows);
 
                     numOfPrintedComp++;
                 }
+
+                //// TBD - shuky were here to save crashes when less then 3 compositions are avaliable
+                //if (MiscConstants.NUM_OF_PRODUCTS_IN_COMBINATION > numOfPrintedComp && 0 < numOfPrintedComp)
+                //{
+                //    // hagly, very hugly, buy short: copy the first combination to all arrays...
+                //    for (int i = numOfPrintedComp; i < MiscConstants.NUM_OF_PRODUCTS_IN_COMBINATION; i++)
+                //    {
+                //        CompositionTableNames.Add(CompositionTableNames[0]);
+                //        CompositionTables.Add(CompositionTables[0]);
+                //        CompositionSummaries.Add(CompositionSummaries[0]);
+                //    }
+                //}
 
 
                 for (int i = 0; i < CompositionTables.Count; i++)
@@ -983,9 +1114,8 @@ namespace WisorLibrary.Reporting
             return page;
         }
 
-        public String GetPage4Body(RunEnvironment env)
+        public String GetPage4Body(ResultReportData reportData)
         {
-            ResultReportData reportData = env.theLoan.resultReportData;
             string title = null;
             String page = null;
 

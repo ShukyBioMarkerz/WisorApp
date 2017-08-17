@@ -14,24 +14,27 @@ namespace WisorLibrary.Reporting
 {
     public class Reporter
     {
-        public static int LenderReport(ResultReportData reportData, String HTMLfilename, 
+        public static int LenderReport(RunEnvironment env, String HTMLfilename, 
             String PDFfilename, CultureInfo cultureInfo, bool isPrintCovers)
         {
             // debug the entire data correctness
             if (false) {
-                LenderReportDebug(reportData);
+                LenderReportDebug(env);
             }
+
+            // TBD - should remove
+            cultureInfo = CultureInfo.CreateSpecificCulture("en-US");
 
             LenderReport lr = new LenderReport(cultureInfo, isPrintCovers);
 
             if (HTMLfilename != null)
             {
-                lr.GenerateLenderHtmlReport(HTMLfilename, reportData);
+                lr.GenerateLenderHtmlReport(HTMLfilename, env);
             }
 
             if (PDFfilename != null)
             {
-                lr.GenerateLenderPdfReport(PDFfilename, reportData);
+                lr.GenerateLenderPdfReport(PDFfilename, env);
             }
 
             return 0;
@@ -55,9 +58,11 @@ namespace WisorLibrary.Reporting
             return 0;
         }
 
-        public static void LenderReportDebug(ResultReportData reportData /* ,string filename,  
+        public static void LenderReportDebug(RunEnvironment env /* ,string filename,  
             bool shouldCreateHTML, bool shouldCreatePDF, CultureInfo cultureInfo = null */)
         {
+            ResultReportData reportData = env.theLoan.resultReportData;
+
             // get the report data
             Console.WriteLine(
                 "\n\nBankName: " + reportData.BankName +
@@ -82,7 +87,7 @@ namespace WisorLibrary.Reporting
                 );
 
             // get the entire original loan' detail
-            LoanList ll = reportData.theLoan.OriginalLoanDetaild;
+            LoanList ll = env.theLoan.OriginalLoanDetaild;
             foreach (loanDetails ld in ll)
             {
                 Console.WriteLine(
@@ -208,5 +213,99 @@ namespace WisorLibrary.Reporting
             }
 
         }
+
+ 
+        public static void LongReportDebug(CultureInfo cultureInfo, LongReportDataObject lrdo)
+        {
+            // enable Hebrew in the console
+            //Console.OutputEncoding = new UTF8Encoding();
+ 
+            Console.WriteLine(
+                "\n\n 2.: " + Translator.GetStringByLanguage(/*lrdo.*/"MainHeader2") + "\n" +
+                Translator.GetStringByLanguage(/*lrdo.*/"OrderNumberTitle") + " : " + lrdo.OrderNumberValue + "\n" +
+                Translator.GetStringByLanguage(/*lrdo.*/"EmailTitle") + " : " + lrdo.EmailValue + "\n" +
+                "\n 2.1.: " + Translator.GetStringByLanguage(/*lrdo.*/"MainHeader21") + "\n" +
+                // right column
+                Translator.GetStringByLanguage(/*lrdo.*/"TransactionTypeTitle") + " : " + Translator.ReverseStringByLanguage(lrdo.TransactionTypeValue) + "\n" +
+                Translator.GetStringByLanguage(/*lrdo.*/"MortgagedPropertyValueTitle") + " : " + lrdo.MortgagedPropertyValueValue + "\n" +
+                Translator.GetStringByLanguage(/*lrdo.*/"DesireLoanAmountTitle") + " : " + lrdo.DesireLoanAmountValue + "\n" +
+                Translator.GetStringByLanguage(/*lrdo.*/"ExistingCapitalTitle") + " : " + lrdo.ExistingCapitalValue + "\n" +
+                Translator.GetStringByLanguage(/*lrdo.*/"DesireMonthlyReturnTitle") + " : " + lrdo.DesireMonthlyReturnValue + "\n" +
+                Translator.GetStringByLanguage(/*lrdo.*/"EstimateAccessToProprtyTitle") + " : " + lrdo.EstimateAccessToProprtyValue + "\n" +
+                Translator.GetStringByLanguage(/*lrdo.*/"CurrentlyRentalPayTitle") + " : " + lrdo.CurrentlyRentalPayValue + "\n" +
+
+                // middle column
+                Translator.GetStringByLanguage(/*lrdo.*/"NumberOfBorrowersTitle") + " : " + lrdo.NumberOfBorrowersValue + "\n" +
+                Translator.GetStringByLanguage(/*lrdo.*/"YoungestBorrowerAgeTitle") + " : " + lrdo.YoungestBorrowerAgeValue + "\n" +
+                Translator.GetStringByLanguage(/*lrdo.*/"TotalNetIncomeTitle") + " : " + lrdo.TotalNetIncomeValue + "\n" +
+                Translator.GetStringByLanguage(/*lrdo.*/"PriorLiabilitiesTitle") + " : " + Translator.TranslateBoolToYesOrNo2(0 < lrdo.PriorLiabilitiesValue.Length) + "\n" +
+                Translator.GetStringByLanguage(/*lrdo.*/"FutureReleasesTitle") + " : " + Translator.TranslateBoolToYesOrNo2(0 < lrdo.FutureReleasesValue.Length) + "\n" +
+                Translator.GetStringByLanguage(/*lrdo.*/"FixedSavingsTitle") + " : " + Translator.TranslateBoolToYesOrNo2(0 < lrdo.FixedSavingsValue.Length) + "\n" +
+
+                // left column
+                Translator.GetStringByLanguage(/*lrdo.*/"FinincingRateTitle") + " : " + lrdo.FinincingRateValue + "\n" +
+                Translator.GetStringByLanguage(/*lrdo.*/"ReturnOnIncomeRatioTitle") + " : " + lrdo.ReturnOnIncomeRatioValue);
+
+            // the tables
+            // right table
+            if (0  < lrdo.PriorLiabilitiesTableValues.Length)
+            {
+                Console.WriteLine(Translator.GetStringByLanguage(/*lrdo.*/"PriorLiabilitiesTableTitle"));
+                Console.WriteLine(Translator.GetStringByLanguage(/*lrdo.*/"PriorLiabilitiesTableMonthlyReturnTitle") + " : " +
+                    Translator.GetStringByLanguage(/*lrdo.*/"PriorLiabilitiesTableEndDateTitle"));
+
+
+                for (int i = 0; i < lrdo.PriorLiabilitiesTableValues.Length; i++)
+                {
+                    Console.WriteLine(lrdo.PriorLiabilitiesTableValues[i].MonthlyReturn + " : " +
+                        lrdo.PriorLiabilitiesTableValues[i].Date);
+                }
+            }
+
+            // middle table
+            if (0 < lrdo.FutureReleasesTableValues.Length)
+            {
+                Console.WriteLine(Translator.GetStringByLanguage(/*lrdo.*/"FutureReleasesTableTitle"));
+                Console.WriteLine(Translator.GetStringByLanguage(/*lrdo.*/"FutureReleasesTableAmountTitle") + " : " 
+                    + Translator.GetStringByLanguage(/*lrdo.*/"FutureReleasesTableDateTitle"));
+
+                for (int i = 0; i < lrdo.FutureReleasesTableValues.Length; i++)
+                {
+                    Console.WriteLine(lrdo.FutureReleasesTableValues[i].Amount + " : " +
+                        lrdo.FutureReleasesTableValues[i].Date);
+                }
+            }
+
+            // left table
+            if (0 < lrdo.FixedSavingsTableValues.Length)
+            {
+                Console.WriteLine(Translator.GetStringByLanguage(/*lrdo.*/"FixedSavingsTableTitle"));
+                Console.WriteLine(Translator.GetStringByLanguage(/*lrdo.*/"FixedSavingsTableAmountTitle") + " : " +
+                    Translator.GetStringByLanguage(/*lrdo.*/"FixedSavingsTableSavingTypeTitle") + " : " +
+                    Translator.GetStringByLanguage(/*lrdo.*/"FixedSavingsTableAverageYieldTitle") + " : " +
+                    Translator.GetStringByLanguage(/*lrdo.*/"FixedSavingsTableLiquidTitle"));
+
+                for (int i = 0; i < lrdo.FixedSavingsTableValues.Length; i++)
+                {
+                    Console.WriteLine(lrdo.FixedSavingsTableValues[i].Amount + " : " +
+                        Translator.ReverseStringByLanguage(lrdo.FixedSavingsTableValues[i].SavingType) + " : " +
+                        lrdo.FixedSavingsTableValues[i].AverageYield + " : " + 
+                        Translator.TranslateBoolToYesOrNo(lrdo.FixedSavingsTableValues[i].Liquid));
+                }
+            }
+
+            // 2.2. section
+            Console.WriteLine("\n 2.1.: " + Translator.GetStringByLanguage(/*lrdo.*/"MainHeader22") + "\n" +
+                Translator.GetStringByLanguage(/*lrdo.*/"ExpectedPropertyHoldingTimeTitle") + " : " +
+                Translator.ReverseStringByLanguage(lrdo.ExpectedPropertyHoldingTimeValue) +  "\n" +
+                Translator.GetStringByLanguage(/*lrdo.*/"StabilityAndLiquidityTitle") + " : " +
+                Translator.ReverseStringByLanguage(lrdo.StabilityAndLiquidityValue) + "\n" +
+                Translator.GetStringByLanguage(/*lrdo.*/"ExpectedChangesTitle") +" : " +
+                Translator.ReverseStringByLanguage(lrdo.ExpectedChangesValue));
+
+
+
+        }
+
     }
 }
