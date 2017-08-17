@@ -32,12 +32,19 @@ namespace WisorLibrary.DataObjects
                 if (!Directory.Exists(Path.GetDirectoryName(filename)))
                     Directory.CreateDirectory(Path.GetDirectoryName(filename));
 
-                fileStream = new StreamWriter(filename, append);
-                // will flush its buffer to the underlying stream after every call to StreamWriter.Write.
-                // bad performance, yet enable to break the run in the middle and still get the output lines
-                // but without the summary.....
-                // that's life 
-                fileStream.AutoFlush = true;
+                try
+                {
+                    fileStream = new StreamWriter(filename, append);
+                    // will flush its buffer to the underlying stream after every call to StreamWriter.Write.
+                    // bad performance, yet enable to break the run in the middle and still get the output lines
+                    // but without the summary.....
+                    // that's life 
+                    fileStream.AutoFlush = true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("ERROR: PrintLog2CSV got Exception: " + ex.ToString());
+                }
             }
         }
 

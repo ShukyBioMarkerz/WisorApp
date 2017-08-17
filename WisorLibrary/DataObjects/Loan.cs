@@ -262,9 +262,9 @@ namespace WisorLib
 
             resultReportData.CalculationTime = DateTime.Now - resultReportData.StartTime;
             resultReportData.SetCompositionData(cleanComp);
-            resultReportData.SetLoanData(this);
-            resultReportData.SetEnvData(env);
-            resultReportData.Activate(shouldStoreInDB, shouldCreateHTMLReport, shouldCreatePDFReport);
+            //resultReportData.SetLoanData(this);
+            //resultReportData.SetEnvData(env);
+            resultReportData.Activate(env, shouldStoreInDB, shouldCreateHTMLReport, shouldCreatePDFReport);
             //resultReportData.CalculationTime = DateTime.Now - resultReportData.CalculationTime;
          }
     }

@@ -31,15 +31,19 @@ namespace WisorLibrary.DataObjects
         public double optRateFirstPeriod;
     }
 
+    //[Serializable]
+    // remove the Serializable for the sake of avoiding adding special cases for the setter functions
+    // consider use "Data Contracts" instead
     public class ResultReportData
     {
-        public loanDetails theLoan { get; set; }
+        //public loanDetails theLoan { get; set; }
 
-        public RunEnvironment env { get; set; }
+        [XmlIgnore]
+        //public RunEnvironment env { get; set; }
 
         // Loan data
         public string BankName;
-        public string ID { get; set; }
+        public string ID; // { get; set; }
         public string ProductName { get; set; }
         public uint PropertyValue { get; set; }
         public uint DesiredMonthlyPayment { get; set; }
@@ -121,15 +125,15 @@ namespace WisorLibrary.DataObjects
         //    return compositionReportData;
         //}
 
-        public void SetLoanData(loanDetails loan)
-        {
-            theLoan = loan;
-        }
+        //public void SetLoanData(loanDetails loan)
+        //{
+        //    theLoan = loan;
+        //}
 
-        public void SetEnvData(RunEnvironment  env)
-        {
-            this.env = env;
-        }
+        //public void SetEnvData(RunEnvironment  env)
+        //{
+        //    this.env = env;
+        //}
 
         
         public void SetCompositionData(Composition[] compositions)
@@ -142,11 +146,11 @@ namespace WisorLibrary.DataObjects
             
         }
 
-        public void Activate(bool shouldStoreInDB, bool shouldCreateHTMLReport, bool shouldCreatePDFReport)
+        public void Activate(RunEnvironment env, bool shouldStoreInDB, bool shouldCreateHTMLReport, bool shouldCreatePDFReport)
         {
             bool shouldThisLoanReFinance;
 
-            UpdateGeneralResults(out shouldThisLoanReFinance);
+            UpdateGeneralResults(env, out shouldThisLoanReFinance);
 
             WindowsUtilities.loggerMethod("\nCreating report for loan: " + this.ID + " shouldThisLoanReFinance: " + shouldThisLoanReFinance +
                 ", shouldCreatePDFReport: " + shouldCreatePDFReport);
@@ -169,7 +173,7 @@ namespace WisorLibrary.DataObjects
                     }
 
                     if (!String.IsNullOrEmpty(HTMLfilename) || !String.IsNullOrEmpty(PDFfilename))
-                        Reporter.LenderReport(this, HTMLfilename, PDFfilename, Share.cultureInfo,
+                        Reporter.LenderReport(env, HTMLfilename, PDFfilename, Share.cultureInfo,
                             false /*isPrintCovers*/);
 
                     //// store in XML file
@@ -193,7 +197,7 @@ namespace WisorLibrary.DataObjects
         // manage the summery file updating the bulk of loans results
         // store for each loan: id, amount, savings, calculation time
         // TBD - omri.
-        void UpdateGeneralResults(out bool shouldThisLoanReFinance)
+        void UpdateGeneralResults(RunEnvironment env, out bool shouldThisLoanReFinance)
         {
             bool totalBenefitPerLoan = false;
             bool noCompositionFounded = true;
@@ -228,7 +232,7 @@ namespace WisorLibrary.DataObjects
                     int ttlBankPay, ttlBorrowerPay, ttlProfit;
                     MiscUtilities.CalcaulateProfit(comp, out ttlBankPay, out ttlBorrowerPay, out ttlProfit);
                     int borrowerProfitCalc, bankProfitCalc, totalBenefit, bankOriginalProfit;
-                    MiscUtilities.CalcaulateProfitAll(comp, theLoan, 
+                    MiscUtilities.CalcaulateProfitAll(comp, env.theLoan, 
                         out borrowerProfitCalc, out bankProfitCalc, out totalBenefit, out bankOriginalProfit);
                     comp.BorrowerProfitCalc = borrowerProfitCalc;
                     comp.BankProfitCalc = bankProfitCalc;
@@ -242,20 +246,20 @@ namespace WisorLibrary.DataObjects
                     shouldReFinance = canBorrowerSave && canLenderProfit;
                     shouldThisLoanReFinance = shouldThisLoanReFinance || shouldReFinance;
                     totalBenefitPerLoan = totalBenefitPerLoan || (0 < totalBenefit);
-                    totalProfitPercantage = ((double) totalBenefit / theLoan.LoanAmount * 100);
+                    totalProfitPercantage = ((double) totalBenefit / env.theLoan.LoanAmount * 100);
                     canIncreaseTotalProfit = (0 < totalBenefit);
                     comp.IsWinWin = shouldReFinance;
 
                     string[] msg = {
-                        theLoan.ID, // "Loan ID",
-                        theLoan.OriginalLoanAmount.ToString(), // "Original Loan Amount",
-                        theLoan.OriginalDateTaken.ToString(), // "Date Taken",
-                        theLoan.LoanAmount.ToString(), // "Remaining Amount",
-                        theLoan.resultReportData.PayUntilToday.ToString(), // "Borrower Paid So Far",
-                        theLoan.resultReportData.BankPayUntilToday.ToString(), // "Bank Profit So Far",
-                        theLoan.resultReportData.PayFuture.ToString(), // "Borrower Future Payment",
-                        theLoan.resultReportData.BankPayFuture.ToString(), // "Lender Future Payment",
-                        (theLoan.resultReportData.PayFuture - theLoan.resultReportData.BankPayFuture).ToString(), // "Orig Bank Future Profit",
+                        env.theLoan.ID, // "Loan ID",
+                        env.theLoan.OriginalLoanAmount.ToString(), // "Original Loan Amount",
+                        env.theLoan.OriginalDateTaken.ToString(), // "Date Taken",
+                        env.theLoan.LoanAmount.ToString(), // "Remaining Amount",
+                        env.theLoan.resultReportData.PayUntilToday.ToString(), // "Borrower Paid So Far",
+                        env.theLoan.resultReportData.BankPayUntilToday.ToString(), // "Bank Profit So Far",
+                        env.theLoan.resultReportData.PayFuture.ToString(), // "Borrower Future Payment",
+                        env.theLoan.resultReportData.BankPayFuture.ToString(), // "Lender Future Payment",
+                        (env.theLoan.resultReportData.PayFuture - env.theLoan.resultReportData.BankPayFuture).ToString(), // "Orig Bank Future Profit",
                         (shouldReFinance ? "Yes" : "No" ), // "Refinance Or No",
                         (canBorrowerSave ? "Yes" : "No" ), // "Can Save Borrower Money",
                         (canLenderProfit ? "Yes" : "No" ), // "Can Increase Lender Profit",
@@ -264,7 +268,7 @@ namespace WisorLibrary.DataObjects
                         ttlBankPay.ToString(), // "Lender pay"
                         ttlProfit.ToString(), // "Maximim Lender Profit"
                         borrowerProfitCalc.ToString(), // diff of Borrower Future between the 2 options
-                        ((double) borrowerProfitCalc / theLoan.LoanAmount * 100).ToString(),// Borrower beneficial%
+                        ((double) borrowerProfitCalc / env.theLoan.LoanAmount * 100).ToString(),// Borrower beneficial%
                         bankProfitCalc.ToString(), // diff of Bank Future between the 2 options
                         // bank benefit % = difference in the bank benefit / original benefit
                         ((double) (bankProfitCalc - bankOriginalProfit) / bankOriginalProfit * 100).ToString(),
@@ -272,11 +276,11 @@ namespace WisorLibrary.DataObjects
                         totalBenefit.ToString(), // total benefit
                         totalProfitPercantage.ToString(), // total benefit percantage
                         comp.name, // for debug - print the composition name
-                        theLoan.BorrowerAge.ToString(), // "Age",
-                        theLoan.resultReportData.LTV.ToString(), //"LTV",
-                        theLoan.resultReportData.PTI.ToString(), // "PTI",
-                        theLoan.YearlyIncome.ToString(), //"Income"
-                        theLoan.fico.ToString() // fico
+                        env.theLoan.BorrowerAge.ToString(), // "Age",
+                        env.theLoan.resultReportData.LTV.ToString(), //"LTV",
+                        env.theLoan.resultReportData.PTI.ToString(), // "PTI",
+                        env.theLoan.YearlyIncome.ToString(), //"Income"
+                        env.theLoan.fico.ToString() // fico
                     };
 
                     MiscUtilities.PrintSummaryFile(msg);
@@ -347,7 +351,7 @@ namespace WisorLibrary.DataObjects
 
            if (noCompositionFounded) // no composition was found
            {
-                string[] ms = { theLoan.ID, "No composition founded for load id: " };
+                string[] ms = { env.theLoan.ID, "No composition founded for load id: " };
                 MiscUtilities.PrintSummaryFile(ms);
            }
 
@@ -361,15 +365,15 @@ namespace WisorLibrary.DataObjects
             if (shouldThisLoanReFinance)
             {
                 string[] msgn = {
-                        theLoan.ID, // "Loan ID",
-                        theLoan.OriginalLoanAmount.ToString(), // "Original Loan Amount",
-                        theLoan.OriginalDateTaken.ToString(), // "Date Taken",
-                        theLoan.LoanAmount.ToString(), // "Remaining Amount",
-                        theLoan.resultReportData.PayUntilToday.ToString(), // "Borrower Paid So Far",
-                        theLoan.resultReportData.BankPayUntilToday.ToString(), // "Bank Profit So Far",
-                        theLoan.resultReportData.PayFuture.ToString(), // "Borrower Future Payment",
-                        theLoan.resultReportData.BankPayFuture.ToString(), // "Lender Future Payment",
-                        (theLoan.resultReportData.PayFuture - theLoan.resultReportData.BankPayFuture).ToString(), // "Orig Bank Future Profit",
+                        env.theLoan.ID, // "Loan ID",
+                        env.theLoan.OriginalLoanAmount.ToString(), // "Original Loan Amount",
+                        env.theLoan.OriginalDateTaken.ToString(), // "Date Taken",
+                        env.theLoan.LoanAmount.ToString(), // "Remaining Amount",
+                        env.theLoan.resultReportData.PayUntilToday.ToString(), // "Borrower Paid So Far",
+                        env.theLoan.resultReportData.BankPayUntilToday.ToString(), // "Bank Profit So Far",
+                        env.theLoan.resultReportData.PayFuture.ToString(), // "Borrower Future Payment",
+                        env.theLoan.resultReportData.BankPayFuture.ToString(), // "Lender Future Payment",
+                        (env.theLoan.resultReportData.PayFuture - env.theLoan.resultReportData.BankPayFuture).ToString(), // "Orig Bank Future Profit",
 
                         // add the accululate data
                         maxBorrowerPayment.ToString() ,
