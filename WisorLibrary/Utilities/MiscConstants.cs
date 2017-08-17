@@ -109,6 +109,8 @@ namespace WisorLib
         public const string FROM_IDS_LOAD_LOANS = "FROM_IDS_LOAD_LOANS";
         internal static string LENDER_REPORT_PREFIX = "LenderReport";
         internal static string BORROWER_REPORT_PREFIX = "BorrowerReport";
+        internal static string HEBREW_PREFIX = "HEB";
+        internal static string ENGLISH_PREFIX = "EN";
 
         internal static string shouldConsider = "shouldConsider";
         internal static string Product = "Product";
@@ -133,6 +135,7 @@ namespace WisorLib
         public static uint DEFAULT_PERCANTAGE_OF_MONTHLY_PAYMENT = 30;
 
         public static uint NUM_OF_PRODUCTS_IN_COMBINATION = 3;
+        public static uint MAX_NUM_OF_COMBINATION_TO_SELECT = 3;
 
         public const int NumberOfProfiles = 6;
         public const int NumberOfYearsFrProduct = 27;

@@ -19,7 +19,9 @@ namespace WisorLib
     {
         static public MyDelegate loggerMethod { get; set; }
 
-        static public MyRunDelegate runLoanMethod { get; set; }
+        static public MyRunDelegate runSingleLoanASyncMethod { get; set; }
+        static public MyRunDelegate runSingleLoanSyncMethod { get; set; }
+
         static public MyRunDelegateListOfLoans runLoanMethodSync { get; set; }
         static public MyRunDelegateListOfLoans runLoanMethodASync { get; set; }
 

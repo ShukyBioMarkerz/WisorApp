@@ -265,6 +265,19 @@ namespace WisorLibrary.Utilities
                         compL.Add(comp);
             }
 
+            // ensure the composition number is obeyed
+            if (compL.Count > MiscConstants.MAX_NUM_OF_COMBINATION_TO_SELECT)
+            {
+                // TBD - how to decide which combination to preffer?
+                for (int i = compL.Count; i > MiscConstants.MAX_NUM_OF_COMBINATION_TO_SELECT; i--)
+                {
+                    // to be on the safe side....
+                    int loc = i - 1;
+                    if (0 <= loc)
+                        compL.RemoveAt(loc);
+                }
+                
+            }
             return compL.ToArray();
         }
 
@@ -583,10 +596,21 @@ namespace WisorLibrary.Utilities
             return true;
         }
 
-        public static void LoadXMLConfigurationFile(string filename)
+        public static bool LoadXMLConfigurationFile(string filename, bool isFullConfigFilename)
         {
-            string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + Share.DataDirectory + Path.DirectorySeparatorChar;
-            string fullFilename = dir + filename;
+            string fullFilename = MiscConstants.UNDEFINED_STRING, dir = MiscConstants.UNDEFINED_STRING;
+
+            if (isFullConfigFilename)
+            {
+                fullFilename = filename;
+                dir = System.IO.Path.GetDirectoryName(filename) + Path.DirectorySeparatorChar;
+            }
+            else
+            {
+                dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + Share.DataDirectory + Path.DirectorySeparatorChar;
+                fullFilename = dir + filename;
+            }
+            bool rc = false;
 
             try
             {
@@ -596,6 +620,9 @@ namespace WisorLibrary.Utilities
 
                     //load up the xml from the location 
                     doc.Load(fullFilename);
+
+                    if (0 < doc.DocumentElement.ChildNodes.Count)
+                        rc = true;
 
                     // cycle through each child noed 
                     foreach (XmlNode child in doc.DocumentElement.ChildNodes)
@@ -701,7 +728,7 @@ namespace WisorLibrary.Utilities
             {
                 WindowsUtilities.loggerMethod("NOTICE: LoadXMLConfigurationFile Exception occured: " + ex.ToString());
             }
-
+            return rc;
         }
 
         // look if the file already set in the Shared object; if not - look for it
@@ -991,8 +1018,9 @@ namespace WisorLibrary.Utilities
         // start some log files for misc. logging
         public static void OpenMiscLogger()
         {
-            Share.theMiscLogger = new LoggerFile(Share.tempLogFile /*+ OrderID*/ + MiscConstants.CSV_EXT /*".txt"*/,
-               MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
+            if (Share.shouldDebugLoans)
+                Share.theMiscLogger = new LoggerFile(Share.tempLogFile /*+ OrderID*/ + MiscConstants.CSV_EXT /*".txt"*/,
+                    MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
         }
 
         public static void CloseMiscLogger()
@@ -1088,16 +1116,19 @@ namespace WisorLibrary.Utilities
 
         public static void OpenSummaryFile()
         {
-            Share.theSummaryFile = new LoggerFile(Share.summaryLogFile +
+            if (Share.shouldDebugLoans)
+            {
+                Share.theSummaryFile = new LoggerFile(Share.summaryLogFile +
                 DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT,
                MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
 
-            // add the header
-            string[] msg = summaryHeader();
-            PrintSummaryFile(msg);
+                // add the header
+                string[] msg = summaryHeader();
+                PrintSummaryFile(msg);
 
-            // Ugly but short...
-            OpenSummaryFileS();
+                // Ugly but short...
+                OpenSummaryFileS();
+            }
         }
 
         public static void CloseSummaryFile()
@@ -1391,13 +1422,16 @@ namespace WisorLibrary.Utilities
             return value;
         }
 
-
-        static public string GetReportFileName(string id, FileType fileType)
+        
+        static public string GetReportFileName(string id, FileType fileType, bool isLender = true)
         {
             string ext = MiscUtilities.GetFileTypeExtension(fileType);
-            string fn = AppDomain.CurrentDomain.BaseDirectory
-                + MiscConstants.REPORTS_DIR + Path.DirectorySeparatorChar +
-                MiscConstants.LENDER_REPORT_PREFIX + MiscConstants.NAME_SEP_CHAR + id + MiscConstants.NAME_SEP_CHAR +
+            string lenderOrBorrowerPrefix = (isLender ? MiscConstants.LENDER_REPORT_PREFIX : MiscConstants.BORROWER_REPORT_PREFIX);
+            string languagePrefix = (Share.cultureInfo.Name.Equals("he-IL") ? MiscConstants.HEBREW_PREFIX : MiscConstants.ENGLISH_PREFIX);
+            string fn = AppDomain.CurrentDomain.BaseDirectory +
+                MiscConstants.REPORTS_DIR + Path.DirectorySeparatorChar +
+                lenderOrBorrowerPrefix + MiscConstants.NAME_SEP_CHAR + 
+                languagePrefix + MiscConstants.NAME_SEP_CHAR + id + MiscConstants.NAME_SEP_CHAR +
                 DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + ext;
             
             return fn;
@@ -1416,9 +1450,13 @@ namespace WisorLibrary.Utilities
             WindowsUtilities.loggerMethod = func;
         }
 
-        static void SetRunLoanFunc(MyRunDelegate func)
+        static void SetRunSingleLoanFuncASync(MyRunDelegate func)
         {
-            WindowsUtilities.runLoanMethod = func;
+            WindowsUtilities.runSingleLoanASyncMethod = func;
+        }
+        static void SetRunSingleLoanFuncSync(MyRunDelegate func)
+        {
+            WindowsUtilities.runSingleLoanSyncMethod = func;
         }
 
         static void SetRunLoanFuncSync(MyRunDelegateListOfLoans func)
@@ -1431,10 +1469,13 @@ namespace WisorLibrary.Utilities
         }
 
 
-        static public void SetupAllEnv()
+        static public bool SetupAllEnv(string dataDirectory = null)
         {
+            bool rc = false;
+ 
             //SetRunLoanFunc(Utilities.RunTheLoansSync);
-            SetRunLoanFunc(MultiThreadingManagment.RunTheLoanASync);
+            SetRunSingleLoanFuncASync(MultiThreadingManagment.runSingleLoanASyncMethod);
+            SetRunSingleLoanFuncSync(MultiThreadingManagment.runSingleLoanSyncMethod);
             SetRunLoanFuncSync(MultiThreadingManagment.RunTheLoansWraperSync);
             SetRunLoanFuncASync(MultiThreadingManagment.RunTheLoansWraperASync);
 
@@ -1467,7 +1508,7 @@ namespace WisorLibrary.Utilities
             //Share.ShouldStoreHTMLReport = true;
             Share.LoansLoadFromLine = MiscConstants.UNDEFINED_UINT;
             Share.LoansLoadIDsFromLine = MiscConstants.UNDEFINED_STRING;
-            Share.shouldDebugLoans = false;
+            Share.shouldDebugLoans = true;
             Share.shouldDebugLuchSilukin = false;
             Share.ShouldCreateCombinationDynamickly = false;
 
@@ -1484,12 +1525,58 @@ namespace WisorLibrary.Utilities
             Share.shouldRunSync = true;
             Share.shouldRunLogicSync = true;
             Share.shouldCreatePDFReport = false; //true;
-            Share.DataDirectory = MiscConstants.DATA_DIR;
+
+            bool isFullConfigFilename = false;
+            string configFilename = MiscConstants.CONFIGURATION_FILE;
+
+            if (null != dataDirectory)
+            {
+                Share.DataDirectory = dataDirectory;
+                isFullConfigFilename = true;
+                configFilename = dataDirectory + Path.DirectorySeparatorChar + MiscConstants.CONFIGURATION_FILE;
+            }
+            else
+            {
+                Share.DataDirectory = MiscConstants.DATA_DIR;
+            }
 
             // load the configuration file
-            MiscUtilities.LoadXMLConfigurationFile(MiscConstants.CONFIGURATION_FILE);
+            if (null == WindowsUtilities.loggerMethod)
+            {
+                SetLogger(LogFunction);
+            }
+            rc = MiscUtilities.LoadXMLConfigurationFile(configFilename, isFullConfigFilename);
+
+            return rc;
         }
 
+        static public void LogFunction(string msg, bool write2console = true, bool shouldColor = false)
+        {
+            Console.WriteLine(msg);
+        }
+
+        // support languages...
+        static public string GetStringByLanguage(CultureInfo culture, string name)
+        {
+            string tmp = WisorLibrary.Language.ResourceManager.GetString(name, culture);
+            if (!string.IsNullOrEmpty(tmp))
+            {
+                if (culture.Name.Equals("he-IL"))
+                {
+                    tmp = new string(tmp.Reverse().ToArray());
+                }
+                else
+                {
+
+                }
+            }
+            else
+            {
+                tmp = name;
+            }
+
+            return tmp; 
+        }
 
     }
 
