@@ -1,68 +1,132 @@
 ﻿
-                <div class="header-bar">
-                    <div class="header-logo"></div>
-                    <div class="header-left-text">{0}</div>
-                </div>
+<div class="header-bar">
+    <div class="header-logo">
+        <img class="wisor-logo" src="images/logo.png" />
+    </div>
 
-                <div class="row" style="position: relative; top: 60px; margin-bottom: 160px;">
-                    <div class="col-md-12 case-title">
-                        <p class="text-center large-title">Case {1} - {2}</p>
-                    </div>
-                </div>
+    <!--<div class="header-left-text">{0}</div>-->
+    <img class="header-left-logo" src="{1}" />
+</div>
 
 
+<div class="row" style="position: relative; top: 60px; margin-bottom: 60px;">
+    <div class="col-md-12 case-title">
+        <p class="text-center large-title">Case {2}</p>
+    </div>
+</div>
 
 
-                <div class="row tables-container-page-2">
-                    <div class="col-md-6" style="margin-bottom: 60px;">
-                        <div style="border-style:unset;">
-                            <table class="original-loan table-sm">
-                                <tr style="font-weight:bold;"><td style="border-bottom: 1px solid black;" colspan="2">Original Loan:</td></tr>
-                                <tr><td style="width:260px;">Date taken:</td><td>{3}</td></tr>
-                                <tr><td>Amount taken:</td><td>{4}</td></tr>
-                                <tr><td>Product:</td><td>{5}</td></tr>
-                                <tr><td>Term:</td><td>{6}</td></tr>
-                                <tr><td>Rate:</td><td>{7}</td></tr>
-                                <tr><td style='font-weight:bold;'>First monthly payment:</td><td style='font-weight:bold;'>{8}</td></tr>
-                                <tr><td>Total income:</td><td>{9}</td></tr>
-                                <tr><td>Debt-to-incme:</td><td>{10}</td></tr>
-                                <tr><td>Paid until today:</td><td>{11}</td></tr>
-                                <tr><td style='font-weight:bold;'>Left to pay:</td><td style='font-weight:bold;'>{12}</td></tr>
-                                <tr><td style='font-weight:bold;'>Estimated future payment:</td><td style='font-weight:bold;'>{13}</td></tr>
-                
-                                <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
 
-                                <tr><td style='font-weight:bold;'>Product margin:</td><td style='font-weight:bold;'>{14}</td></tr>
-                              
 
-                                <tr><td>Estimated % profits so far:</td><td>{15}</td></tr>
-                                <tr style='font-weight:bold;'><td>Estimated profit so far:</td><td>{16}</td></tr>
-                                <tr><td>Estimated total % profit:</td><td>{17}</td></tr>
-                                <tr><td>Estimated total profit:</td><td>{18}</td></tr>
-                                <tr><td>Estimated future % profit:</td><td style='font-weight:bold;'>{19}</td></tr>
-                                <tr style='font-weight:bold;'><td>Estimated future profit:</td><td>{20}</td></tr>
-                            </table>
-                    </div>
-                        </div>
+<div class="row tables-container-page-3">
 
-                    <div class="col-md-6" style="align-content:center;">
-                        <div style="position:relative; border-style:unset;">
-                                <table>
-                                    <tr><td style="text-align: left; font-size: 16px; font-weight: bold;">Products used in analysis:</td></tr>
-                                </table>
-                                <table class="table-sm products-used-in-analysis">
-                                    <thead>
-                                        <tr>       
-                                            <th style="text-align: center; width:60px;">#</th>
-                                            <th style="text-align: center; width:100px;">Product</th>
-                                            <th style="text-align: center; width:95px;">Rate</th>
-                                            <th style="text-align: center; width:95px;">Margin</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {21}
-                                    </tbody>
-                                </table>
-                         </div>
-                     </div>
-                </div>
+    <div class="col-md-12">
+        <div style="position:relative; border-style:unset; padding-bottom: 60px;">
+
+            <div class="hide-in-desktop-view" style="position: relative; left: 0px; padding-bottom: 6px; display: block; font-weight: bold; font-size: 14px; text-align: left;">Original Loan:</div>
+
+
+            <table class="composition_table" style="position: relative; width: 100%;">
+                <thead style="position: relative;">
+                    <tr style="position: relative;"><th style="position:relative; padding-bottom: 8px; border-top: 1px solid white; border-bottom: 0px solid white;border-left: 1px solid white; border-right: 0px solid white; font-size: 16px; text-align: left;">Original Loan:</th></tr>
+                </thead>
+            </table>
+
+
+            <table class="original-loan table-sm" style="width: 100%;">
+
+                <thead>
+                    <tr>
+                        <th style="width:90px;">Amount</th>
+                        <th style="width:120px;">Product</th>
+                        <th style="width:50px;">Time</th>
+                        <th style="width:50px;">Rate</th>
+                        <th style="width:50px;">Indexed</th>
+                        <th style="width:70px;">Return</th>
+                        <th style="width:100px;">Pay so far</th>
+                        <th style="width:100px;">Balance to pay</th>
+                        <th style="width:130px;">Future payment forecast</th>
+
+                        <th style="width:60px; position:relative; border-top: 0px solid white; border-bottom: 0pt solid white;">&nbsp;</th>
+
+                        <th style="width:100px;">Profit so far</th>
+                        <th style="width:120px;">Profit so far %</th>
+
+                        <th style="width:120px;">Expected future profit</th>
+                        <th style="width:120px;">Expected future profit %</th>
+                </thead>
+                <tbody>
+                    {3}
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+<div class="row tables-container-page-3">
+
+
+
+    <div class="col-md-9" style="padding-bottom: 60px;">
+        <div style="position:relative; border-style:unset;">
+
+            <div class="hide-in-desktop-view" style="position: absolute; left: 0px; display: block; font-weight: bold; font-size: 16px; text-align: left;">Products used in analysis:</div>
+
+
+            <table class="composition_table" style="position: absolute; width: 40%; left: 0px;">
+                <thead style="position: relative;">
+                    <tr style="position: relative;"><th style="position:relative; padding-bottom: 8px; border-top: 1px solid white; border-bottom: 0px solid white;border-left: 1px solid white; border-right: 0px solid white; font-size: 16px; text-align: left;">Products used in analysis:</th></tr>
+                </thead>
+            </table>
+
+
+            <table class="products-used-in-analysis table-sm" style="position: absolute; width: 60%; left: 0px; top: 35px;">
+                <thead>
+                    <tr>
+                        <th style="position: relative; width:5%;">#</th>
+                        <th style="position: relative; width:30%;">Product</th>
+                        <th style="position: relative; width:35%;">Rate</th>
+                        <th style="position: relative; width:35%;">Margin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {4}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+
+    <div class="col-md-3" style="padding-bottom: 60px;">
+        <table class="table-sm" style="position: absolute; left: 0px; font-size: 16px; <!--font-weight: bold;--> ">
+            <tr>
+                <td style='width:260px;'>Date taken</td>
+                <td style='width:85px;'>{5}</td>
+            </tr>
+            <tr style='border-top: 1px solid black;'>
+                <td style='width:260px;'>Property value</td>
+                <td style='width:85px;'>{6}</td>
+            </tr>
+            <tr style='border-top: 1px solid black;'>
+                <td style='width:260px;'>Monthly income</td>
+                <td style='width:85px;'>{7}</td>
+            </tr>
+
+        </table>
+    </div>
+
+
+
+
+</div>
