@@ -667,7 +667,7 @@ namespace WisorAppWpf
                 dateTaken, product, true /*shouldCalculate*/, originalRate, originalTime,
                 originalMargin, sequentialNumber, risk, liquidity);
            
-            WindowsUtilities.runLoanMethod(loan);
+            WindowsUtilities.runSingleLoanSyncMethod(loan);
         }
         
     }
