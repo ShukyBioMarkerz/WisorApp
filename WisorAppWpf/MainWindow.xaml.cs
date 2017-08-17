@@ -125,7 +125,7 @@ namespace WisorAppWpf
 
         private void InitSettings()
         {
-            MiscUtilities.SetupAllEnv();
+            bool rc = MiscUtilities.SetupAllEnv();
 
             // testing area
             //Tests.TestLuchSilukinCalculation();
@@ -139,8 +139,11 @@ namespace WisorAppWpf
             //Tests.TestHistoricIndexRate();
             //Tests.TestRatesLoading();
             //Tests.TestCombinations();
-            //Tests.SendSimpleMessage();
+            Tests.SendSimpleEmailMessage();
             //Tests.TestRiskLiquidity();
+            // Tests.TestCalculateMonthlyPmt();
+            //Tests.TestlanguageFunctionality();
+            //Tests.TestLongReportCreation();
 
         }
         private void Window_KeyDown(object sender, KeyEventArgs e)
