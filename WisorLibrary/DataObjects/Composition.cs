@@ -8,7 +8,9 @@ using WisorLibrary.Logic;
 
 namespace WisorLib
 {
-    [Serializable]
+    //[Serializable]
+    // remove the Serializable for the sake of avoiding adding special cases for the setter functions
+    // consider use "Data Contracts" instead
     public class Composition
     {
         // General Parameters
