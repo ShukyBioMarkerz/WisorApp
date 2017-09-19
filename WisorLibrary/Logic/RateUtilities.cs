@@ -57,13 +57,13 @@ namespace WisorLibrary.Logic
                 {
                     Status = rc;
                     WindowsUtilities.loggerMethod("ERROR RateUtilities failed to load borrower rates from file: " + filename);
-                   }
+                }
                 rc = LoadBankRates();
                 if (!rc)
                 {
                     Status = rc;
                     WindowsUtilities.loggerMethod("ERROR RateUtilities failed to load bank  rates from file: " + bankFilename);
-                 }
+                }
             }
             else
             {
