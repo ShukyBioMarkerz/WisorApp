@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WisorLib;
 using WisorLibrary.DataObjects;
+using WisorLibrary.ReportApplication;
 using WisorLibrary.Utilities;
 using static WisorLib.MiscConstants;
 
@@ -373,6 +374,106 @@ namespace WisorLibrary.Logic
             {
                 MiscUtilities.PrintMiscLogger(msg);
             }
+        }
+
+        // Calculate the luach silukin and get the entire monthly data as well
+        public static void CalculateLuahSilukinAllResults(indices indices,
+           double originalRate, double originalInflation,
+           double originalLoanAmount, uint originalLoanTime,
+           DateTime dateLoanTaken, ref AmortisationTable[] amortisationData,
+           RunEnvironment env, bool IsBank)
+        {
+            List<AmortisationTable> amortisationTable = new List<AmortisationTable>();
+            int NumOfYears = 0;
+            double interestPaidSoFar = MiscConstants.UNDEFINED_DOUBLE,
+                totalPaidSoFar = MiscConstants.UNDEFINED_DOUBLE,
+                principalPaidSoFar = MiscConstants.UNDEFINED_DOUBLE;
+            double startingAmount = originalLoanAmount;
+            //calculationData.RemaingLoanTime = originalLoanTime;
+            double primeMargin = MiscConstants.UNDEFINED_DOUBLE;
+            double historicRate = MiscUtilities.GetHistoricIndexRateForDate(indices, dateLoanTaken, originalRate,
+                out primeMargin, IsBank);
+            historicRate += primeMargin;
+            // the difference between the original rate and the historic rate define the base for the product
+            double productPlanRate = historicRate - originalRate;
+            double rate2calculateR = (IsBank ? historicRate : originalRate);
+            double r = ((rate2calculateR / 12 * 100000000) - ((rate2calculateR / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
+            double i = ((originalInflation / 12 * 100000000) - ((originalInflation / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
+            double monthlyPmt = CalculateMonthlyPmt(originalLoanAmount, originalLoanTime, historicRate, originalInflation); ;
+            //calculationData.FirstMonthlyPMT = (uint)Math.Round(monthlyPmt);
+            int numOfMonths = MiscUtilities.CalculateMonthBetweenDates(dateLoanTaken, DateTime.Now);
+            double currentRate = originalRate, ratePmt = MiscConstants.UNDEFINED_DOUBLE, principalPmt = MiscConstants.UNDEFINED_DOUBLE;
+            DateTime currentDate = dateLoanTaken;
+            int m;
+            double ratePmtFuture = MiscConstants.UNDEFINED_DOUBLE, principalPmtFuture = MiscConstants.UNDEFINED_DOUBLE, principalPayFuture = MiscConstants.UNDEFINED_DOUBLE,
+                 optTtlRatePayFuture = MiscConstants.UNDEFINED_DOUBLE,
+                 totalPaidFuture = MiscConstants.UNDEFINED_DOUBLE,
+                 startingAmountFuture, monthlyPmtFuture;
+            double redundantValue;
+ 
+            double monthlyPmtCalc;
+            for (m = 1; m <= numOfMonths; m++)
+            {
+                ratePmt = Math.Round((startingAmount * (1 + i) * r), 2);
+                principalPmt = monthlyPmt - ratePmt;
+                principalPaidSoFar += principalPmt;
+                interestPaidSoFar += ratePmt;
+                totalPaidSoFar += monthlyPmt;
+                //calculationData.RemaingLoanTime--;
+
+                // calculate the exact historical rate 
+                currentDate = dateLoanTaken.AddMonths(m);
+                //historicRate = MiscUtilities.GetHistoricIndexRateForPeriod(indices, currentDate);
+                historicRate = MiscUtilities.GetHistoricIndexRateForDate(indices, currentDate, originalRate,
+                    out redundantValue, IsBank);
+                historicRate += primeMargin;
+                currentRate = (IsBank ? historicRate : historicRate + productPlanRate);
+                r = ((currentRate / 12 * 100000000) - ((currentRate / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
+                startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
+                monthlyPmtCalc = Math.Round(CalculateMonthlyPmt(startingAmount, (uint)(originalLoanTime - m),
+                        currentRate, originalInflation), 2);
+                if (0 < (uint)Math.Round(monthlyPmtCalc))
+                {
+                    monthlyPmt = monthlyPmtCalc;
+                }
+
+                if (0 == m % 12)
+                {
+                    amortisationTable.Add(new AmortisationTable(NumOfYears, startingAmount /*remaining amount*/,
+                        totalPaidSoFar /*accululate payment*/));
+                    NumOfYears++;
+                }
+            }
+
+            startingAmountFuture = startingAmount;
+            monthlyPmtFuture = monthlyPmt;
+
+            // calculate from now till the end loan' time
+            for (/*m = numOfMonths*/; m <= originalLoanTime; m++)
+            {
+                ratePmtFuture = Math.Round((startingAmountFuture * (1 + i) * r), 2);
+                principalPmtFuture = monthlyPmtFuture - ratePmtFuture;
+                principalPayFuture += principalPmtFuture;
+                optTtlRatePayFuture += ratePmtFuture;
+                totalPaidFuture += monthlyPmtFuture;
+                startingAmountFuture = Math.Round((((startingAmountFuture) * (1 + i)) - principalPmtFuture), 2);
+                monthlyPmtCalc = Math.Round(
+                    CalculateMonthlyPmt(startingAmountFuture, (uint)(originalLoanTime - m),
+                    currentRate, originalInflation), 2);
+                if (0 < (uint)Math.Round(monthlyPmtCalc))
+                {
+                    monthlyPmtFuture = monthlyPmtCalc;
+                }
+
+                if (0 == m % 12)
+                {
+                    amortisationTable.Add(new AmortisationTable(NumOfYears, startingAmountFuture /*remaining amount*/,
+                        totalPaidSoFar + totalPaidFuture /*accululate payment*/));
+                    NumOfYears++;
+                }
+
+            }
+            amortisationData = amortisationTable.ToArray();
         }
 
 
