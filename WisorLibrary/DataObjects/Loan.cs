@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CommonObjects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -53,6 +54,8 @@ namespace WisorLib
 
         public ResultReportData resultReportData { set; get; }
 
+        // the input data from the user
+        public OrderDataContainer2 orderDataContainer2 { set; get; }
 
         [XmlIgnoreAttribute]
         public bool Status { set; get; }
@@ -255,8 +258,9 @@ namespace WisorLib
 
         }
 
+ 
         public void CompleteCalculation(Composition[]composition, bool shouldStoreInDB, 
-            bool shouldCreateHTMLReport, bool shouldCreatePDFReport, RunEnvironment env)
+            bool shouldCreateShortPDFReport, bool shouldCreateLongPDFReport, RunEnvironment env)
         {
             Composition[] cleanComp = MiscUtilities.CleanComposition(composition);
 
@@ -264,7 +268,8 @@ namespace WisorLib
             resultReportData.SetCompositionData(cleanComp);
             //resultReportData.SetLoanData(this);
             //resultReportData.SetEnvData(env);
-            resultReportData.Activate(env, shouldStoreInDB, shouldCreateHTMLReport, shouldCreatePDFReport);
+            resultReportData.Activate(env, shouldStoreInDB, shouldCreateShortPDFReport, shouldCreateLongPDFReport,
+                orderDataContainer2);
             //resultReportData.CalculationTime = DateTime.Now - resultReportData.CalculationTime;
          }
     }
