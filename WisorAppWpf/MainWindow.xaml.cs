@@ -139,11 +139,12 @@ namespace WisorAppWpf
             //Tests.TestHistoricIndexRate();
             //Tests.TestRatesLoading();
             //Tests.TestCombinations();
-            Tests.SendSimpleEmailMessage();
+            // Tests.SendSimpleEmailMessage();
+            //Tests.SendSimpleEmailMessageByMailgun();
             //Tests.TestRiskLiquidity();
             // Tests.TestCalculateMonthlyPmt();
             //Tests.TestlanguageFunctionality();
-            //Tests.TestLongReportCreation();
+            Tests.TestLongReportCreation();
 
         }
         private void Window_KeyDown(object sender, KeyEventArgs e)
