@@ -59,7 +59,7 @@ namespace WisorLibrary.DataObjects
             else
             {
 
-                if (String.IsNullOrEmpty(filename))
+                if (String.IsNullOrEmpty(filename) || !File.Exists(filename))
                 {
                     filename = Combinations.GetCombinationsFilename();
                 }
@@ -152,8 +152,9 @@ namespace WisorLibrary.DataObjects
             bool rc = Combinations.SetFilename(filename);
 
             if (rc)
-            // number all the combination
+            // number all the combination 
                 rc = ConvertProductsNaming();
+            WindowsUtilities.loggerMethod("NOTICE SetCombinationsFilename filename: " + filename + ", combinations4market.Length: " + Share.combinations4market.Length);
 
             return rc;
         }

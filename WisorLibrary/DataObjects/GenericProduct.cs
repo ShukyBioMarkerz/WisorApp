@@ -181,6 +181,8 @@ namespace WisorLib
             {
                 if (File.Exists(filename))
                 {
+                    WindowsUtilities.loggerMethod("LoadXMLProductsFile file: " + filename);
+
                     XDocument doc = XDocument.Load(filename);
 
                     // loop all the items in the document
