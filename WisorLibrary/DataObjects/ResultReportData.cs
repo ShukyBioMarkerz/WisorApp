@@ -10,6 +10,7 @@ using WisorLibrary.Reporting;
 using static WisorLib.MiscConstants;
 using System.Xml.Serialization;
 using System.Globalization;
+using WisorLibrary.ReportApplication;
 
 namespace WisorLibrary.DataObjects
 {
@@ -114,7 +115,9 @@ namespace WisorLibrary.DataObjects
         }
         public string TotalTimeElapsed { get; set; }
 
-   
+        public string ReportFilename { get; set; }
+
+
         public string[] GetProducts()
         {
             return Share.theProductsNames;
@@ -146,35 +149,51 @@ namespace WisorLibrary.DataObjects
             
         }
 
-        public void Activate(RunEnvironment env, bool shouldStoreInDB, bool shouldCreateHTMLReport, bool shouldCreatePDFReport)
+        public void Activate(RunEnvironment env, bool shouldStoreInDB, bool shouldCreateShortPDFReport, 
+            bool shouldCreateLongPDFReport, CommonObjects.OrderDataContainer2 orderDataContainer2)
         {
             bool shouldThisLoanReFinance;
 
             UpdateGeneralResults(env, out shouldThisLoanReFinance);
 
             WindowsUtilities.loggerMethod("\nCreating report for loan: " + this.ID + " shouldThisLoanReFinance: " + shouldThisLoanReFinance +
-                ", shouldCreatePDFReport: " + shouldCreatePDFReport);
-            if (shouldThisLoanReFinance && (shouldCreateHTMLReport || shouldCreatePDFReport))
+                ", shouldCreateShortPDFReport: " + shouldCreateShortPDFReport + ", shouldCreateLongPDFReport: " + shouldCreateLongPDFReport);
+            if (shouldThisLoanReFinance && (shouldCreateShortPDFReport || shouldCreateLongPDFReport))
             {
 
                 try
                 {
                     // TBD - calculate the time of creating the reposts
-                    string HTMLfilename = null, PDFfilename = null;
+                    string /*PDFfilename = null, */HTMLfilename = null;
 
                     // create the report
-                    if (shouldCreateHTMLReport)
-                    {
-                        HTMLfilename = MiscUtilities.GetReportFileName(ID, FileType.HTML);
-                    }
-                    if (shouldCreatePDFReport)
-                    {
-                        PDFfilename = MiscUtilities.GetReportFileName(ID, FileType.PDF);
-                    }
+                    ReportFilename = MiscUtilities.GetReportFileName(ID, FileType.PDF);
+                    Console.WriteLine("Notice: Set PDF report file: " + ReportFilename);
 
-                    if (!String.IsNullOrEmpty(HTMLfilename) || !String.IsNullOrEmpty(PDFfilename))
-                        Reporter.LenderReport(env, HTMLfilename, PDFfilename, Share.cultureInfo,
-                            false /*isPrintCovers*/);
+                    // does it the short or long report
+                    if (!String.IsNullOrEmpty(ReportFilename))
+                    {
+                        if (shouldCreateShortPDFReport)
+                        {
+                            bool shouldUseTheDirectPDFlib = false;
+                            string shouldUseTheDirectPDFlibStr = System.Configuration.ConfigurationManager.AppSettings["ShouldUseTheDirectPDFlib"];
+                            if (!String.IsNullOrEmpty(shouldUseTheDirectPDFlibStr) && MiscConstants._YES_KEY == shouldUseTheDirectPDFlibStr.ToLower())
+                                shouldUseTheDirectPDFlib = true;
+
+                            if (shouldUseTheDirectPDFlib)
+                            {
+                                bool rc = MiscUtilities.RunLongPDFreport(ReportFilename, orderDataContainer2, env.theLoan.resultReportData, Share.cultureInfo);
+                            }
+                            else
+                            {
+                                Reporter.LenderReport(env, HTMLfilename, ReportFilename, Share.cultureInfo,
+                                    false /*isPrintCovers*/);
+                            }
+                            
+                        }
+                        else if (shouldCreateLongPDFReport)
+                            CreateTheFullReport(env, ReportFilename, Share.cultureInfo);
+                    }
 
                     //// store in XML file
                     //if (shouldStoreInDB)
@@ -199,9 +218,14 @@ namespace WisorLibrary.DataObjects
         // TBD - omri.
         void UpdateGeneralResults(RunEnvironment env, out bool shouldThisLoanReFinance)
         {
+            bool IsItNewLoan = false;
             bool totalBenefitPerLoan = false;
             bool noCompositionFounded = true;
             shouldThisLoanReFinance = false;
+            // if the loan is new, always mark it as should refinance
+            int numOfMonths = MiscUtilities.CalculateMonthBetweenDates(env.theLoan.DateTaken, DateTime.Now);
+            if (numOfMonths <= 0)
+                shouldThisLoanReFinance = IsItNewLoan = true;
             int maxBorrowerPayment, maxBorrowerPayment_corrspondLenderPayment, maxBorrowerPayment_corrspondBorrowerSaving,
                 maxBorrowerPayment_corrspondLenderProfit;
             string maxBorrowerPayment_corrspondName;
@@ -243,7 +267,11 @@ namespace WisorLibrary.DataObjects
                     double totalProfitPercantage;
                     canBorrowerSave = (0 < borrowerProfitCalc); // (theLoan.resultReportData.PayFuture >= ttlBorrowerPay);
                     canLenderProfit = (0 < bankProfitCalc); // (bankOptionProfit <= ttlProfit);
-                    shouldReFinance = canBorrowerSave && canLenderProfit;
+                    // is it a new loan? so should refinince
+                    if (IsItNewLoan)
+                        shouldReFinance = true;
+                    else
+                        shouldReFinance = canBorrowerSave && canLenderProfit;
                     shouldThisLoanReFinance = shouldThisLoanReFinance || shouldReFinance;
                     totalBenefitPerLoan = totalBenefitPerLoan || (0 < totalBenefit);
                     totalProfitPercantage = ((double) totalBenefit / env.theLoan.LoanAmount * 100);
@@ -453,6 +481,37 @@ namespace WisorLibrary.DataObjects
                 ", BankPayFuture: " + BankPayFuture + ", RemaingLoanAmount: " + RemaingLoanAmount +
                 ", MonthlyPaymentCalc: " + MonthlyPaymentCalc;
             return s;
+        }
+
+        // the long report
+        public static void CreateTheFullReport(RunEnvironment env, string pdfFileName, CultureInfo cultureInfo)
+        {
+            ResultReportData reportData = env.theLoan.resultReportData;
+            LongReportDataObject lrdo = new LongReportDataObject(reportData, null /*OrderDataContainer*/, cultureInfo);
+
+            // Report Type
+            lrdo.CurrentReportType = LongReportDataObject.ReportType.Refinance_LoanInserted_PriceOffers;
+
+            // Test Another Types
+
+            //lrdo.CurrentReportType = LongReportDataObject.ReportType.PurchaseNew_NoPriceOffers;
+            //lrdo.CurrentReportType = LongReportDataObject.ReportType.PurchaseNew_PriceOffers;
+            //lrdo.CurrentReportType = LongReportDataObject.ReportType.PurchaseUsed_PriceOffers;
+            //lrdo.CurrentReportType = LongReportDataObject.ReportType.PurchaseUsed_NoPriceOffers;
+            //lrdo.CurrentReportType = LongReportDataObject.ReportType.Refinance_LoanInserted_NoPriceOffers;
+            //lrdo.CurrentReportType = LongReportDataObject.ReportType.Refinance_NoLoanInserted_NoPriceOffers;
+            //lrdo.CurrentReportType = LongReportDataObject.ReportType.Refinance_NoLoanInserted_PriceOffers;
+
+            // Changes Preferences 
+            lrdo.CurrentСhangesPreferences = LongReportDataObject.СhangesPreferencesScenario.ChangeInMonthlyPayment;
+
+            // Another settings
+            //lrdo.NumberPriceOffers = 2; // PART2 PAGE 2
+            //lrdo.NumberRecommendedStructures = 2;  // PART3 
+            //lrdo.NumberStressTestRecommendedStructures = 2; // PART4
+            //lrdo.NumberStressTestPriceOffers = 2; // PART4B
+
+            LongReportDataObject.RunTheReport(lrdo, pdfFileName, cultureInfo);
         }
 
 
