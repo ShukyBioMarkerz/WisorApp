@@ -118,7 +118,7 @@ namespace WisorLibrary.Logic
                 // ld = collectedLoans[0];
 
                 uint originalAmount = MiscConstants.UNDEFINED_UINT,
-                    monthlyPayment = MiscConstants.UNDEFINED_UINT,
+                    desiredMonthlyPayment = MiscConstants.UNDEFINED_UINT,
                     yearlyIncome = MiscConstants.UNDEFINED_UINT;
                 uint PayUntilToday = MiscConstants.UNDEFINED_UINT,
                     PayFuture = MiscConstants.UNDEFINED_UINT,
@@ -134,7 +134,7 @@ namespace WisorLibrary.Logic
                     {
                         yearlyIncome = collectedLoans[i].YearlyIncome;
                         originalAmount += collectedLoans[i].OriginalLoanAmount;
-                        monthlyPayment += collectedLoans[i].DesiredMonthlyPayment;
+                        desiredMonthlyPayment += collectedLoans[i].DesiredMonthlyPayment;
                     // calculate luch silukim
 
                     //try
@@ -187,7 +187,7 @@ namespace WisorLibrary.Logic
                 }
 
                     UpdateLoanData(ref ld, collectedLoans[0], PayUntilToday, PayFuture, RemaingLoanAmount,
-                        MonthlyPaymentCalc, BankPayUntilToday, BankPayFuture, yearlyIncome, originalAmount, FirstMonthlyPMT);
+                        MonthlyPaymentCalc, BankPayUntilToday, BankPayFuture, yearlyIncome, originalAmount, FirstMonthlyPMT, desiredMonthlyPayment);
 
                 //}
                 //catch (Exception e)
@@ -217,7 +217,7 @@ namespace WisorLibrary.Logic
         void  UpdateLoanData(ref /*not needed but for the sake of god will...*/ 
                         loanDetails ld, loanDetails loan, uint PayUntilToday, uint PayFuture,
                         uint RemaingLoanAmount, uint MonthlyPaymentCalc, uint BankPayUntilToday, uint BankPayFuture,
-                        uint yearlyIncome, uint originalAmount, uint FirstMonthlyPMT)
+                        uint yearlyIncome, uint originalAmount, uint FirstMonthlyPMT, uint desiredMonthlyPayment)
         {
             //ld.LoanAmount = originalAmount;
             ld.resultReportData.BankName = Share.CustomerName;
@@ -243,7 +243,10 @@ namespace WisorLibrary.Logic
             ld.resultReportData.YearlyIncome = ld.YearlyIncome = yearlyIncome;
             ld.resultReportData.OriginalLoanAmount = ld.OriginalLoanAmount = originalAmount;
             // the new monthly amount should be the sum of the all monthly payments today
-            ld.resultReportData.DesiredMonthlyPayment = ld.DesiredMonthlyPayment = MonthlyPaymentCalc;
+            if (0 >= MonthlyPaymentCalc)
+                ld.resultReportData.DesiredMonthlyPayment = ld.DesiredMonthlyPayment = desiredMonthlyPayment;
+            else 
+                ld.resultReportData.DesiredMonthlyPayment = ld.DesiredMonthlyPayment = MonthlyPaymentCalc;
             
             if (0 < ld.YearlyIncome)
                 ld.resultReportData.PTI = (double)ld.DesiredMonthlyPayment / ld.YearlyIncome;
