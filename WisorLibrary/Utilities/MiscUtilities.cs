@@ -1,9 +1,14 @@
-﻿using System;
+﻿using RestSharp;
+using RestSharp.Authenticators;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -15,9 +20,11 @@ using System.Xml.Linq;
 using WisorLib;
 using WisorLibrary.DataObjects;
 using WisorLibrary.Logic;
+using WisorLibrary.ReportApplication;
 using static WisorLib.GenericProduct;
 using static WisorLib.MiscConstants;
 using static WisorLib.Options;
+using static WisorLibrary.ReportApplication.Utils;
 
 namespace WisorLibrary.Utilities
 {
@@ -59,26 +66,9 @@ namespace WisorLibrary.Utilities
         public static bool SetRatesFilename()
         {
             Share.theSelectionType = SelectionType.ReadRates;
-            //string ratesFilename = @"..\..\..\Data\RateFileGeneric.csv";
-            //string ratesBankFilename = @"..\..\..\Data\CitiRateMarginGeneric.csv";
             bool rc;
             string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
-            //string borrowerFullfilename = MiscUtilities.GetFilenameFromUser(); // dir + MiscConstants.RATES_FILE;
-            //string bankFullfilename = dir + MiscConstants.BANK_RATES_FILE;
-            //string fn2 = MiscUtilities.GetSpecificFilename(bankFullfilename, Share.CustomerName);
-
-            //rc = Rates.SetRatesFile(borrowerFullfilename, fn2);
             rc = Rates.SetRatesFile(Share.RatesFileName, Share.BankRatesFileName);
-
-            //if (!File.Exists(fullfilename))
-            //{
-            //    fullfilename = Utilities.GetFilenameFromUser();
-            //    rc = Rates.SetRatesFile(fullfilename, bankfullfilename);
-            //}
-            //else
-            //{
-            //    rc = Rates.SetRatesFile(fullfilename, bankfullfilename);
-            //}
 
             return rc;
         }
@@ -111,7 +101,11 @@ namespace WisorLibrary.Utilities
             return rc;
         }
 
-   
+
+        public static string GetImagesDirectory()
+        {
+            return System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.IMAGES_DIR + Path.DirectorySeparatorChar;
+        }
 
         public static string GetFilenameFromUser()
         {
@@ -262,7 +256,7 @@ namespace WisorLibrary.Utilities
                 if (!compL.Exists(Composition.CompositionPredicate(comp)))
                     // ensure its a win-win composition
                     //if (comp.IsWinWin)           leave it for debug purpose
-                        compL.Add(comp);
+                    compL.Add(comp);
             }
 
             // ensure the composition number is obeyed
@@ -276,7 +270,7 @@ namespace WisorLibrary.Utilities
                     if (0 <= loc)
                         compL.RemoveAt(loc);
                 }
-                
+
             }
             return compL.ToArray();
         }
@@ -298,7 +292,7 @@ namespace WisorLibrary.Utilities
         internal static bool DoesProductExists(GenericProduct[] products, OneOptType[] options)
         {
             bool rc = true;
-            List< OneOptType> ol = options.ToList();
+            List<OneOptType> ol = options.ToList();
 
             foreach (GenericProduct prod in products)
             {
@@ -335,7 +329,7 @@ namespace WisorLibrary.Utilities
         {
             uint desiredMonthlyPayment = 0;
 
-            desiredMonthlyPayment = (uint) Math.Round((double)yearlyIncome / 3);
+            desiredMonthlyPayment = (uint)Math.Round((double)yearlyIncome / 3);
             return desiredMonthlyPayment;
         }
 
@@ -408,7 +402,7 @@ namespace WisorLibrary.Utilities
             return index;
         }
 
-        public static double GetHistoricIndexRateForDate(indices indic, DateTime dateLoanTaken, 
+        public static double GetHistoricIndexRateForDate(indices indic, DateTime dateLoanTaken,
             double originalRate, out double primeMargin, bool IsBank)
         {
             double index = 0;
@@ -504,7 +498,7 @@ namespace WisorLibrary.Utilities
             return dt;
         }
 
- 
+
         public static DateTime ConvertDate2(string str, out string formatedDate/*, CultureInfo provider*/)
         {
             DateTime value;
@@ -616,6 +610,8 @@ namespace WisorLibrary.Utilities
             {
                 if (File.Exists(fullFilename))
                 {
+                    WindowsUtilities.loggerMethod("LoadXMLConfigurationFile file: " + fullFilename);
+
                     XmlDocument doc = new XmlDocument();
 
                     //load up the xml from the location 
@@ -677,38 +673,38 @@ namespace WisorLibrary.Utilities
                                 case MiscConstants.MAX_COMBINATIONS:
                                     Share.MaxCombinationNumber = System.Convert.ToUInt32(node.Value);
                                     break;
-                                case SHOULD_STORE_REPORT_AS_HTML:
-                                    Share.shouldCreateHTMLReport = "yes" == node.Value ? true : false;
+                                case MiscConstants.SHOULD_STORE_REPORT_AS_LONG_PDF:
+                                    Share.shouldCreateLongPDFReport = "yes" == node.Value ? true : false;
                                     // ensure the directory realy exists
-                                    if (Share.shouldCreateHTMLReport)
+                                    if (Share.shouldCreateLongPDFReport)
                                     {
                                         string fn = MiscUtilities.GetReportFileName("tempID", FileType.HTML);
                                         if (!Directory.Exists(Path.GetDirectoryName(fn)))
                                             Directory.CreateDirectory(Path.GetDirectoryName(fn));
                                     }
                                     break;
-                                 case SHOULD_STORE_REPORT_AS_PDF:
-                                    Share.shouldCreatePDFReport = "yes" == node.Value ? true : false;
+                                case MiscConstants.SHOULD_STORE_REPORT_AS_SHORT_PDF:
+                                    Share.shouldCreateShortPDFReport = "yes" == node.Value ? true : false;
                                     // ensure the directory realy exists
-                                    if (Share.shouldCreatePDFReport)
+                                    if (Share.shouldCreateShortPDFReport)
                                     {
                                         string fn = MiscUtilities.GetReportFileName("tempID", FileType.PDF);
                                         if (!Directory.Exists(Path.GetDirectoryName(fn)))
                                             Directory.CreateDirectory(Path.GetDirectoryName(fn));
                                     }
                                     break;
-                                case SHOULD_STORE_REPORT_IN_DB:
+                                case MiscConstants.SHOULD_STORE_REPORT_IN_DB:
                                     Share.ShouldStoreInDB = "yes" == node.Value ? true : false;
                                     break;
-                                case FROM_TO_LINES_TO_LOAD_LOANS:
+                                case MiscConstants.FROM_TO_LINES_TO_LOAD_LOANS:
                                     //<from_line>,<to_line>
                                     string[] lines = node.Value.Split(MiscConstants.COMMA);
-                                    if (! String.IsNullOrEmpty(lines[0]))
+                                    if (!String.IsNullOrEmpty(lines[0]))
                                         Share.LoansLoadFromLine = System.Convert.ToUInt32(lines[0]);
                                     if (!String.IsNullOrEmpty(lines[1]))
                                         Share.LoansLoadToLine = System.Convert.ToUInt32(lines[1]);
                                     break;
-                                case FROM_IDS_LOAD_LOANS:
+                                case MiscConstants.FROM_IDS_LOAD_LOANS:
                                     Share.LoansLoadIDsFromLine = node.Value;
                                     break;
                                 default:
@@ -801,9 +797,12 @@ namespace WisorLibrary.Utilities
         {
             uint result = MiscConstants.UNDEFINED_UINT;
             double[] amounts = new double[Enum.GetNames(typeof(options)).Length];
-            /*Risk*/ double [] risk = new double[Enum.GetNames(typeof(options)).Length];
-            /*Liquidity*/ double [] liquidity = new double[Enum.GetNames(typeof(options)).Length];
-            /*Benefit*/ double[] benefit = new double[Enum.GetNames(typeof(options)).Length];
+            /*Risk*/
+            double[] risk = new double[Enum.GetNames(typeof(options)).Length];
+            /*Liquidity*/
+            double[] liquidity = new double[Enum.GetNames(typeof(options)).Length];
+            /*Benefit*/
+            double[] benefit = new double[Enum.GetNames(typeof(options)).Length];
             FixOrAdjustable[] fixOrAdjustable = new FixOrAdjustable[Enum.GetNames(typeof(options)).Length];
             int i = 0;
 
@@ -825,7 +824,7 @@ namespace WisorLibrary.Utilities
 
             // TBD - what should be calculate here
             // risk liquidity benefit fix ....
-            result = (uint) (1 - amountScore) + riskScore + liquidityScore + fixOrAdjustableScore;
+            result = (uint)(1 - amountScore) + riskScore + liquidityScore + fixOrAdjustableScore;
 
             return result;
         }
@@ -858,13 +857,13 @@ namespace WisorLibrary.Utilities
 
             for (int i = 0; i < risk.Length; i++)
             {
-                riskScore += (uint) risk[i]; // or should it calculate differently?
+                riskScore += (uint)risk[i]; // or should it calculate differently?
             }
 
             return riskScore;
         }
 
-        static uint  CalculateLiquidityScore(/*Liquidity*/double[] liquidity)
+        static uint CalculateLiquidityScore(/*Liquidity*/double[] liquidity)
         {
             uint liquidityScore = MiscConstants.UNDEFINED_UINT;
 
@@ -876,7 +875,7 @@ namespace WisorLibrary.Utilities
             return liquidityScore;
         }
 
-        static uint  CalculateFixOrAdjustableScore(FixOrAdjustable[] fixOrAdjustable)
+        static uint CalculateFixOrAdjustableScore(FixOrAdjustable[] fixOrAdjustable)
         {
             uint fixOrAdjustableScore = MiscConstants.UNDEFINED_UINT;
 
@@ -945,10 +944,10 @@ namespace WisorLibrary.Utilities
         public static void CalcaulateProfit(Composition comp, out int ttlBankPay,
             out int ttlBorrowerPay, out int ttlProfit)
         {
-            ttlBankPay = (int) (comp.optXBankTtlPay + comp.optYBankTtlPay + comp.optZBankTtlPay);
-            ttlBorrowerPay = (int) Math.Round(comp.opts[(int)Options.options.OPTX].optTtlPay +
+            ttlBankPay = (int)(comp.optXBankTtlPay + comp.optYBankTtlPay + comp.optZBankTtlPay);
+            ttlBorrowerPay = (int)Math.Round(comp.opts[(int)Options.options.OPTX].optTtlPay +
                 comp.opts[(int)Options.options.OPTY].optTtlPay + comp.opts[(int)Options.options.OPTZ].optTtlPay);
-            ttlProfit = /*(int)comp.ttlPay*/ ttlBorrowerPay - ttlBankPay; 
+            ttlProfit = /*(int)comp.ttlPay*/ ttlBorrowerPay - ttlBankPay;
         }
 
         public static void CalcaulateProfitAll(Composition comp, loanDetails loan,
@@ -1034,7 +1033,7 @@ namespace WisorLibrary.Utilities
         {
             if (null != Share.theMiscLogger)
                 Share.theMiscLogger.PrintLog(msg);
-         }
+        }
 
         ////////////////////
 
@@ -1273,7 +1272,7 @@ namespace WisorLibrary.Utilities
         public static bool IsProductAdjustableInterest(indices indices, FixOrAdjustable fixOrAdjustable, indexJumps indexJumpFirstTimePeriod)
         {
             // TBD - Omri what is the: 1 < (int) indexJumpFirstTimePeriod, it is enumarator!!!
-            return (indices.PRIME == indices && FixOrAdjustable.FIX == fixOrAdjustable && 1 < (int) indexJumpFirstTimePeriod );
+            return (indices.PRIME == indices && FixOrAdjustable.FIX == fixOrAdjustable && 1 < (int)indexJumpFirstTimePeriod);
         }
 
         ////////////////////////////////////
@@ -1381,7 +1380,7 @@ namespace WisorLibrary.Utilities
             //WindowsUtilities.loggerMethod("Complete calculate the entire " + loans.Count + " loans");
         }
 
-     
+
         /////////////////////////////////////////////////
 
         /////////////////////////////////////////////////
@@ -1406,7 +1405,7 @@ namespace WisorLibrary.Utilities
                     }
                 }
                 trimed = str;
- 
+
                 loc = trimed.IndexOf(MiscConstants.PERCANTAGE_STR);
                 trimed = (0 <= loc) ? trimed.Remove(loc) : trimed;
 
@@ -1422,18 +1421,19 @@ namespace WisorLibrary.Utilities
             return value;
         }
 
-        
+
         static public string GetReportFileName(string id, FileType fileType, bool isLender = true)
         {
             string ext = MiscUtilities.GetFileTypeExtension(fileType);
             string lenderOrBorrowerPrefix = (isLender ? MiscConstants.LENDER_REPORT_PREFIX : MiscConstants.BORROWER_REPORT_PREFIX);
             string languagePrefix = (Share.cultureInfo.Name.Equals("he-IL") ? MiscConstants.HEBREW_PREFIX : MiscConstants.ENGLISH_PREFIX);
+            string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.IMAGES_DIR + Path.DirectorySeparatorChar;
             string fn = AppDomain.CurrentDomain.BaseDirectory +
                 MiscConstants.REPORTS_DIR + Path.DirectorySeparatorChar +
-                lenderOrBorrowerPrefix + MiscConstants.NAME_SEP_CHAR + 
+                lenderOrBorrowerPrefix + MiscConstants.NAME_SEP_CHAR +
                 languagePrefix + MiscConstants.NAME_SEP_CHAR + id + MiscConstants.NAME_SEP_CHAR +
                 DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + ext;
-            
+
             return fn;
         }
 
@@ -1472,7 +1472,7 @@ namespace WisorLibrary.Utilities
         static public bool SetupAllEnv(string dataDirectory = null)
         {
             bool rc = false;
- 
+
             //SetRunLoanFunc(Utilities.RunTheLoansSync);
             SetRunSingleLoanFuncASync(MultiThreadingManagment.runSingleLoanASyncMethod);
             SetRunSingleLoanFuncSync(MultiThreadingManagment.runSingleLoanSyncMethod);
@@ -1503,9 +1503,8 @@ namespace WisorLibrary.Utilities
             Share.ShouldEachCombinationRunSeparetly = false;
             Share.ShouldStoreAllCombinations = false;
 
-            Share.shouldCreateHTMLReport = false; // true;
+            //Share.shouldCreateHTMLReport = false; // true;
             Share.ShouldStoreInDB = true;
-            //Share.ShouldStoreHTMLReport = true;
             Share.LoansLoadFromLine = MiscConstants.UNDEFINED_UINT;
             Share.LoansLoadIDsFromLine = MiscConstants.UNDEFINED_STRING;
             Share.shouldDebugLoans = true;
@@ -1524,7 +1523,8 @@ namespace WisorLibrary.Utilities
             // important settings
             Share.shouldRunSync = true;
             Share.shouldRunLogicSync = true;
-            Share.shouldCreatePDFReport = false; //true;
+            Share.shouldCreateShortPDFReport = false; //true;
+            Share.shouldCreateLongPDFReport = true;
 
             bool isFullConfigFilename = false;
             string configFilename = MiscConstants.CONFIGURATION_FILE;
@@ -1533,12 +1533,16 @@ namespace WisorLibrary.Utilities
             {
                 Share.DataDirectory = dataDirectory;
                 isFullConfigFilename = true;
-                configFilename = dataDirectory + Path.DirectorySeparatorChar + MiscConstants.CONFIGURATION_FILE;
             }
             else
             {
-                Share.DataDirectory = MiscConstants.DATA_DIR;
+                string dd = MiscUtilities.GetDataDirectory();
+                if (!String.IsNullOrEmpty(dd))
+                    Share.DataDirectory = dd;
+                else
+                    Share.DataDirectory = MiscConstants.DATA_DIR;
             }
+            configFilename = Share.DataDirectory + Path.DirectorySeparatorChar + MiscConstants.CONFIGURATION_FILE;
 
             // load the configuration file
             if (null == WindowsUtilities.loggerMethod)
@@ -1575,7 +1579,324 @@ namespace WisorLibrary.Utilities
                 tmp = name;
             }
 
-            return tmp; 
+            return tmp;
+        }
+
+        public static string GetDataDirectory()
+        {
+            string dataDir = System.Configuration.ConfigurationManager.AppSettings["DataDirectory"];
+            return dataDir;
+        }
+
+        public static string GetOutputDirectory2()
+        {
+            string outputDir = System.Configuration.ConfigurationManager.AppSettings["OutputDirectory"];
+            if (String.IsNullOrEmpty(outputDir))
+                outputDir = GetDataDirectory() + Path.DirectorySeparatorChar + MiscConstants.OUTPUT_DIR + Path.DirectorySeparatorChar;
+            return outputDir;
+        }
+
+        public static string GetBinDirectory()
+        {
+            string outputDir = System.Configuration.ConfigurationManager.AppSettings["BinDirectory"];
+            if (String.IsNullOrEmpty(outputDir))
+                outputDir = GetDataDirectory() + Path.DirectorySeparatorChar + MiscConstants.BIN_DIR + Path.DirectorySeparatorChar;
+            return outputDir;
+        }
+
+
+        public static void CalculateTypeOfProducts2(RecommendedStructure[] compData,
+            out string structureTypeString)
+        {
+            string FixHeader, IndexationHeader1, IndexationHeader2, IndexationHeader3;
+            structureTypeString = MiscConstants.UNDEFINED_STRING;
+            //int ttlBankPay, ttlBorrowerPay, ttlProfit;
+
+            // RecommendedStructure(int amount, string productType, double rate, int time, int pmt)
+            if (null != compData && 0 < compData.Length)
+            {
+                //// ensure its a win-win composition
+                //if (!compData[i].IsWinWin)
+                //    continue;
+
+                // calculate the relations between tzamud and not in all the products which consist the composition
+                uint fix = MiscConstants.UNDEFINED_UINT, adjustable = MiscConstants.UNDEFINED_UINT;
+                uint tsamud = MiscConstants.UNDEFINED_UINT, notTsamud = MiscConstants.UNDEFINED_UINT;
+
+                //MiscUtilities.CalcaulateProfit(compData[i], out ttlBankPay, out ttlBorrowerPay, out ttlProfit);
+
+                //uint sumAmount = 0, sumMonthly = 0, sumTTLPay = 0, sumTTllProfit = 0;
+                //double sumLenderProfit = 0;
+
+                //// get the bank profit from the composition fields
+                //uint[] bankPay = new uint[] {
+                //    compData[i].optXBankTtlPay, compData[i].optYBankTtlPay, compData[i].optZBankTtlPay };
+                bool isProductFix = false, isProductTsamud = false;
+                for (int j = 0; j < compData.Length; j++)
+                {
+                    isProductFix = MiscUtilities.IsProductFix(compData[j].Product.fixOrAdjustable);
+                    isProductTsamud = MiscUtilities.IsProductTsamud(compData[j].Product.originalIndexUsedFirstTimePeriod);
+
+                    // accumulate the fix or adjustable
+                    if (isProductFix)
+                        fix += (uint)compData[j].Amount;
+                    else
+                        adjustable += (uint)compData[j].Amount;
+
+                    // accululate Tsamud or not
+                    if (isProductTsamud)
+                        tsamud += (uint)compData[j].Amount;
+                    else
+                        notTsamud += (uint)compData[j].Amount;
+
+                    //string productName = compData[i].opts[j].product.productID.stringTypeId;
+                    //string Option = productName;
+                    //uint Amt = (uint)compData[i].opts[j].optAmt;
+                    //double Rate = compData[i].opts[j].optRateFirstPeriod;
+                    //uint Time = compData[i].opts[j].optTime;
+                    //uint PMT = (uint)compData[i].opts[j].optPmt;
+                    //uint TTLPay = (uint)compData[i].opts[j].optTtlPay;
+                    //uint TTllProfit = TTLPay - bankPay[j];
+                    //double LenderProfit = (double)TTllProfit / reportData.RemaingLoanAmount * 100;
+
+                    //sumAmount += Amt;
+                    //sumMonthly += PMT;
+                    //sumTTLPay += TTLPay;
+                    //sumTTllProfit += TTllProfit;
+                    //sumLenderProfit += LenderProfit;
+
+                    //bool Indexation = MiscUtilities.IsProductTsamud(compData[i].opts[j].product.originalIndexUsedFirstTimePeriod);
+
+                    // calculate the fix and adjustable numbers
+                    uint entireFixSum = fix + adjustable;
+                    uint fixNum = MiscConstants.UNDEFINED_UINT, adjustableNum = MiscConstants.UNDEFINED_UINT;
+                    if (0 < entireFixSum)
+                    {
+                        fixNum = Convert.ToUInt32((double)fix / entireFixSum * 100);
+                        adjustableNum = 100 - fixNum;
+                    }
+
+                    // calculate the tsamud vs. not numbers
+                    uint entireTsamudSum = tsamud + notTsamud;
+                    uint tsamudNum = MiscConstants.UNDEFINED_UINT, notTsamudNum = MiscConstants.UNDEFINED_UINT;
+                    if (0 < entireTsamudSum)
+                    {
+                        tsamudNum = Convert.ToUInt32((double)tsamud / entireTsamudSum * 100);
+                        notTsamudNum = 100 - tsamudNum;
+                    }
+
+                    CalculateHeaders(adjustable, tsamudNum, out FixHeader, out IndexationHeader1,
+                        out IndexationHeader2, out IndexationHeader3);
+                    // set the right numbers to the header
+                    structureTypeString = FixHeader + ", " + IndexationHeader1 + " ) " + fixNum + "% "
+                        + IndexationHeader2 + " , " + adjustableNum + "% " + IndexationHeader3 + " (";
+                   
+                }
+            }
+        }
+
+        public static void CalculateTypeOfProducts(ResultReportData reportData, int indexOfComposition,
+            out string structureTypeString)
+        {
+            structureTypeString = MiscConstants.UNDEFINED_STRING;
+            string FixHeader, IndexationHeader1, IndexationHeader2, IndexationHeader3;
+            int ttlBankPay, ttlBorrowerPay, ttlProfit;
+            int i = indexOfComposition;
+            Composition[] compData = reportData.compositions;
+            if (null != compData && null != compData[i])
+            {
+                //// ensure its a win-win composition
+                //if (!compData[i].IsWinWin)
+                //    continue;
+
+                // calculate the relations between tzamud and not in all the products which consist the composition
+                uint fix = MiscConstants.UNDEFINED_UINT, adjustable = MiscConstants.UNDEFINED_UINT;
+                uint tsamud = MiscConstants.UNDEFINED_UINT, notTsamud = MiscConstants.UNDEFINED_UINT;
+
+                MiscUtilities.CalcaulateProfit(compData[i], out ttlBankPay, out ttlBorrowerPay, out ttlProfit);
+
+                uint sumAmount = 0, sumMonthly = 0, sumTTLPay = 0, sumTTllProfit = 0;
+                double sumLenderProfit = 0;
+
+                // get the bank profit from the composition fields
+                uint[] bankPay = new uint[] {
+                    compData[i].optXBankTtlPay, compData[i].optYBankTtlPay, compData[i].optZBankTtlPay };
+
+                for (int j = 0; j < compData[i].opts.Length; j++)
+                {
+                    bool isProductFix = MiscUtilities.IsProductFix(compData[i].opts[j].product.fixOrAdjustable);
+                    bool isProductTsamud = MiscUtilities.IsProductTsamud(compData[i].opts[j].product.originalIndexUsedFirstTimePeriod);
+
+                    // accumulate the fix or adjustable
+                    if (isProductFix)
+                        fix += (uint)compData[i].opts[j].optAmt;
+                    else
+                        adjustable += (uint)compData[i].opts[j].optAmt;
+
+                    // accululate Tsamud or not
+                    if (isProductTsamud)
+                        tsamud += (uint)compData[i].opts[j].optAmt;
+                    else
+                        notTsamud += (uint)compData[i].opts[j].optAmt;
+
+                    string productName = compData[i].opts[j].product.productID.stringTypeId;
+                    string Option = productName;
+                    uint Amt = (uint)compData[i].opts[j].optAmt;
+                    double Rate = compData[i].opts[j].optRateFirstPeriod;
+                    uint Time = compData[i].opts[j].optTime;
+                    uint PMT = (uint)compData[i].opts[j].optPmt;
+                    uint TTLPay = (uint)compData[i].opts[j].optTtlPay;
+                    uint TTllProfit = TTLPay - bankPay[j];
+                    double LenderProfit = (double)TTllProfit / reportData.RemaingLoanAmount * 100;
+
+                    sumAmount += Amt;
+                    sumMonthly += PMT;
+                    sumTTLPay += TTLPay;
+                    sumTTllProfit += TTllProfit;
+                    sumLenderProfit += LenderProfit;
+
+                    bool Indexation = MiscUtilities.IsProductTsamud(compData[i].opts[j].product.originalIndexUsedFirstTimePeriod);
+
+                    // calculate the fix and adjustable numbers
+                    uint entireFixSum = fix + adjustable;
+                    uint fixNum = MiscConstants.UNDEFINED_UINT, adjustableNum = MiscConstants.UNDEFINED_UINT;
+                    if (0 < entireFixSum)
+                    {
+                        fixNum = Convert.ToUInt32((double)fix / entireFixSum * 100);
+                        adjustableNum = 100 - fixNum;
+                    }
+
+                    // calculate the tsamud vs. not numbers
+                    uint entireTsamudSum = tsamud + notTsamud;
+                    uint tsamudNum = MiscConstants.UNDEFINED_UINT, notTsamudNum = MiscConstants.UNDEFINED_UINT;
+                    if (0 < entireTsamudSum)
+                    {
+                        tsamudNum = Convert.ToUInt32((double)tsamud / entireTsamudSum * 100);
+                        notTsamudNum = 100 - tsamudNum;
+                    }
+
+                    CalculateHeaders(adjustable, tsamudNum, out FixHeader, out IndexationHeader1,
+                        out IndexationHeader2, out IndexationHeader3);
+                    // set the right numbers to the header
+                    IndexationHeader2 = String.Format(IndexationHeader2, fixNum, adjustableNum);
+
+                }
+
+            }
+        }
+
+
+
+
+        public static void CalculateHeaders(uint adjustable, uint tsamudNum, out string FixHeader,
+             out string IndexationHeader1, out string IndexationHeader2, out string IndexationHeader3)
+        {
+            FixHeader = IndexationHeader1 = IndexationHeader2 = IndexationHeader3 = MiscConstants.UNDEFINED_STRING;
+
+            /*
+            אם תמהיל משלב ריבית משתנה – לא פריים – אז חלק ראשון של הכותרת תמיד יהיה: "תמהיל המאפשר יותר שינויים"
+            אם תמהיל משלב רק פריים וריבית קבועה – אז חלק ראשון של הכותרת תמיד יהיה: "תמהיל המאפשר יותר יציבות" 
+            */
+            if (0 < adjustable)
+            {
+                FixHeader = Properties.Resources.stressTestFlexible;
+            }
+            else
+            {
+                FixHeader = Properties.Resources.stressTestStability;
+            }
+
+            /*
+            אם 0% מהכסף במוצרים צמודים למדד – אז החלק השני של הכותרת תמיד יהיה: "כאשר כל הכסף לא צמוד למדד"
+            אם עד 50% מהכסף במוצרים צמודים למדד – אז החלק השני של הכותרת תמיד יהיה: כאשר חלק מהכסף צמוד למדד"
+            אם בדיוק 50% מהכסף במוצרים צמודים למדד – אז החלק השני של הכותרת תמיד יהיה: כאשר חצי מהכסף צמוד למדד"
+            אם מעל 50% מהכסף במוצרים צמודים למדד – אז החלק השני של הכותרת תמיד יהיה: כאשר רוב הכסף צמוד למדד"
+            אם 100% מהכסף במוצרים צמודים למדד (כנראה לא יקרה כי בינתיים יש תמיד מוצר פריים בתמהיל) – אז החלק השני של הכותרת תמיד יהיה: כאשר כל הכסף צמוד למדד"
+            */
+            IndexationHeader2 = Properties.Resources.stressTestFixRate;
+            IndexationHeader3 = Properties.Resources.stressTestDynamicRate;
+
+            if (MiscConstants.UNDEFINED_UINT == tsamudNum)
+            {
+                IndexationHeader1 = Properties.Resources.stressTestAllMoneyNotTsamud;
+            }
+            else if (MiscConstants.UNDEFINED_UINT < tsamudNum && 50 > tsamudNum)
+            {
+                IndexationHeader1 = Properties.Resources.stressTestPartMoneyTsamud;
+            }
+            else if (MiscConstants.UNDEFINED_UINT < tsamudNum && 50 == tsamudNum)
+            {
+                IndexationHeader1 = Properties.Resources.stressTestHalfMoneyTsamud;
+            }
+            else if (MiscConstants.UNDEFINED_UINT < tsamudNum && 100 == tsamudNum)
+            {
+                IndexationHeader1 = Properties.Resources.stressTestAllMoneyTsamud;
+            }
+            else if (MiscConstants.UNDEFINED_UINT < tsamudNum && 50 < tsamudNum)
+            {
+                IndexationHeader1 = Properties.Resources.stressTestMostMoneyTsamud;
+            }
+        }
+
+        public static RecommendedStructure[] CalculateRecommendedStructure(Composition c, ResultReportData reportData)
+        {
+            bool isHebrew = Share.cultureInfo.Name.Equals(MiscConstants.HEBREW_STR);
+
+            List<RecommendedStructure> recommendedStructureList = new List<RecommendedStructure>();
+            for (int i = 0; i < c.opts.Length; i++)
+            {
+                RecommendedStructure currRecommend = new RecommendedStructure(
+                    Convert.ToInt32(c.opts[i].optAmt),
+                    (isHebrew) ? c.opts[i].product.hebrewName : c.opts[i].product.name,
+                    c.opts[i].optRateFirstPeriod, (int)c.opts[i].optTime, Convert.ToInt32(c.opts[i].optPmt), c.opts[i].product);
+                double TotalProfitPercantage, TotalPay, TotalProfit, TotalBankPay;
+                TotalPay = c.opts[i].optTtlPay;
+                TotalBankPay = c.optXBankTtlPay + c.optYBankTtlPay + c.optZBankTtlPay;
+                TotalProfit = TotalPay - TotalBankPay;
+                TotalProfitPercantage = (double)TotalProfit / reportData.RemaingLoanAmount * 100;
+                LenderCalculationData lenderCalculationData = new LenderCalculationData(
+                    (int)TotalPay, (int)TotalProfit, TotalProfitPercantage);
+                currRecommend.lenderCalculationData = lenderCalculationData;
+                recommendedStructureList.Add(currRecommend);
+            }
+            return recommendedStructureList.ToArray();
+        }
+
+        public static bool SendEmailMessageByMailgun(MailMessage msg)
+        {
+            string MailServer = ConfigurationManager.AppSettings["MailServer2"];
+            string MailApiKey = ConfigurationManager.AppSettings["MailApiKey2"];
+            string MailDomain = ConfigurationManager.AppSettings["MailDomain2"];
+            RestSharp.RestClient client = new RestClient(MailServer);
+            client.Authenticator = new HttpBasicAuthenticator("api", MailApiKey);
+            RestRequest request = new RestRequest();
+            request.AddParameter("domain", MailDomain, ParameterType.UrlSegment);
+            request.Resource = "{domain}/messages";
+            request.AddParameter("from", msg.From);
+            request.AddParameter("to", msg.To);
+            request.AddParameter("subject", msg.Subject);
+            request.AddParameter("text", msg.Body);
+            request.AddParameter("html", msg.Body);
+            request.Method = Method.POST;
+
+            IRestResponse rr = client.Execute(request);
+            HttpStatusCode res = rr.StatusCode;
+            return HttpStatusCode.OK == res ? true : false;
+        }
+
+        public static bool RunLongPDFreport(string reportFilename, CommonObjects.OrderDataContainer2 orderDataContainer2,
+             ResultReportData reportData, CultureInfo cultureInfo)
+        {
+            LongReportDataObject lrdo = new LongReportDataObject(reportData, orderDataContainer2, cultureInfo);
+            lrdo.OrderNumberValue = reportData.ID;
+
+            // Create a new instance of WisorReportManager class, set filename, culture and data
+            WisorReportManager reportManager = new WisorReportManager(reportFilename, cultureInfo, lrdo);
+            // it's about time to use the direct PDF lib now...
+            int structuresQuantity = reportManager.CreateRecommendedStructuresPage(1);
+            // Save and start View 
+            bool rc = reportManager.SavePDFDocument();
+            return rc;
         }
 
     }
