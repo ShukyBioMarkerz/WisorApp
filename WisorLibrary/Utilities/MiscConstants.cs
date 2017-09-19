@@ -30,9 +30,11 @@ namespace WisorLib
         public static char      PERCANTAGE_STR = '%';
         public static char      DOLLAR_STR = '$';
         public static string    CRITERIA_FILENAME = "criteria.txt";
-        public static string    OUTPUT_DIR = "Output";
-        public static string    REPORTS_DIR = "Reports";
+        public static string    OUTPUT_DIR = @"..\Output";
+        public static string    BIN_DIR = @"..";
+        public static string    REPORTS_DIR = @"..\Reports";
         public static string    DATA_DIR = @"..\Data"; // @"..\..\..\Data";
+        public static string    IMAGES_DIR = @"..\images";
         public static char      NAME_SEP_CHAR = '-';
         public static string    CSV_EXT = ".csv";
         public static string    XML_EXT = ".xml";
@@ -103,14 +105,16 @@ namespace WisorLib
         public const string MAX_COMBINATIONS = "MAX_COMBINATIONS";
         public const string SHOULD_CREATE_REPORT = "SHOULD_CREATE_REPORT";
         public const string SHOULD_STORE_REPORT_IN_DB = "SHOULD_STORE_REPORT_IN_DB";
-        public const string SHOULD_STORE_REPORT_AS_HTML = "SHOULD_STORE_REPORT_AS_HTML";
-        public const string SHOULD_STORE_REPORT_AS_PDF = "SHOULD_STORE_REPORT_AS_PDF";
+        public const string SHOULD_STORE_REPORT_AS_LONG_PDF = "SHOULD_STORE_REPORT_AS_LONG_PDF";
+        public const string SHOULD_STORE_REPORT_AS_SHORT_PDF = "SHOULD_STORE_REPORT_AS_SHORT_PDF";
         public const string FROM_TO_LINES_TO_LOAD_LOANS = "FROM_TO_LINES_TO_LOAD_LOANS";
         public const string FROM_IDS_LOAD_LOANS = "FROM_IDS_LOAD_LOANS";
         internal static string LENDER_REPORT_PREFIX = "LenderReport";
         internal static string BORROWER_REPORT_PREFIX = "BorrowerReport";
         internal static string HEBREW_PREFIX = "HEB";
         internal static string ENGLISH_PREFIX = "EN";
+        public const string _YES_KEY = "yes";
+        public const string _NO_KEY = "no";
 
         internal static string shouldConsider = "shouldConsider";
         internal static string Product = "Product";
@@ -131,8 +135,9 @@ namespace WisorLib
         internal static string risk = "risk";
         internal static string liquidity = "liquidity";
         internal static string mustBeUsed = "mustBeUsed";
-        
+
         public static uint DEFAULT_PERCANTAGE_OF_MONTHLY_PAYMENT = 30;
+        public static uint MAX_LOAN_TIME = 360;
 
         public static uint NUM_OF_PRODUCTS_IN_COMBINATION = 3;
         public static uint MAX_NUM_OF_COMBINATION_TO_SELECT = 3;
@@ -167,6 +172,8 @@ namespace WisorLib
         public enum Risk { MinimumRisk1, LessRisk2, MediumRisk3, MoreRisk4, MaximumRisk5, NONERisk}; 
         public enum Liquidity { MinimumLiquidity1, LessLiquidity2, MediumLiquidity3, MoreLiquidity4, MaximumLiquidity5 , NONELiquidity};
         public const string RISK_LIQUIDITY_FILE = "RiskLiquidityCiti.xlsx";
+
+        public static object HEBREW_STR { get { return "he-IL"; }  }
 
         public enum Benefit { Benefit1, Benefit2, Benefit3, Benefit4, Benefit5, NONEBenefit };
         public enum FixOrAdjustable { FIX, ADJUSTABLE };
