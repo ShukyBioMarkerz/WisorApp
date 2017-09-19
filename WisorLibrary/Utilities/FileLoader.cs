@@ -25,6 +25,8 @@ namespace WisorLib
 
             if (File.Exists(filename))
             {
+                WindowsUtilities.loggerMethod("LoadXMLFileData file: " + filename);
+
                 doc = XDocument.Load(filename);
                 int index = 0;
 
@@ -68,7 +70,7 @@ namespace WisorLib
             }
             else
             {
-                WindowsUtilities.loggerMethod("LoadFileData file: " + filename + " does not exists!!!");
+                WindowsUtilities.loggerMethod("LoadXMLFileData file: " + filename + " does not exists!!!");
             }
 
             // if no user involve, make sure to set all the mandatory criteria
