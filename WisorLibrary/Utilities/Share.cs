@@ -62,12 +62,13 @@ namespace WisorLib
 
         public static uint ProductBeneficialScoreCriteria { get; set; }
         public static uint MaxCombinationNumber { get; set; }
+         
 
         // Reports
         public static bool ShouldStoreInDB { get; set; }
-        public static bool shouldCreateHTMLReport { get; set; }
-        public static bool shouldCreatePDFReport { get; set; }
-        public static bool ShouldStoreHTMLReport { get; set; }
+        public static bool shouldCreateShortPDFReport { get; set; }
+        public static bool shouldCreateLongPDFReport { get; set; }
+        //public static bool ShouldStoreHTMLReport { get; set; }
         public static uint LoansLoadFromLine { get; set; }
         public static uint LoansLoadToLine { get; set; }
         // load specific loan' IDs

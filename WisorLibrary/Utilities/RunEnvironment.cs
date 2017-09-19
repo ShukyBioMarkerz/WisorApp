@@ -180,14 +180,13 @@ namespace WisorLib
         // store the results in the DB and create the reports
         public void CompleteCalculation()
         {
-           
             // check if should create the report
-            if (Share.shouldCreateHTMLReport || Share.ShouldStoreInDB)
+            if (Share.shouldCreateShortPDFReport || Share.shouldCreateLongPDFReport || Share.ShouldStoreInDB)
             {
                 theLoan.CompleteCalculation(new Composition[] 
                     { bestDiffComposition, bestBankComposition, bestBorrowerComposition,
                         bestAllProfitComposition, bestAllProfitCompositionBank, bestAllProfitCompositionBorrower }, 
-                    Share.ShouldStoreInDB, Share.shouldCreateHTMLReport, Share.shouldCreatePDFReport,
+                    Share.ShouldStoreInDB, Share.shouldCreateShortPDFReport, Share.shouldCreateLongPDFReport,
                     this /* enable to print in the output file*/);
             }
             
