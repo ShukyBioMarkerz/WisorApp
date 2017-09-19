@@ -23,7 +23,7 @@ namespace WisorLibrary.Reporting
             }
 
             // TBD - should remove
-            cultureInfo = CultureInfo.CreateSpecificCulture("en-US");
+            //cultureInfo = CultureInfo.CreateSpecificCulture("en-US");
 
             LenderReport lr = new LenderReport(cultureInfo, isPrintCovers);
 
@@ -214,7 +214,7 @@ namespace WisorLibrary.Reporting
 
         }
 
- 
+#if __DEBUG_FULL_REPORT__
         public static void LongReportDebug(CultureInfo cultureInfo, LongReportDataObject lrdo)
         {
             // enable Hebrew in the console
@@ -306,6 +306,7 @@ namespace WisorLibrary.Reporting
 
 
         }
+#endif
 
     }
 }
