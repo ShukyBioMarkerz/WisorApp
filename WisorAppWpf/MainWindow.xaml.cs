@@ -106,14 +106,13 @@ namespace WisorAppWpf
 #endif
 
             // the logger window          
-            DataContext = LogEntries = new ObservableCollection<LogEntry>();
+            // DataContext = LogEntries = new ObservableCollection<LogEntry>();
 
             MiscUtilities.SetLogger(Log2Window);
 
             InitSettings();
 
-            LoadMarket.Visibility = Visibility.Hidden;
-
+         
 #if DETECT_EXIT
             while (!isclosing)
             {
@@ -125,7 +124,8 @@ namespace WisorAppWpf
 
         private void InitSettings()
         {
-            bool rc = MiscUtilities.SetupAllEnv();
+            bool rc = MiscUtilities.PrepareRunningFull();
+            // bool rc = MiscUtilities.SetupAllEnv();
 
             // testing area
             //Tests.TestLuchSilukinCalculation();
@@ -140,11 +140,11 @@ namespace WisorAppWpf
             //Tests.TestRatesLoading();
             //Tests.TestCombinations();
             // Tests.SendSimpleEmailMessage();
-            //Tests.SendSimpleEmailMessageByMailgun();
+            Tests.SendTestSimpleEmailMessageByMailgun();
             //Tests.TestRiskLiquidity();
             // Tests.TestCalculateMonthlyPmt();
             //Tests.TestlanguageFunctionality();
-            Tests.TestLongReportCreation();
+            // Tests.TestLongReportCreation();
 
         }
         private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -157,6 +157,10 @@ namespace WisorAppWpf
 
         private void AddEntry(string msg)
         {
+            // avoid the smart logger window...
+            // Console.WriteLine(msg);
+            return;
+
             LogEntry le = new LogEntry()
             {
                 //Index = index++,
@@ -216,13 +220,7 @@ namespace WisorAppWpf
                 data.Add(m);
                 //LoadMarket.Items.Add(m);
             }
-
-            // ... Assign the ItemsSource to the List.
-            LoadMarket.ItemsSource = data;
-            //LoadMarket.Text = "Select the market:";
-
-            // ... Make the first item selected.
-            //LoadMarket.SelectedIndex = 0;
+            
         }
 
         private void SelectMarket_selected(object sender, SelectionChangedEventArgs e)

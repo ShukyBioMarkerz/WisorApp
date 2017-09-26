@@ -107,9 +107,8 @@
             </ItemsControl.ItemsPanel>
         </ItemsControl>
 
-        <Button x:Name="StartButton"  Click="Button_Click" Width="114" Height="35" RenderTransformOrigin="0.752,0.211" Margin="350,264,0,6.6">Run batch</Button>
-        <Button x:Name="AskInput"  Click="AskInput_Button_Click" Width="114" Height="35" RenderTransformOrigin="0.752,0.211" Margin="-350,264,0,6.6">Ask the user</Button>
-        <ComboBox x:Name="LoadMarket"  Loaded="SelectMarket_Load" SelectionChanged="SelectMarket_selected" VerticalAlignment="Top" Width="114" Height="35" RenderTransformOrigin="0.752,0.211" Margin="-350,264,0,6.6"></ComboBox>
+        <Button x:Name="StartButton"  Click="Button_Click" Width="114" Height="35" RenderTransformOrigin="0.752,0.211" Margin="0,264,0,0" >Run batch</Button>
+        <Button x:Name="AskInput"  Click="AskInput_Button_Click" Width="114" Height="35" RenderTransformOrigin="0.752,0.211" Margin="0,264,0,0">Ask the user</Button>
 
     </DockPanel>
 
