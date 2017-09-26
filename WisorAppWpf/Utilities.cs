@@ -277,65 +277,12 @@ namespace WisorAppWpf
         /// <summary>
         /// Run the loans by single/multi thread
         /// </summary>
-
-        private static bool PrepareRunOLD()
-        {
-            return MiscUtilities.PrepareRuning();
-
-            // OLD stuff. Be brave...
-            bool rc = false;
-         
-            // enable log debug
-            MiscUtilities.OpenMiscLogger();
-            MiscUtilities.OpenSummaryFile();
-
-            ProductsList products = Utilities.GetProductsFromFile();
-            if (null == Share.theLoadedProducts)
-            {
-                WindowsUtilities.loggerMethod("NOTICE: PrepareRun Failed to upload products definitions.");
-            }
-            else
-            {
-                rc = Combinations.SetCombinationsFilename();
-                if (!rc)
-                {
-                    WindowsUtilities.loggerMethod("NOTICE: PrepareRun Failed to load combination file.");
-                    return rc;
-                }
-
-                // ensure the rates file is located
-                rc = MiscUtilities.SetRatesFilename();
-                if (!rc)
-                {
-                    WindowsUtilities.loggerMethod("NOTICE: PrepareRun Failed to load rates file.");
-                    return rc;
-                }
-
-                // Build the input controls from the xml file
-                // Load the loan' parameters from a file
-                FieldList fields = Utilities.GetCriteriaFromFile();
-                if (null == Share.theSelectedCriteriaFields)
-                {
-                    WindowsUtilities.loggerMethod("NOTICE: PrepareRun Failed to upload criteria definitions.");
-                }
-                else
-                {
-                    rc = MiscUtilities.SetRiskAndLiquidityFilename();
-                    if (!rc)
-                    {
-                        WindowsUtilities.loggerMethod("NOTICE: PrepareRun Failed in SetRiskAndLiquidityFilename.");
-                        return rc;
-                    }
-                }
-            }
-
-            return rc;
-        }
+        
 
         public static void Ask4Input()
         {
             // bool rc = Utilities.PrepareRun();
-            bool rc = MiscUtilities.PrepareRuning();
+            bool rc = MiscUtilities.PrepareRunningFull();
 
             if (rc)
             {
@@ -580,83 +527,6 @@ namespace WisorAppWpf
                         ref originalRate, ref originalMargin, ref originalTime,
                         ref risk, ref liquidity, ref product);
 
-                    //string txt = c.Text.Replace(MiscConstants.COMMA_STR, MiscConstants.UNDEFINED_STRING);  // cleanup
-                    //string name = c.Name;
-                    //switch (name.ToLower())
-                    //{
-                    //    case MiscConstants.LOAN_AMOUNT:
-                    //        loanAmount = Convert.ToUInt32(txt);
-                    //        break;
-                    //    case MiscConstants.MONTHLY_PAYMENT:
-                    //        desiredMonthlyPayment = Convert.ToUInt32(txt);
-                    //        break;
-                    //    case MiscConstants.PROPERTY_VALUE:
-                    //        propertyValue = Convert.ToUInt32(txt);
-                    //        break;
-                    //    case MiscConstants.YEARLY_INCOME:
-                    //        yearlyIncome = Convert.ToUInt32(txt);
-                    //        break;
-                    //    case MiscConstants.AGE:
-                    //        borrowerAge = Convert.ToUInt32(txt);
-                    //        break;
-                    //    case MiscConstants.LOAN_FICO:
-                    //        fico = Convert.ToInt32(txt);
-                    //        break;
-                    //    case MiscConstants.CUSTOMER_NAME:
-                    //        if (! String.IsNullOrEmpty(txt))
-                    //            Share.CustomerName = txt;
-                    //        break;
-                    //    case MiscConstants.DATE_TAKEN:
-                    //        DateTime value;
-                    //        if (!DateTime.TryParse(txt, out value))
-                    //        {
-                    //            string[] formats = { "MM/dd/yyyy" };
-                    //            if (!DateTime.TryParseExact(txt, formats, new CultureInfo("en-US"),
-                    //                   DateTimeStyles.None, out value))
-                    //            {
-                    //                dateTaken = DateTime.Now;
-                    //            }
-                    //            else
-                    //            {
-                    //                dateTaken = value;
-                    //            }
-                    //        }
-                    //        else
-                    //        {
-                    //            dateTaken = value;
-                    //        }
-                    //        break;
-                    //    case MiscConstants.DESIRE_TERMINATION_MONTH:
-                    //        desireTerminationMonth = Convert.ToUInt32(txt);
-                    //        break;
-                    //    case MiscConstants.SEQ_NUMBER:
-                    //        sequentialNumber = Convert.ToUInt32(txt);
-                    //        break;
-                    //    //case MiscConstants.ORIGINAL_PRODUCT:
-                    //    //    originalProduct = txt;
-                    //    //    break;
-                    //    case MiscConstants.ORIGINAL_RATE:
-                    //        originalRate = Convert.ToDouble(txt);
-                    //        break;
-                    //    case MiscConstants.ORIGINAL_MARGIN:
-                    //        originalMargin = Convert.ToDouble(txt);
-                    //        break;
-                    //    case MiscConstants.ORIGINAL_TIME:
-                    //        originalTime = Convert.ToUInt32(txt);
-                    //        break;
-                    //    case MiscConstants.RISK_VALUE:
-                    //        risk = (Risk)Enum.Parse(typeof(Risk), txt, true);
-                    //        break;
-                    //    case MiscConstants.LIQUIDITY_VALUE:
-                    //        liquidity = (Liquidity)Enum.Parse(typeof(Liquidity), txt, true);
-                    //        break;
-                    //    case MiscConstants.PRODUCT_NAME:
-                    //        product = new ProductID(MiscConstants.UNDEFINED_INT, txt);
-                    //        break;
-                    //    default:
-                    //        Console.WriteLine("StartButton_Clicked Illegal control name: " + name);
-                    //        break;
-                    //}
                 }
             }
             uil.Hide();
