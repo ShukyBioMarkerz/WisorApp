@@ -36,30 +36,14 @@ namespace WisorLib
         }
     }
 
-    //public class CheckInfo
-    //{
-    //    // Time Software Opened and closed
-    //    public static DateTime calculationStartTime;
-    //    public static DateTime calculationEndTime;
-    //    public static DateTime softwareOpenTime;
-    //    public static DateTime searchStartTime;
-    //    public static DateTime softwareCloseTime;
-
-    //    // Execution Information
-    //    public static double startTimeToMeasure = new DateTime(2014, 1, 1).Ticks;
-    //    public static string fastCheckID = "";
-    //    public static string orderID = "";
-    //    public static double resultsID = 0;
-    //}
-
-
-    
-
+ 
     class Options
     {
         
         // Option Names For Calculation
         public enum options { OPTX, OPTY, OPTZ };
+        // 2 products per composition
+        public enum options2Products { OPTX, OPTY };
 
         // Limit Times for Options
         public enum pmtLimits { MAXTIME, MINTIME };
@@ -136,8 +120,8 @@ namespace WisorLib
             minAmts = new double[] {CalculationConstants.optionMinimumAmount,
                               CalculationConstants.optionMinimumAmount,
                               CalculationConstants.optionMinimumAmount };
-
             maxAmts = new double[] { -1, -1, -1 };
+
         }
 
     }
@@ -190,7 +174,7 @@ namespace WisorLib
             for (int i = 0; i <= com.GetUpperBound(0); i++)
             {
                 msg += (i + 1) + " : ";
-                for (int j = 0; j < Share.numberOfOption; j++)
+                for (int j = 0; j < Share.NumberOfProductsInCombination; j++)
                 {
                     msg += com[i, j] + ", ";
                 }

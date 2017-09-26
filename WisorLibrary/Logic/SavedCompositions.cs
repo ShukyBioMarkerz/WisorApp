@@ -34,11 +34,18 @@ namespace WisorLib
             Interlocked.Add(ref Share.SavedCompositionsCounter, 1);
 
             this.env = env;
-            fixedOptZ = fixedOptionZ;
             savedListForCheck = savedMatchesListForOnePlane;
-            
-            //Get Total payment for Fixed OptionZ (using borrower rates)
-            fixedOptZ.GetTtlPay(env);
+
+            if (MiscUtilities.Use3ProductsInComposition())
+            {
+                fixedOptZ = fixedOptionZ;
+                //Get Total payment for Fixed OptionZ (using borrower rates)
+                fixedOptZ.GetTtlPay(env);
+            }
+            else
+            {
+                fixedOptZ = null;
+            }
 
             CheckMatchList(env);
         }
@@ -84,7 +91,10 @@ namespace WisorLib
             Option tempOptY = matchingPoint[(int)Options.options.OPTY];
             tempOptX.GetTtlPay(env);
             tempOptY.GetTtlPay(env);
-            ttlPayForCheck = tempOptX.optTtlPay + tempOptY.optTtlPay + fixedOptZ.optTtlPay;
+            if (MiscUtilities.Use3ProductsInComposition())
+                ttlPayForCheck = tempOptX.optTtlPay + tempOptY.optTtlPay + fixedOptZ.optTtlPay;
+            else
+                ttlPayForCheck = tempOptX.optTtlPay + tempOptY.optTtlPay;
 
             CalculateTheCompositionProfit(tempOptX, tempOptY, fixedOptZ, env);
             
@@ -93,9 +103,14 @@ namespace WisorLib
             
             if (ttlPayChecker == (int)ttlPayRange.SMALLER)
             {
-                env.resultsOutput.bestCompositionSoFar = new Composition(matchingPoint[(int)Options.options.OPTX],
+                if (MiscUtilities.Use3ProductsInComposition())
+                    env.resultsOutput.bestCompositionSoFar = new Composition(matchingPoint[(int)Options.options.OPTX],
                                    matchingPoint[(int)Options.options.OPTY], fixedOptZ, env,
                                    "bestCompositionSoFar");
+                else
+                    env.resultsOutput.bestCompositionSoFar = new Composition(matchingPoint[(int)Options.options.OPTX],
+                                  matchingPoint[(int)Options.options.OPTY], null, env,
+                                  "bestCompositionSoFar");
             }
         }
 
@@ -124,10 +139,15 @@ namespace WisorLib
 
             double optXBankTtlPay = optX.CalculateLuahSilukinBank();
             double optYBankTtlPay = optY.CalculateLuahSilukinBank();
-            double optZBankTtlPay = optZ.CalculateLuahSilukinBank();
+            double optZBankTtlPay = 0, ttlPayForCheck = 0;
+            if (MiscUtilities.Use3ProductsInComposition())
+                optZBankTtlPay = optZ.CalculateLuahSilukinBank();
             int ttlBankPayPayk = Convert.ToInt32(optXBankTtlPay + optYBankTtlPay + optZBankTtlPay);
-            int ttlPayForCheck = Convert.ToInt32(optX.optTtlPay + optY.optTtlPay + optZ.optTtlPay);
-            int diff = ttlPayForCheck - ttlBankPayPayk;
+            if (MiscUtilities.Use3ProductsInComposition())
+                ttlPayForCheck = Convert.ToInt32(optX.optTtlPay + optY.optTtlPay + optZ.optTtlPay);
+            else
+                ttlPayForCheck = Convert.ToInt32(optX.optTtlPay + optY.optTtlPay);
+            int diff = Convert.ToInt32(ttlPayForCheck - ttlBankPayPayk);
 
             // for debug only - print the luch silukin results to a file
             if (Share.shouldDebugLuchSilukin)
@@ -151,10 +171,15 @@ namespace WisorLib
                 string productNameY = GenericProduct.GetProductName(optY.optType);
                 string resultY = productNameY + MiscConstants.DOTS_STR + optY.optAmt +
                     MiscConstants.DOTS_STR + optY.optTime + MiscConstants.DOTS_STR + optY.optRateFirstPeriod;
-                string productNameZ = GenericProduct.GetProductName(optZ.optType);
-                string resultZ = productNameZ + MiscConstants.DOTS_STR + optZ.optAmt +
-                    MiscConstants.DOTS_STR + optZ.optTime + MiscConstants.DOTS_STR + optZ.optRateFirstPeriod;
-
+                string productNameZ = MiscConstants.UNDEFINED_STRING;
+                string resultZ = MiscConstants.UNDEFINED_STRING;
+                if (MiscUtilities.Use3ProductsInComposition())
+                {
+                    productNameZ = GenericProduct.GetProductName(optZ.optType);
+                    resultZ = productNameZ + MiscConstants.DOTS_STR + optZ.optAmt +
+                        MiscConstants.DOTS_STR + optZ.optTime + MiscConstants.DOTS_STR + optZ.optRateFirstPeriod;
+                }
+             
                 ChosenComposition comp = new ChosenComposition()
                     { resultX, resultY, resultZ, ttlPayForCheck.ToString(), ttlBankPayPayk.ToString(), diff.ToString() };
                 comp.SetBorrowerPay(ttlPayForCheck);
@@ -178,12 +203,12 @@ namespace WisorLib
             }
             if (0 >= env.MinBorrowerPay)
             {
-                env.MinBorrowerPay = ttlPayForCheck;
+                env.MinBorrowerPay = Convert.ToInt32(ttlPayForCheck);
                 env.bestBorrowerComposition = new Composition(optX, optY, optZ, env, MiscConstants.BEST_BORROWER_COMPOSITION);
             }
             if (env.MinBorrowerPay > ttlPayForCheck)
             {
-                env.MinBorrowerPay = ttlPayForCheck;
+                env.MinBorrowerPay = Convert.ToInt32(ttlPayForCheck);
                 env.bestBorrowerComposition = new Composition(optX, optY, optZ, env, MiscConstants.BEST_BORROWER_COMPOSITION);
             }
 
@@ -191,7 +216,7 @@ namespace WisorLib
             // by the factor to each of them
             // UPON the actuall known data from the loan' calculation
             int borrowerProfitCalc, bankProfitCalc, totalBenefit;
-            MiscUtilities.CalcaulateProfitAll(ttlBankPayPayk, ttlPayForCheck, diff, env.theLoan,
+            MiscUtilities.CalcaulateProfitAll(ttlBankPayPayk, Convert.ToInt32(ttlPayForCheck), diff, env.theLoan,
                 out borrowerProfitCalc, out bankProfitCalc, out totalBenefit);
             if (0 < borrowerProfitCalc && 0 < bankProfitCalc && 0 < totalBenefit)
             {

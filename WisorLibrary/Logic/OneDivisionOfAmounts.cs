@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using WisorLibrary.Utilities;
 
 namespace WisorLib
 {
@@ -17,54 +18,61 @@ namespace WisorLib
 
         // Plane for search
         public SinglePlane plane = null;
-        
-
-
+ 
         // Lists of saved matching points
         public SavedMatchesBeforeCheck savedMatches = new SavedMatchesBeforeCheck();
         private SavedCompositions savedCompositionsForFile = null;
-
-
+   
         public OneDivisionOfAmounts(double amtOpt1, double amtOpt2, double amtOpt3, RunEnvironment env)
         {
-            Interlocked.Add(ref Share.counterOfOneDivisionOfAmounts, 1);
-
             printOrNo = env.PrintOptions.printFunctionsInConsole;
+            Interlocked.Add(ref Share.counterOfOneDivisionOfAmounts, 1);
 
             amtOptX = amtOpt1;
             amtOptY = amtOpt2;
-            amtOptZ = amtOpt3;
 
-            pmtLimits = new PmtLimits(amtOptX, amtOptY, amtOptZ, env);
-            fixedOptZ0 = FindZ0(env.CalculationParameters.optTypes, pmtLimits,
-                                    env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.minTime, env);
-            if (fixedOptZ0 != null)
+            if (MiscUtilities.Use3ProductsInComposition())
             {
-                while ((fixedOptZ0 != null) && 
-                            (fixedOptZ0.optTime <= env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.maxTime))
+                amtOptZ = amtOpt3;
+
+                pmtLimits = new PmtLimits(amtOptX, amtOptY, amtOptZ, env);
+                fixedOptZ0 = FindZ0(env.CalculationParameters.optTypes, pmtLimits,
+                                        env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.minTime, env);
+                if (fixedOptZ0 != null)
                 {
-                    // Omri - when this loop is ended?
-                    plane = new SinglePlane(pmtLimits, fixedOptZ0, env);
-                    
-                    savedCompositionsForFile = new SavedCompositions(fixedOptZ0, plane.savedMatches, env);
-                    
-                    if (fixedOptZ0.optTime == env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.maxTime)
+                    while ((fixedOptZ0 != null) &&
+                                (fixedOptZ0.optTime <= env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.maxTime))
                     {
-                        fixedOptZ0 = null;
+                        // Omri - when this loop is ended?
+                        plane = new SinglePlane(pmtLimits, fixedOptZ0, env);
+
+                        savedCompositionsForFile = new SavedCompositions(fixedOptZ0, plane.savedMatches, env);
+
+                        if (fixedOptZ0.optTime == env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.maxTime)
+                        {
+                            fixedOptZ0 = null;
+                        }
+                        else
+                        {
+                            fixedOptZ0 = FindZ0(env.CalculationParameters.optTypes, pmtLimits,
+                                            (fixedOptZ0.optTime + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.timeJump), env);
+                        }
                     }
-                    else
+                }
+                else
+                {
+                    if (printOrNo == true)
                     {
-                        fixedOptZ0 = FindZ0(env.CalculationParameters.optTypes, pmtLimits,
-                                        (fixedOptZ0.optTime + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.timeJump), env);
+                        Console.WriteLine("\nZ0 Time does not exist. No possible matches for this division of money\n");
                     }
                 }
             }
             else
             {
-                if (printOrNo == true)
-                {
-                    Console.WriteLine("\nZ0 Time does not exist. No possible matches for this division of money\n");
-                }
+                pmtLimits = new PmtLimits(amtOptX, amtOptY, MiscConstants.UNDEFINED_DOUBLE, env);
+
+                plane = new SinglePlane(pmtLimits, null, env);
+                savedCompositionsForFile = new SavedCompositions(null, plane.savedMatches, env);
             }
         }
 

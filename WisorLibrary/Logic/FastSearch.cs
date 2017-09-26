@@ -155,17 +155,33 @@ namespace WisorLib
 
         private void DefineOptionTypes(uint combinationToDefine, RunEnvironment env)
         {
-            env.CalculationParameters.optTypes = new OptionTypes(
-                Share.combinations4market[combinationToDefine, 0],
-                Share.combinations4market[combinationToDefine, 1],
-                Share.combinations4market[combinationToDefine, 2], env);
+            if (MiscUtilities.Use3ProductsInComposition())
+            {
+                env.CalculationParameters.optTypes = new OptionTypes(
+                    Share.combinations4market[combinationToDefine, 0],
+                    Share.combinations4market[combinationToDefine, 1],
+                    Share.combinations4market[combinationToDefine, 2], env);
+            }
+            else
+            {
+                env.CalculationParameters.optTypes = new OptionTypes(
+                    Share.combinations4market[combinationToDefine, 0],
+                    Share.combinations4market[combinationToDefine, 1],
+                    MiscConstants.UNDEFINED_INT, env);
+            }
 
             if (env.PrintOptions.printFunctionsInConsole == true)
             {
-                Console.WriteLine("\nDefining combination for check - "  
-                + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].product.productID.numberID + " "
-                + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].product.productID.numberID + " "
-                + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.productID.numberID + " :\n");
+                if (MiscUtilities.Use3ProductsInComposition())
+                    Console.WriteLine("\nDefining combination for check - "  
+                        + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].product.productID.numberID + " "
+                        + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].product.productID.numberID + " "
+                        + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.productID.numberID + " :\n");
+                else
+                    Console.WriteLine("\nDefining combination for check - "
+                         + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].product.productID.numberID + " "
+                         + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].product.productID.numberID + " :\n");
+
             }
         }
 
@@ -225,7 +241,10 @@ namespace WisorLib
                     (Combinations.GetCombination(Share.theMarket).GetUpperBound(0) + 1) + " : " +
                     Combinations.GetCombination(Share.theMarket)[combinationCounter, 0] + " " +
                     Combinations.GetCombination(Share.theMarket)[combinationCounter, 1] + " " +
-                    Combinations.GetCombination(Share.theMarket)[combinationCounter, 2] + " :");
+                    (MiscUtilities.Use3ProductsInComposition() ? 
+                        Combinations.GetCombination(Share.theMarket)[combinationCounter, 2] : MiscConstants.UNDEFINED_STRING)
+                        + " :");
+
                 Console.WriteLine("\nnumOfCalculations: " + numOfCalculations);
                 if (env.resultsOutput.bestCompositionSoFar != null)
                 {
@@ -249,7 +268,8 @@ namespace WisorLib
                 {
                     summaryToFile += (Combinations.GetCombination(Share.theMarket)[combinationCounter, 0])
                                         + "," + "," + "," + "," + (Combinations.GetCombination(Share.theMarket)[combinationCounter, 1])
-                                        + "," + "," + "," + "," + (Combinations.GetCombination(Share.theMarket)[combinationCounter, 2]);
+                                        + "," + "," + "," + "," +
+                                        (MiscUtilities.Use3ProductsInComposition() ? (Combinations.GetCombination(Share.theMarket)[combinationCounter, 2]) : "");
                 }
                 env.WriteToOutputFile(summaryToFile);
             }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WisorLibrary.Utilities;
 
 namespace WisorLib
 {
@@ -25,7 +26,7 @@ namespace WisorLib
         }
     }
 
-
+  
 
     public class PmtLimits
     {
@@ -36,21 +37,25 @@ namespace WisorLib
         {
             amts[(int)Options.options.OPTX] = n_optXAmt;
             amts[(int)Options.options.OPTY] = n_optYAmt;
-            amts[(int)Options.options.OPTZ] = n_optZAmt;
+            if (MiscUtilities.Use3ProductsInComposition())
+                amts[(int)Options.options.OPTZ] = n_optZAmt;
 
             opts[(int)Options.options.OPTX] = new OneOption(env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX],
                                                 amts[(int)Options.options.OPTX], env);
             opts[(int)Options.options.OPTY] = new OneOption(env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY],
                                                 amts[(int)Options.options.OPTY], env);
-            opts[(int)Options.options.OPTZ] = new OneOption(env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ],
+            if (MiscUtilities.Use3ProductsInComposition())
+                opts[(int)Options.options.OPTZ] = new OneOption(env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ],
                                                 amts[(int)Options.options.OPTZ], env);
             
         }
 
-
+  
         public override string ToString()
         {
-            return "OptX: " + opts[(int)Options.options.OPTX].times[(int)Options.pmtLimits.MAXTIME] + "="
+            if (MiscUtilities.Use3ProductsInComposition())
+            {
+                return "OptX: " + opts[(int)Options.options.OPTX].times[(int)Options.pmtLimits.MAXTIME] + "="
                         + opts[(int)Options.options.OPTX].times[(int)Options.pmtLimits.MAXTIME].optPmt + " , "
                         + opts[(int)Options.options.OPTX].times[(int)Options.pmtLimits.MINTIME] + "="
                         + opts[(int)Options.options.OPTX].times[(int)Options.pmtLimits.MINTIME].optPmt +
@@ -68,8 +73,25 @@ namespace WisorLib
                         (opts[(int)Options.options.OPTX].times[(int)Options.pmtLimits.MINTIME].optPmt
                         + opts[(int)Options.options.OPTY].times[(int)Options.pmtLimits.MINTIME].optPmt
                         + opts[(int)Options.options.OPTZ].times[(int)Options.pmtLimits.MINTIME].optPmt) + "\n";
+            }
+            else
+            {
+                return "OptX: " + opts[(int)Options.options.OPTX].times[(int)Options.pmtLimits.MAXTIME] + "="
+                  + opts[(int)Options.options.OPTX].times[(int)Options.pmtLimits.MAXTIME].optPmt + " , "
+                  + opts[(int)Options.options.OPTX].times[(int)Options.pmtLimits.MINTIME] + "="
+                  + opts[(int)Options.options.OPTX].times[(int)Options.pmtLimits.MINTIME].optPmt +
+                    "\nOptY: " + opts[(int)Options.options.OPTY].times[(int)Options.pmtLimits.MAXTIME] + "="
+                  + opts[(int)Options.options.OPTY].times[(int)Options.pmtLimits.MAXTIME].optPmt + " , "
+                  + opts[(int)Options.options.OPTY].times[(int)Options.pmtLimits.MINTIME] + "="
+                  + opts[(int)Options.options.OPTY].times[(int)Options.pmtLimits.MINTIME].optPmt +
+                    "\n\t\t" + (opts[(int)Options.options.OPTX].times[(int)Options.pmtLimits.MAXTIME].optPmt
+                  + opts[(int)Options.options.OPTY].times[(int)Options.pmtLimits.MAXTIME].optPmt
+                  + opts[(int)Options.options.OPTX].times[(int)Options.pmtLimits.MINTIME].optPmt
+                  + opts[(int)Options.options.OPTY].times[(int)Options.pmtLimits.MINTIME].optPmt )+ "\n";
+            }
         }
     }
 
+ 
 
 }

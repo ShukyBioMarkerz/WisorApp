@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using WisorLibrary.Logic;
+using WisorLibrary.Utilities;
 
 namespace WisorLib
 {
@@ -47,9 +48,18 @@ namespace WisorLib
             this.name = name;
             opts[(int)Options.options.OPTX] = optionX;
             opts[(int)Options.options.OPTY] = optionY;
-            opts[(int)Options.options.OPTZ] = optionZ;
 
-            ttlPmt = (opts[(int)Options.options.OPTX].optPmt + opts[(int)Options.options.OPTY].optPmt + opts[(int)Options.options.OPTZ].optPmt);
+            if (MiscUtilities.Use3ProductsInComposition())
+            {
+                opts[(int)Options.options.OPTZ] = optionZ;
+                ttlPmt = (opts[(int)Options.options.OPTX].optPmt + opts[(int)Options.options.OPTY].optPmt + opts[(int)Options.options.OPTZ].optPmt);
+            }
+            else
+            {
+                opts[(int)Options.options.OPTZ] = null;
+                ttlPmt = (opts[(int)Options.options.OPTX].optPmt + opts[(int)Options.options.OPTY].optPmt);
+            }
+
             CheckIfTtlCalculatedOrNo(env);
 
             CalculateBankProfit(env);
@@ -57,12 +67,17 @@ namespace WisorLib
 
         private void CalculateBankProfit(RunEnvironment env)
         {
-            Calculations.CalculateTheBankProfit(opts[(int)Options.options.OPTX], opts[(int)Options.options.OPTY],
-                opts[(int)Options.options.OPTZ], env.BorrowerProfile.profile);
+            if (MiscUtilities.Use3ProductsInComposition())
+                Calculations.CalculateTheBankProfit(opts[(int)Options.options.OPTX], opts[(int)Options.options.OPTY],
+                    opts[(int)Options.options.OPTZ], env.BorrowerProfile.profile);
+            else
+                Calculations.CalculateTheBankProfit(opts[(int)Options.options.OPTX], opts[(int)Options.options.OPTY],
+                    null, env.BorrowerProfile.profile);
 
             optXBankTtlPay = opts[(int)Options.options.OPTX].CalculateLuahSilukinBank();
             optYBankTtlPay = opts[(int)Options.options.OPTY].CalculateLuahSilukinBank();
-            optZBankTtlPay = opts[(int)Options.options.OPTZ].CalculateLuahSilukinBank();
+            if (MiscUtilities.Use3ProductsInComposition())
+                optZBankTtlPay = opts[(int)Options.options.OPTZ].CalculateLuahSilukinBank();
          }
 
    
@@ -80,10 +95,11 @@ namespace WisorLib
             {
                 CalculateTtlPayForOneOption((int)Options.options.OPTY, env);
             }
-            if (ttlPayCalculated[(int)Options.options.OPTZ] == false)
-            {
-                CalculateTtlPayForOneOption((int)Options.options.OPTZ, env);
-            }
+            if (MiscUtilities.Use3ProductsInComposition())
+                if (ttlPayCalculated[(int)Options.options.OPTZ] == false)
+                {
+                    CalculateTtlPayForOneOption((int)Options.options.OPTZ, env);
+                }
         }
 
 
@@ -137,15 +153,29 @@ namespace WisorLib
         {
             string s = "\nComposition list:";
 
-            s += /*"Ticks" + "," + "OrderID" + "," + "Time" + "," +*/
+            if (MiscUtilities.Use3ProductsInComposition())
+            {
+                s += 
                 "X:optType" + "," + "X:optAmt" + "," + "X:optTime" + "," + "X:RateFirstPeriod" + "," +
                 "Y:optType" + "," + "Y:optAmt" + "," + "Y:optTime" + "," + "Y:RateFirstPeriod" + "," +
                 "Z:optType" + "," + "Z:optAmt" + "," + "Z:optTime" + "," + "Z:RateFirstPeriod" + "," +
                 "OPTXPmt" + "," + "OPTYPmt" + "," + "OPTZPmt" + "," + "ttlPmt" + "," +
-                "OPTXTtlPay" + "," + "OPTYTtlPay" + "," + "OPTZTtlPay" + "," + 
+                "OPTXTtlPay" + "," + "OPTYTtlPay" + "," + "OPTZTtlPay" + "," +
                 // bank profit data
                 "X:BankTtlPay" + "," + "Y:BankTtlPay" + "," + "Z:BankTtlPay" + "," +
-                "ttlBorrowerPay" + "," + "TtlBankPay" + "," +  "TtlBankProfit";
+                "ttlBorrowerPay" + "," + "TtlBankPay" + "," + "TtlBankProfit";
+            }
+            else
+            {
+               s +=
+              "X:optType" + "," + "X:optAmt" + "," + "X:optTime" + "," + "X:RateFirstPeriod" + "," +
+              "Y:optType" + "," + "Y:optAmt" + "," + "Y:optTime" + "," + "Y:RateFirstPeriod" + "," +
+              "OPTXPmt" + "," + "OPTYPmt" + "," + "OPTZPmt" + "," + "ttlPmt" + "," +
+              "OPTXTtlPay" + "," + "OPTYTtlPay" + "," + "OPTZTtlPay" + "," +
+              // bank profit data
+              "X:BankTtlPay" + "," + "Y:BankTtlPay" + "," + "Z:BankTtlPay" + "," +
+              "ttlBorrowerPay" + "," + "TtlBankPay" + "," + "TtlBankProfit";
+            }
 
             return s;
         }
@@ -155,27 +185,51 @@ namespace WisorLib
             int ttlBankPayPayk = Convert.ToInt32(optXBankTtlPay + optYBankTtlPay + optZBankTtlPay);
             string s = MiscConstants.UNDEFINED_STRING;
 
-            if (null != opts && null != opts[(int)Options.options.OPTX] && null != opts[(int)Options.options.OPTY] &&
-                null != opts[(int)Options.options.OPTZ])
+            if (MiscUtilities.Use3ProductsInComposition())
             {
-                s = "" + opts[(int)Options.options.OPTX].ToString()
-                        + "," + opts[(int)Options.options.OPTY].ToString()
-                            + "," + opts[(int)Options.options.OPTZ].ToString()
-                            + "," + (int)opts[(int)Options.options.OPTX].optPmt
-                            + "," + (int)opts[(int)Options.options.OPTY].optPmt
-                            + "," + (int)opts[(int)Options.options.OPTZ].optPmt
-                            + "," + (int)ttlPmt
-                            + "," + (int)opts[(int)Options.options.OPTX].optTtlPay
-                            + "," + (int)opts[(int)Options.options.OPTY].optTtlPay
-                            + "," + (int)opts[(int)Options.options.OPTZ].optTtlPay
-                            // the bank profit data
-                            + "," + Convert.ToInt32(optXBankTtlPay).ToString()
-                            + "," + Convert.ToInt32(optYBankTtlPay).ToString()
-                            + "," + Convert.ToInt32(optZBankTtlPay).ToString()
-                            + "," + (int)ttlPay
-                            + "," + Convert.ToInt32(ttlBankPayPayk).ToString()
-                            + "," + Convert.ToInt32(ttlPay - ttlBankPayPayk).ToString()
-                            /*+ "," + score*/;
+                if (null != opts && null != opts[(int)Options.options.OPTX] && null != opts[(int)Options.options.OPTY] &&
+                    null != opts[(int)Options.options.OPTZ])
+                {
+                    s = "" + opts[(int)Options.options.OPTX].ToString()
+                            + "," + opts[(int)Options.options.OPTY].ToString()
+                                + "," + opts[(int)Options.options.OPTZ].ToString()
+                                + "," + (int)opts[(int)Options.options.OPTX].optPmt
+                                + "," + (int)opts[(int)Options.options.OPTY].optPmt
+                                + "," + (int)opts[(int)Options.options.OPTZ].optPmt
+                                + "," + (int)ttlPmt
+                                + "," + (int)opts[(int)Options.options.OPTX].optTtlPay
+                                + "," + (int)opts[(int)Options.options.OPTY].optTtlPay
+                                + "," + (int)opts[(int)Options.options.OPTZ].optTtlPay
+                                // the bank profit data
+                                + "," + Convert.ToInt32(optXBankTtlPay).ToString()
+                                + "," + Convert.ToInt32(optYBankTtlPay).ToString()
+                                + "," + Convert.ToInt32(optZBankTtlPay).ToString()
+                                + "," + (int)ttlPay
+                                + "," + Convert.ToInt32(ttlBankPayPayk).ToString()
+                                + "," + Convert.ToInt32(ttlPay - ttlBankPayPayk).ToString()
+                                /*+ "," + score*/;
+                }
+            }
+            else
+            {
+                if (null != opts && null != opts[(int)Options.options.OPTX] && null != opts[(int)Options.options.OPTY])
+                {
+                    s = "" + opts[(int)Options.options.OPTX].ToString()
+                            + "," + opts[(int)Options.options.OPTY].ToString()
+                                + "," + (int)opts[(int)Options.options.OPTX].optPmt
+                                + "," + (int)opts[(int)Options.options.OPTY].optPmt
+                                + "," + (int)ttlPmt
+                                + "," + (int)opts[(int)Options.options.OPTX].optTtlPay
+                                + "," + (int)opts[(int)Options.options.OPTY].optTtlPay
+                                // the bank profit data
+                                + "," + Convert.ToInt32(optXBankTtlPay).ToString()
+                                + "," + Convert.ToInt32(optYBankTtlPay).ToString()
+                                + "," + (int)ttlPay
+                                + "," + Convert.ToInt32(ttlBankPayPayk).ToString()
+                                + "," + Convert.ToInt32(ttlPay - ttlBankPayPayk).ToString()
+                                /*+ "," + score*/;
+                }
+
             }
             return s;
         }
@@ -188,14 +242,25 @@ namespace WisorLib
                 if (null == c)
                     return true; // avoid to add a null value
 
-                return
+                if (MiscUtilities.Use3ProductsInComposition())
+                {
+                    return 
                     comp.opts[(int)Options.options.OPTX].optAmt == c.opts[(int)Options.options.OPTX].optAmt &&
                     comp.opts[(int)Options.options.OPTX].optTime == c.opts[(int)Options.options.OPTX].optTime &&
                     comp.opts[(int)Options.options.OPTY].optAmt == c.opts[(int)Options.options.OPTY].optAmt &&
                     comp.opts[(int)Options.options.OPTY].optTime == c.opts[(int)Options.options.OPTY].optTime &&
                     comp.opts[(int)Options.options.OPTZ].optAmt == c.opts[(int)Options.options.OPTZ].optAmt &&
                     comp.opts[(int)Options.options.OPTZ].optTime == c.opts[(int)Options.options.OPTZ].optTime;
-            };
+                }
+                else
+                {
+                    return
+                    comp.opts[(int)Options.options.OPTX].optAmt == c.opts[(int)Options.options.OPTX].optAmt &&
+                    comp.opts[(int)Options.options.OPTX].optTime == c.opts[(int)Options.options.OPTX].optTime &&
+                    comp.opts[(int)Options.options.OPTY].optAmt == c.opts[(int)Options.options.OPTY].optAmt &&
+                    comp.opts[(int)Options.options.OPTY].optTime == c.opts[(int)Options.options.OPTY].optTime;
+                }
+              };
         }
 
     }

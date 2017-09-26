@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Threading;
+using WisorLibrary.Utilities;
 
 namespace WisorLib
 {
@@ -26,21 +27,28 @@ namespace WisorLib
 
 
 
-        public ThreeOptionSearch(/*double minAmountOptX, double maxAmountOptX,*/ RunEnvironment env)
+        public ThreeOptionSearch(RunEnvironment env)
         {
             minAmtOptX = env.CalculationParameters.minAmts[(int)Options.options.OPTX];
             maxAmtOptX = env.CalculationParameters.maxAmts[(int)Options.options.OPTX]; 
             minAmtOptY = env.CalculationParameters.minAmts[(int)Options.options.OPTY];
             maxAmtOptY = env.CalculationParameters.maxAmts[(int)Options.options.OPTY];
-            minAmtOptZ = env.CalculationParameters.minAmts[(int)Options.options.OPTZ];
-            maxAmtOptZ = env.CalculationParameters.maxAmts[(int)Options.options.OPTZ];
+
+            // number of products in composition
+            if (MiscUtilities.Use3ProductsInComposition())
+            {
+                minAmtOptZ = env.CalculationParameters.minAmts[(int)Options.options.OPTZ];
+                maxAmtOptZ = env.CalculationParameters.maxAmts[(int)Options.options.OPTZ];
+            }
             if (env.PrintOptions.printFunctionsInConsole == true)
             {
                 Console.WriteLine("\nPerforming three option search ...\n");
             }
-            PerformFullThreeOptionSearch(env);
 
-
+            if (MiscUtilities.Use3ProductsInComposition())
+                PerformFullThreeOptionSearch(env);
+            else
+                PerformFull2OptionSearch(env);
         }
 
 
@@ -50,6 +58,40 @@ namespace WisorLib
 
         // **************************************************************************************************************************** //
         // ***************** PRIVATE - Performs Full Search for Three Options According to Limit Amounts for Option X ***************** //
+
+        
+        private void PerformFull2OptionSearch(RunEnvironment env)
+        {
+            double opt2Amt = MiscConstants.UNDEFINED_DOUBLE;
+            double percentDone = 0;
+            double counter = 0;
+            double loopCount = ((maxAmtOptX - minAmtOptX) / CalculationConstants.jumpBetweenAmounts) + 1;
+            Console.WriteLine("Max Amount = " + maxAmtOptX + "\nMin Amount = " + minAmtOptX + "\nLoop Counter = " + loopCount);
+            numOfCalculations = 0;
+
+            // Begin loop for Option 1 amount
+            for (double opt1Amt = minAmtOptX; opt1Amt <= maxAmtOptX; opt1Amt += CalculationConstants.jumpBetweenAmounts)
+            {
+                numOfCalculations++;
+                counter++;
+                if (((env.CalculationParameters.loanAmtWanted - opt1Amt) >= minAmtOptY) &&
+                        ((env.CalculationParameters.loanAmtWanted - opt1Amt) <= maxAmtOptY))
+                {
+                    opt2Amt = env.CalculationParameters.loanAmtWanted - opt1Amt;
+                    // Perform main thing here ...
+                    searchOneDivisionOfAmounts = new OneDivisionOfAmounts(opt1Amt, opt2Amt, MiscConstants.UNDEFINED_DOUBLE, env);
+                }
+
+                // Show progress and  calculate remaining time
+                if (env.PrintOptions.printPercentageDone == true)
+                {
+                    percentDone = (counter / loopCount) * 100;
+                    percentDone = ((percentDone * 100) - ((percentDone * 100) % 1)) / 100;
+                    Console.Write("\n" + counter + " / " + loopCount + " -> AmountX = " + opt1Amt + " | AmountY = " + opt2Amt + " (" + percentDone + " % done)");
+                }
+
+            }
+        }
 
         private void PerformFullThreeOptionSearch(RunEnvironment env)
         {
@@ -79,6 +121,8 @@ namespace WisorLib
                                             + opt1Amt + " ( " + percentDone + " % done ) - took " + tLoop);
                     }
 
+                    // number of products in composition (notice: minAmtOptZ is not set...
+                    // if (MiscUtilities.Use3ProductsInComposition())
                     if (((env.CalculationParameters.loanAmtWanted - opt1Amt - opt2Amt) >= minAmtOptZ) &&
                             ((env.CalculationParameters.loanAmtWanted - opt1Amt - opt2Amt) <= maxAmtOptZ))
                     {

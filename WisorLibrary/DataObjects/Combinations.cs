@@ -76,7 +76,7 @@ namespace WisorLibrary.DataObjects
                     {
                         //string[] oneCombination = new string[MiscConstants.NUM_OF_PRODUCTS_IN_COMBINATION];
 
-                        allCombination = new string[comb.Length, MiscConstants.NUM_OF_PRODUCTS_IN_COMBINATION]; // { { } };
+                        allCombination = new string[comb.Length, MiscUtilities.GetNumberOfProductsInCombination()]; // { { } };
                         string[] entities;
                         string line = null;
 
@@ -87,7 +87,7 @@ namespace WisorLibrary.DataObjects
                                 continue;
 
                             entities = line.Split(MiscConstants.COMMA);
-                            for (int j = 0; j < MiscConstants.NUM_OF_PRODUCTS_IN_COMBINATION; j++)
+                            for (int j = 0; j < MiscUtilities.GetNumberOfProductsInCombination(); j++)
                             {
                                 allCombination[i, j] = entities[j].Trim();
                             }
@@ -104,7 +104,7 @@ namespace WisorLibrary.DataObjects
 
         private string[] LoadCombinationsFileData(string filename)
         {
-            uint lineElemntsNum = MiscConstants.NUM_OF_PRODUCTS_IN_COMBINATION;
+            int lineElemntsNum = MiscUtilities.GetNumberOfProductsInCombination();
             string[] lines = null;
  
             try
@@ -148,7 +148,8 @@ namespace WisorLibrary.DataObjects
 
         public static bool SetCombinationsFilename()
         {
-            string filename = MiscUtilities.GetFilename(Share.CombinationFileName, MiscConstants.COMBINATIONS_FILE);
+            string filename = GetCombinationsFilename();
+
             bool rc = Combinations.SetFilename(filename);
 
             if (rc)
@@ -163,7 +164,11 @@ namespace WisorLibrary.DataObjects
         {
             //string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
             //string filename = dir + MiscConstants.COMBINATIONS_FILE;
-            string filename = MiscUtilities.GetFilename(Share.CombinationFileName, MiscConstants.COMBINATIONS_FILE);
+            string filename;
+            if (MiscUtilities.Use3ProductsInComposition())
+                filename = MiscUtilities.GetFilename(Share.CombinationFileName, MiscConstants.COMBINATION_FILENAME);
+            else
+                filename = MiscUtilities.GetFilename(Share.Products2InCombinationFileName, MiscConstants.COMBINATION_FILENAME_2_PRODUCTS_IN_COMBINATION);
 
             return filename;
         }
@@ -263,7 +268,7 @@ namespace WisorLibrary.DataObjects
                         break;
                     }
                     
-                    string[] oneCombination = new string[MiscConstants.NUM_OF_PRODUCTS_IN_COMBINATION];
+                    string[] oneCombination = new string[MiscUtilities.GetNumberOfProductsInCombination()];
                     oneCombination = c.ToArray();
                     // TBD - blockcopy or array copy
                     // copy first the must products

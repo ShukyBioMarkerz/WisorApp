@@ -658,7 +658,7 @@ namespace WisorLibrary.Logic
             // check the amounts correctness
             uint totalBorowerPay = calculationBorrowerData.PayUntilToday + calculationBorrowerData.PayFuture;
             uint totalBankPay = calculationBankData.PayUntilToday + calculationBankData.PayFuture;
-            if (totalBorowerPay > totalBankPay)
+            if (totalBorowerPay >= totalBankPay)
             {
                 calculationData.EstimateTotalProfit =
                     calculationBorrowerData.PayUntilToday + calculationBorrowerData.PayFuture -
@@ -667,7 +667,7 @@ namespace WisorLibrary.Logic
             else
             {
                 WindowsUtilities.loggerMethod("ERROR: CalculateLuahSilukinFullAll the borrower pay: " + totalBorowerPay +
-                    " less than the bank: " + totalBankPay + "(originalBorrowerRate: " + originalBorrowerRate + 
+                    " less than the bank: " + totalBankPay + " (originalBorrowerRate: " + originalBorrowerRate + 
                     ", originalbankRate: " + originalbankRate);
             }
             // EstimateTotalProfitPercantage = EstimateTotalProfit / loan amount
@@ -782,39 +782,80 @@ namespace WisorLibrary.Logic
         {
             MinMax minmax = new MinMax();
 
-            // TBD: should check if this is the case when the interest is low 
-            if (indices.PRIME == optType.product.originalIndexUsedFirstTimePeriod)
+            if (MiscUtilities.Use3ProductsInComposition())
             {
-                minmax.max = (int)(Calculations.FindMaxAmount(loanAmtWanted, optType) / 100 * 100);
-                minmax.min = minmax.max;
-            }
-            else
-            {
-                if (Risk.NONERisk == risk || Liquidity.NONELiquidity == liquidity)
+                // TBD: should check if this is the case when the interest is low 
+                if (indices.PRIME == optType.product.originalIndexUsedFirstTimePeriod)
                 {
-                    // keep the old good stuff...
                     minmax.max = (int)(Calculations.FindMaxAmount(loanAmtWanted, optType) / 100 * 100);
-                    minmax.min = (int)prevMin; // ... don't touch
+                    minmax.min = minmax.max;
                 }
                 else
                 {
-                    RiskLiquidityValue riskLiquidityValue = new RiskLiquidityValue();
-                    riskLiquidityValue.liquidity = liquidity;
-                    riskLiquidityValue.risk = risk;
-                    riskLiquidityValue.productID = optType.product.productID;
-                    bool rc = MiscUtilities.FindRiskLiquidity(riskLiquidityValue);
-                    if (rc)
+                    if (Risk.NONERisk == risk || Liquidity.NONELiquidity == liquidity)
                     {
-                        // should calculate the loan values according to the percantage
-                        minmax.min = (int)(loanAmtWanted * riskLiquidityValue.min / 100 * 100);
-                        minmax.max = (int)(loanAmtWanted * riskLiquidityValue.max / 100 * 100);
-                    }
-                    else
-                    {
-                        Console.WriteLine("FindMinMaxAmount failed for: " + riskLiquidityValue.ToString());
                         // keep the old good stuff...
                         minmax.max = (int)(Calculations.FindMaxAmount(loanAmtWanted, optType) / 100 * 100);
                         minmax.min = (int)prevMin; // ... don't touch
+                    }
+                    else
+                    {
+                        RiskLiquidityValue riskLiquidityValue = new RiskLiquidityValue();
+                        riskLiquidityValue.liquidity = liquidity;
+                        riskLiquidityValue.risk = risk;
+                        riskLiquidityValue.productID = optType.product.productID;
+                        bool rc = MiscUtilities.FindRiskLiquidity(riskLiquidityValue);
+                        if (rc)
+                        {
+                            // should calculate the loan values according to the percantage
+                            minmax.min = (int)(loanAmtWanted * riskLiquidityValue.min / 100 * 100);
+                            minmax.max = (int)(loanAmtWanted * riskLiquidityValue.max / 100 * 100);
+                        }
+                        else
+                        {
+                            Console.WriteLine("FindMinMaxAmount failed for: " + riskLiquidityValue.ToString());
+                            // keep the old good stuff...
+                            minmax.max = (int)(Calculations.FindMaxAmount(loanAmtWanted, optType) / 100 * 100);
+                            minmax.min = (int)prevMin; // ... don't touch
+                        }
+                    }
+                }
+            }
+            else // 2 products in a combination
+            {
+                if (indices.PRIME == optType.product.originalIndexUsedFirstTimePeriod)
+                {
+                    minmax.max = (int)(Calculations.FindMaxAmount(loanAmtWanted, optType) / 100 * 100);
+                    minmax.min = (int)prevMin;
+                }
+                else
+                {
+                    if (Risk.NONERisk == risk || Liquidity.NONELiquidity == liquidity)
+                    {
+                        // keep the old good stuff...
+                        minmax.max = (int)(Calculations.FindMaxAmount(loanAmtWanted, optType) / 100 * 100);
+                        minmax.min = (int)prevMin; // ... don't touch
+                    }
+                    else
+                    {
+                        RiskLiquidityValue riskLiquidityValue = new RiskLiquidityValue();
+                        riskLiquidityValue.liquidity = liquidity;
+                        riskLiquidityValue.risk = risk;
+                        riskLiquidityValue.productID = optType.product.productID;
+                        bool rc = MiscUtilities.FindRiskLiquidity(riskLiquidityValue);
+                        if (rc)
+                        {
+                            // should calculate the loan values according to the percantage
+                            minmax.min = (int)(loanAmtWanted * riskLiquidityValue.min / 100 * 100);
+                            minmax.max = (int)(loanAmtWanted * riskLiquidityValue.max / 100 * 100);
+                        }
+                        else
+                        {
+                            Console.WriteLine("FindMinMaxAmount failed for: " + riskLiquidityValue.ToString());
+                            // keep the old good stuff...
+                            minmax.max = (int)(Calculations.FindMaxAmount(loanAmtWanted, optType) / 100 * 100);
+                            minmax.min = (int)prevMin; // ... don't touch
+                        }
                     }
                 }
             }
@@ -826,7 +867,7 @@ namespace WisorLibrary.Logic
         {
             double loanAmount = loanAmountTemp;
             OneOptType optTypeForTest = optType;
-            int numOfFixedOptions = 2;
+            int numOfFixedOptions = MiscUtilities.GetNumberOfProductsInCombination() - 1;
             double result = MiscConstants.UNDEFINED_DOUBLE;
 
             // Omri - need the maxPercentageOfLoan value
@@ -860,9 +901,12 @@ namespace WisorLibrary.Logic
             bankRate = RateUtilities.Instance.GetBankRate(optionY.product.productID.numberID,
                 profile, (int)optionY.optTime / 12 - 4);
             optionY.SetBankRate(bankRate);
-            bankRate = RateUtilities.Instance.GetBankRate(optionZ.product.productID.numberID,
+            if (MiscUtilities.Use3ProductsInComposition())
+            {
+                bankRate = RateUtilities.Instance.GetBankRate(optionZ.product.productID.numberID,
                 profile, (int)optionZ.optTime / 12 - 4);
-            optionZ.SetBankRate(bankRate);
+                optionZ.SetBankRate(bankRate);
+            }
         }
 
     }

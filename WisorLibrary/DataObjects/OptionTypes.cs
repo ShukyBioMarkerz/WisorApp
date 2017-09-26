@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WisorLibrary.DataObjects;
 using WisorLibrary.Logic;
+using WisorLibrary.Utilities;
 using static WisorLib.GenericProduct;
 using static WisorLib.MiscConstants;
 
@@ -154,7 +155,8 @@ namespace WisorLib
         {
             optionTypes[(int)Options.options.OPTX] = new OneOptType(optXType);
             optionTypes[(int)Options.options.OPTY] = new OneOptType(optYType);
-            optionTypes[(int)Options.options.OPTZ] = new OneOptType(optZType);
+            if (MiscUtilities.Use3ProductsInComposition())
+                optionTypes[(int)Options.options.OPTZ] = new OneOptType(optZType);
             GetAgeRestriction(env);
             GetMinMaxAmountsForThreeOptions(env);
          }
@@ -191,7 +193,8 @@ namespace WisorLib
             {
                 GetAgeRestrictionOneOption(optionTypes[(int)Options.options.OPTX], env);
                 GetAgeRestrictionOneOption(optionTypes[(int)Options.options.OPTY], env);
-                GetAgeRestrictionOneOption(optionTypes[(int)Options.options.OPTZ], env);
+                if (MiscUtilities.Use3ProductsInComposition())
+                    GetAgeRestrictionOneOption(optionTypes[(int)Options.options.OPTZ], env);
             }
         }
 
@@ -207,7 +210,7 @@ namespace WisorLib
             //Console.ReadKey();
 
             uint remainingTimePossible;
-            if (0 < optTypeForCheck.product.timeJump)
+            if (null != optTypeForCheck.product && 0 < optTypeForCheck.product.timeJump)
             {
                 remainingTimePossible = env.CalculationParameters.maximumTimeForLoan - (env.CalculationParameters.maximumTimeForLoan % optTypeForCheck.product.timeJump);
             }
@@ -216,7 +219,7 @@ namespace WisorLib
                 remainingTimePossible = env.CalculationParameters.maximumTimeForLoan;
             }
 
-            if (optTypeForCheck.product.maxTime > optTypeForCheck.product.minTime)
+            if (null != optTypeForCheck.product && optTypeForCheck.product.maxTime > optTypeForCheck.product.minTime)
             {
                 if (remainingTimePossible >= optTypeForCheck.product.maxTime)
                     optTypeForCheck.product.maxTime = remainingTimePossible;
@@ -231,13 +234,16 @@ namespace WisorLib
                                     + "\nNew maximum time for option type = " + remainingTimePossible);
             }
 
-            optTypeForCheck.product.maxTime = remainingTimePossible;
-            if (optTypeForCheck.product.maxTime <= CalculationConstants.minimumTimeForLoan)
+            if (null != optTypeForCheck.product)
             {
-                Console.WriteLine("NOTICE: Option Type = " + optTypeForCheck.product.name + "\nMaximum time for option type = " + optTypeForCheck.product.maxTime
-                                    + "\nMaximum time possible for loaner = " + env.CalculationParameters.maximumTimeForLoan
-                                    + "\nNew maximum time for option type = " + remainingTimePossible);
+                optTypeForCheck.product.maxTime = remainingTimePossible;
+                if (optTypeForCheck.product.maxTime <= CalculationConstants.minimumTimeForLoan)
+                {
+                    Console.WriteLine("NOTICE: Option Type = " + optTypeForCheck.product.name + "\nMaximum time for option type = " + optTypeForCheck.product.maxTime
+                                        + "\nMaximum time possible for loaner = " + env.CalculationParameters.maximumTimeForLoan
+                                        + "\nNew maximum time for option type = " + remainingTimePossible);
 
+                }
             }
 
         }
@@ -271,14 +277,18 @@ namespace WisorLib
                 env.CalculationParameters.maxAmts[(int)Options.options.OPTY] = minmax.max;
             }
 
-            minmax = Calculations.FindMinMaxAmount(
-                    env.CalculationParameters.loanAmtWanted, optionTypes[(int)Options.options.OPTZ],
-                    env.theLoan.risk, env.theLoan.liquidity,
-                    env.CalculationParameters.minAmts[(int)Options.options.OPTZ]);
-            if (null != minmax)
+            // number of products in composition
+            if (MiscUtilities.Use3ProductsInComposition())
             {
-                env.CalculationParameters.minAmts[(int)Options.options.OPTZ] = minmax.min;
-                env.CalculationParameters.maxAmts[(int)Options.options.OPTZ] = minmax.max;
+                minmax = Calculations.FindMinMaxAmount(
+                        env.CalculationParameters.loanAmtWanted, optionTypes[(int)Options.options.OPTZ],
+                        env.theLoan.risk, env.theLoan.liquidity,
+                        env.CalculationParameters.minAmts[(int)Options.options.OPTZ]);
+                if (null != minmax)
+                {
+                    env.CalculationParameters.minAmts[(int)Options.options.OPTZ] = minmax.min;
+                    env.CalculationParameters.maxAmts[(int)Options.options.OPTZ] = minmax.max;
+                }
             }
 
             // TBD: ensure the sum produce the loan ...

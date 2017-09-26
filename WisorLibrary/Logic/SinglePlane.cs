@@ -35,13 +35,73 @@ namespace WisorLib
         public SinglePlane(PmtLimits planePmtLimits, Option optZ0, RunEnvironment env)
         {
             pmtLimits = planePmtLimits;
-            fixedOptZ = optZ0;
             printOrNo = env.PrintOptions.printFunctionsInConsole;
 
-            // 1 - Calculate target Pmt for two Option X and Option Y for limit point search
-            targetTwoOptionPmt = env.CalculationParameters.monthlyPmtWanted - fixedOptZ.optPmt;
+            if (MiscUtilities.Use3ProductsInComposition())
+            {
+                fixedOptZ = optZ0;
+                // 1 - Calculate target Pmt for two Option X and Option Y for limit point search
+                targetTwoOptionPmt = env.CalculationParameters.monthlyPmtWanted - fixedOptZ.optPmt;
 
-            // 2 - Get Initial Limit Points
+                // 2 - Get Initial Limit Points
+                FindInitialLimitPointsForSearchArea(env);
+                //Console.ReadKey();
+
+                if (initialLimitPoints[(int)Options.options.OPTX].opts[(int)Options.options.OPTX] != null)
+                {
+
+                    if (printOrNo == true)
+                    {
+                        Console.WriteLine("\nInitial limit A = " + initialLimitPoints[(int)Options.options.OPTX].ToString()
+                            + "\nInitial limit B = " + initialLimitPoints[(int)Options.options.OPTY].ToString());
+                    }
+                    totalLimitPointExists++;
+
+                    // 3 - Get Final Limit Points
+                    FindFinalExtendedLimitPointsForSearchArea(env);
+                    //Console.ReadKey();
+
+
+                    if (!MiscUtilities.CheckConsistency(finalLimitPoints))
+                    {
+                        //env.WriteToOutputFile("ERROR: SinglePlane failed in CheckConsistency. fixedOptZ: " + fixedOptZ.ToString() +
+                        //    ", initialLimitPoints OPTX: " + initialLimitPoints[(int)Options.options.OPTX].ToString() +
+                        //    ", initialLimitPoints OPTY: " + initialLimitPoints[(int)Options.options.OPTY].ToString() +
+                        //    ", finalLimitPoints OPTX: " + finalLimitPoints[(int)Options.options.OPTX].ToString() +
+                        //    ", finalLimitPoints OPTY: " + finalLimitPoints[(int)Options.options.OPTY].ToString());
+
+                        Console.WriteLine("ERROR: SinglePlane failed in CheckConsistency.");
+                        return;
+                    }
+
+                    // 4 - Create final search Area
+                    FindFinalSearchArea(env);
+                    //Console.ReadKey();
+
+                    // 5 - Perform column search in final search area 
+                    SearchAllColumnsInFinalSearchArea(env);
+                    //Console.ReadKey();
+                }
+                else
+                {
+                    totalLimitPointNotExists++;
+                    if (printOrNo == true)
+                    {
+                        Console.WriteLine("\nInitial limit points not found\n");
+                    }
+                }
+            }
+            else
+            {
+                SinglePlan2ProductsInComposition(env);
+            }
+        }
+
+        void SinglePlan2ProductsInComposition(RunEnvironment env)
+        {
+            targetTwoOptionPmt = env.CalculationParameters.monthlyPmtWanted;
+
+            // 1 - Get Initial Limit Points
             FindInitialLimitPointsForSearchArea(env);
             //Console.ReadKey();
 
@@ -55,28 +115,15 @@ namespace WisorLib
                 }
                 totalLimitPointExists++;
 
-                // 3 - Get Final Limit Points
+                // 2 - Get Final Limit Points
                 FindFinalExtendedLimitPointsForSearchArea(env);
                 //Console.ReadKey();
 
-                
-                if (! MiscUtilities.CheckConsistency(finalLimitPoints))
-                {
-                    //env.WriteToOutputFile("ERROR: SinglePlane failed in CheckConsistency. fixedOptZ: " + fixedOptZ.ToString() +
-                    //    ", initialLimitPoints OPTX: " + initialLimitPoints[(int)Options.options.OPTX].ToString() +
-                    //    ", initialLimitPoints OPTY: " + initialLimitPoints[(int)Options.options.OPTY].ToString() +
-                    //    ", finalLimitPoints OPTX: " + finalLimitPoints[(int)Options.options.OPTX].ToString() +
-                    //    ", finalLimitPoints OPTY: " + finalLimitPoints[(int)Options.options.OPTY].ToString());
-               
-                    Console.WriteLine("ERROR: SinglePlane failed in CheckConsistency.");
-                    return;
-                }
-
-                // 4 - Create final search Area
+                // 3 - Create final search Area
                 FindFinalSearchArea(env);
                 //Console.ReadKey();
 
-                // 5 - Perform column search in final search area 
+                // 4 - Perform column search in final search area 
                 SearchAllColumnsInFinalSearchArea(env);
                 //Console.ReadKey();
             }
@@ -89,8 +136,6 @@ namespace WisorLib
                 }
             }
         }
-
-    
 
 
 
