@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shrink2FitDAL", "WisorShare
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WisorPublicAPI", "WisorPublicAPI\WisorPublicAPI.csproj", "{35CEA5D9-3F5A-41E5-AC38-186F21EEA9A6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonObjects", "CommonObjects\CommonObjects.csproj", "{8272C3B4-1D4E-4910-8684-C126D34C3DAA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,14 @@ Global
 		{35CEA5D9-3F5A-41E5-AC38-186F21EEA9A6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{35CEA5D9-3F5A-41E5-AC38-186F21EEA9A6}.Release|x86.ActiveCfg = Release|Any CPU
 		{35CEA5D9-3F5A-41E5-AC38-186F21EEA9A6}.Release|x86.Build.0 = Release|Any CPU
+		{8272C3B4-1D4E-4910-8684-C126D34C3DAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8272C3B4-1D4E-4910-8684-C126D34C3DAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8272C3B4-1D4E-4910-8684-C126D34C3DAA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8272C3B4-1D4E-4910-8684-C126D34C3DAA}.Debug|x86.Build.0 = Debug|Any CPU
+		{8272C3B4-1D4E-4910-8684-C126D34C3DAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8272C3B4-1D4E-4910-8684-C126D34C3DAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8272C3B4-1D4E-4910-8684-C126D34C3DAA}.Release|x86.ActiveCfg = Release|Any CPU
+		{8272C3B4-1D4E-4910-8684-C126D34C3DAA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

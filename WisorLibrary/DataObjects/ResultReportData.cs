@@ -156,18 +156,18 @@ namespace WisorLibrary.DataObjects
 
             UpdateGeneralResults(env, out shouldThisLoanReFinance);
 
-            WindowsUtilities.loggerMethod("\nCreating report for loan: " + this.ID + " shouldThisLoanReFinance: " + shouldThisLoanReFinance +
-                ", shouldCreateShortPDFReport: " + shouldCreateShortPDFReport + ", shouldCreateLongPDFReport: " + shouldCreateLongPDFReport);
+            // create the report
+            ReportFilename = MiscUtilities.GetReportFileName(ID, FileType.PDF);
+
             if (shouldThisLoanReFinance && (shouldCreateShortPDFReport || shouldCreateLongPDFReport))
             {
+                WindowsUtilities.loggerMethod("\nCreating report for loan: " + this.ID + " ReportFilename: " + ReportFilename);
 
                 try
                 {
                     // TBD - calculate the time of creating the reposts
                     string /*PDFfilename = null, */HTMLfilename = null;
 
-                    // create the report
-                    ReportFilename = MiscUtilities.GetReportFileName(ID, FileType.PDF);
                     Console.WriteLine("Notice: Set PDF report file: " + ReportFilename);
 
                     // does it the short or long report
@@ -182,7 +182,9 @@ namespace WisorLibrary.DataObjects
 
                             if (shouldUseTheDirectPDFlib)
                             {
-                                bool rc = MiscUtilities.RunLongPDFreport(ReportFilename, orderDataContainer2, env.theLoan.resultReportData, Share.cultureInfo);
+                                bool rc = MiscUtilities.RunLongPDFreport(ReportFilename, orderDataContainer2, env.theLoan.resultReportData,
+                                    // TBD - once debbuging the PDF English version should use the real culture 
+                                    CultureInfo.CreateSpecificCulture("he-IL") /*Share.cultureInfo*/);
                             }
                             else
                             {
@@ -208,9 +210,14 @@ namespace WisorLibrary.DataObjects
                 }
             }
             else {
-                 //WindowsUtilities.loggerMethod("Activate loan: " + this.ID + " should not be refininced");
+                WindowsUtilities.loggerMethod("\nNOTICE: Don't create report for loan: " + this.ID +
+                    ", shouldThisLoanReFinance: " + shouldThisLoanReFinance+
+                    ", shouldCreateShortPDFReport: " + shouldCreateShortPDFReport +
+                    ", shouldCreateLongPDFReport: " + shouldCreateLongPDFReport);
+
+                //WindowsUtilities.loggerMethod("Activate loan: " + this.ID + " should not be refininced");
             }
-        
+
         }
 
         // manage the summery file updating the bulk of loans results

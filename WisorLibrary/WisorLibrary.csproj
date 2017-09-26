@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WisorLibrary</RootNamespace>
     <AssemblyName>WisorLibrary</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -63,17 +64,22 @@
     <Reference Include="Remotion.Data.Linq">
       <HintPath>..\..\SharedLib\LinqToExcel\Remotion.Data.Linq.dll</HintPath>
     </Reference>
-    <Reference Include="RestSharp, Version=105.2.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\RestSharp.105.2.3\lib\net452\RestSharp.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="RestSharp">
+      <HintPath>..\..\..\..\..\..\..\Downloads\Shrink2Fit\Shrink2Fit\Shrink2Fit\Shrink2FitWeb\bin\RestSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="sharpPDF">
+      <HintPath>..\..\..\..\..\packages\sharpPDF\sharpPDF.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
       <Private>True</Private>
@@ -110,6 +116,9 @@
     <Compile Include="Logic\FastSearch.cs" />
     <Compile Include="Logic\LoanContainer.cs" />
     <Compile Include="Logic\RateUtilities.cs" />
+    <Compile Include="PDF-Reports\LongReportDataObject.cs" />
+    <Compile Include="PDF-Reports\WisorGraph.cs" />
+    <Compile Include="PDF-Reports\WisorReportManager.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -137,6 +146,7 @@
     <Compile Include="Logic\PmtLimits.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DataObjects\Rates.cs" />
+    <Compile Include="Utilities\Mailing.cs" />
     <Compile Include="Utilities\MiscUtilities.cs" />
     <Compile Include="Utilities\MultiThreadingManagment.cs" />
     <Compile Include="Utilities\PDFUtilities.cs" />
@@ -158,9 +168,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="API\" />
-  </ItemGroup>
-  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.he-IL.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -180,6 +190,21 @@
     <EmbeddedResource Include="Reporting\lender_template_pages\rtl\lender_template_page2_rtl.html" />
     <EmbeddedResource Include="Reporting\lender_template_pages\rtl\lender_template_page3_rtl.html" />
     <EmbeddedResource Include="Reporting\lender_template_pages\rtl\lender_template_page4_rtl.html" />
+    <EmbeddedResource Include="Reporting\lender_template_pages\ltr\lender_composition_template_ltr.html" />
+    <EmbeddedResource Include="Reporting\lender_template_pages\rtl\lender_composition_template_rtl.html" />
+    <Content Include="Reporting\images\bank_leumi_logo.png" />
+    <Content Include="Reporting\images\book.png" />
+    <Content Include="Reporting\images\borrower_header_bar_green_gradient.png" />
+    <Content Include="Reporting\images\borrower_header_logo_green_gradient.PNG" />
+    <Content Include="Reporting\images\down_arrow.png" />
+    <Content Include="Reporting\images\footer_banner.jpg" />
+    <Content Include="Reporting\images\glasses.png" />
+    <Content Include="Reporting\images\lender_header_bar_green_gradient.png" />
+    <Content Include="Reporting\images\lender_header_logo_green_gradient - old.PNG" />
+    <Content Include="Reporting\images\lender_header_logo_green_gradient.PNG" />
+    <Content Include="Reporting\images\logo.png" />
+    <Content Include="Reporting\images\wisor_logo.png" />
+    <Content Include="Reporting\images\wisor_signature.png" />
     <Content Include="Reporting\styles\ltr\borrower_style_ltr.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -215,6 +240,15 @@
     <EmbeddedResource Include="Reporting\borrower_template_pages\template_page7.html" />
     <EmbeddedResource Include="Reporting\borrower_template_pages\template_page8.html" />
     <EmbeddedResource Include="Reporting\borrower_template_pages\template_page9.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CommonObjects\CommonObjects.csproj">
+      <Project>{8272c3b4-1d4e-4910-8684-c126d34c3daa}</Project>
+      <Name>CommonObjects</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
