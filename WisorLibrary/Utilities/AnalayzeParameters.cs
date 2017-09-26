@@ -18,15 +18,6 @@ namespace WisorLibrary.Utilities
             ref double originalRate, ref double originalMargin, ref uint originalTime,
             ref Risk risk, ref Liquidity liquidity, ref ProductID product)
         {
-            //loanAmount = desiredMonthlyPayment = propertyValue = yearlyIncome = borrowerAge =
-            //    desireTerminationMonth = sequentialNumber = originalTime = MiscConstants.UNDEFINED_UINT;
-            //fico = MiscConstants.UNDEFINED_INT;
-            //dateTaken = DateTime.Now;
-            //originalRate = originalMargin = MiscConstants.UNDEFINED_DOUBLE;
-            //risk = Risk.NONERisk;
-            //liquidity = Liquidity.NONELiquidity;
-            //product = null;
-
             string txt = paramText.Replace(MiscConstants.COMMA_STR, MiscConstants.UNDEFINED_STRING);  // cleanup
             switch (paramName.ToLower())
             {

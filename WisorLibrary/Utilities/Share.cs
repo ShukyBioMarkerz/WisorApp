@@ -105,7 +105,9 @@ namespace WisorLib
 
         public static string tempLogFile
         {
-            get { return @"C:\tmp\LogNewLoans"; }
+            get {
+                return MiscUtilities.GetOutputDirectory() + Path.DirectorySeparatorChar + "LogNewLoans";
+                /* return @"C:\tmp\LogNewLoans"; */ }
         }
         public static string summaryLogFile
         {
@@ -220,7 +222,7 @@ namespace WisorLib
             get
             {
                 if (string.IsNullOrEmpty(combinationFileName))
-                    return MiscConstants.COMBINATIONS_FILE;
+                    return MiscConstants.COMBINATION_FILENAME;
                 return combinationFileName;
             }
             set
@@ -229,6 +231,23 @@ namespace WisorLib
                     combinationFileName = value;
             }
         }
+
+        private static string products2InCombinationFileName;
+        public static string Products2InCombinationFileName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(products2InCombinationFileName))
+                    return MiscConstants.COMBINATIONS_FILE;
+                return products2InCombinationFileName;
+            }
+            set
+            {
+                //if (File.Exists(value))
+                products2InCombinationFileName = value;
+            }
+        }
+        
 
         private static string riskAndLiquidityFileName;
         public static string RiskAndLiquidityFileName
@@ -249,6 +268,7 @@ namespace WisorLib
         public static bool ShouldCreateCombinationDynamickly { get; set; }
         public static bool ShouldPrintLog { get; internal set; }
         public static string DataDirectory { get; set; }
+        public static int NumberOfProductsInCombination { get; internal set; }
 
 
 
@@ -292,7 +312,7 @@ namespace WisorLib
         // Loan settings
         internal static uint maximumTimeForLoan = 360;
         internal const double optionMinimumAmount = 30000;
-        internal const double jumpBetweenAmounts = 1000;
+        internal const double jumpBetweenAmounts = 100; // 1000;
         internal const uint minimumTimeForLoan = 48;
         public const double largeDev = 20;
         internal const double smallDev = 1;

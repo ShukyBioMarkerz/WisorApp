@@ -63,6 +63,11 @@ namespace WisorLibrary.Utilities
             return AppDomain.CurrentDomain.BaseDirectory + MiscConstants.OUTPUT_DIR;
         }
 
+        public static string GetCurrentDirectory()
+        {
+            return AppDomain.CurrentDomain.BaseDirectory;
+        }
+
         public static bool SetRatesFilename()
         {
             Share.theSelectionType = SelectionType.ReadRates;
@@ -649,10 +654,13 @@ namespace WisorLibrary.Utilities
                                 case MiscConstants.HISTORIC_FILENAME:
                                     Share.HistoricFileName = dir + node.Value;
                                     break;
-                                case MiscConstants.COMBINATIONS_FILENAME:
+                                case MiscConstants.COMBINATIONS_FILE:
                                     Share.CombinationFileName = dir + node.Value;
                                     break;
-                                case MiscConstants.RISK_LIQUIDITY_FILENAME:
+                                case MiscConstants.COMBINATIONS_FILE_2_PRODUCTS_IN_COMBINATION:
+                                    Share.Products2InCombinationFileName = dir + node.Value;
+                                    break;
+                                 case MiscConstants.RISK_LIQUIDITY_FILENAME:
                                     Share.RiskAndLiquidityFileName = dir + node.Value;
                                     break;
                                 case MiscConstants.PRODUCTS_FILENAME:
@@ -707,6 +715,10 @@ namespace WisorLibrary.Utilities
                                 case MiscConstants.FROM_IDS_LOAD_LOANS:
                                     Share.LoansLoadIDsFromLine = node.Value;
                                     break;
+                                case MiscConstants.NUMBER_OF_PRODUCTS_IN_COMBINATION:
+                                    Share.NumberOfProductsInCombination = System.Convert.ToInt32(node.Value);
+                                    break;
+                                    
                                 default:
                                     Console.WriteLine("LoadXMLConfigurationFile Illegal input: " + child.Name);
                                     break;
@@ -944,9 +956,19 @@ namespace WisorLibrary.Utilities
         public static void CalcaulateProfit(Composition comp, out int ttlBankPay,
             out int ttlBorrowerPay, out int ttlProfit)
         {
-            ttlBankPay = (int)(comp.optXBankTtlPay + comp.optYBankTtlPay + comp.optZBankTtlPay);
-            ttlBorrowerPay = (int)Math.Round(comp.opts[(int)Options.options.OPTX].optTtlPay +
-                comp.opts[(int)Options.options.OPTY].optTtlPay + comp.opts[(int)Options.options.OPTZ].optTtlPay);
+            if (MiscUtilities.Use3ProductsInComposition())
+            {
+                ttlBankPay = (int)(comp.optXBankTtlPay + comp.optYBankTtlPay + comp.optZBankTtlPay);
+                ttlBorrowerPay = (int)Math.Round(comp.opts[(int)Options.options.OPTX].optTtlPay +
+                    comp.opts[(int)Options.options.OPTY].optTtlPay + comp.opts[(int)Options.options.OPTZ].optTtlPay);
+            }
+            else
+            {
+                ttlBankPay = (int)(comp.optXBankTtlPay + comp.optYBankTtlPay);
+                ttlBorrowerPay = (int)Math.Round(comp.opts[(int)Options.options.OPTX].optTtlPay +
+                    comp.opts[(int)Options.options.OPTY].optTtlPay);
+            }
+            
             ttlProfit = /*(int)comp.ttlPay*/ ttlBorrowerPay - ttlBankPay;
         }
 
@@ -1017,7 +1039,7 @@ namespace WisorLibrary.Utilities
         // start some log files for misc. logging
         public static void OpenMiscLogger()
         {
-            if (Share.shouldDebugLoans)
+            if (Share.shouldDebugLoans && null == Share.theMiscLogger)
                 Share.theMiscLogger = new LoggerFile(Share.tempLogFile /*+ OrderID*/ + MiscConstants.CSV_EXT /*".txt"*/,
                     MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
         }
@@ -1277,9 +1299,51 @@ namespace WisorLibrary.Utilities
 
         ////////////////////////////////////
 
-        public static bool PrepareRuning()
+        // redirect the console output to a file
+        public static void RedirectOutput2File()
         {
-            bool rc = false;
+            string shouldRedirectOutput2File = System.Configuration.ConfigurationManager.AppSettings["ShouldRedirectOutput2File"];
+            if (!String.IsNullOrEmpty(shouldRedirectOutput2File) && MiscConstants._YES_KEY == shouldRedirectOutput2File.ToLower())
+            {
+                string dd = MiscUtilities.GetOutputDirectory2();
+                dd = dd + Path.DirectorySeparatorChar + "outLog.txt";
+
+                FileStream filestream = new FileStream(dd, FileMode.Create);
+                var streamwriter = new StreamWriter(filestream);
+                streamwriter.AutoFlush = true;
+                Console.SetOut(streamwriter);
+                Console.SetError(streamwriter);
+                Console.WriteLine("NOTICE: PrepareRunningFull RunSearch set output file: " + dd);
+            }
+        }
+
+        static bool firstTimeRun = true;
+        public static bool PrepareRunningFull()
+        {
+            bool rc = true;
+
+            if (firstTimeRun)
+            {
+                // redirect the console output to a file
+                RedirectOutput2File();
+
+                // set the data directory
+                string dataDirectory = MiscUtilities.GetDataDirectory();
+                Console.WriteLine("NOTICE: PrepareRunningFull RunSearch set data directory: " + dataDirectory);
+
+                MiscUtilities.SetupAllEnv(dataDirectory);
+
+                rc = PrepareRuning();
+                firstTimeRun = false;
+            }
+
+            return rc;
+        }
+
+ 
+        static bool PrepareRuning()
+        {
+            bool rc = true;
 
             // enable log debug
             MiscUtilities.OpenMiscLogger();
@@ -1323,6 +1387,7 @@ namespace WisorLibrary.Utilities
                         return rc;
                     }
                 }
+              
             }
 
             return rc;
@@ -1336,7 +1401,7 @@ namespace WisorLibrary.Utilities
             {
                 if (shouldCallPrepare)
                 {
-                    rc = PrepareRuning();
+                    rc = PrepareRunningFull();
                 }
 
                 if (rc)
@@ -1507,13 +1572,14 @@ namespace WisorLibrary.Utilities
             Share.ShouldStoreInDB = true;
             Share.LoansLoadFromLine = MiscConstants.UNDEFINED_UINT;
             Share.LoansLoadIDsFromLine = MiscConstants.UNDEFINED_STRING;
-            Share.shouldDebugLoans = true;
+            Share.shouldDebugLoans = false;
             Share.shouldDebugLuchSilukin = false;
             Share.ShouldCreateCombinationDynamickly = false;
 
             // output log level settings
             Share.printMainInConsole = true;
             Share.printToOutputFile = true;
+
             Share.printFunctionsInConsole = false;
             Share.printSubFunctionsInConsole = false;
             Share.printPercentageDone = false;
@@ -1560,31 +1626,35 @@ namespace WisorLibrary.Utilities
         }
 
         // support languages...
-        static public string GetStringByLanguage(CultureInfo culture, string name)
-        {
-            string tmp = WisorLibrary.Language.ResourceManager.GetString(name, culture);
-            if (!string.IsNullOrEmpty(tmp))
-            {
-                if (culture.Name.Equals("he-IL"))
-                {
-                    tmp = new string(tmp.Reverse().ToArray());
-                }
-                else
-                {
+        //static public string GetStringByLanguage(CultureInfo culture, string name)
+        //{
+        //    string tmp = Properties.Resources.name;
+        //    if (!string.IsNullOrEmpty(tmp))
+        //    {
+        //        if (culture.Name.Equals("he-IL"))
+        //        {
+        //            tmp = new string(tmp.Reverse().ToArray());
+        //        }
+        //        else
+        //        {
 
-                }
-            }
-            else
-            {
-                tmp = name;
-            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        tmp = name;
+        //    }
 
-            return tmp;
-        }
+        //    return tmp;
+        //}
 
         public static string GetDataDirectory()
         {
             string dataDir = System.Configuration.ConfigurationManager.AppSettings["DataDirectory"];
+            if (String.IsNullOrEmpty(dataDir))
+            {
+                dataDir = GetCurrentDirectory() + MiscConstants.DATA_DIR;
+            }
             return dataDir;
         }
 
@@ -1841,46 +1911,57 @@ namespace WisorLibrary.Utilities
         public static RecommendedStructure[] CalculateRecommendedStructure(Composition c, ResultReportData reportData)
         {
             bool isHebrew = Share.cultureInfo.Name.Equals(MiscConstants.HEBREW_STR);
-
             List<RecommendedStructure> recommendedStructureList = new List<RecommendedStructure>();
-            for (int i = 0; i < c.opts.Length; i++)
+
+            if (null != c && null != c.opts)
             {
-                RecommendedStructure currRecommend = new RecommendedStructure(
-                    Convert.ToInt32(c.opts[i].optAmt),
-                    (isHebrew) ? c.opts[i].product.hebrewName : c.opts[i].product.name,
-                    c.opts[i].optRateFirstPeriod, (int)c.opts[i].optTime, Convert.ToInt32(c.opts[i].optPmt), c.opts[i].product);
-                double TotalProfitPercantage, TotalPay, TotalProfit, TotalBankPay;
-                TotalPay = c.opts[i].optTtlPay;
-                TotalBankPay = c.optXBankTtlPay + c.optYBankTtlPay + c.optZBankTtlPay;
-                TotalProfit = TotalPay - TotalBankPay;
-                TotalProfitPercantage = (double)TotalProfit / reportData.RemaingLoanAmount * 100;
-                LenderCalculationData lenderCalculationData = new LenderCalculationData(
-                    (int)TotalPay, (int)TotalProfit, TotalProfitPercantage);
-                currRecommend.lenderCalculationData = lenderCalculationData;
-                recommendedStructureList.Add(currRecommend);
+                for (int i = 0; i < c.opts.Length; i++)
+                {
+                    if (null == c.opts[i])
+                        continue;
+
+                    RecommendedStructure currRecommend = new RecommendedStructure(
+                        Convert.ToInt32(c.opts[i].optAmt),
+                        (isHebrew) ? c.opts[i].product.hebrewName : c.opts[i].product.name,
+                        c.opts[i].optRateFirstPeriod, (int)c.opts[i].optTime, Convert.ToInt32(c.opts[i].optPmt), c.opts[i].product);
+                    double TotalProfitPercantage, TotalPay, TotalProfit, TotalBankPay;
+                    TotalPay = c.opts[i].optTtlPay;
+                    TotalBankPay = c.optXBankTtlPay + c.optYBankTtlPay + c.optZBankTtlPay;
+                    TotalProfit = TotalPay - TotalBankPay;
+                    TotalProfitPercantage = (double)TotalProfit / reportData.RemaingLoanAmount * 100;
+                    LenderCalculationData lenderCalculationData = new LenderCalculationData(
+                        (int)TotalPay, (int)TotalProfit, TotalProfitPercantage);
+                    currRecommend.lenderCalculationData = lenderCalculationData;
+                    recommendedStructureList.Add(currRecommend);
+                }
             }
             return recommendedStructureList.ToArray();
         }
 
         public static bool SendEmailMessageByMailgun(MailMessage msg)
         {
-            string MailServer = ConfigurationManager.AppSettings["MailServer2"];
-            string MailApiKey = ConfigurationManager.AppSettings["MailApiKey2"];
-            string MailDomain = ConfigurationManager.AppSettings["MailDomain2"];
-            RestSharp.RestClient client = new RestClient(MailServer);
-            client.Authenticator = new HttpBasicAuthenticator("api", MailApiKey);
-            RestRequest request = new RestRequest();
-            request.AddParameter("domain", MailDomain, ParameterType.UrlSegment);
-            request.Resource = "{domain}/messages";
-            request.AddParameter("from", msg.From);
-            request.AddParameter("to", msg.To);
-            request.AddParameter("subject", msg.Subject);
-            request.AddParameter("text", msg.Body);
-            request.AddParameter("html", msg.Body);
-            request.Method = Method.POST;
+            string MailServer = ConfigurationManager.AppSettings["MailServer"];
+            string MailApiKey = ConfigurationManager.AppSettings["MailApiKey"];
+            string MailDomain = ConfigurationManager.AppSettings["MailDomain"];
+            HttpStatusCode res = HttpStatusCode.NotImplemented;
+            if (null != MailServer && null != MailApiKey && null != MailDomain)
+            {
+                RestSharp.RestClient client = new RestClient(MailServer);
+                client.Authenticator = new HttpBasicAuthenticator("api", MailApiKey);
+                RestRequest request = new RestRequest();
+                request.AddParameter("domain", MailDomain, ParameterType.UrlSegment);
+                request.Resource = "{domain}/messages";
+                request.AddParameter("from", msg.From);
+                request.AddParameter("to", msg.To);
+                request.AddParameter("subject", msg.Subject);
+                request.AddParameter("text", msg.Body);
+                request.AddParameter("html", msg.Body);
+                request.Method = Method.POST;
 
-            IRestResponse rr = client.Execute(request);
-            HttpStatusCode res = rr.StatusCode;
+                IRestResponse rr = client.Execute(request);
+                res = rr.StatusCode;
+            }
+ 
             return HttpStatusCode.OK == res ? true : false;
         }
 
@@ -1897,6 +1978,16 @@ namespace WisorLibrary.Utilities
             // Save and start View 
             bool rc = reportManager.SavePDFDocument();
             return rc;
+        }
+
+        public static bool Use3ProductsInComposition()
+        {
+            return (3 == Share.NumberOfProductsInCombination);
+        }
+
+        public static int GetNumberOfProductsInCombination()
+        {
+            return Share.NumberOfProductsInCombination;
         }
 
     }

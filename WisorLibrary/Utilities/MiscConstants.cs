@@ -63,7 +63,9 @@ namespace WisorLib
         public const string RATES_FILE = "RateFileClalOnlyApril2017.xlsx";
         public const string BANK_RATES_FILE = "MarginFileClalOnlyApril2017.xlsx";
         public const string LOAN_FILE = "ClalShort.xlsx"; //"ClalPOCDataForFinalCalculation.xlsx"; // "Citi Test cases (2).csv"; // "POC Data - Test Run.csv";
-        public const string COMBINATIONS_FILE = "CombinationsIsrael.csv";
+        public const string COMBINATION_FILENAME = "CombinationsIsrael.csv";
+        public const string COMBINATION_FILENAME_2_PRODUCTS_IN_COMBINATION = "CombinationsIsrael2ProductsInCombination.csv";
+        
         public const string HISTORIC_FILE = "PrimeIsraelRateDB_Test.xlsx"; // "HistoricIsraelPrimeRates - Copy.xlsx";
         public const string CONFIGURATION_FILE = "WisorConfiguration.xml";
 
@@ -95,7 +97,8 @@ namespace WisorLib
         public const string RATES_FILENAME = "RATES_FILE";
         public const string BANK_RATES_FILENAME = "BANK_RATES_FILE";
         public const string HISTORIC_FILENAME = "HISTORIC_FILE";
-        public const string COMBINATIONS_FILENAME = "COMBINATIONS_FILE";
+        public const string COMBINATIONS_FILE = "COMBINATIONS_FILE";
+        public const string COMBINATIONS_FILE_2_PRODUCTS_IN_COMBINATION = "COMBINATIONS_FILE_2_PRODUCTS_IN_COMBINATION";
         public const string RISK_LIQUIDITY_FILENAME = "RISK_LIQUIDITY_FILE";
         public const string PRODUCTS_FILENAME = "PRODUCTS_FILE";
         public const string RISK_FACTOR = "RISKFACTOR";
@@ -109,6 +112,8 @@ namespace WisorLib
         public const string SHOULD_STORE_REPORT_AS_SHORT_PDF = "SHOULD_STORE_REPORT_AS_SHORT_PDF";
         public const string FROM_TO_LINES_TO_LOAD_LOANS = "FROM_TO_LINES_TO_LOAD_LOANS";
         public const string FROM_IDS_LOAD_LOANS = "FROM_IDS_LOAD_LOANS";
+        public const string NUMBER_OF_PRODUCTS_IN_COMBINATION = "NUMBER_OF_PRODUCTS_IN_COMBINATION";
+
         internal static string LENDER_REPORT_PREFIX = "LenderReport";
         internal static string BORROWER_REPORT_PREFIX = "BorrowerReport";
         internal static string HEBREW_PREFIX = "HEB";
@@ -139,7 +144,7 @@ namespace WisorLib
         public static uint DEFAULT_PERCANTAGE_OF_MONTHLY_PAYMENT = 30;
         public static uint MAX_LOAN_TIME = 360;
 
-        public static uint NUM_OF_PRODUCTS_IN_COMBINATION = 3;
+        // public static uint NUM_OF_PRODUCTS_IN_COMBINATION = 3;
         public static uint MAX_NUM_OF_COMBINATION_TO_SELECT = 3;
 
         public const int NumberOfProfiles = 6;
