@@ -560,7 +560,7 @@ namespace WisorLibrary.Reporting
                         String prodName = MiscConstants.UNDEFINED_STRING;
                         if (null != ld && null != ld.ProductID)
                             prodName = ld.ProductID.stringTypeId;
-                        string rsamudStr = MiscUtilities.IsProductTsamud(ld.indices) ? "yes" : "no";
+                        string rsamudStr = MiscUtilities.IsProductTsamud(ld.indicesFirstTimePeriod) ? "yes" : "no";
                         gp = GenericProduct.GetProductByName(prodName);
                         if (null == gp)
                             gp = GenericProduct.GetProductFromAllListByName(prodName);
@@ -585,7 +585,7 @@ namespace WisorLibrary.Reporting
 #if WDEBUG
                             rsamudStr = "כן";
 #else
-                            rsamudStr = MiscUtilities.IsProductTsamud(ld.indices) ? "כן" : "לא";
+                            rsamudStr = MiscUtilities.IsProductTsamud(ld.indicesFirstTimePeriod) ? "כן" : "לא";
 #endif
 
                         }

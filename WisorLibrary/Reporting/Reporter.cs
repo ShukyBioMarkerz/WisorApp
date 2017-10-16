@@ -14,8 +14,7 @@ namespace WisorLibrary.Reporting
 {
     public class Reporter
     {
-        public static int LenderReport(RunEnvironment env, String HTMLfilename, 
-            String PDFfilename, CultureInfo cultureInfo, bool isPrintCovers)
+        public static int LenderReport(RunEnvironment env, String PDFfilename, CultureInfo cultureInfo, bool isPrintCovers)
         {
             // debug the entire data correctness
             if (false) {
@@ -27,10 +26,10 @@ namespace WisorLibrary.Reporting
 
             LenderReport lr = new LenderReport(cultureInfo, isPrintCovers);
 
-            if (HTMLfilename != null)
-            {
-                lr.GenerateLenderHtmlReport(HTMLfilename, env);
-            }
+            //if (HTMLfilename != null)
+            //{
+            //    lr.GenerateLenderHtmlReport(HTMLfilename, env);
+            //}
 
             if (PDFfilename != null)
             {
@@ -95,7 +94,7 @@ namespace WisorLibrary.Reporting
                     " Product: " + ld.ProductID.stringTypeId +
                     "\n Time: " + ld.OriginalTime +
                     " Rate: " + ld.OriginalRate +
-                    "\n Tsamud: " + MiscUtilities.IsProductTsamud(ld.indices) +
+                    "\n Tsamud: " + MiscUtilities.IsProductTsamud(ld.indicesFirstTimePeriod) +
                     " Monthly pay: " + ld.DesiredMonthlyPayment +
                     "\n Paid: " + ld.resultReportData.PayUntilToday +
                     " Future pay: " + ld.resultReportData.PayFuture +
