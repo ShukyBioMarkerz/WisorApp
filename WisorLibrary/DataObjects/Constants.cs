@@ -91,7 +91,7 @@ namespace WisorLib
         public double pti;
 
         // Credit score (FICO)
-        public int fico;
+        public int fico { get; set; }
 
         // Time restriction from age of youngest lender
         public uint maximumTimeForLoan = Share.maximumTimeForLoan; // 360;

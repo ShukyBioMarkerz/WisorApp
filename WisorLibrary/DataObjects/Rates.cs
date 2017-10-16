@@ -47,10 +47,11 @@ namespace WisorLib
 
         static private string ratesFilename;
 
-        public static bool SetRatesFile(string filename, string bankFilename)
+        public static bool SetRatesFile(string filename, string bankFilename, string secondPeriodFilename,
+            string secondPeriodBankRatesFileName)
         {
             ratesFilename = filename;
-            RateUtilities.SetFilename(filename, bankFilename);
+            RateUtilities.SetFilename(filename, bankFilename, secondPeriodFilename, secondPeriodBankRatesFileName);
             return RateUtilities.Instance.Status;
         }
 
@@ -62,6 +63,28 @@ namespace WisorLib
             return rate;
         }
 
+        public static double FindRateForKeySecondPeriod(int productID, int profile, int index)
+        {
+             double rate = RateUtilities.Instance.GetBorrowerRateSecondPeriod(
+                productID, profile, index);
+            return rate;
+        }
+
+        public static double FindBankMarginForKey(int productID, int profile, int index)
+        {
+            //double rate = RateUtilities.Instance.FindRateForKey(new WisorLibrary.DataObjects.RatesKey(productID, profile), index);
+            double rate = RateUtilities.Instance.GetBankRate(
+                productID, profile, index);
+            return rate;
+        }
+
+        public static double FindBankMarginForKeySecondPeriod(int productID, int profile, int index)
+        {
+            double rate = RateUtilities.Instance.GetBankRateSecondPeriod(
+               productID, profile, index);
+            return rate;
+        }
+
         //public static RateLine FindRatesForKey(string productID, int profile)
         //{
         //    // RateLine : double[] value
@@ -69,7 +92,7 @@ namespace WisorLib
         //    return rate;
         //}
 
-        
+
 
 
 

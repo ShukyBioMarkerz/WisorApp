@@ -42,6 +42,8 @@ namespace WisorLib
         public double indexUsedFirstTimePeriod { get; set; }
         public double indexUsedSecondTimePeriod { get; set; }
         public indices originalIndexUsedFirstTimePeriod { get; set; }
+        public indices originalIndexUsedSecondTimePeriod { get; set; }
+        
         public /*Benefit*/ double benefit { get; set; }
         public FixOrAdjustable fixOrAdjustable { get; set; }
         public /*Risk*/ double risk { get; set; }
@@ -95,6 +97,7 @@ namespace WisorLib
             this.name = name;
             this.hebrewName = hebrewName;
             this.originalIndexUsedFirstTimePeriod = indexUsedFirstTimePeriod;
+            this.originalIndexUsedSecondTimePeriod = indexUsedSecondTimePeriod;
             this.indexUsedFirstTimePeriod = MiscUtilities.GetIndexRateForOption(indexUsedFirstTimePeriod);
             this.indexUsedSecondTimePeriod = MiscUtilities.GetIndexRateForOption(indexUsedSecondTimePeriod);
             this.indexJumpFirstTimePeriod = indexJumpFirstTimePeriod;

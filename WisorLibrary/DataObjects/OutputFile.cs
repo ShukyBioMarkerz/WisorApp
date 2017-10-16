@@ -45,12 +45,12 @@ namespace WisorLib
             WriteToOutputFile("Original loan date : " + loan.DateTaken.ToString());
             WriteToOutputFile("Original loan amount : " + loan.OriginalLoanAmount);
             uint amount = loan.OriginalLoanAmount - loan.LoanAmount;
-            WriteToOutputFile("Down payment amount : " + amount);
+            WriteToOutputFile("Prinsipal paid so far: " + amount);
             WriteToOutputFile("Remaing loan time : " + loan.resultReportData.RemaingLoanTime);
             WriteToOutputFile("Remainig loan amount : " + loan.LoanAmount);
-             WriteToOutputFile("Monthly payment wanted : " + loan.DesiredMonthlyPayment);
+            WriteToOutputFile("Monthly payment wanted : " + loan.DesiredMonthlyPayment);
             WriteToOutputFile("Property value : " + loan.PropertyValue);
-
+        
             WriteToOutputFile("\nBorrower information:");
             WriteToOutputFile("Youngest borrower age: " + loan.BorrowerAge);
             WriteToOutputFile("Total monthly gross income: " + loan.YearlyIncome);

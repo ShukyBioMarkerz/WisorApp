@@ -170,10 +170,10 @@ namespace WisorLib
                s +=
               "X:optType" + "," + "X:optAmt" + "," + "X:optTime" + "," + "X:RateFirstPeriod" + "," +
               "Y:optType" + "," + "Y:optAmt" + "," + "Y:optTime" + "," + "Y:RateFirstPeriod" + "," +
-              "OPTXPmt" + "," + "OPTYPmt" + "," + "OPTZPmt" + "," + "ttlPmt" + "," +
-              "OPTXTtlPay" + "," + "OPTYTtlPay" + "," + "OPTZTtlPay" + "," +
+              "OPTXPmt" + "," + "OPTYPmt"  + "," + "ttlPmt" + "," +
+              "OPTXTtlPay" + "," + "OPTYTtlPay" +  "," +
               // bank profit data
-              "X:BankTtlPay" + "," + "Y:BankTtlPay" + "," + "Z:BankTtlPay" + "," +
+              "X:BankTtlPay" + "," + "Y:BankTtlPay"  + "," +
               "ttlBorrowerPay" + "," + "TtlBankPay" + "," + "TtlBankProfit";
             }
 

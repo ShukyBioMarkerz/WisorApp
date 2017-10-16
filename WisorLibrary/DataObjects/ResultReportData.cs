@@ -155,25 +155,31 @@ namespace WisorLibrary.DataObjects
             bool shouldThisLoanReFinance;
 
             UpdateGeneralResults(env, out shouldThisLoanReFinance);
-
-            // create the report
-            ReportFilename = MiscUtilities.GetReportFileName(ID, FileType.PDF);
-
+ 
             if (shouldThisLoanReFinance && (shouldCreateShortPDFReport || shouldCreateLongPDFReport))
             {
+                // create the report
+                // is it the Lender or the Borrower side? Should be decided by the orderDataContainer2 value since it set by the UI or not
+                //bool isLender = null == orderDataContainer2;
+                bool isLender = shouldCreateShortPDFReport;
+                ReportFilename = MiscUtilities.GetReportFileName(ID, FileType.PDF, isLender);
                 WindowsUtilities.loggerMethod("\nCreating report for loan: " + this.ID + " ReportFilename: " + ReportFilename);
 
                 try
                 {
-                    // TBD - calculate the time of creating the reposts
-                    string /*PDFfilename = null, */HTMLfilename = null;
-
                     Console.WriteLine("Notice: Set PDF report file: " + ReportFilename);
 
                     // does it the short or long report
                     if (!String.IsNullOrEmpty(ReportFilename))
                     {
                         if (shouldCreateShortPDFReport)
+                        {
+                            // Reporter.LenderReport(env, ReportFilename, Share.cultureInfo, false /*isPrintCovers*/);
+                            bool rc = MiscUtilities.RunShortPDFreport(ReportFilename, orderDataContainer2, env.theLoan.resultReportData,
+                                // TBD - once debbuging the PDF English version should use the real culture 
+                                CultureInfo.CreateSpecificCulture("he-IL") /*Share.cultureInfo*/);
+                        }
+                        else if (shouldCreateLongPDFReport)
                         {
                             bool shouldUseTheDirectPDFlib = false;
                             string shouldUseTheDirectPDFlibStr = System.Configuration.ConfigurationManager.AppSettings["ShouldUseTheDirectPDFlib"];
@@ -188,13 +194,10 @@ namespace WisorLibrary.DataObjects
                             }
                             else
                             {
-                                Reporter.LenderReport(env, HTMLfilename, ReportFilename, Share.cultureInfo,
-                                    false /*isPrintCovers*/);
+                                CreateTheFullReport(env, ReportFilename, Share.cultureInfo);
                             }
                             
                         }
-                        else if (shouldCreateLongPDFReport)
-                            CreateTheFullReport(env, ReportFilename, Share.cultureInfo);
                     }
 
                     //// store in XML file
@@ -230,7 +233,7 @@ namespace WisorLibrary.DataObjects
             bool noCompositionFounded = true;
             shouldThisLoanReFinance = false;
             // if the loan is new, always mark it as should refinance
-            int numOfMonths = MiscUtilities.CalculateMonthBetweenDates(env.theLoan.DateTaken, DateTime.Now);
+            int numOfMonths = MiscUtilities.CalculateMonthBetweenDates(env.theLoan.OriginalDateTaken, DateTime.Now);
             if (numOfMonths <= 0)
                 shouldThisLoanReFinance = IsItNewLoan = true;
             int maxBorrowerPayment, maxBorrowerPayment_corrspondLenderPayment, maxBorrowerPayment_corrspondBorrowerSaving,
@@ -288,7 +291,8 @@ namespace WisorLibrary.DataObjects
                     string[] msg = {
                         env.theLoan.ID, // "Loan ID",
                         env.theLoan.OriginalLoanAmount.ToString(), // "Original Loan Amount",
-                        env.theLoan.OriginalDateTaken.ToString(), // "Date Taken",
+                        env.theLoan.DesiredMonthlyPayment.ToString(), // "Monthly payment",
+                        env.theLoan.OriginalDateTaken.ToString(DATE_FORMAT), // "Date Taken",
                         env.theLoan.LoanAmount.ToString(), // "Remaining Amount",
                         env.theLoan.resultReportData.PayUntilToday.ToString(), // "Borrower Paid So Far",
                         env.theLoan.resultReportData.BankPayUntilToday.ToString(), // "Bank Profit So Far",
@@ -306,7 +310,7 @@ namespace WisorLibrary.DataObjects
                         ((double) borrowerProfitCalc / env.theLoan.LoanAmount * 100).ToString(),// Borrower beneficial%
                         bankProfitCalc.ToString(), // diff of Bank Future between the 2 options
                         // bank benefit % = difference in the bank benefit / original benefit
-                        ((double) (bankProfitCalc - bankOriginalProfit) / bankOriginalProfit * 100).ToString(),
+                        (0 != bankOriginalProfit) ? ((double) (bankProfitCalc - bankOriginalProfit) / bankOriginalProfit * 100).ToString() : 0.ToString(),
                         // ((double) bankProfitCalc / theLoan.LoanAmount * 100).ToString(),// Bank beneficial%
                         totalBenefit.ToString(), // total benefit
                         totalProfitPercantage.ToString(), // total benefit percantage
@@ -386,7 +390,7 @@ namespace WisorLibrary.DataObjects
 
            if (noCompositionFounded) // no composition was found
            {
-                string[] ms = { env.theLoan.ID, "No composition founded for load id: " };
+                string[] ms = { env.theLoan.ID, "No composition founded for load id: " + env.theLoan.ID };
                 MiscUtilities.PrintSummaryFile(ms);
            }
 
@@ -402,7 +406,8 @@ namespace WisorLibrary.DataObjects
                 string[] msgn = {
                         env.theLoan.ID, // "Loan ID",
                         env.theLoan.OriginalLoanAmount.ToString(), // "Original Loan Amount",
-                        env.theLoan.OriginalDateTaken.ToString(), // "Date Taken",
+                        env.theLoan.DesiredMonthlyPayment.ToString(), // "Monthly payment",
+                        env.theLoan.OriginalDateTaken.ToString(DATE_FORMAT), // "Date Taken",
                         env.theLoan.LoanAmount.ToString(), // "Remaining Amount",
                         env.theLoan.resultReportData.PayUntilToday.ToString(), // "Borrower Paid So Far",
                         env.theLoan.resultReportData.BankPayUntilToday.ToString(), // "Bank Profit So Far",

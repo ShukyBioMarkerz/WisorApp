@@ -63,48 +63,16 @@ namespace WisorLib
 
         public BorrowerProfile(CalculationParameters CalculationParameters, int ficoScore = MiscConstants.UNDEFINED_INT)
         {
+            // TBD - Omri. Define for each market the profile calculation
             if (MiscConstants.UNDEFINED_INT == ficoScore)
             {
-                profile = GetBorrowerProfile(CalculationParameters);
+                profile = CalculateProfile(CalculationParameters.pti, CalculationParameters.ltv);
             }
             else
             {
-                // get the profile from the fico store
-                //uint ficoScore = env.CalculationParameters.fico;
-                // TBD: this is hugly but short - in order to enable using FICO and class (1-6), once recognize as 1-6 it means the exact class and not fico...
-                if (0 <= ficoScore && ficoScore < Enum.GetValues(typeof(borrowerProfiles)).Length)
-                {
-                    profile = (int)Enum.Parse(typeof(borrowerProfiles), ficoScore.ToString(), true);
-                }
-                else
-                {
-                    if ((0 < ficoScore) && (550 >= ficoScore))
-                    {
-                        profile = (int)CalculationConstants.borrowerProfiles.AVERAGE;
-                    }
-                    else if ((550 < ficoScore) && (650 >= ficoScore))
-                    {
-                        profile = (int)CalculationConstants.borrowerProfiles.GOOD;
-                    }
-                    else if ((650 < ficoScore) && (750 >= ficoScore))
-                    {
-                        profile = (int)CalculationConstants.borrowerProfiles.VERY_GOOD;
-                    }
-                    else if ((750 < ficoScore) && (850 >= ficoScore))
-                    {
-                        profile = (int)CalculationConstants.borrowerProfiles.BEST;
-                    }
-                    else
-                    {
-                        // Should happen...
-                        profile = (int)CalculationConstants.borrowerProfiles.NOTOK;
-
-                        // TBD. to be on the safe side
-                        profile = (int)CalculationConstants.borrowerProfiles.AVERAGE;
-                    }
-       
-                }
+                profile = CalculateProfile(ficoScore);
             }
+
 
             if ((int)CalculationConstants.borrowerProfiles.BAD < profile || (int)CalculationConstants.borrowerProfiles.BEST > profile)
             {
@@ -113,12 +81,14 @@ namespace WisorLib
                     ", CalculationParameters.ltv: " + CalculationParameters.ltv);
                 profile = (int)CalculationConstants.borrowerProfiles.AVERAGE;
             }
+
         }
 
         // **************************************************************************************************************************** //
         // ************************************ Getting Borrower Profile According to LTV and PTI ************************************* //
 
-        private int GetBorrowerProfile(CalculationParameters CalculationParameters)
+
+        private int CalculateProfile(double pti, double ltv)
         {
             int borrowerProfile = (int)CalculationConstants.borrowerProfiles.NOTSET;
 
@@ -126,9 +96,9 @@ namespace WisorLib
             int ptiCounter = 0;
             while (borrowerProfile == (int)CalculationConstants.borrowerProfiles.NOTSET)
             {
-                if (CalculationParameters.pti <= ptiRatios[ptiCounter])
+                if (pti <= ptiRatios[ptiCounter])
                 {
-                    if (CalculationParameters.ltv <= ltvRatios[ltvCounter])
+                    if (ltv <= ltvRatios[ltvCounter])
                     {
                         borrowerProfile = profileMatrix[ptiCounter, ltvCounter];
                     }
@@ -157,12 +127,53 @@ namespace WisorLib
                 }
             }
             Console.WriteLine("Matrix Index [" + (ptiCounter + 1) + "," + (ltvCounter + 1) + "] = " + borrowerProfile
-                                                + "\nLTV = " + Math.Round(CalculationParameters.ltv * 100, 2) + "%\nPTI = "
-                                                + Math.Round(CalculationParameters.pti * 100, 2)
+                                                + "\nLTV = " + Math.Round(ltv * 100, 2) + "%\nPTI = "
+                                                + Math.Round(pti * 100, 2)
                                                 + "%\nProfile = " + CalculationConstants.profiles[borrowerProfile]);
             return borrowerProfile;
         }
 
+
+        private int CalculateProfile(int ficoScore)
+        {
+            // get the profile from the fico store
+            //uint ficoScore = env.CalculationParameters.fico;
+            // TBD: this is hugly but short - in order to enable using FICO and class (1-6), once recognize as 1-6 it means the exact class and not fico...
+            if (0 <= ficoScore && ficoScore < Enum.GetValues(typeof(borrowerProfiles)).Length)
+            {
+                profile = (int)Enum.Parse(typeof(borrowerProfiles), ficoScore.ToString(), true);
+            }
+            else
+            {
+                if ((0 < ficoScore) && (550 >= ficoScore))
+                {
+                    profile = (int)CalculationConstants.borrowerProfiles.AVERAGE;
+                }
+                else if ((550 < ficoScore) && (650 >= ficoScore))
+                {
+                    profile = (int)CalculationConstants.borrowerProfiles.GOOD;
+                }
+                else if ((650 < ficoScore) && (750 >= ficoScore))
+                {
+                    profile = (int)CalculationConstants.borrowerProfiles.VERY_GOOD;
+                }
+                else if ((750 < ficoScore) && (850 >= ficoScore))
+                {
+                    profile = (int)CalculationConstants.borrowerProfiles.BEST;
+                }
+                else
+                {
+                    // Should happen...
+                    profile = (int)CalculationConstants.borrowerProfiles.NOTOK;
+
+                    // TBD. to be on the safe side
+                    profile = (int)CalculationConstants.borrowerProfiles.AVERAGE;
+                }
+
+            }
+
+            return profile;
+        }
 
 
 
