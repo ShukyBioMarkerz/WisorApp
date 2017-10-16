@@ -1,4 +1,5 @@
-﻿using RestSharp;
+﻿using CommonObjects;
+using RestSharp;
 using RestSharp.Authenticators;
 using System;
 using System.Collections.Generic;
@@ -73,21 +74,30 @@ namespace WisorLibrary.Utilities
             Share.theSelectionType = SelectionType.ReadRates;
             bool rc;
             string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
-            rc = Rates.SetRatesFile(Share.RatesFileName, Share.BankRatesFileName);
+            rc = Rates.SetRatesFile(Share.RatesFileName, Share.BankRatesFileName, 
+                Share.SecondPeriodFilename, Share.SecondPeriodBankRatesFileName);
 
             return rc;
         }
 
-        public static bool SetHistoricRatesFilename()
+        public static string GetHistoricRatesFilename()
         {
             //string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
             //string filename = dir + MiscConstants.HISTORIC_FILE;
-            string filename = MiscUtilities.GetFilename(Share.HistoricFileName, MiscConstants.HISTORIC_FILE);
-
-            bool rc = HistoricRate.SetFilename(filename);
-
-            return rc;
+            string dir = GetDataDirectory() + Path.DirectorySeparatorChar;
+            string filename = MiscUtilities.GetFilename(dir + Share.HistoricFileName, dir + MiscConstants.HISTORIC_FILE);
+            return filename;
+            //bool rc = HistoricRate.SetFilename(filename);
+            //return rc;
         }
+
+        public static string GetHistoricRatesBBBRFilename()
+        {
+            string dir = GetDataDirectory() + Path.DirectorySeparatorChar;
+            string filename = MiscUtilities.GetFilename(dir + MiscConstants.HISTORIC_BBBR_FILE, MiscConstants.UNDEFINED_STRING);
+            return filename;
+         }
+        
 
         public static bool SetRiskAndLiquidityFilename()
         {
@@ -324,7 +334,7 @@ namespace WisorLibrary.Utilities
             double optAmt, int optTime, double optPmt,
             double indexFirstPeriod, double indexSecondPeriod, int optType, bool printOrNo)
         {
-            return Calculations.CalculateLuahSilukin2(rateFirstPeriod, rateSecondPeriod,
+            return Calculations.CalculateLuahSilukinBank(rateFirstPeriod, rateSecondPeriod,
                  productFirstTimePeriod, productIndexUsedFirstTimePeriod,
                  optAmt, (int)optTime, optPmt,
                  indexFirstPeriod, indexSecondPeriod, optType, printOrNo);
@@ -363,76 +373,98 @@ namespace WisorLibrary.Utilities
          * For the remaining loan amount we should calculate the luch-silukin precisly according to the known historic rate
          * The function calculate the avarage rate if the rate was change several time in the same month
          */
-        public static double GetHistoricIndexRateForPeriod(indices indic, DateTime dateLoanTaken)
-        {
-            double index = 0;
+        //public static double GetHistoricIndexRateForPeriod(indices indic, DateTime dateLoanTaken)
+        //{
+        //    double index = 0;
 
-            switch (indic)
-            {
-                case indices.MADAD:
-                    index = MiscConstants.MADAD_Inflation;
-                    break;
-                case indices.PRIME:
-                    // ensure the file was loaded
-                    if (null == HistoricRate.Instance || !HistoricRate.Instance.Status)
-                        MiscUtilities.SetHistoricRatesFilename();
-                    //index = HistoricRate.GetHistoricIndex(indic, dateLoanTaken);
-                    // get the entire month values
-                    index = HistoricRate.GetHistoricValues(indic, dateLoanTaken, dateLoanTaken.AddMonths(1));
-                    break;
-                case indices.CPI:
-                    index = 0;
-                    break;
-                case indices.FED:
-                    index = 0;
-                    break;
-                case indices.LIBOR:
-                    index = 0;
-                    break;
-                case indices.EUROBOR:
-                    index = 0;
-                    break;
-                case indices.BBBR:
-                    index = 0;
-                    break;
-                case indices.MAKAM:
-                    index = 0;
-                    break;
-                default:
-                    index = 0;
-                    //WindowsUtilities.loggerMethod("NOTICE: GetIndexRateForOption undefined for indic: " + indic);
-                    break;
-            }
+        //    switch (indic)
+        //    {
+        //        case indices.MADAD:
+        //            index = MiscConstants.MADAD_Inflation;
+        //            break;
+        //        case indices.PRIME:
+        //            // ensure the file was loaded
+        //            //if (null == HistoricRate.Instance || !HistoricRate.Instance.Status)
+        //            //    MiscUtilities.SetHistoricRatesFilename();
+                    
+        //            // get the entire month values
+        //            index = HistoricRate.GetHistoricValues(indic, dateLoanTaken, dateLoanTaken.AddMonths(1));
+        //            break;
+        //        case indices.CPI:
+        //            index = 0;
+        //            break;
+        //        case indices.FED:
+        //            index = 0;
+        //            break;
+        //        case indices.LIBOR:
+        //            index = 0;
+        //            break;
+        //        case indices.EUROBOR:
+        //            index = 0;
+        //            break;
+        //        case indices.BBBR:
+        //            index = 0;
+        //            break;
+        //        case indices.MAKAM:
+        //            index = 0;
+        //            break;
+        //        default:
+        //            index = 0;
+        //            //WindowsUtilities.loggerMethod("NOTICE: GetIndexRateForOption undefined for indic: " + indic);
+        //            break;
+        //    }
 
-            return index;
-        }
+        //    return index;
+        //}
 
         public static double GetHistoricIndexRateForDate(indices indic, DateTime dateLoanTaken,
-            double originalRate, out double primeMargin, bool IsBank)
+            double originalRate, out double margin, bool IsBank)
         {
             double index = 0;
+            margin = MiscConstants.UNDEFINED_DOUBLE;
 
             if (indices.PRIME == indic)
             {
                 if (IsBank)
                 {
-                    primeMargin = MiscConstants.BANK_PRIME_RATE_FACTOR - originalRate;
+                    margin = MiscConstants.BANK_PRIME_RATE_FACTOR - originalRate;
                     index = originalRate;
                 }
                 else
                 {
                     // ensure the file was loaded
-                    if (null == HistoricRate.Instance || !HistoricRate.Instance.Status)
-                        MiscUtilities.SetHistoricRatesFilename();
                     index = HistoricRate.GetHistoricIndex(indic, dateLoanTaken);
                     // should calculate the actuall rate the borrower got , based on the Prime + Actuall rate
-                    primeMargin = originalRate - index;
+                    margin = originalRate - index;
                 }
+            }
+            else if (indices.BBBR == indic)
+            {
+                // ensure the file was loaded
+                index = HistoricRateBBBR.GetHistoricIndex(indic, dateLoanTaken);
+
+                // should calculate the actuall rate the borrower got , based on the Prime + Actuall rate
+                margin = originalRate - index;
+
+                //if (IsBank)
+                //{
+                //    margin = 0 /*MiscConstants.BANK_BBBR_RATE_FACTOR - originalRate*/;
+                //    index = originalRate;
+                //}
+                //else
+                //{
+                //    // ensure the file was loaded
+                //    index = HistoricRateBBBR.GetHistoricIndex(indic, dateLoanTaken);
+
+                //    // should calculate the actuall rate the borrower got , based on the Prime + Actuall rate
+                //    margin = originalRate - index;
+                //}
+
             }
             else
             {
                 index = originalRate;
-                primeMargin = 0;
+                margin = 0;
             }
             //  case indices.MADAD:
             //      MiscConstants.MADAD_Inflation
@@ -481,26 +513,26 @@ namespace WisorLibrary.Utilities
             // dirty change still simpler...
             return ConvertDate2(str, out formatedDate);
 
-            CultureInfo provider = CultureInfo.InvariantCulture;
-            DateTime dt = default(DateTime);
+            //CultureInfo provider = CultureInfo.InvariantCulture;
+            //DateTime dt = default(DateTime);
 
-            // cleanup the minutes
-            int ind = str.IndexOf(MiscConstants.SPACE_STR);
-            if (0 < ind)
-                str = str.Remove(str.IndexOf(MiscConstants.SPACE_STR)).Trim();
+            //// cleanup the minutes
+            //int ind = str.IndexOf(MiscConstants.SPACE_STR);
+            //if (0 < ind)
+            //    str = str.Remove(str.IndexOf(MiscConstants.SPACE_STR)).Trim();
 
-            try
-            {
-                //CultureInfo culture = new CultureInfo("he-IL"); // ("en -US");
-                //dt = DateTime.Parse(str, culture);
-                dt = DateTime.ParseExact(str, MiscConstants.DATE_FORMAT, provider);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("ERROR ConvertDate Exception: " + ex.ToString() + " for str: " + str);
-            }
+            //try
+            //{
+            //    //CultureInfo culture = new CultureInfo("he-IL"); // ("en -US");
+            //    //dt = DateTime.Parse(str, culture);
+            //    dt = DateTime.ParseExact(str, MiscConstants.DATE_FORMAT, provider);
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine("ERROR ConvertDate Exception: " + ex.ToString() + " for str: " + str);
+            //}
 
-            return dt;
+            //return dt;
         }
 
 
@@ -651,7 +683,13 @@ namespace WisorLibrary.Utilities
                                 case MiscConstants.BANK_RATES_FILENAME:
                                     Share.BankRatesFileName = dir + node.Value;
                                     break;
-                                case MiscConstants.HISTORIC_FILENAME:
+                                case MiscConstants.SECOND_PERIOD_RATES_FILENAME:
+                                    Share.SecondPeriodFilename = dir + node.Value;
+                                    break;
+                                case MiscConstants.SECOND_PERIOD_BANK_RATES_FILENAME:
+                                    Share.SecondPeriodBankRatesFileName = dir + node.Value;
+                                    break;
+                                 case MiscConstants.HISTORIC_FILENAME:
                                     Share.HistoricFileName = dir + node.Value;
                                     break;
                                 case MiscConstants.COMBINATIONS_FILE:
@@ -755,7 +793,11 @@ namespace WisorLibrary.Utilities
                 filename = dir + file2lookFef;
             }
 
-            return filename;
+            // ensure existance
+            if (File.Exists(filename))
+                return filename;
+            else
+                return MiscConstants.UNDEFINED_STRING;
         }
 
         /*
@@ -1039,7 +1081,7 @@ namespace WisorLibrary.Utilities
         // start some log files for misc. logging
         public static void OpenMiscLogger()
         {
-            if (Share.shouldDebugLoans && null == Share.theMiscLogger)
+            if (Share.shouldDebugLoansCalculation && Share.shouldDebugLoans && null == Share.theMiscLogger)
                 Share.theMiscLogger = new LoggerFile(Share.tempLogFile /*+ OrderID*/ + MiscConstants.CSV_EXT /*".txt"*/,
                     MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
         }
@@ -1064,6 +1106,7 @@ namespace WisorLibrary.Utilities
             string[] msg = {
                         "Loan ID",
                         "Original Loan Amount",
+                        "Monthly payment",
                         "Date Taken",
                         "Remaining Amount",
                         "Borrower Paid So Far",
@@ -1100,6 +1143,7 @@ namespace WisorLibrary.Utilities
             string[] msg = {
                         "Loan ID",
                         "Original Loan Amount",
+                        "Monthly payment",
                         "Date Taken",
                         "Remaining Amount",
                         "Borrower Paid So Far",
@@ -1184,31 +1228,38 @@ namespace WisorLibrary.Utilities
 
         public static void OpenSummaryFileS()
         {
-            Share.theWinWinSummaryFile = new LoggerFile(Share.summaryLogFile + "WinWin" +
-                DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT,
-               MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
-            Share.theBorrowerWinSummaryFile = new LoggerFile(Share.summaryLogFile + "BorrowerWin" +
-                DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT,
-               MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
-            Share.theBankWinSummaryFile = new LoggerFile(Share.summaryLogFile + "BankWin" +
-                DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT,
-               MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
-            Share.theTotalWinSummaryFile = new LoggerFile(Share.summaryLogFile + "TotalWin" +
-                DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT,
-               MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
+            if (Share.shouldDebugLoans)
+            {
+                // add the header
+                string[] msg = summaryHeader();
 
-            // add the header
-            string[] msg = summaryHeader();
-            PrintSummaryFileS(Share.theWinWinSummaryFile, summaryAccululateHeader());
-            PrintSummaryFileS(Share.theBorrowerWinSummaryFile, msg);
-            PrintSummaryFileS(Share.theBankWinSummaryFile, msg);
-            PrintSummaryFileS(Share.theTotalWinSummaryFile, msg);
+                Share.theWinWinSummaryFile = new LoggerFile(Share.summaryLogFile + "WinWin" +
+                    DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT,
+                    MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
+                PrintSummaryFileS(Share.theWinWinSummaryFile, summaryAccululateHeader());
 
+                if (!Share.shouldDebugLoansOnlyWinWin)
+                {
+                    Share.theBorrowerWinSummaryFile = new LoggerFile(Share.summaryLogFile + "BorrowerWin" +
+                        DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT,
+                       MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
+                    Share.theBankWinSummaryFile = new LoggerFile(Share.summaryLogFile + "BankWin" +
+                        DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT,
+                       MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
+                    Share.theTotalWinSummaryFile = new LoggerFile(Share.summaryLogFile + "TotalWin" +
+                        DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT,
+                       MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
+
+                    PrintSummaryFileS(Share.theBorrowerWinSummaryFile, msg);
+                    PrintSummaryFileS(Share.theBankWinSummaryFile, msg);
+                    PrintSummaryFileS(Share.theTotalWinSummaryFile, msg);
+                }
+            }
         }
 
         public static void PrintSummaryFileS(LoggerFile file, string[] msg)
         {
-            if (null != Share.theSummaryFile)
+            if (null != file /*&& null != Share.theSummaryFile*/)
                 file.PrintLog2CSV(msg);
         }
 
@@ -1572,7 +1623,9 @@ namespace WisorLibrary.Utilities
             Share.ShouldStoreInDB = true;
             Share.LoansLoadFromLine = MiscConstants.UNDEFINED_UINT;
             Share.LoansLoadIDsFromLine = MiscConstants.UNDEFINED_STRING;
-            Share.shouldDebugLoans = false;
+            Share.shouldDebugLoans = true;
+            Share.shouldDebugLoansCalculation = true; //  false;
+            Share.shouldDebugLoansOnlyWinWin = false;
             Share.shouldDebugLuchSilukin = false;
             Share.ShouldCreateCombinationDynamickly = false;
 
@@ -1965,20 +2018,48 @@ namespace WisorLibrary.Utilities
             return HttpStatusCode.OK == res ? true : false;
         }
 
-        public static bool RunLongPDFreport(string reportFilename, CommonObjects.OrderDataContainer2 orderDataContainer2,
+        public static bool RunLongPDFreport(string reportFilename, OrderDataContainer2 orderDataContainer2,
              ResultReportData reportData, CultureInfo cultureInfo)
         {
             LongReportDataObject lrdo = new LongReportDataObject(reportData, orderDataContainer2, cultureInfo);
             lrdo.OrderNumberValue = reportData.ID;
+            lrdo.EmailValue = orderDataContainer2.Userid;
+            bool rc = true;
 
             // Create a new instance of WisorReportManager class, set filename, culture and data
             WisorReportManager reportManager = new WisorReportManager(reportFilename, cultureInfo, lrdo);
             // it's about time to use the direct PDF lib now...
-            int structuresQuantity = reportManager.CreateRecommendedStructuresPage(1);
-            // Save and start View 
-            bool rc = reportManager.SavePDFDocument();
+            bool createFullReport = true;
+            if (createFullReport)
+            {
+                reportManager.CreateFullReport();
+            }
+            // create the composition summery
+            else
+            {
+                int structuresQuantity = reportManager.CreateRecommendedStructuresPage(1);
+                // Save and start View 
+                rc = reportManager.SavePDFDocument();
+            }
+            
             return rc;
         }
+
+        public static bool RunShortPDFreport(string reportFilename, OrderDataContainer2 orderDataContainer2,
+            ResultReportData reportData, CultureInfo cultureInfo)
+        {
+            ShortReportDataObject lrdo = new ShortReportDataObject(/*reportData, orderDataContainer2, cultureInfo*/);
+            //lrdo.OrderNumberValue = reportData.ID;
+            //lrdo.EmailValue = orderDataContainer2.Userid;
+            bool rc = true;
+
+            // Create a new instance of WisorReportManager class, set filename, culture and data
+            WisorReportManagerShort reportManager = new WisorReportManagerShort(reportFilename, cultureInfo, lrdo);
+            rc = reportManager.CreateFullReport();
+
+            return rc;
+        }
+
 
         public static bool Use3ProductsInComposition()
         {
@@ -1988,6 +2069,138 @@ namespace WisorLibrary.Utilities
         public static int GetNumberOfProductsInCombination()
         {
             return Share.NumberOfProductsInCombination;
+        }
+
+        public static DateValueCollection LoadHistoricRateFile(string fn)
+        {
+            DateValueCollection data = null;
+            string filename;
+
+            if (String.IsNullOrEmpty(fn))
+                filename = MiscUtilities.GetHistoricRatesFilename();
+            else
+                filename = fn;
+
+            bool Status = false;
+
+            if (!String.IsNullOrEmpty(filename))
+            {
+                //setFilename(filename);
+                data = LoadHistoricRatesCSVFile(filename);
+                if (null != data && 0 < data.Capacity)
+                {
+                    Status = true;
+                }
+                else
+                {
+                    Status = false;
+                    WindowsUtilities.loggerMethod("ERROR HistoricRate failed to load borrower rates from file: " + filename);
+                }
+            }
+            else
+            {
+                WindowsUtilities.loggerMethod("NOTICE HistoricRate without setting the rates file name");
+            }
+            return data;
+        }
+
+        private static DateValueCollection LoadHistoricRatesCSVFile(string filename)
+        {
+            DateValueCollection historicDate = null;
+            string line = MiscConstants.UNDEFINED_STRING;
+
+            try
+            {
+                string ext = Path.GetExtension(filename);
+                string[] lines = null;
+
+                if (".xls" == ext || ".xlsx" == ext)
+                {
+                    lines = ExcelUtilities.GetLinesFromFile(filename, false /*shouldRemoveFractions*/);
+                }
+                else if (".csv" == ext)
+                {
+                    lines = CSVUtilities.GetLinesFromFile(filename);
+                }
+                if (null == lines || 0 >= lines.Length)
+                {
+                    Console.WriteLine("ERROR: LoadHistoricRatesCSVFile failed to load from file: " + filename);
+                    return null;
+                }
+
+                historicDate = new DateValueCollection();
+                string[] entities;
+
+                int lineNumber = 1;
+                double theRate = MiscConstants.UNDEFINED_DOUBLE;
+                DateTime? theDate = null;
+
+                for (int li = 0; li < lines.Length; li++)
+                {
+                    line = lines[li];
+                    if (String.IsNullOrEmpty(line))
+                        continue;
+
+                    // skip the first line
+                    // TBD: should read the headers and relate to it
+                    if (1 == lineNumber++)
+                        continue;
+
+                    entities = line.Split(MiscConstants.COMMA);
+                    if (String.IsNullOrEmpty(entities[0]))
+                    {
+                        continue;
+                    }
+                    //theDate = DateTime.Parse(entities[0]);
+                    theDate = MiscUtilities.ConvertDate(entities[0]);
+
+                    //// ensure the line correctness. 2 are the product name and the profile
+                    //if (MiscConstants.NumberOfYearsFrProduct + 2 != entities.Length)
+                    //{
+                    //    continue;
+                    //}
+
+                    // clean all redundant chars e.g. %
+                    for (int i = 1; i < entities.Length; i++)
+                    {
+                        int index = entities[i].IndexOf(MiscConstants.PERCANTAGE_STR);
+                        string trimed = (0 < index) ? entities[i].Remove(index).Trim() : entities[i].Trim();
+                        theRate = Double.Parse(trimed);
+                    }
+
+                    if (null != theDate)
+                        historicDate.Add(new DateValue((DateTime)theDate, theRate));
+                }
+            }
+            catch (Exception ex)
+            {
+                WindowsUtilities.loggerMethod("ERROR: LoadHistoricRatesCSVFile got Exception: " + ex.ToString() + ". line: " + line);
+            }
+
+            return historicDate;
+        }
+
+        public static void PrintResultReportData (string msg, ResultReportData data)
+        {
+            string ToPrint =  msg + " :  " + 
+                "   PayUntilToday: " + data.PayUntilToday + 
+                "   PayFuture: " + data.PayFuture +
+                "   RemaingLoanAmount: " + data.RemaingLoanAmount +
+                "   RemaingLoanTime: " + data.RemaingLoanTime +
+                "   FirstMonthlyPMT: " + data.FirstMonthlyPMT +
+                "   MonthlyPaymentCalc: " + data.MonthlyPaymentCalc +
+                "   BankPayUntilToday: " + data.BankPayUntilToday +
+                "   BankPayFuture: " + data.BankPayFuture;
+            Log2File(ToPrint);
+        }
+
+        // log to file
+        public static void Log2File(string msg)
+        {
+            if (Share.shouldDebugLoansCalculation)
+            {
+                MiscUtilities.PrintMiscLogger(msg);
+            }
         }
 
     }

@@ -225,8 +225,10 @@ namespace WisorLib
                         int sequentialNumberIndex = fieldsDef.GetIndexOf(MiscConstants.SEQ_NUMBER);
                         //int originalProductIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_PRODUCT);
                         int originalRateIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_RATE);
+                        int originalRateIndex2 = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_RATE2);
                         int originalTimeIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_TIME);
                         int originalMarginIndex = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_MARGIN);
+                        int originalMarginIndex2 = fieldsDef.GetIndexOf(MiscConstants.ORIGINAL_MARGIN2);
 
                         int riskIndex = fieldsDef.GetIndexOf(MiscConstants.RISK_VALUE);
                         int liquidityIndex = fieldsDef.GetIndexOf(MiscConstants.LIQUIDITY_VALUE);
@@ -246,10 +248,16 @@ namespace WisorLib
                             double originalRateIndexV =
                                 (originalRateIndex >= entities.Length) ? MiscConstants.UNDEFINED_DOUBLE :
                                     Convert.ToDouble(MiscUtilities.CleanupRedundantChars(entities, originalRateIndex, true /*allowDot*/));
+                            double originalRateIndexV2 =
+                                (originalRateIndex2 >= entities.Length) ? MiscConstants.UNDEFINED_DOUBLE :
+                                    Convert.ToDouble(MiscUtilities.CleanupRedundantChars(entities, originalRateIndex2, true /*allowDot*/));
                             uint originalTimeIndexV = Convert.ToUInt32(MiscUtilities.CleanupRedundantChars(entities, originalTimeIndex));
                             double originalMarginIndexV =
                                 (originalMarginIndex >= entities.Length) ? MiscConstants.UNDEFINED_DOUBLE :
                                     Convert.ToDouble(MiscUtilities.CleanupRedundantChars(entities, originalMarginIndex, true /*allowDot*/));
+                            double originalMarginIndexV2 =
+                                (originalMarginIndex2 >= entities.Length) ? MiscConstants.UNDEFINED_DOUBLE :
+                                    Convert.ToDouble(MiscUtilities.CleanupRedundantChars(entities, originalMarginIndex2, true /*allowDot*/));
                             DateTime dateTakenIndexV = new DateTime();
 
                             if (MiscConstants.UNDEFINED_UINT == sequentialNumberIndexV && MiscConstants.UNDEFINED_INT < sequentialNumberIndex)
@@ -288,7 +296,8 @@ namespace WisorLib
                                 uloanAmountIndexV, umonthlyPaymentIndexV, upropertyValueIndexV,
                                 uyearlyIncomeIndexV, uageIndexV, ficoIndexV,
                                 dateTakenIndexV, product, true /*shouldCalculate*/,
-                                originalRateIndexV, originalTimeIndexV, originalMarginIndexV,
+                                originalRateIndexV, originalRateIndexV2, originalTimeIndexV, 
+                                originalMarginIndexV, originalMarginIndexV2,
                                 /*desireTerminationMonthIndexV,*/ sequentialNumberIndexV, risk, liquidity));
                             id++;
 

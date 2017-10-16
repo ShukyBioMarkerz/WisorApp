@@ -15,7 +15,8 @@ namespace WisorLibrary.Utilities
             ref uint loanAmount, ref uint desiredMonthlyPayment, ref uint propertyValue,
             ref uint yearlyIncome, ref uint borrowerAge, ref int fico, ref DateTime dateTaken,
             ref uint desireTerminationMonth, ref uint sequentialNumber,
-            ref double originalRate, ref double originalMargin, ref uint originalTime,
+            ref double originalRate, ref double originalRate2,
+            ref double originalMargin, ref double originalMargin2, ref uint originalTime,
             ref Risk risk, ref Liquidity liquidity, ref ProductID product)
         {
             string txt = paramText.Replace(MiscConstants.COMMA_STR, MiscConstants.UNDEFINED_STRING);  // cleanup
@@ -75,8 +76,14 @@ namespace WisorLibrary.Utilities
                 case MiscConstants.ORIGINAL_RATE:
                     originalRate = Convert.ToDouble(txt);
                     break;
+                case MiscConstants.ORIGINAL_RATE2:
+                    originalRate2 = Convert.ToDouble(txt);
+                    break;
                 case MiscConstants.ORIGINAL_MARGIN:
                     originalMargin = Convert.ToDouble(txt);
+                    break;
+                case MiscConstants.ORIGINAL_MARGIN2:
+                    originalMargin2 = Convert.ToDouble(txt);
                     break;
                 case MiscConstants.ORIGINAL_TIME:
                     originalTime = Convert.ToUInt32(txt);

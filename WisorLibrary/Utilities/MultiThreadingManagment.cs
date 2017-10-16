@@ -181,6 +181,8 @@ namespace WisorLibrary.Utilities
 
             // start the time elapse counter
             MultiThreadingManagment.StartPerformanceCalculation();
+            Share.TotalNumberOfLoans = ll.Count;
+
             Task t = null;
             try
             {

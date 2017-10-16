@@ -51,6 +51,8 @@ namespace WisorLib
         public static string[,] combinationsAsString;
         public static string[] theProductsNames { get; set; }
         public static double[] theProductsRates;
+        public static double[] theProductsRatesSecondPeriod;
+        public static double[] theProductsBankRatesSecondPeriod;
         // bank rates
         public static double[] theBankRates;
 
@@ -75,6 +77,9 @@ namespace WisorLib
         public static string LoansLoadIDsFromLine { get; set; }
 
         public static bool shouldDebugLoans { get; set; }
+        public static bool shouldDebugLoansCalculation{ get; set; }
+        public static bool shouldDebugLoansOnlyWinWin { get; set; }
+        
         public static bool shouldDebugLuchSilukin { get; set; }
 
     /// <summary>
@@ -200,6 +205,40 @@ namespace WisorLib
             }
         }
 
+        private static string secondPeriodFilename;
+        public static string SecondPeriodFilename
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(secondPeriodFilename))
+                    return MiscConstants.BANK_RATES_FILE;
+                return secondPeriodFilename;
+            }
+            set
+            {
+                //if (File.Exists(value))
+                secondPeriodFilename = value;
+            }
+        }
+
+        private static string secondPeriodBankRatesFileName;
+        public static string SecondPeriodBankRatesFileName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(secondPeriodBankRatesFileName))
+                    return MiscConstants.BANK_RATES_FILE;
+                return secondPeriodBankRatesFileName;
+            }
+            set
+            {
+                //if (File.Exists(value))
+                secondPeriodBankRatesFileName = value;
+            }
+        }
+
+        
+
         private static string historicFileName;
         public static string HistoricFileName
         {
@@ -312,7 +351,7 @@ namespace WisorLib
         // Loan settings
         internal static uint maximumTimeForLoan = 360;
         internal const double optionMinimumAmount = 30000;
-        internal const double jumpBetweenAmounts = 100; // 1000;
+        internal const double jumpBetweenAmounts = 1000;
         internal const uint minimumTimeForLoan = 48;
         public const double largeDev = 20;
         internal const double smallDev = 1;

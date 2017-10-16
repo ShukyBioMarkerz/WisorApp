@@ -66,9 +66,10 @@ namespace WisorLib
         public const string COMBINATION_FILENAME = "CombinationsIsrael.csv";
         public const string COMBINATION_FILENAME_2_PRODUCTS_IN_COMBINATION = "CombinationsIsrael2ProductsInCombination.csv";
         
-        public const string HISTORIC_FILE = "PrimeIsraelRateDB_Test.xlsx"; // "HistoricIsraelPrimeRates - Copy.xlsx";
+        public const string HISTORIC_FILE = "PrimeIsrael_RateDB.xlsx"; // "HistoricIsraelPrimeRates - Copy.xlsx";
+        public const string HISTORIC_BBBR_FILE = "BBBR_RateDB.xlsx"; // "HistoricIsraelPrimeRates - Copy.xlsx";
         public const string CONFIGURATION_FILE = "WisorConfiguration.xml";
-
+        
         // Loan parameter
         public const string LOAN_AMOUNT = "loan amount";
         public const string MONTHLY_PAYMENT = "monthly payment";
@@ -84,8 +85,10 @@ namespace WisorLib
         public const string SEQ_NUMBER = "sequentialnumber";
         public const string ORIGINAL_PRODUCT = "original product";
         public const string ORIGINAL_RATE = "rate";
+        public const string ORIGINAL_RATE2 = "rate2";
         public const string ORIGINAL_TIME = "time";
         public const string ORIGINAL_MARGIN = "margin";
+        public const string ORIGINAL_MARGIN2 = "margin2";
         public const string CUSTOMER_NAME = "CUSTOMER_NAME";
         public const string RISK_VALUE = "risk";
         public const string LIQUIDITY_VALUE = "liquidity";
@@ -96,6 +99,8 @@ namespace WisorLib
         // configuration settings
         public const string RATES_FILENAME = "RATES_FILE";
         public const string BANK_RATES_FILENAME = "BANK_RATES_FILE";
+        public const string SECOND_PERIOD_RATES_FILENAME = "SECOND_PERIOD_RATES_FILENAME";
+        public const string SECOND_PERIOD_BANK_RATES_FILENAME = "SECOND_PERIOD_BANK_RATES_FILENAME";
         public const string HISTORIC_FILENAME = "HISTORIC_FILE";
         public const string COMBINATIONS_FILE = "COMBINATIONS_FILE";
         public const string COMBINATIONS_FILE_2_PRODUCTS_IN_COMBINATION = "COMBINATIONS_FILE_2_PRODUCTS_IN_COMBINATION";
@@ -153,6 +158,7 @@ namespace WisorLib
         //public static double BANK_RATE = 0.005;
         public static double MADAD_Inflation = 0.005; /*0.018;*/
         public static double BANK_PRIME_RATE_FACTOR = 0.001;
+        //public static double BANK_BBBR_RATE_FACTOR = 0.001;
 
         // enable to select the right composition by name
         internal const string BEST_DIFF_COMPOSITION = "bestDiffComposition";
@@ -170,7 +176,8 @@ namespace WisorLib
         public enum FileType { XML = 0, HTML, PDF, CSV};
 
         // TBD - shuky
-        public enum indices { NONE, MADAD, PRIME, CPI, FED, LIBOR, EUROBOR, BBBR, MAKAM, OTHER }; // Are the options in the code or pulled from outside DB?
+        public enum indices { NONE = 0, MADAD = 1, PRIME = 2, CPI = 3, FED = 4, LIBOR = 5,
+            EUROBOR = 6, BBBR = 7, MAKAM = 8, OTHER = 9}; // Are the options in the code or pulled from outside DB?
 
         // Risk and Liquidity
         public const int RISK_LIQUIDITY_HEADER = 3;
@@ -185,8 +192,8 @@ namespace WisorLib
         public enum markets { USA, UK, ISRAEL, OTHER, NONE }; // Are the options in the code or pulled from outside DB?
         public enum indexJumps
         {
-            DAY, WEEK, MONTHS1, MONTHS3, MONTHS6, MONTHS12, MONTHS24, MONTHS30, MONTHS36, MONTHS60,
-            MONTHS84, MONTHS120, OTHER, NONE
+            NONE = 0,  WEEK = 1, MONTHS1 = 2, MONTHS3 = 3, MONTHS6 = 4, MONTHS12 = 5, MONTHS24 = 6,
+            MONTHS30 = 7, MONTHS36 = 8, MONTHS60 = 9, MONTHS84 = 10, MONTHS120 = 11, OTHER = 12, DAY = 13
         };
 
     }
