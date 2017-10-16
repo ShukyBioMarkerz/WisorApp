@@ -73,15 +73,21 @@ namespace WisorLib
             bool rc = GetInflationsForOption(optType);
 
             optRateFirstPeriod = FindInterestRate(env.BorrowerProfile.profile);
+            optRateSecondPeriod = Rates.FindRateForKeySecondPeriod(product.productID.numberID, env.BorrowerProfile.profile, (int)optTime / 12 - 4);
             if (-1 == optRateFirstPeriod)
             {
                 // TBD: Uston we have a problem
                 Console.WriteLine("Option optRateFirstPeriod is -1. optionType: " + optionType + ", optionAmount: " + optionAmount + ", optionTime: " + optionTime);
             }
             optPmt = CalculatePmt(optAmt, optTime, optRateFirstPeriod, env);
+
+            // read the bank margin
+            optBankRateFirstPeriod = Rates.FindBankMarginForKey(product.productID.numberID, env.BorrowerProfile.profile, (int)optTime / 12 - 4);
+            optBankRateSecondPeriod = Rates.FindBankMarginForKeySecondPeriod(product.productID.numberID, env.BorrowerProfile.profile, (int)optTime / 12 - 4);
+
         }
 
-   
+
 
 
 
@@ -214,14 +220,18 @@ namespace WisorLib
             {
                 if ((amtForCalc > 0) && (timeForCalc > 0))
                 {
-                    if (product.firstTimePeriod <= timeForCalc)
-                    {
-                        currInterest = optRateFirstPeriod = interestRateForCalc; //  FindInterestRate();
-                    }
-                    else
-                    {
-                        currInterest = optRateSecondPeriod = interestRateForCalc; //  FindInterestRate();
-                    }
+                    // Omri was here in 10/10/2017 and add this line
+                    currInterest = interestRateForCalc;
+
+                    // Omri was here in 10/10/2017 and removed those lines
+                    //if (product.firstTimePeriod <= timeForCalc)
+                    //{
+                    //    currInterest = optRateFirstPeriod = interestRateForCalc; //  FindInterestRate();
+                    //}
+                    //else
+                    //{
+                    //    currInterest = optRateSecondPeriod = interestRateForCalc; //  FindInterestRate();
+                    //}
                 }
                 if (printOrNo == true)
                 {
@@ -430,25 +440,27 @@ namespace WisorLib
                 return (uint)Math.Round(optTtlPay);
             }
         }
-        
+         
         public void SetBankRate(double margin)
         {
             optBankRateFirstPeriod = optRateFirstPeriod + margin;
-            if (-1 == optRateSecondPeriod)
-            {
-                optBankRateSecondPeriod = optBankRateFirstPeriod;
-            }
-            else
-            {
-                optBankRateSecondPeriod = optRateSecondPeriod + margin;
-            }
+            optBankRateSecondPeriod = optRateSecondPeriod + margin;
+  
+            //if (-1 == optRateSecondPeriod)
+            //{
+            //    optBankRateSecondPeriod = optBankRateFirstPeriod;
+            //}
+            //else
+            //{
+            //    optBankRateSecondPeriod = // get the second period number from the file optRateSecondPeriod + margin;
+            //}
 
             // bank rate can be negative
             //if (0 > optBankRateFirstPeriod || 0 > optBankRateSecondPeriod)
             //{
             //    Console.WriteLine("NOTICE: SetBankRate illegal value to optBankRateFirstPeriod: " + optBankRateFirstPeriod);
             //}
-            
+
         }
 
         public uint CalculateLuahSilukinBank()

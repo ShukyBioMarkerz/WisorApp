@@ -94,11 +94,11 @@ namespace WisorLibrary.Logic
             {
                 Console.WriteLine("Loan: " + (i + 1).ToString() + " : " + returnLoans[i].ToString());
                 // debug print
-                if (Share.shouldDebugLoans)
-                {
-                    MiscUtilities.PrintMiscLogger("The original Loan: " + (i + 1).ToString() + " : " + returnLoans[i].ToString());
-                    MiscUtilities.PrintMiscLogger("The luch silkin: " + returnLoans[i].resultReportData.ToString());
-                }
+                //if (Share.shouldDebugLoans)
+                //{
+                //    MiscUtilities.PrintMiscLogger("The original Loan: " + (i + 1).ToString() + " : " + returnLoans[i].ToString());
+                //    MiscUtilities.PrintMiscLogger("The luch silkin: " + returnLoans[i].resultReportData.ToString());
+                //}
             }
 
             // calculate the luaah silukin 
@@ -139,10 +139,13 @@ namespace WisorLibrary.Logic
 
                     //try
                     //{
-                        Calculations.CalculateLuahSilukinFullAll(collectedLoans[i].indices,
-                             collectedLoans[i].OriginalRate, collectedLoans[i].OriginalMargin, collectedLoans[i].OriginalInflation,
-                             collectedLoans[i].OriginalLoanAmount, collectedLoans[i].OriginalTime,
-                             collectedLoans[i].DateTaken, collectedLoans[i].ID, ref resultData);
+                        Calculations.CalculateLuahSilukinFullAll(
+                            collectedLoans[i].indicesFirstTimePeriod, collectedLoans[i].indicesSecondTimePeriod,
+                            collectedLoans[i].OriginalRate, collectedLoans[i].OriginalRate2,
+                            collectedLoans[i].OriginalMargin, collectedLoans[i].OriginalMargin2,
+                            collectedLoans[i].OriginalInflation, collectedLoans[i].firstTimePeriod,
+                            collectedLoans[i].OriginalLoanAmount, collectedLoans[i].OriginalTime,
+                            collectedLoans[i].DateTaken, collectedLoans[i].ID, ref resultData);
                     //}
                     //catch (ArgumentOutOfRangeException aoore)
                     //{
@@ -165,6 +168,7 @@ namespace WisorLibrary.Logic
                     collectedLoans[i].resultReportData.PayUntilToday = resultData.PayUntilToday;
                     collectedLoans[i].resultReportData.PayFuture = resultData.PayFuture;
                     collectedLoans[i].resultReportData.RemaingLoanAmount = resultData.RemaingLoanAmount;
+                    collectedLoans[i].resultReportData.RemaingLoanTime = resultData.RemaingLoanTime;
                     collectedLoans[i].resultReportData.MonthlyPaymentCalc = resultData.MonthlyPaymentCalc;
                     collectedLoans[i].resultReportData.BankPayUntilToday = resultData.BankPayUntilToday;
                     collectedLoans[i].resultReportData.BankPayFuture = resultData.BankPayFuture;
@@ -203,11 +207,11 @@ namespace WisorLibrary.Logic
                 }
             }
 
-            if (Share.shouldDebugLoans)
-            {
-                MiscUtilities.PrintMiscLogger("\n\nThe Accumulated loan:\n");
-                MiscUtilities.PrintMiscLogger(ld.ToString());
-            }
+            //if (Share.shouldDebugLoans)
+            //{
+            //    MiscUtilities.PrintMiscLogger("\n\nThe Accumulated loan:\n");
+            //    MiscUtilities.PrintMiscLogger(ld.ToString());
+            //}
         
             return ld;
         }
@@ -232,21 +236,26 @@ namespace WisorLibrary.Logic
             ld.resultReportData.OriginalDateTaken = loan.OriginalDateTaken;
             ld.resultReportData.DateTaken = ld.DateTaken = DateTime.Now; // loan.DateTaken;
             ld.resultReportData.PropertyValue = ld.PropertyValue = loan.PropertyValue;
-            ld.indices = loan.indices;
+            ld.indicesFirstTimePeriod = loan.indicesFirstTimePeriod;
+            ld.indicesSecondTimePeriod = loan.indicesSecondTimePeriod;
+            ld.firstTimePeriod = loan.firstTimePeriod;
             ld.liquidity = loan.liquidity;
             ld.risk = loan.risk;
+            ld.orderDataContainer2 = loan.orderDataContainer2;
             ld.OriginalDateTaken = loan.OriginalDateTaken;
             ld.resultReportData.OriginalInflation = ld.OriginalInflation = loan.OriginalInflation;
             ld.resultReportData.OriginalMargin = ld.OriginalMargin = loan.OriginalMargin;
             ld.resultReportData.StartTime = loan.resultReportData.StartTime;
             ld.resultReportData.RemaingLoanAmount = ld.resultReportData.LoanAmount = ld.LoanAmount = RemaingLoanAmount;
+            ld.resultReportData.RemaingLoanTime = loan.resultReportData.RemaingLoanTime;
             ld.resultReportData.YearlyIncome = ld.YearlyIncome = yearlyIncome;
             ld.resultReportData.OriginalLoanAmount = ld.OriginalLoanAmount = originalAmount;
+            ld.DesiredMonthlyPayment = desiredMonthlyPayment;
             // the new monthly amount should be the sum of the all monthly payments today
             if (0 >= MonthlyPaymentCalc)
-                ld.resultReportData.DesiredMonthlyPayment = ld.DesiredMonthlyPayment = desiredMonthlyPayment;
+                ld.resultReportData.DesiredMonthlyPayment = /*ld.DesiredMonthlyPayment =*/ desiredMonthlyPayment;
             else 
-                ld.resultReportData.DesiredMonthlyPayment = ld.DesiredMonthlyPayment = MonthlyPaymentCalc;
+                ld.resultReportData.DesiredMonthlyPayment = /*ld.DesiredMonthlyPayment =*/ MonthlyPaymentCalc;
             
             if (0 < ld.YearlyIncome)
                 ld.resultReportData.PTI = (double)ld.DesiredMonthlyPayment / ld.YearlyIncome;
