@@ -467,14 +467,14 @@ namespace WisorAppWpf
             //lbl2.Font = new Font("Arial", 11);
             //lbl2.Text = "Customer name";
             //lbl2.Width = 250; // w + 20;
-            //lbl2.Location = new System.Drawing.Point(positionX + 20, positionY);
+            //lbl2.Location = new XPoint(positionX + 20, positionY);
             //uil.Controls.Add(lbl2);
 
             //comp = new System.Windows.Forms.TextBox();
             //comp.Name = Share.CustomerName;
             //////comp.Tag = f.ID;
             ////comp.Text = MiscConstants.CUSTOMER_NAME;
-            //comp.Location = new System.Drawing.Point(positionX + 450, positionY);
+            //comp.Location = new XPoint(positionX + 450, positionY);
             //comp.Width = 200;
             //positionY += yShift;
             //uil.Controls.Add(comp);
@@ -503,7 +503,8 @@ namespace WisorAppWpf
             DateTime dateTaken = DateTime.Now;
             uint desireTerminationMonth, sequentialNumber;
             //string originalProduct = MiscConstants.UNDEFINED_STRING;
-            double originalRate = MiscConstants.UNDEFINED_DOUBLE, originalMargin = MiscConstants.UNDEFINED_DOUBLE;
+            double originalRate = MiscConstants.UNDEFINED_DOUBLE, originalRate2 = MiscConstants.UNDEFINED_DOUBLE;
+            double originalMargin = MiscConstants.UNDEFINED_DOUBLE, originalMargin2 = MiscConstants.UNDEFINED_DOUBLE;
             uint originalTime = MiscConstants.UNDEFINED_UINT;
             Risk risk = Risk.NONERisk;
             Liquidity liquidity = Liquidity.NONELiquidity;
@@ -524,8 +525,8 @@ namespace WisorAppWpf
                         ref loanAmount, ref desiredMonthlyPayment, ref propertyValue,
                         ref yearlyIncome, ref borrowerAge, ref fico, ref dateTaken,
                         ref desireTerminationMonth, ref sequentialNumber,
-                        ref originalRate, ref originalMargin, ref originalTime,
-                        ref risk, ref liquidity, ref product);
+                        ref originalRate, ref originalRate2, ref originalMargin, ref originalMargin2, 
+                        ref originalTime, ref risk, ref liquidity, ref product);
 
                 }
             }
@@ -534,8 +535,8 @@ namespace WisorAppWpf
             
             loanDetails loan = new loanDetails(id.ToString(), loanAmount, desiredMonthlyPayment,
                 propertyValue, yearlyIncome, borrowerAge, fico,
-                dateTaken, product, true /*shouldCalculate*/, originalRate, originalTime,
-                originalMargin, sequentialNumber, risk, liquidity);
+                dateTaken, product, true /*shouldCalculate*/, originalRate, originalRate2, originalTime,
+                originalMargin, originalMargin2, sequentialNumber, risk, liquidity);
            
             WindowsUtilities.runSingleLoanSyncMethod(loan);
         }

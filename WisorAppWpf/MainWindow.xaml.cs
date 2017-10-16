@@ -137,16 +137,18 @@ namespace WisorAppWpf
             //Tests.TestRegularExpression();
             //Tests.TestXMLFunctionality("123");
             //Tests.TestHistoricIndexRate();
+            //Tests.TestHistoricIndexRateFromDB();
             //Tests.TestRatesLoading();
             //Tests.TestCombinations();
             // Tests.SendSimpleEmailMessage();
-            Tests.SendTestSimpleEmailMessageByMailgun();
+            //Tests.SendTestSimpleEmailMessageByMailgun();
             //Tests.TestRiskLiquidity();
             // Tests.TestCalculateMonthlyPmt();
             //Tests.TestlanguageFunctionality();
             // Tests.TestLongReportCreation();
-
+            // Tests.TestDatedCalculation();
         }
+
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Escape)
