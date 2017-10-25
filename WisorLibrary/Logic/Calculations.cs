@@ -837,7 +837,8 @@ namespace WisorLibrary.Logic
                     }
                 }
             }
- 
+            Console.WriteLine("FindMinMaxAmount for product: " + optType.product.name + " ,loanAmtWanted: " + loanAmtWanted 
+                + ", return min: " + minmax.min + ", max: " + minmax.max);
             return minmax;
         }
 
