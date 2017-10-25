@@ -106,7 +106,7 @@ namespace WisorAppWpf
 #endif
 
             // the logger window          
-            // DataContext = LogEntries = new ObservableCollection<LogEntry>();
+            DataContext = LogEntries = new ObservableCollection<LogEntry>();
 
             MiscUtilities.SetLogger(Log2Window);
 
