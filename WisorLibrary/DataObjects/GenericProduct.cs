@@ -138,10 +138,12 @@ namespace WisorLib
             //    msg += " Illegal indexUsedFirstTimePeriod: " + indexUsedFirstTimePeriod.ToString() + " .";
             //if (indices.NONE == indexUsedSecondTimePeriod)
             //    msg += " Illegal indexUsedSecondTimePeriod: " + indexUsedSecondTimePeriod.ToString() + " .";
-            if (indexJumps.NONE == indexJumpFirstTimePeriod)
-                msg += " Illegal indexJumpFirstTimePeriod: " + indexJumpFirstTimePeriod.ToString() + " .";
-            if (indexJumps.NONE  == indexJumpSecondTimePeriod)
-                msg += " Illegal indexJumpSecondTimePeriod: " + indexJumpSecondTimePeriod.ToString() + " .";
+
+            // may be NONE
+            //if (indexJumps.NONE == indexJumpFirstTimePeriod)
+            //    msg += " Illegal indexJumpFirstTimePeriod: " + indexJumpFirstTimePeriod.ToString() + " .";
+            //if (indexJumps.NONE  == indexJumpSecondTimePeriod)
+            //    msg += " Illegal indexJumpSecondTimePeriod: " + indexJumpSecondTimePeriod.ToString() + " .";
             if (markets.NONE == localMarket)
                 msg += " Illegal localMarket: " + localMarket.ToString() + " .";
             
@@ -411,6 +413,27 @@ namespace WisorLib
 
             return product;
         }
+
+        public static string GetProductHebrewName(string productName)
+        {
+            string hebrewName = productName;
+            if (null != Share.theAllLoadedProducts)
+            {
+                foreach (KeyValuePair<int, GenericProduct> p in Share.theAllLoadedProducts)
+                {
+                    if (p.Value.productID.stringTypeId.ToLower() == productName.ToLower())
+                    {
+                        hebrewName = p.Value.hebrewName;
+                        break;
+                    }
+                }
+            }
+            else
+                WindowsUtilities.loggerMethod("GetProductFromAllListByName: Share.theAllLoadedProducts in null!!! ");
+
+            return hebrewName;
+        }
+
 
 
 

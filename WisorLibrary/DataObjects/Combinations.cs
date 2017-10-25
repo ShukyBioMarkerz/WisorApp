@@ -166,14 +166,14 @@ namespace WisorLibrary.DataObjects
             //string filename = dir + MiscConstants.COMBINATIONS_FILE;
             string filename;
             if (MiscUtilities.Use3ProductsInComposition())
-                filename = MiscUtilities.GetFilename(Share.CombinationFileName, MiscConstants.COMBINATION_FILENAME);
+                filename = MiscUtilities.GetFilename(Share.CombinationFileName, MiscConstants.UNDEFINED_STRING /*MiscConstants.COMBINATION_FILENAME*/);
             else
-                filename = MiscUtilities.GetFilename(Share.Products2InCombinationFileName, MiscConstants.COMBINATION_FILENAME_2_PRODUCTS_IN_COMBINATION);
+                filename = MiscUtilities.GetFilename(Share.Products2InCombinationFileName, MiscConstants.UNDEFINED_STRING /*MiscConstants.COMBINATION_FILENAME_2_PRODUCTS_IN_COMBINATION*/);
 
             return filename;
         }
+       
 
-   
         public static string[,] GetCombination(markets market)
         {
             return Instance.allCombination;

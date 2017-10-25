@@ -57,8 +57,11 @@ namespace WisorLibrary.DataObjects
         public uint BorrowerAge { get; set; }
         public uint YearlyIncome { get; set; }
         public double OriginalRate { get; set; }
+        public double OriginalRate2 { get; set; }
         public double OriginalMargin { get; set; }
+        public double OriginalMargin2 { get; set; }
         public uint OriginalTime { get; set; }
+        public int firstTimePeriod { set; get; }
         //public indices indices { set; get; }
         public double OriginalInflation { set; get; }
         // the selected compositions
@@ -68,6 +71,7 @@ namespace WisorLibrary.DataObjects
         // calculation data
         public uint RemaingLoanTime { get; set; }
         public uint FirstMonthlyPMT { get; set; }
+        public uint FirstMonthlyPMT2 { get; set; }
         public uint PayUntilToday { get; set; }
         public uint PayFuture { get; set; }
 
@@ -156,7 +160,7 @@ namespace WisorLibrary.DataObjects
 
             UpdateGeneralResults(env, out shouldThisLoanReFinance);
  
-            if (shouldThisLoanReFinance && (shouldCreateShortPDFReport || shouldCreateLongPDFReport))
+            if ((shouldThisLoanReFinance && shouldCreateLongPDFReport) || shouldCreateShortPDFReport)
             {
                 // create the report
                 // is it the Lender or the Borrower side? Should be decided by the orderDataContainer2 value since it set by the UI or not
@@ -176,8 +180,9 @@ namespace WisorLibrary.DataObjects
                         {
                             // Reporter.LenderReport(env, ReportFilename, Share.cultureInfo, false /*isPrintCovers*/);
                             bool rc = MiscUtilities.RunShortPDFreport(ReportFilename, orderDataContainer2, env.theLoan.resultReportData,
+                                Share.cultureInfo, env);
                                 // TBD - once debbuging the PDF English version should use the real culture 
-                                CultureInfo.CreateSpecificCulture("he-IL") /*Share.cultureInfo*/);
+                                // CultureInfo.CreateSpecificCulture(/*"he-IL"*/"en-GB") /*Share.cultureInfo*//*, env*/);
                         }
                         else if (shouldCreateLongPDFReport)
                         {

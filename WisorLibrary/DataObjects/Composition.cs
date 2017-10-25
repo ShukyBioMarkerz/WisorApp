@@ -207,7 +207,8 @@ namespace WisorLib
                                 + "," + (int)ttlPay
                                 + "," + Convert.ToInt32(ttlBankPayPayk).ToString()
                                 + "," + Convert.ToInt32(ttlPay - ttlBankPayPayk).ToString()
-                                /*+ "," + score*/;
+                                /*+ "," + score*/
+                                /* is win-win */ + "," + IsWinWin;
                 }
             }
             else
@@ -227,7 +228,8 @@ namespace WisorLib
                                 + "," + (int)ttlPay
                                 + "," + Convert.ToInt32(ttlBankPayPayk).ToString()
                                 + "," + Convert.ToInt32(ttlPay - ttlBankPayPayk).ToString()
-                                /*+ "," + score*/;
+                                /*+ "," + score*/
+                                /* is win-win */ + "," + IsWinWin;
                 }
 
             }
