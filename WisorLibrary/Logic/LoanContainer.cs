@@ -128,41 +128,30 @@ namespace WisorLibrary.Logic
                     BankPayFuture = MiscConstants.UNDEFINED_UINT,
                     FirstMonthlyPMT = MiscConstants.UNDEFINED_UINT;
 
-                //try
-                //{
-                    for (int i = 0; i < collectedLoans.Count; i++)
-                    {
-                        yearlyIncome = collectedLoans[i].YearlyIncome;
-                        originalAmount += collectedLoans[i].OriginalLoanAmount;
-                        desiredMonthlyPayment += collectedLoans[i].DesiredMonthlyPayment;
+                for (int i = 0; i < collectedLoans.Count; i++)
+                {
+                    yearlyIncome = collectedLoans[i].YearlyIncome;
+                    originalAmount += collectedLoans[i].OriginalLoanAmount;
+                    desiredMonthlyPayment += collectedLoans[i].DesiredMonthlyPayment;
                     // calculate luch silukim
-
-                    //try
-                    //{
-                        Calculations.CalculateLuahSilukinFullAll(
-                            collectedLoans[i].indicesFirstTimePeriod, collectedLoans[i].indicesSecondTimePeriod,
-                            collectedLoans[i].OriginalRate, collectedLoans[i].OriginalRate2,
-                            collectedLoans[i].OriginalMargin, collectedLoans[i].OriginalMargin2,
-                            collectedLoans[i].OriginalInflation, collectedLoans[i].firstTimePeriod,
-                            collectedLoans[i].OriginalLoanAmount, collectedLoans[i].OriginalTime,
-                            collectedLoans[i].DateTaken, collectedLoans[i].ID, ref resultData);
-                    //}
-                    //catch (ArgumentOutOfRangeException aoore)
-                    //{
-                    //    WindowsUtilities.loggerMethod("NOTICE: AccumulaLoanData ArgumentOutOfRangeException occured: " + aoore.ToString() +
-                    //        " in load: " + collectedLoans[i].ID);
-                    //    continue;
-                    //}
+                    Calculations.CalculateLuahSilukinFullAll(
+                        collectedLoans[i].indicesFirstTimePeriod, collectedLoans[i].indicesSecondTimePeriod,
+                        collectedLoans[i].OriginalRate, collectedLoans[i].OriginalRate2,
+                        collectedLoans[i].OriginalMargin, collectedLoans[i].OriginalMargin2,
+                        collectedLoans[i].OriginalInflation, collectedLoans[i].firstTimePeriod,
+                        collectedLoans[i].OriginalLoanAmount, collectedLoans[i].OriginalTime,
+                        collectedLoans[i].DateTaken, collectedLoans[i].ID, ref resultData);
+                 
 
                     // borrower data
-                        PayUntilToday += resultData.PayUntilToday;
-                        PayFuture += resultData.PayFuture;
-                        RemaingLoanAmount += resultData.RemaingLoanAmount;
-                        MonthlyPaymentCalc += resultData.MonthlyPaymentCalc;
-                        // bank data
-                        BankPayUntilToday += resultData.BankPayUntilToday;
-                        BankPayFuture += resultData.BankPayFuture;
-                        FirstMonthlyPMT += resultData.FirstMonthlyPMT;
+                    PayUntilToday += resultData.PayUntilToday;
+                    PayFuture += resultData.PayFuture;
+                    RemaingLoanAmount += resultData.RemaingLoanAmount;
+                    MonthlyPaymentCalc += resultData.MonthlyPaymentCalc;
+                    // bank data
+                    BankPayUntilToday += resultData.BankPayUntilToday;
+                    BankPayFuture += resultData.BankPayFuture;
+                    FirstMonthlyPMT += resultData.FirstMonthlyPMT;
 
                     // update the data in order to display in the report
                     collectedLoans[i].resultReportData.PayUntilToday = resultData.PayUntilToday;
@@ -190,14 +179,9 @@ namespace WisorLibrary.Logic
                 
                 }
 
-                    UpdateLoanData(ref ld, collectedLoans[0], PayUntilToday, PayFuture, RemaingLoanAmount,
-                        MonthlyPaymentCalc, BankPayUntilToday, BankPayFuture, yearlyIncome, originalAmount, FirstMonthlyPMT, desiredMonthlyPayment);
+                UpdateLoanData(ref ld, collectedLoans[0], PayUntilToday, PayFuture, RemaingLoanAmount,
+                    MonthlyPaymentCalc, BankPayUntilToday, BankPayFuture, yearlyIncome, originalAmount, FirstMonthlyPMT, desiredMonthlyPayment);
 
-                //}
-                //catch (Exception e)
-                //{
-                //    WindowsUtilities.loggerMethod("ERROR: AccumulaLoandata got Exception: " + e.ToString());
-                //}
 
                 // add the original loan' details to the calculated new loan in order to show it in the report
                 ld.OriginalLoanDetaild = new LoanList();
@@ -224,12 +208,15 @@ namespace WisorLibrary.Logic
                         uint yearlyIncome, uint originalAmount, uint FirstMonthlyPMT, uint desiredMonthlyPayment)
         {
             //ld.LoanAmount = originalAmount;
+            ld.ProductID = loan.ProductID;
+            ld.resultReportData.ProductName = loan.ProductID.stringTypeId;
             ld.resultReportData.BankName = Share.CustomerName;
             ld.resultReportData.ID = ld.ID = loan.ID;
             // the age is passing...
             int years = MiscUtilities.CalculateYearsBetweenDates(loan.DateTaken, DateTime.Now);
             ld.resultReportData.BorrowerAge = ld.BorrowerAge = loan.BorrowerAge + (uint) years;
             ld.resultReportData.OriginalRate = ld.OriginalRate = loan.OriginalRate;
+            ld.resultReportData.OriginalRate2 = ld.OriginalRate2 = loan.OriginalRate2;
             ld.resultReportData.OriginalTime = ld.OriginalTime = loan.OriginalTime;
             ld.resultReportData.fico = ld.fico = loan.fico;
             ld.resultReportData.FirstMonthlyPMT = FirstMonthlyPMT;
@@ -245,6 +232,8 @@ namespace WisorLibrary.Logic
             ld.OriginalDateTaken = loan.OriginalDateTaken;
             ld.resultReportData.OriginalInflation = ld.OriginalInflation = loan.OriginalInflation;
             ld.resultReportData.OriginalMargin = ld.OriginalMargin = loan.OriginalMargin;
+            ld.resultReportData.OriginalMargin2 = ld.OriginalMargin2 = loan.OriginalMargin2;
+            ld.resultReportData.firstTimePeriod = ld.firstTimePeriod = loan.firstTimePeriod;
             ld.resultReportData.StartTime = loan.resultReportData.StartTime;
             ld.resultReportData.RemaingLoanAmount = ld.resultReportData.LoanAmount = ld.LoanAmount = RemaingLoanAmount;
             ld.resultReportData.RemaingLoanTime = loan.resultReportData.RemaingLoanTime;
@@ -264,7 +253,6 @@ namespace WisorLibrary.Logic
             ld.resultReportData.PayFuture = PayFuture;
             ld.resultReportData.BankPayUntilToday = BankPayUntilToday;
             ld.resultReportData.BankPayFuture = BankPayFuture;
-            ld.resultReportData.FirstMonthlyPMT = FirstMonthlyPMT;
             ld.resultReportData.EstimateFuturePay = ld.resultReportData.PayFuture;
             // make consistancy checks
             if (ld.resultReportData.BankPayUntilToday > ld.resultReportData.PayUntilToday)

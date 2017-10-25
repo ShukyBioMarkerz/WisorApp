@@ -36,7 +36,7 @@ namespace WisorLib
 
         public RunLoanDetails runSearch()
         {
-            long elapsedMs = 0;
+            //long elapsedMs = 0;
             // ensure there are any combinations
             string[,] combinations = Combinations.GetCombination(Share.theMarket);
 
