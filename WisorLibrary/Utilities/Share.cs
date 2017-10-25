@@ -130,8 +130,8 @@ namespace WisorLib
         public static string CriteriaFileName
         {
             get {
-                if (string.IsNullOrEmpty(criteriaFileName))
-                    return MiscConstants.CRETIRIA_FILE;
+                //if (string.IsNullOrEmpty(criteriaFileName))
+                //    return MiscConstants.CRETIRIA_FILE;
                 return criteriaFileName;
             }
             set
@@ -146,8 +146,8 @@ namespace WisorLib
         {
             get
             {
-                if (string.IsNullOrEmpty(productsFileName))
-                    return MiscConstants.PRODUCTS_FILE;
+                //if (string.IsNullOrEmpty(productsFileName))
+                //    return MiscConstants.PRODUCTS_FILE;
                 return productsFileName;
             }
             set
@@ -162,8 +162,8 @@ namespace WisorLib
         {
             get
             {
-                if (string.IsNullOrEmpty(loansFileName))
-                    return MiscConstants.LOAN_FILE;
+                //if (string.IsNullOrEmpty(loansFileName))
+                //    return MiscConstants.LOAN_FILE;
                 return loansFileName;
             }
             set
@@ -178,8 +178,8 @@ namespace WisorLib
         {
             get
             {
-                if (string.IsNullOrEmpty(ratesFileName))
-                    return MiscConstants.RATES_FILE;
+                //if (string.IsNullOrEmpty(ratesFileName))
+                //    return MiscConstants.RATES_FILE;
                 return ratesFileName;
             }
             set
@@ -194,8 +194,8 @@ namespace WisorLib
         {
             get
             {
-                if (string.IsNullOrEmpty(bankRatesFileName))
-                    return MiscConstants.BANK_RATES_FILE;
+                //if (string.IsNullOrEmpty(bankRatesFileName))
+                //    return MiscConstants.BANK_RATES_FILE;
                 return bankRatesFileName;
             }
             set
@@ -210,8 +210,8 @@ namespace WisorLib
         {
             get
             {
-                if (string.IsNullOrEmpty(secondPeriodFilename))
-                    return MiscConstants.BANK_RATES_FILE;
+                //if (string.IsNullOrEmpty(secondPeriodFilename))
+                //    return MiscConstants.BANK_RATES_FILE;
                 return secondPeriodFilename;
             }
             set
@@ -226,8 +226,8 @@ namespace WisorLib
         {
             get
             {
-                if (string.IsNullOrEmpty(secondPeriodBankRatesFileName))
-                    return MiscConstants.BANK_RATES_FILE;
+                //    if (string.IsNullOrEmpty(secondPeriodBankRatesFileName))
+                //        return MiscConstants.BANK_RATES_FILE;
                 return secondPeriodBankRatesFileName;
             }
             set
@@ -260,8 +260,8 @@ namespace WisorLib
         {
             get
             {
-                if (string.IsNullOrEmpty(combinationFileName))
-                    return MiscConstants.COMBINATION_FILENAME;
+                //if (string.IsNullOrEmpty(combinationFileName))
+                //    return MiscConstants.COMBINATION_FILENAME;
                 return combinationFileName;
             }
             set
@@ -308,6 +308,8 @@ namespace WisorLib
         public static bool ShouldPrintLog { get; internal set; }
         public static string DataDirectory { get; set; }
         public static int NumberOfProductsInCombination { get; internal set; }
+
+        public static bool ShouldCreateReportOnlyWhenWinWin { get; internal set; }
 
 
 

@@ -46,6 +46,10 @@ namespace WisorLib
         public static string    DATE_FORMAT  = "d/M/yyyy";
         public static string    DATE_FORMAT_US = "M/d/yyyy";
         public static string    COMMA_STR = ",";
+        public static string    HEB_BRACKETS1 = " ) ";
+        public static string    HEB_BRACKETS2 = " ( ";
+        public static string    ENG_BRACKETS1 = " ( ";
+        public static string    ENG_BRACKETS2 = " ) ";
 
         // files to load from
 
@@ -58,13 +62,13 @@ namespace WisorLib
 
         public const string MARKET = "market";
         public static string LOGGER_FILE = "LOGGER";
-        public const string PRODUCTS_FILE = "MortgageProducts - Updated.xml";
-        public const string CRETIRIA_FILE = "ClalGui.xml"; // "Gui.xml"; 
-        public const string RATES_FILE = "RateFileClalOnlyApril2017.xlsx";
-        public const string BANK_RATES_FILE = "MarginFileClalOnlyApril2017.xlsx";
-        public const string LOAN_FILE = "ClalShort.xlsx"; //"ClalPOCDataForFinalCalculation.xlsx"; // "Citi Test cases (2).csv"; // "POC Data - Test Run.csv";
-        public const string COMBINATION_FILENAME = "CombinationsIsrael.csv";
-        public const string COMBINATION_FILENAME_2_PRODUCTS_IN_COMBINATION = "CombinationsIsrael2ProductsInCombination.csv";
+        //public const string PRODUCTS_FILE = "MortgageProducts - Updated.xml";
+        //public const string CRETIRIA_FILE = "ClalGui.xml"; // "Gui.xml"; 
+        //public const string RATES_FILE = "RateFileClalOnlyApril2017.xlsx";
+        //public const string BANK_RATES_FILE = "MarginFileClalOnlyApril2017.xlsx";
+        //public const string LOAN_FILE = "ClalShort.xlsx"; //"ClalPOCDataForFinalCalculation.xlsx"; // "Citi Test cases (2).csv"; // "POC Data - Test Run.csv";
+        //public const string COMBINATION_FILENAME = "CombinationsIsrael.csv";
+        //public const string COMBINATION_FILENAME_2_PRODUCTS_IN_COMBINATION = "CombinationsIsrael2ProductsInCombination.csv";
         
         public const string HISTORIC_FILE = "PrimeIsrael_RateDB.xlsx"; // "HistoricIsraelPrimeRates - Copy.xlsx";
         public const string HISTORIC_BBBR_FILE = "BBBR_RateDB.xlsx"; // "HistoricIsraelPrimeRates - Copy.xlsx";

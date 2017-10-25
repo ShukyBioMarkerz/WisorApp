@@ -74,7 +74,7 @@ namespace WisorLibrary.Utilities
             Share.theSelectionType = SelectionType.ReadRates;
             bool rc;
             string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
-            rc = Rates.SetRatesFile(Share.RatesFileName, Share.BankRatesFileName, 
+            rc = Rates.SetRatesFile(Share.RatesFileName, Share.BankRatesFileName,
                 Share.SecondPeriodFilename, Share.SecondPeriodBankRatesFileName);
 
             return rc;
@@ -96,8 +96,8 @@ namespace WisorLibrary.Utilities
             string dir = GetDataDirectory() + Path.DirectorySeparatorChar;
             string filename = MiscUtilities.GetFilename(dir + MiscConstants.HISTORIC_BBBR_FILE, MiscConstants.UNDEFINED_STRING);
             return filename;
-         }
-        
+        }
+
 
         public static bool SetRiskAndLiquidityFilename()
         {
@@ -386,7 +386,7 @@ namespace WisorLibrary.Utilities
         //            // ensure the file was loaded
         //            //if (null == HistoricRate.Instance || !HistoricRate.Instance.Status)
         //            //    MiscUtilities.SetHistoricRatesFilename();
-                    
+
         //            // get the entire month values
         //            index = HistoricRate.GetHistoricValues(indic, dateLoanTaken, dateLoanTaken.AddMonths(1));
         //            break;
@@ -689,7 +689,7 @@ namespace WisorLibrary.Utilities
                                 case MiscConstants.SECOND_PERIOD_BANK_RATES_FILENAME:
                                     Share.SecondPeriodBankRatesFileName = dir + node.Value;
                                     break;
-                                 case MiscConstants.HISTORIC_FILENAME:
+                                case MiscConstants.HISTORIC_FILENAME:
                                     Share.HistoricFileName = dir + node.Value;
                                     break;
                                 case MiscConstants.COMBINATIONS_FILE:
@@ -698,7 +698,7 @@ namespace WisorLibrary.Utilities
                                 case MiscConstants.COMBINATIONS_FILE_2_PRODUCTS_IN_COMBINATION:
                                     Share.Products2InCombinationFileName = dir + node.Value;
                                     break;
-                                 case MiscConstants.RISK_LIQUIDITY_FILENAME:
+                                case MiscConstants.RISK_LIQUIDITY_FILENAME:
                                     Share.RiskAndLiquidityFileName = dir + node.Value;
                                     break;
                                 case MiscConstants.PRODUCTS_FILENAME:
@@ -746,9 +746,9 @@ namespace WisorLibrary.Utilities
                                     //<from_line>,<to_line>
                                     string[] lines = node.Value.Split(MiscConstants.COMMA);
                                     if (!String.IsNullOrEmpty(lines[0]))
-                                        Share.LoansLoadFromLine = System.Convert.ToUInt32(lines[0]);
+                                        Share.LoansLoadFromLine = System.Convert.ToUInt32(lines[0]) /*- 1*/; // the line index starts from zero
                                     if (!String.IsNullOrEmpty(lines[1]))
-                                        Share.LoansLoadToLine = System.Convert.ToUInt32(lines[1]);
+                                        Share.LoansLoadToLine = System.Convert.ToUInt32(lines[1]) /*- 1*/; // the line index starts from zero
                                     break;
                                 case MiscConstants.FROM_IDS_LOAD_LOANS:
                                     Share.LoansLoadIDsFromLine = node.Value;
@@ -756,7 +756,7 @@ namespace WisorLibrary.Utilities
                                 case MiscConstants.NUMBER_OF_PRODUCTS_IN_COMBINATION:
                                     Share.NumberOfProductsInCombination = System.Convert.ToInt32(node.Value);
                                     break;
-                                    
+
                                 default:
                                     Console.WriteLine("LoadXMLConfigurationFile Illegal input: " + child.Name);
                                     break;
@@ -834,7 +834,8 @@ namespace WisorLibrary.Utilities
             }
 
             // order the list and get the first X elements
-            Array.Sort(comp, delegate (Composition c1, Composition c2) {
+            Array.Sort(comp, delegate (Composition c1, Composition c2)
+            {
                 return c1.score.CompareTo(c2.score);
             });
 
@@ -995,23 +996,60 @@ namespace WisorLibrary.Utilities
             return c;
         }
 
+        public static void CalcaulateProfitOfSpecificProduct(Composition comp, int productIndex, out int BankPay,
+            out int BorrowerPay, out int Profit)
+        {
+            BankPay = BorrowerPay = Profit = MiscConstants.UNDEFINED_INT;
+            if (null != comp)
+            {
+                if (Share.NumberOfProductsInCombination > productIndex)
+                {
+                    switch (productIndex)
+                    {
+                        case (int)Options.options.OPTX:
+                            BankPay = (int)(comp.optXBankTtlPay);
+                            BorrowerPay = (int)Math.Round(comp.opts[(int)Options.options.OPTX].optTtlPay);
+                            break;
+                        case (int)Options.options.OPTY:
+                            BankPay = (int)(comp.optYBankTtlPay);
+                            BorrowerPay = (int)Math.Round(comp.opts[(int)Options.options.OPTY].optTtlPay);
+                            break;
+                        case (int)Options.options.OPTZ:
+                            BankPay = (int)(comp.optZBankTtlPay);
+                            BorrowerPay = (int)Math.Round(comp.opts[(int)Options.options.OPTZ].optTtlPay);
+                            break;
+
+                    }
+                    Profit = BorrowerPay - BankPay;
+
+                }
+            }
+        }
+
         public static void CalcaulateProfit(Composition comp, out int ttlBankPay,
             out int ttlBorrowerPay, out int ttlProfit)
         {
-            if (MiscUtilities.Use3ProductsInComposition())
+            if (null != comp)
             {
-                ttlBankPay = (int)(comp.optXBankTtlPay + comp.optYBankTtlPay + comp.optZBankTtlPay);
-                ttlBorrowerPay = (int)Math.Round(comp.opts[(int)Options.options.OPTX].optTtlPay +
-                    comp.opts[(int)Options.options.OPTY].optTtlPay + comp.opts[(int)Options.options.OPTZ].optTtlPay);
+                if (MiscUtilities.Use3ProductsInComposition())
+                {
+                    ttlBankPay = (int)(comp.optXBankTtlPay + comp.optYBankTtlPay + comp.optZBankTtlPay);
+                    ttlBorrowerPay = (int)Math.Round(comp.opts[(int)Options.options.OPTX].optTtlPay +
+                        comp.opts[(int)Options.options.OPTY].optTtlPay + comp.opts[(int)Options.options.OPTZ].optTtlPay);
+                }
+                else
+                {
+                    ttlBankPay = (int)(comp.optXBankTtlPay + comp.optYBankTtlPay);
+                    ttlBorrowerPay = (int)Math.Round(comp.opts[(int)Options.options.OPTX].optTtlPay +
+                        comp.opts[(int)Options.options.OPTY].optTtlPay);
+                }
+
+                ttlProfit = /*(int)comp.ttlPay*/ ttlBorrowerPay - ttlBankPay;
             }
             else
             {
-                ttlBankPay = (int)(comp.optXBankTtlPay + comp.optYBankTtlPay);
-                ttlBorrowerPay = (int)Math.Round(comp.opts[(int)Options.options.OPTX].optTtlPay +
-                    comp.opts[(int)Options.options.OPTY].optTtlPay);
+                ttlBankPay = ttlBorrowerPay = ttlProfit = 0;
             }
-            
-            ttlProfit = /*(int)comp.ttlPay*/ ttlBorrowerPay - ttlBankPay;
         }
 
         public static void CalcaulateProfitAll(Composition comp, loanDetails loan,
@@ -1331,6 +1369,23 @@ namespace WisorLibrary.Utilities
             return fields;
         }
 
+        public static string GetProductHebrewName(string productName)
+        {
+            return GenericProduct.GetProductHebrewName(productName);
+        }
+
+        public static string GetProductHebrewName(GenericProduct product)
+        {
+            string name = MiscConstants.UNDEFINED_STRING;
+            if (Share.cultureInfo.Name.Equals("he-IL"))
+                name = product.hebrewName;
+            else
+                name = product.name;
+            if (MiscConstants.UNDEFINED_STRING == name)
+                name = product.name;
+            return name;
+        }
+
         public static bool IsProductTsamud(indices indexUsedFirstTimePeriod)
         {
             return (indices.MADAD == indexUsedFirstTimePeriod);
@@ -1391,7 +1446,7 @@ namespace WisorLibrary.Utilities
             return rc;
         }
 
- 
+
         static bool PrepareRuning()
         {
             bool rc = true;
@@ -1438,7 +1493,7 @@ namespace WisorLibrary.Utilities
                         return rc;
                     }
                 }
-              
+
             }
 
             return rc;
@@ -1542,7 +1597,7 @@ namespace WisorLibrary.Utilities
         {
             string ext = MiscUtilities.GetFileTypeExtension(fileType);
             string lenderOrBorrowerPrefix = (isLender ? MiscConstants.LENDER_REPORT_PREFIX : MiscConstants.BORROWER_REPORT_PREFIX);
-            string languagePrefix = (Share.cultureInfo.Name.Equals("he-IL") ? MiscConstants.HEBREW_PREFIX : MiscConstants.ENGLISH_PREFIX);
+            string languagePrefix = Share.cultureInfo.Name;
             string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.IMAGES_DIR + Path.DirectorySeparatorChar;
             string fn = AppDomain.CurrentDomain.BaseDirectory +
                 MiscConstants.REPORTS_DIR + Path.DirectorySeparatorChar +
@@ -1601,6 +1656,7 @@ namespace WisorLibrary.Utilities
             Share.shouldShowProductSelectionContinue = false;
             Share.shouldShowRatesSelectionWindow = false;
             Share.shouldShowLoansSelectionWindow = false;
+            Share.ShouldCreateReportOnlyWhenWinWin = false;
 
             Share.shouldRunFake = false;
             Share.numberOfOption = 3;
@@ -1727,12 +1783,90 @@ namespace WisorLibrary.Utilities
             return outputDir;
         }
 
-
-        public static void CalculateTypeOfProducts2(RecommendedStructure[] compData,
+        public static void CalculateTypeOfProducts3(GenericProduct[] Products, int[] Amount,
             out string structureTypeString)
         {
             string FixHeader, IndexationHeader1, IndexationHeader2, IndexationHeader3;
             structureTypeString = MiscConstants.UNDEFINED_STRING;
+
+            if (null != Products && 0 < Products.Length && null != Amount && 0 < Amount.Length)
+            {
+                int len = Math.Min(Products.Length, Amount.Length);
+                // calculate the relations between tzamud and not in all the products which consist the composition
+                uint fix = MiscConstants.UNDEFINED_UINT, adjustable = MiscConstants.UNDEFINED_UINT;
+                uint tsamud = MiscConstants.UNDEFINED_UINT, notTsamud = MiscConstants.UNDEFINED_UINT;
+
+                bool isProductFix = false, isProductTsamud = false;
+                for (int j = 0; j < len; j++)
+                {
+                    isProductFix = MiscUtilities.IsProductFix(Products[j].fixOrAdjustable);
+                    isProductTsamud = MiscUtilities.IsProductTsamud(Products[j].originalIndexUsedFirstTimePeriod);
+
+                    // accumulate the fix or adjustable
+                    if (isProductFix)
+                        fix += (uint)Amount[j];
+                    else
+                        adjustable += (uint)Amount[j];
+
+                    // accululate Tsamud or not
+                    if (isProductTsamud)
+                        tsamud += (uint)Amount[j];
+                    else
+                        notTsamud += (uint)Amount[j];
+
+                    // calculate the fix and adjustable numbers
+                    uint entireFixSum = fix + adjustable;
+                    uint fixNum = MiscConstants.UNDEFINED_UINT, adjustableNum = MiscConstants.UNDEFINED_UINT;
+                    if (0 < entireFixSum)
+                    {
+                        fixNum = Convert.ToUInt32((double)fix / entireFixSum * 100);
+                        adjustableNum = 100 - fixNum;
+                    }
+
+                    // calculate the tsamud vs. not numbers
+                    uint entireTsamudSum = tsamud + notTsamud;
+                    uint tsamudNum = MiscConstants.UNDEFINED_UINT, notTsamudNum = MiscConstants.UNDEFINED_UINT;
+                    if (0 < entireTsamudSum)
+                    {
+                        tsamudNum = Convert.ToUInt32((double)tsamud / entireTsamudSum * 100);
+                        notTsamudNum = 100 - tsamudNum;
+                    }
+
+                    CalculateHeaders(adjustable, tsamudNum, out FixHeader, out IndexationHeader1,
+                        out IndexationHeader2, out IndexationHeader3);
+                    // set the right numbers to the header
+                    string brackets1 = ENG_BRACKETS1;
+                    string brackets2 = ENG_BRACKETS2;
+                    if (Share.cultureInfo.Name.Equals("he-IL"))
+                    {
+                        brackets1 = HEB_BRACKETS1;
+                        brackets2 = HEB_BRACKETS2;
+                    }
+                    structureTypeString = FixHeader + ", " + IndexationHeader1 + brackets1 + fixNum + "% "
+                        + IndexationHeader2 + " , " + adjustableNum + "% " + IndexationHeader3 + brackets2;
+
+                }
+            }
+        }
+
+
+        public static void CalculateTypeOfProducts2(RecommendedStructure[] compData, out string structureTypeString)
+        {
+            structureTypeString = MiscConstants.UNDEFINED_STRING;
+            List<GenericProduct> lgp = new List<GenericProduct>();
+            List<int> lamount = new List<int>();
+
+            for (int j = 0; j < compData.Length; j++)
+            {
+                lgp.Add(compData[j].Product);
+                lamount.Add(compData[j].Amount);
+
+                CalculateTypeOfProducts3(lgp.ToArray(), lamount.ToArray(), out structureTypeString);
+            }
+
+#if NO_NEED_ANY_MORE
+            string FixHeader, IndexationHeader1, IndexationHeader2, IndexationHeader3;
+            
             //int ttlBankPay, ttlBorrowerPay, ttlProfit;
 
             // RecommendedStructure(int amount, string productType, double rate, int time, int pmt)
@@ -1772,22 +1906,6 @@ namespace WisorLibrary.Utilities
                     else
                         notTsamud += (uint)compData[j].Amount;
 
-                    //string productName = compData[i].opts[j].product.productID.stringTypeId;
-                    //string Option = productName;
-                    //uint Amt = (uint)compData[i].opts[j].optAmt;
-                    //double Rate = compData[i].opts[j].optRateFirstPeriod;
-                    //uint Time = compData[i].opts[j].optTime;
-                    //uint PMT = (uint)compData[i].opts[j].optPmt;
-                    //uint TTLPay = (uint)compData[i].opts[j].optTtlPay;
-                    //uint TTllProfit = TTLPay - bankPay[j];
-                    //double LenderProfit = (double)TTllProfit / reportData.RemaingLoanAmount * 100;
-
-                    //sumAmount += Amt;
-                    //sumMonthly += PMT;
-                    //sumTTLPay += TTLPay;
-                    //sumTTllProfit += TTllProfit;
-                    //sumLenderProfit += LenderProfit;
-
                     //bool Indexation = MiscUtilities.IsProductTsamud(compData[i].opts[j].product.originalIndexUsedFirstTimePeriod);
 
                     // calculate the fix and adjustable numbers
@@ -1816,6 +1934,7 @@ namespace WisorLibrary.Utilities
                    
                 }
             }
+#endif
         }
 
         public static void CalculateTypeOfProducts(ResultReportData reportData, int indexOfComposition,
@@ -2014,7 +2133,7 @@ namespace WisorLibrary.Utilities
                 IRestResponse rr = client.Execute(request);
                 res = rr.StatusCode;
             }
- 
+
             return HttpStatusCode.OK == res ? true : false;
         }
 
@@ -2041,14 +2160,14 @@ namespace WisorLibrary.Utilities
                 // Save and start View 
                 rc = reportManager.SavePDFDocument();
             }
-            
+
             return rc;
         }
 
         public static bool RunShortPDFreport(string reportFilename, OrderDataContainer2 orderDataContainer2,
-            ResultReportData reportData, CultureInfo cultureInfo)
+            ResultReportData reportData, CultureInfo cultureInfo, RunEnvironment env)
         {
-            ShortReportDataObject lrdo = new ShortReportDataObject(/*reportData, orderDataContainer2, cultureInfo*/);
+            ShortReportDataObject lrdo = new ShortReportDataObject(env, reportData);
             //lrdo.OrderNumberValue = reportData.ID;
             //lrdo.EmailValue = orderDataContainer2.Userid;
             bool rc = true;
@@ -2180,10 +2299,10 @@ namespace WisorLibrary.Utilities
             return historicDate;
         }
 
-        public static void PrintResultReportData (string msg, ResultReportData data)
+        public static void PrintResultReportData(string msg, ResultReportData data)
         {
-            string ToPrint =  msg + " :  " + 
-                "   PayUntilToday: " + data.PayUntilToday + 
+            string ToPrint = msg + " :  " +
+                "   PayUntilToday: " + data.PayUntilToday +
                 "   PayFuture: " + data.PayFuture +
                 "   RemaingLoanAmount: " + data.RemaingLoanAmount +
                 "   RemaingLoanTime: " + data.RemaingLoanTime +
@@ -2201,6 +2320,44 @@ namespace WisorLibrary.Utilities
             {
                 MiscUtilities.PrintMiscLogger(msg);
             }
+        }
+
+        public static string TranslateBoolToYesOrNo(bool value)
+        {
+            string translated = MiscConstants.UNDEFINED_STRING;
+            
+            switch (value)
+            {
+                case true:
+                    translated = Properties.Resources.YesString;
+                    break;
+                case false:
+                    translated = Properties.Resources.NoString;
+                    break;
+                default:
+                    break;
+            }
+
+            return translated;
+        }
+
+        public static string TranslateBoolToYesOrNo2(bool value)
+        {
+            string translated = MiscConstants.UNDEFINED_STRING;
+
+            switch (value)
+            {
+                case true:
+                    translated = Properties.Resources.HaveString;
+                    break;
+                case false:
+                    translated = Properties.Resources.DontHaveString;
+                    break;
+                default:
+                    break;
+            }
+
+            return translated;
         }
 
     }

@@ -146,11 +146,17 @@ namespace WisorLib
             {
                 Share.cultureInfo = CultureInfo.CreateSpecificCulture("he-IL");
             }
-            else
+            else if (markets.UK == market)
+            {
+                Share.cultureInfo = CultureInfo.CreateSpecificCulture("en-GB");
+            }
+            else 
             {
                 Share.cultureInfo = CultureInfo.CreateSpecificCulture("en-US");
             }
-          
+            
+
+
             return rc;
         }
 
