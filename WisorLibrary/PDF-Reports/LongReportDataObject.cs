@@ -228,42 +228,43 @@ namespace WisorLibrary.ReportApplication
             {
                 if (null != orderData && null != orderData.LoanDetails)
                 {
-                    return Utils.GetAmortisation(orderData.LoanDetails.LoanDesire);
+                    return Utils.GetAmortisation(orderData.LoanDetails.LoanDesire).AmortisationTable;
                 }
                 else
                 {
-                    return new AmortisationTable[] {
-                    new AmortisationTable(1, 50000000, 1500),
-                    new AmortisationTable(2, 23000, 2500),
-                    new AmortisationTable(3, 41000, 3500),
-                    new AmortisationTable(4, 4000, 4500),
-                    new AmortisationTable(5, 5000, 5500),
-                    new AmortisationTable(6, 10000, 1001),
-                    new AmortisationTable(7, 20000, 1013),
-                    new AmortisationTable(8, 30000, 6500),
-                    new AmortisationTable(9, 40000, 7500),
-                    new AmortisationTable(10, 50000, 8500),
-                    new AmortisationTable(11, 60000, 1300),
-                    new AmortisationTable(12, 70000, 1400),
-                    new AmortisationTable(13, 20000, 1500),
-                    new AmortisationTable(14, 20000, 1500),
-                    new AmortisationTable(15, 20000, 1200),
-                    new AmortisationTable(16, 20000, 4200),
-                    new AmortisationTable(17, 40400, 5600),
-                    new AmortisationTable(18, 50500, 1500),
-                    new AmortisationTable(19, 50600, 1500),
-                    new AmortisationTable(20, 50700, 1500),
-                    new AmortisationTable(21, 52200, 2400),
-                    new AmortisationTable(22, 50200, 1200),
-                    new AmortisationTable(23, 51300, 5200),
-                    new AmortisationTable(24, 55300, 5300),
-                    new AmortisationTable(25, 13400, 6600),
-                    new AmortisationTable(26, 34100, 1300),
-                    new AmortisationTable(27, 50000, 1300),
-                    new AmortisationTable(28, 134000000, 1200),
-                    new AmortisationTable(29, 2410000, 1100),
-                    new AmortisationTable(30, 131000, 1100)
-                };
+                    return null;
+                //    return new AmortisationTable[] {
+                //    new AmortisationTable(1, 50000000, 1500),
+                //    new AmortisationTable(2, 23000, 2500),
+                //    new AmortisationTable(3, 41000, 3500),
+                //    new AmortisationTable(4, 4000, 4500),
+                //    new AmortisationTable(5, 5000, 5500),
+                //    new AmortisationTable(6, 10000, 1001),
+                //    new AmortisationTable(7, 20000, 1013),
+                //    new AmortisationTable(8, 30000, 6500),
+                //    new AmortisationTable(9, 40000, 7500),
+                //    new AmortisationTable(10, 50000, 8500),
+                //    new AmortisationTable(11, 60000, 1300),
+                //    new AmortisationTable(12, 70000, 1400),
+                //    new AmortisationTable(13, 20000, 1500),
+                //    new AmortisationTable(14, 20000, 1500),
+                //    new AmortisationTable(15, 20000, 1200),
+                //    new AmortisationTable(16, 20000, 4200),
+                //    new AmortisationTable(17, 40400, 5600),
+                //    new AmortisationTable(18, 50500, 1500),
+                //    new AmortisationTable(19, 50600, 1500),
+                //    new AmortisationTable(20, 50700, 1500),
+                //    new AmortisationTable(21, 52200, 2400),
+                //    new AmortisationTable(22, 50200, 1200),
+                //    new AmortisationTable(23, 51300, 5200),
+                //    new AmortisationTable(24, 55300, 5300),
+                //    new AmortisationTable(25, 13400, 6600),
+                //    new AmortisationTable(26, 34100, 1300),
+                //    new AmortisationTable(27, 50000, 1300),
+                //    new AmortisationTable(28, 134000000, 1200),
+                //    new AmortisationTable(29, 2410000, 1100),
+                //    new AmortisationTable(30, 131000, 1100)
+                //};
                 }
             }
         }
@@ -1811,16 +1812,32 @@ namespace WisorLibrary.ReportApplication
         }
     }
 
+    public class AmortisationData
+    {
+        public AmortisationData()
+        {
+            AmortisationTable = new AmortisationTable[MiscConstants.MAX_LOAN_TIME / 12];
+            for (int i = 0; i < AmortisationTable.Length; i++)
+            {
+                AmortisationTable[i] = new AmortisationTable();
+            }
+        }
+
+        public AmortisationTable[] AmortisationTable { get; set; }
+    }
+
     public class AmortisationTable
     {
         public int Year { get; set; } 
-        public double Payable { get; set; }
-        public double Cumulative { get; set; }
-        public AmortisationTable(int year, double payable, double cumulative)
+        public double RemainingAmount { get; set; }
+        public double PaidSoFar { get; set; }
+        public double MonthlyPmt { get; set; }
+        public AmortisationTable(int year = 0, double remainingAmount = 0, double paidSoFar = 0, double monthlyPmt = 0)
         {
             Year = year;
-            Payable = payable;
-            Cumulative = cumulative;
+            RemainingAmount = remainingAmount;
+            PaidSoFar = paidSoFar;
+            MonthlyPmt = monthlyPmt;
         }
     }
 
@@ -2137,10 +2154,10 @@ namespace WisorLibrary.ReportApplication
         } 
 
         // TBD: Omri - where should be the parameters retrieve from?
-        public static AmortisationTable[] GetAmortisation(double amount
+        public static AmortisationData GetAmortisation(double amount
             /*, indices Indices, double rate, double inflation, uint time*/)
         {
-            AmortisationTable[] amortisationData = null;
+            AmortisationData amortisationData = null;
             // TBD Omri - where are those come from
             indices Indices = indices.MADAD;
             double rate = 0.01;

@@ -5170,13 +5170,13 @@ namespace WisorLibrary.ReportApplication
                 tf.Alignment = SetAlignmentForCulture();
                 if ((i + 1) % 5 == 0)
                 {
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Cumulative.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Payable.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].PaidSoFar.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].RemainingAmount.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
                 }
                 else
                 {
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Cumulative.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Payable.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].PaidSoFar.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].RemainingAmount.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
                 }
                 currentPositionY += 15;
             }
@@ -5212,13 +5212,13 @@ namespace WisorLibrary.ReportApplication
                 tf.Alignment = SetAlignmentForCulture();
                 if ((i + 1) % 5 == 0)
                 {
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Cumulative.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Payable.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].RemainingAmount.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].PaidSoFar.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
                 }
                 else
                 {
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Cumulative.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Payable.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].RemainingAmount.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].PaidSoFar.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
                 }
                 currentPositionY2 += 15;
             }
@@ -5254,13 +5254,13 @@ namespace WisorLibrary.ReportApplication
                 tf.Alignment = SetAlignmentForCulture();
                 if ((i + 1) % 5 == 0)
                 {
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Cumulative.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Payable.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].RemainingAmount.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].PaidSoFar.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
                 }
                 else
                 {
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Cumulative.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Payable.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].RemainingAmount.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].PaidSoFar.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
                 }
                 currentPositionY5 += 15;
             }
@@ -5356,13 +5356,13 @@ namespace WisorLibrary.ReportApplication
                 tf.Alignment = SetAlignmentForCulture();
                 if ((i+1) % 5 == 0)
                 {
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Cumulative.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Payable.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].RemainingAmount.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].PaidSoFar.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
                 }
                 else
                 {
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Cumulative.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Payable.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].RemainingAmount.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].PaidSoFar.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
                 }
                 currentPositionY += 15;
             }
@@ -5399,13 +5399,13 @@ namespace WisorLibrary.ReportApplication
                 tf.Alignment = SetAlignmentForCulture();
                 if ((i + 1) % 5 == 0)
                 {
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Cumulative.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Payable.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].PaidSoFar.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].RemainingAmount.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
                 }
                 else
                 {
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Cumulative.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Payable.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].RemainingAmount.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].RemainingAmount.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
                 }
                 currentPositionY2 += 15;
             }
@@ -5441,13 +5441,13 @@ namespace WisorLibrary.ReportApplication
                 tf.Alignment = SetAlignmentForCulture();
                 if ((i + 1) % 5 == 0)
                 {
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Cumulative.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Payable.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].RemainingAmount.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].PaidSoFar.ToString("N0")), fontH6Bold, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
                 }
                 else
                 {
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Cumulative.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Payable.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].RemainingAmount.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].PaidSoFar.ToString("N0")), fontH6, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
                 }
                 currentPositionY5 += 15;
             }
@@ -5527,13 +5527,13 @@ namespace WisorLibrary.ReportApplication
                 tf.Alignment = SetAlignmentForCulture();
                 if ((i + 1) % 5 == 0)
                 {
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Cumulative.ToString("0,000")), fontH6Bold, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Payable.ToString("0,000")), fontH6Bold, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].RemainingAmount.ToString("0,000")), fontH6Bold, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].PaidSoFar.ToString("0,000")), fontH6Bold, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
                 }
                 else
                 {
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Cumulative.ToString("0,000")), fontH6, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
-                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].Payable.ToString("0,000")), fontH6, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].RemainingAmount.ToString("0,000")), fontH6, XBrushes.Black, tableAmortisation3Value2, XStringFormats.TopLeft);
+                    tf.DrawString("₪ " + CheckRTL(longReportDataObject.AmortisationTableValues[i].PaidSoFar.ToString("0,000")), fontH6, XBrushes.Black, tableAmortisation3Value3, XStringFormats.TopLeft);
                 }
                 currentPositionY5 += 15;
             }
