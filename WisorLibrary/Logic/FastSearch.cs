@@ -97,15 +97,25 @@ namespace WisorLib
                     DefineOptionTypes(combinationCounter, env);
                     Console.WriteLine();
 
+#if SHOULD_DEBUG_LUCHSILUKIN
                     //// TBD debug - should remove from here
-                    //Share.ShouldPrintLog = false;
-                    //MiscUtilities.PrintMiscLogger("\nProducts: " 
-                    //    + env.CalculationParameters.optTypes.optionTypes[0].product.productID.stringTypeId
-                    //    + ", " + env.CalculationParameters.optTypes.optionTypes[1].product.productID.stringTypeId
-                    //    + ", " + env.CalculationParameters.optTypes.optionTypes[2].product.productID.stringTypeId);
-                    //// debug should remove till here
+                    Share.ShouldPrintLog = true;
+                    MiscUtilities.PrintMiscLogger("\nProducts: "
+                        + env.CalculationParameters.optTypes.optionTypes[0].product.productID.stringTypeId
+                        + ", " + env.CalculationParameters.optTypes.optionTypes[1].product.productID.stringTypeId
+                        + ", " + (MiscUtilities.Use3ProductsInComposition() ? 
+                            env.CalculationParameters.optTypes.optionTypes[2].product.productID.stringTypeId : MiscConstants.UNDEFINED_STRING));
+                    // debug should remove till here
+#endif
 
                     ThreeOptionSearch search = new ThreeOptionSearch(env);
+
+#if SHOULD_DEBUG_LUCHSILUKIN
+                    //// TBD debug - should remove from here
+                    Share.ShouldPrintLog = false;
+                    // debug should remove till here
+#endif
+
                     env.CheckInfo.calculationEndTime = DateTime.Now;
                     // End of three option search for one combination of option types
 
