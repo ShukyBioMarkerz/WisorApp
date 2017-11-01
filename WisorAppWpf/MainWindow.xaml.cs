@@ -147,6 +147,7 @@ namespace WisorAppWpf
             //Tests.TestlanguageFunctionality();
             // Tests.TestLongReportCreation();
             // Tests.TestDatedCalculation();
+            //Tests.TestSetMarketValue();
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
