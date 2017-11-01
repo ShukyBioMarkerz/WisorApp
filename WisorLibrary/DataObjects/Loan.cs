@@ -45,6 +45,10 @@ namespace WisorLib
         public double OriginalRate2 { get; set; }
         public double OriginalMargin { get; set; }
         public double OriginalMargin2 { get; set; }
+        public double PrintedOriginalMargin { get; set; }
+        public double PrintedOriginalMargin2 { get; set; }
+
+        
         public uint OriginalTime { get; set; }
 
         [XmlIgnoreAttribute]
@@ -109,6 +113,9 @@ namespace WisorLib
                 }
                 OriginalMargin = originalRate + originalMargin;
                 OriginalMargin2 = originalRate2 + originalMargin2;
+                // need to save the originals to display in the report
+                PrintedOriginalMargin = originalMargin;
+                PrintedOriginalMargin2 = originalMargin2;
 
                 risk = ris;
                 liquidity = liquidit;

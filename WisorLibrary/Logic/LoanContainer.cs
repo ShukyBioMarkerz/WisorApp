@@ -126,7 +126,8 @@ namespace WisorLibrary.Logic
                     MonthlyPaymentCalc = MiscConstants.UNDEFINED_UINT,
                     BankPayUntilToday = MiscConstants.UNDEFINED_UINT,
                     BankPayFuture = MiscConstants.UNDEFINED_UINT,
-                    FirstMonthlyPMT = MiscConstants.UNDEFINED_UINT;
+                    FirstMonthlyPMT = MiscConstants.UNDEFINED_UINT,
+                    FirstMonthlyPMT2 = MiscConstants.UNDEFINED_UINT;
 
                 for (int i = 0; i < collectedLoans.Count; i++)
                 {
@@ -152,6 +153,7 @@ namespace WisorLibrary.Logic
                     BankPayUntilToday += resultData.BankPayUntilToday;
                     BankPayFuture += resultData.BankPayFuture;
                     FirstMonthlyPMT += resultData.FirstMonthlyPMT;
+                    FirstMonthlyPMT2 += resultData.FirstMonthlyPMT2;
 
                     // update the data in order to display in the report
                     collectedLoans[i].resultReportData.PayUntilToday = resultData.PayUntilToday;
@@ -162,11 +164,12 @@ namespace WisorLibrary.Logic
                     collectedLoans[i].resultReportData.BankPayUntilToday = resultData.BankPayUntilToday;
                     collectedLoans[i].resultReportData.BankPayFuture = resultData.BankPayFuture;
                     collectedLoans[i].resultReportData.FirstMonthlyPMT = resultData.FirstMonthlyPMT;
+                    collectedLoans[i].resultReportData.FirstMonthlyPMT2 = resultData.FirstMonthlyPMT2;
                     collectedLoans[i].resultReportData.EstimateFuturePay = resultData.PayFuture;
                     collectedLoans[i].resultReportData.EstimateProfitSoFar =
-                        collectedLoans[i].resultReportData.PayUntilToday - collectedLoans[i].resultReportData.BankPayUntilToday;
+                        (int) (collectedLoans[i].resultReportData.PayUntilToday - collectedLoans[i].resultReportData.BankPayUntilToday);
                     collectedLoans[i].resultReportData.EstimateFutureProfit =
-                        collectedLoans[i].resultReportData.PayFuture - collectedLoans[i].resultReportData.BankPayFuture;
+                        (int) (collectedLoans[i].resultReportData.PayFuture - collectedLoans[i].resultReportData.BankPayFuture);
 
                     if (0 < collectedLoans[i].OriginalLoanAmount) {
                         collectedLoans[i].resultReportData.EstimateProfitPercantageSoFar =
@@ -180,7 +183,8 @@ namespace WisorLibrary.Logic
                 }
 
                 UpdateLoanData(ref ld, collectedLoans[0], PayUntilToday, PayFuture, RemaingLoanAmount,
-                    MonthlyPaymentCalc, BankPayUntilToday, BankPayFuture, yearlyIncome, originalAmount, FirstMonthlyPMT, desiredMonthlyPayment);
+                    MonthlyPaymentCalc, BankPayUntilToday, BankPayFuture, yearlyIncome, originalAmount, FirstMonthlyPMT,
+                    FirstMonthlyPMT2, desiredMonthlyPayment);
 
 
                 // add the original loan' details to the calculated new loan in order to show it in the report
@@ -205,7 +209,7 @@ namespace WisorLibrary.Logic
         void  UpdateLoanData(ref /*not needed but for the sake of god will...*/ 
                         loanDetails ld, loanDetails loan, uint PayUntilToday, uint PayFuture,
                         uint RemaingLoanAmount, uint MonthlyPaymentCalc, uint BankPayUntilToday, uint BankPayFuture,
-                        uint yearlyIncome, uint originalAmount, uint FirstMonthlyPMT, uint desiredMonthlyPayment)
+                        uint yearlyIncome, uint originalAmount, uint FirstMonthlyPMT, uint FirstMonthlyPMT2, uint desiredMonthlyPayment)
         {
             //ld.LoanAmount = originalAmount;
             ld.ProductID = loan.ProductID;
@@ -220,6 +224,7 @@ namespace WisorLibrary.Logic
             ld.resultReportData.OriginalTime = ld.OriginalTime = loan.OriginalTime;
             ld.resultReportData.fico = ld.fico = loan.fico;
             ld.resultReportData.FirstMonthlyPMT = FirstMonthlyPMT;
+            ld.resultReportData.FirstMonthlyPMT2 = FirstMonthlyPMT2;
             ld.resultReportData.OriginalDateTaken = loan.OriginalDateTaken;
             ld.resultReportData.DateTaken = ld.DateTaken = DateTime.Now; // loan.DateTaken;
             ld.resultReportData.PropertyValue = ld.PropertyValue = loan.PropertyValue;
@@ -233,6 +238,8 @@ namespace WisorLibrary.Logic
             ld.resultReportData.OriginalInflation = ld.OriginalInflation = loan.OriginalInflation;
             ld.resultReportData.OriginalMargin = ld.OriginalMargin = loan.OriginalMargin;
             ld.resultReportData.OriginalMargin2 = ld.OriginalMargin2 = loan.OriginalMargin2;
+            ld.resultReportData.PrintedOriginalMargin = ld.PrintedOriginalMargin = loan.PrintedOriginalMargin;
+            ld.resultReportData.PrintedOriginalMargin2 = ld.PrintedOriginalMargin2 = loan.PrintedOriginalMargin2;
             ld.resultReportData.firstTimePeriod = ld.firstTimePeriod = loan.firstTimePeriod;
             ld.resultReportData.StartTime = loan.resultReportData.StartTime;
             ld.resultReportData.RemaingLoanAmount = ld.resultReportData.LoanAmount = ld.LoanAmount = RemaingLoanAmount;
@@ -264,7 +271,7 @@ namespace WisorLibrary.Logic
             else
             {
                 ld.resultReportData.EstimateProfitSoFar =
-                    ld.resultReportData.PayUntilToday - ld.resultReportData.BankPayUntilToday;
+                    (int) (ld.resultReportData.PayUntilToday - ld.resultReportData.BankPayUntilToday);
             }
             
             int sum = (int) ld.resultReportData.PayUntilToday + (int) ld.resultReportData.PayFuture -
@@ -277,7 +284,7 @@ namespace WisorLibrary.Logic
             }
             else
             {
-                ld.resultReportData.EstimateTotalProfit = (uint) sum;
+                ld.resultReportData.EstimateTotalProfit = sum;
             }
 
             if (ld.resultReportData.BankPayFuture > ld.resultReportData.PayFuture)
@@ -289,7 +296,7 @@ namespace WisorLibrary.Logic
             else
             {
                 ld.resultReportData.EstimateFutureProfit =
-                    ld.resultReportData.PayFuture - ld.resultReportData.BankPayFuture;
+                    (int)(ld.resultReportData.PayFuture - ld.resultReportData.BankPayFuture);
             }
 
             if (0 >= ld.OriginalLoanAmount)
