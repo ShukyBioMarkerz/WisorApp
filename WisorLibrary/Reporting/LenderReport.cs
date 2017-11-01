@@ -521,9 +521,9 @@ namespace WisorLibrary.Reporting
                 uint totalPayFuture = 0;
                 uint totalEstimateFuturePay = 0;
                 double totalEstimateProfitPercantageSoFar = 0;
-                uint totalEstimateProfitSoFar = 0;
+                int totalEstimateProfitSoFar = 0;
                 double totalEstimateFutureProfitPercantage = 0;
-                uint totalEstimateFutureProfit = 0;
+                int totalEstimateFutureProfit = 0;
                 uint totalOriginalLoanAmountN = 0, totalPayFutureN = 0;
                 double percantageProfitTillNow = MiscConstants.UNDEFINED_DOUBLE;
                 double percantageFutureProfit = MiscConstants.UNDEFINED_DOUBLE;
