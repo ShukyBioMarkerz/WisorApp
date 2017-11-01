@@ -289,7 +289,7 @@ namespace WisorLibrary.ReportApplication
                 XRect lenderTable1Return = new XRect(416 + horizontPosition, heightPosition2 + 240, 150, 20);
                 tf.Alignment = SetAlignmentForCulture();
                 tf.DrawString(CheckRTL(Properties.Resources.lenderTable1Return), fontH6Bold, XBrushes.Black, lenderTable1Return, XStringFormats.TopLeft);
-                XRect lenderTable1Indexed = new XRect(460 + horizontPosition, heightPosition2 + 240, 57, 20);
+                XRect lenderTable1Indexed = new XRect(463 + horizontPosition, heightPosition2 + 240, 57, 20);
                 tf.Alignment = SetAlignmentForCulture();
                 tf.DrawString(CheckRTL(Properties.Resources.lenderTable1Indexed), fontH6Bold, XBrushes.Black, lenderTable1Indexed, XStringFormats.TopLeft);
                 XRect lenderTable1Rate = new XRect(494 + horizontPosition, heightPosition2 + 240, 57, 20);
@@ -318,11 +318,11 @@ namespace WisorLibrary.ReportApplication
 
                     XRect lenderTable1FutureValue = new XRect(247 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
-                    tf.DrawString("₪ " + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].FuturePayment.ToString("N0")), fontH6, XBrushes.Black, lenderTable1FutureValue, XStringFormats.TopLeft);
+                    tf.DrawString("₪" + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].FuturePayment.ToString("N0")), fontH6, XBrushes.Black, lenderTable1FutureValue, XStringFormats.TopLeft);
                     SumOfOriginalFuturePayment += shortReportDataObject.ShortOriginalLoanTableValues[i].FuturePayment;
                     XRect lenderTable1BalanceValue = new XRect(315 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
-                    tf.DrawString("₪ " + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].Balance.ToString("N0")), fontH6, XBrushes.Black, lenderTable1BalanceValue, XStringFormats.TopLeft);
+                    tf.DrawString("₪" + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].Balance.ToString("N0")), fontH6, XBrushes.Black, lenderTable1BalanceValue, XStringFormats.TopLeft);
                     SumOfOriginalBalanceToPay += shortReportDataObject.ShortOriginalLoanTableValues[i].Balance;
                     XRect lenderTable1PayValue = new XRect(370 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
@@ -330,9 +330,9 @@ namespace WisorLibrary.ReportApplication
                     SumOfOriginalPaySoFar += shortReportDataObject.ShortOriginalLoanTableValues[i].PaySoFar;
                     XRect lenderTable1ReturnValue = new XRect(421 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
-                    tf.DrawString("₪ " + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].ReturnValue.ToString("N0")), fontH6, XBrushes.Black, lenderTable1ReturnValue, XStringFormats.TopLeft);
+                    tf.DrawString("₪" + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].ReturnValue.ToString("N0")), fontH6, XBrushes.Black, lenderTable1ReturnValue, XStringFormats.TopLeft);
                     SumOfOriginalMonthlyPayment += shortReportDataObject.ShortOriginalLoanTableValues[i].ReturnValue;
-                    XRect lenderTable1IndexedValue = new XRect(460 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
+                    XRect lenderTable1IndexedValue = new XRect(463 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
                     tf.DrawString(CheckRTL(MiscUtilities.TranslateBoolToYesOrNo(shortReportDataObject.ShortOriginalLoanTableValues[i].Indexed)), fontH6, XBrushes.Black, lenderTable1IndexedValue, XStringFormats.TopLeft);
                     XRect lenderTable1RateValue = new XRect(490 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
@@ -341,7 +341,7 @@ namespace WisorLibrary.ReportApplication
                     XRect lenderTable1TimeValue = new XRect(528 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
                     tf.DrawString(CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].Time.ToString("N0")), fontH6, XBrushes.Black, lenderTable1TimeValue, XStringFormats.TopLeft);
-                    XRect lenderTable1ProductValue = new XRect(570 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
+                    XRect lenderTable1ProductValue = new XRect(557 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
                     tf.DrawString(CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].Product.ToString()), fontH6, XBrushes.Black, lenderTable1ProductValue, XStringFormats.TopLeft);
                     XRect lenderTable1AmountValue = new XRect(642 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
@@ -420,7 +420,7 @@ namespace WisorLibrary.ReportApplication
                 XRect lenderTable2ExpectedProfit = new XRect(515 + horizontPosition2, heightPosition2 + 240, 150, 20);
                 tf.Alignment = SetAlignmentForCulture();
                 tf.DrawString(CheckRTL(Properties.Resources.lenderTable2ExpectedProfit), fontH6Bold, XBrushes.Black, lenderTable2ExpectedProfit, XStringFormats.TopLeft);
-                XRect lenderTable2ProfitPercent = new XRect(580 + horizontPosition2, heightPosition2 + 240, 150, 20);
+                XRect lenderTable2ProfitPercent = new XRect(583 + horizontPosition2, heightPosition2 + 240, 150, 20);
                 tf.Alignment = SetAlignmentForCulture();
                 tf.DrawString(CheckRTL(Properties.Resources.lenderTable2ProfitPercent), fontH6Bold, XBrushes.Black, lenderTable2ProfitPercent, XStringFormats.TopLeft);
                 XRect lenderTable2Profit = new XRect(650 + horizontPosition2, heightPosition2 + 240, 57, 20);
@@ -445,7 +445,7 @@ namespace WisorLibrary.ReportApplication
                     SumOfExpectedProfitPercent += shortReportDataObject.ShortOriginalLoanTableValues[i].EstimateFutureProfitPercantage * 100;
                     XRect lenderTable2FutureProfitValue = new XRect(525 + horizontPosition2, heightPosition2 + PositionY3 - 20, 100, 20);
                     tf.Alignment = SetAlignmentForCulture();
-                    tf.DrawString("₪ " + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].EstimateFutureProfit.ToString("N0")), fontH6, XBrushes.Black, lenderTable2FutureProfitValue, XStringFormats.TopLeft);
+                    tf.DrawString("₪" + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].EstimateFutureProfit.ToString("N0")), fontH6, XBrushes.Black, lenderTable2FutureProfitValue, XStringFormats.TopLeft);
                     SumOfExpectedProfit += shortReportDataObject.ShortOriginalLoanTableValues[i].EstimateFutureProfit;
                     XRect lenderTable2ProfitPercentValue = new XRect(588 + horizontPosition2, heightPosition2 + PositionY3 - 20, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
@@ -453,7 +453,7 @@ namespace WisorLibrary.ReportApplication
                     SumOfProfitPercent += shortReportDataObject.ShortOriginalLoanTableValues[i].EstimateProfitPercantageSoFar * 100;
                     XRect lenderTable2ProfitValue = new XRect(650 + horizontPosition2, heightPosition2 + PositionY3 - 20, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
-                    tf.DrawString("₪ " + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].EstimateProfitSoFar.ToString("N0")), fontH6, XBrushes.Black, lenderTable2ProfitValue, XStringFormats.TopLeft);
+                    tf.DrawString("₪" + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].EstimateProfitSoFar.ToString("N0")), fontH6, XBrushes.Black, lenderTable2ProfitValue, XStringFormats.TopLeft);
                     SumOfProfit += shortReportDataObject.ShortOriginalLoanTableValues[i].EstimateProfitSoFar;
                 }
                 // VERTICAL LINES FROM TOP TO BOTTOM (DRAW RIGHT TO LEFT)
@@ -537,7 +537,7 @@ namespace WisorLibrary.ReportApplication
                     XRect lenderTable3RateValue = new XRect(595 + horizontPosition3, heightPosition3 + PositionY4 - 12, 100, 20);
                     tf.Alignment = SetAlignmentForCulture();
                     tf.DrawString(CheckRTL(shortReportDataObject.ShortProductsUsedInAnalysisTableValues[i].Rate.ToString("0.000") + "%"), fontH6, XBrushes.Black, lenderTable3RateValue, XStringFormats.TopLeft);
-                    XRect lenderTable3ProductValue = new XRect(680 + horizontPosition3, heightPosition3 + PositionY4 - 12, 150, 20);
+                    XRect lenderTable3ProductValue = new XRect(670 + horizontPosition3, heightPosition3 + PositionY4 - 12, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
                     tf.DrawString(CheckRTL(shortReportDataObject.ShortProductsUsedInAnalysisTableValues[i].Product.ToString()), fontH6, XBrushes.Black, lenderTable3ProductValue, XStringFormats.TopLeft);
 
@@ -570,14 +570,14 @@ namespace WisorLibrary.ReportApplication
                 XRect lenderRowsDateValue = new XRect(1000 + horizontPosition3, heightPosition3 + 209, 100, 20);
                 tf.Alignment = SetAlignmentForCulture();
                 tf.DrawString(CheckRTL(shortReportDataObject.GetDate().ToString("dd/MM/yyyy")), fontH5, XBrushes.Black, lenderRowsDateValue, XStringFormats.TopLeft);
-                XRect lenderRowsProperty = new XRect(1130 + horizontPosition3, heightPosition3 + 223, 100, 20);
+                XRect lenderRowsProperty = new XRect(1131 + horizontPosition3, heightPosition3 + 223, 100, 20);
                 tf.Alignment = SetAlignmentForCulture();
                 tf.DrawString(CheckRTL(Properties.Resources.lenderRowsProperty), fontH5, XBrushes.Black, lenderRowsProperty, XStringFormats.TopLeft);
                 XRect lenderRowsPropertyValue = new XRect(1000 + horizontPosition3, heightPosition3 + 223, 100, 20);
                 tf.Alignment = SetAlignmentForCulture();
                 tf.DrawString(CheckRTL("₪" + shortReportDataObject.GetPropertyValue().ToString("N0")), fontH5, XBrushes.Black, lenderRowsPropertyValue, XStringFormats.TopLeft);
 
-                XRect lenderRowsMonthly = new XRect(1111 + horizontPosition3, heightPosition3 + 237, 100, 20);
+                XRect lenderRowsMonthly = new XRect(1112 + horizontPosition3, heightPosition3 + 237, 100, 20);
                 tf.Alignment = SetAlignmentForCulture();
                 tf.DrawString(CheckRTL(Properties.Resources.lenderRowsMonthly), fontH5, XBrushes.Black, lenderRowsMonthly, XStringFormats.TopLeft);
                 XRect lenderRowsMonthlyValue = new XRect(1000 + horizontPosition3, heightPosition3 + 237, 100, 20);
@@ -627,13 +627,13 @@ namespace WisorLibrary.ReportApplication
                 XRect lenderTable1Pay = new XRect(506 + horizontPosition, heightPosition2 + 240, 150, 20);
                 tf.Alignment = SetAlignmentForCulture();
                 tf.DrawString(CheckRTL(Properties.Resources.lenderTable1Pay), fontH6Bold, XBrushes.Black, lenderTable1Pay, XStringFormats.TopLeft);
-                XRect lenderTable1Return = new XRect(462 + horizontPosition, heightPosition2 + 240, 150, 20);
+                XRect lenderTable1Return = new XRect(456 + horizontPosition, heightPosition2 + 240, 150, 20);
                 tf.Alignment = SetAlignmentForCulture();
                 tf.DrawString(CheckRTL(Properties.Resources.lenderTable1Return), fontH6Bold, XBrushes.Black, lenderTable1Return, XStringFormats.TopLeft);
-                XRect lenderTable1Indexed = new XRect(424 + horizontPosition, heightPosition2 + 240, 57, 20);
-                tf.Alignment = SetAlignmentForCulture();
-                tf.DrawString(CheckRTL(Properties.Resources.lenderTable1Indexed), fontH6Bold, XBrushes.Black, lenderTable1Indexed, XStringFormats.TopLeft);
-                XRect lenderTable1Rate = new XRect(399 + horizontPosition, heightPosition2 + 240, 57, 20);
+                //XRect lenderTable1Indexed = new XRect(424 + horizontPosition, heightPosition2 + 240, 57, 20);
+                //tf.Alignment = SetAlignmentForCulture();
+                //tf.DrawString(CheckRTL(Properties.Resources.lenderTable1Indexed), fontH6Bold, XBrushes.Black, lenderTable1Indexed, XStringFormats.TopLeft);
+                XRect lenderTable1Rate = new XRect(404 + horizontPosition, heightPosition2 + 240, 57, 20);
                 tf.Alignment = SetAlignmentForCulture();
                 tf.DrawString(CheckRTL(Properties.Resources.lenderTable1Rate), fontH6Bold, XBrushes.Black, lenderTable1Rate, XStringFormats.TopLeft);
                 XRect lenderTable1Time = new XRect(370 + horizontPosition, heightPosition2 + 240, 57, 20);
@@ -647,31 +647,40 @@ namespace WisorLibrary.ReportApplication
                 tf.DrawString(CheckRTL(Properties.Resources.lenderTable1Amount), fontH6Bold, XBrushes.Black, lenderTable1Amount, XStringFormats.TopLeft);
                 // VALUES INSIDE TABLE
                 int positionY2 = 260;
+                int SumOfOriginalFuturePayment, SumOfOriginalBalanceToPay, SumOfOriginalPaySoFar, SumOfOriginalMonthlyPayment, SumOfOriginalLoanAmountTotal;
+                SumOfOriginalFuturePayment = SumOfOriginalBalanceToPay = SumOfOriginalPaySoFar = SumOfOriginalMonthlyPayment = SumOfOriginalLoanAmountTotal = 0;
+                int SumOfLenderProfit = 0, SumOfEstimateFutureProfit = 0;
+                double SumOfLenderProfitPercantage = 0, SumOfEstimateFutureProfitPercantage = 0;
+
                 for (int i = 0; i < shortReportDataObject.ShortOriginalLoanTableValues.Length; i++)
                 {
                     positionY2 += 30;
                     gfx.DrawLine(tableLine3,
                     new XPoint(240 + horizontPosition, heightPosition2 + positionY2),
                     new XPoint(685 + horizontPosition, heightPosition2 + positionY2));
-
-                    XRect lenderTable1FutureValue = new XRect(627 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
+ 
+                    XRect lenderTable1FutureValue = new XRect(630 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
-                    tf.DrawString("$ " + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].FuturePayment.ToString("N0")), fontH6, XBrushes.Black, lenderTable1FutureValue, XStringFormats.TopLeft);
+                    tf.DrawString("$" + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].FuturePayment.ToString("N0")), fontH6, XBrushes.Black, lenderTable1FutureValue, XStringFormats.TopLeft);
+                    SumOfOriginalFuturePayment += shortReportDataObject.ShortOriginalLoanTableValues[i].FuturePayment;
                     XRect lenderTable1BalanceValue = new XRect(560 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
-                    tf.DrawString("$ " + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].Balance.ToString("N0")), fontH6, XBrushes.Black, lenderTable1BalanceValue, XStringFormats.TopLeft);
+                    tf.DrawString("$" + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].Balance.ToString("N0")), fontH6, XBrushes.Black, lenderTable1BalanceValue, XStringFormats.TopLeft);
+                    SumOfOriginalBalanceToPay += shortReportDataObject.ShortOriginalLoanTableValues[i].Balance;
                     XRect lenderTable1PayValue = new XRect(506 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
-                    tf.DrawString("$ " + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].PaySoFar.ToString("N0")), fontH6, XBrushes.Black, lenderTable1PayValue, XStringFormats.TopLeft);
-                    XRect lenderTable1ReturnValue = new XRect(463 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
+                    tf.DrawString("$" + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].PaySoFar.ToString("N0")), fontH6, XBrushes.Black, lenderTable1PayValue, XStringFormats.TopLeft);
+                    SumOfOriginalPaySoFar += shortReportDataObject.ShortOriginalLoanTableValues[i].PaySoFar;
+                    XRect lenderTable1ReturnValue = new XRect(456 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
-                    tf.DrawString("$ " + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].ReturnValue.ToString("N0")), fontH6, XBrushes.Black, lenderTable1ReturnValue, XStringFormats.TopLeft);
-                    XRect lenderTable1IndexedValue = new XRect(428 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
+                    tf.DrawString("$" + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].ReturnValue.ToString("N0")), fontH6, XBrushes.Black, lenderTable1ReturnValue, XStringFormats.TopLeft);
+                    SumOfOriginalMonthlyPayment += shortReportDataObject.ShortOriginalLoanTableValues[i].ReturnValue;
+                    //XRect lenderTable1IndexedValue = new XRect(428 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
+                    //tf.Alignment = SetAlignmentForCulture();
+                    //tf.DrawString(CheckRTL(MiscUtilities.TranslateBoolToYesOrNo(shortReportDataObject.ShortOriginalLoanTableValues[i].Indexed)), fontH6, XBrushes.Black, lenderTable1IndexedValue, XStringFormats.TopLeft);
+                    XRect lenderTable1RateValue = new XRect(400 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
-                    tf.DrawString(CheckRTL(MiscUtilities.TranslateBoolToYesOrNo(shortReportDataObject.ShortOriginalLoanTableValues[i].Indexed)), fontH6, XBrushes.Black, lenderTable1IndexedValue, XStringFormats.TopLeft);
-                    XRect lenderTable1RateValue = new XRect(395 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
-                    tf.Alignment = SetAlignmentForCulture();
-                    tf.DrawString(CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].Rate.ToString("0.000") + "%"), fontH6, XBrushes.Black, lenderTable1RateValue, XStringFormats.TopLeft);
+                    tf.DrawString(CheckRTL((shortReportDataObject.ShortOriginalLoanTableValues[i].Rate * 100).ToString("0.000") + "%"), fontH6, XBrushes.Black, lenderTable1RateValue, XStringFormats.TopLeft);
                     XRect lenderTable1TimeValue = new XRect(372 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
                     tf.DrawString(CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].Time.ToString("N0")), fontH6, XBrushes.Black, lenderTable1TimeValue, XStringFormats.TopLeft);
@@ -680,7 +689,8 @@ namespace WisorLibrary.ReportApplication
                     tf.DrawString(CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].Product.ToString()), fontH6, XBrushes.Black, lenderTable1ProductValue, XStringFormats.TopLeft);
                     XRect lenderTable1AmountValue = new XRect(247 + horizontPosition, heightPosition2 + positionY2 - 20, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
-                    tf.DrawString("$ " + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].Amount.ToString("N0")), fontH6, XBrushes.Black, lenderTable1AmountValue, XStringFormats.TopLeft);
+                    tf.DrawString("$" + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].Amount.ToString("N0")), fontH6, XBrushes.Black, lenderTable1AmountValue, XStringFormats.TopLeft);
+                    SumOfOriginalLoanAmountTotal += shortReportDataObject.ShortOriginalLoanTableValues[i].Amount;
                 }
                 // VERTICAL LINES FROM TOP TO BOTTOM (DRAW RIGHT TO LEFT)
                 gfx.DrawLine(tableLine3,
@@ -696,11 +706,11 @@ namespace WisorLibrary.ReportApplication
                    new XPoint(496 + horizontPosition, heightPosition2 + positionY2 + 15),
                    new XPoint(496 + horizontPosition, heightPosition2 + 230));
                 gfx.DrawLine(tableLine3,
-                  new XPoint(456 + horizontPosition, heightPosition2 + positionY2 + 15),
-                  new XPoint(456 + horizontPosition, heightPosition2 + 230));
-                gfx.DrawLine(tableLine3,
-                   new XPoint(422 + horizontPosition, heightPosition2 + positionY2),
-                   new XPoint(422 + horizontPosition, heightPosition2 + 230));
+                  new XPoint(436 + horizontPosition, heightPosition2 + positionY2 + 15),
+                  new XPoint(436 + horizontPosition, heightPosition2 + 230));
+                //gfx.DrawLine(tableLine3,
+                //   new XPoint(422 + horizontPosition, heightPosition2 + positionY2),
+                //   new XPoint(422 + horizontPosition, heightPosition2 + 230));
                 gfx.DrawLine(tableLine3,
                    new XPoint(394 + horizontPosition, heightPosition2 + positionY2),
                    new XPoint(394 + horizontPosition, heightPosition2 + 230));
@@ -718,24 +728,24 @@ namespace WisorLibrary.ReportApplication
                     new XPoint(240 + horizontPosition, heightPosition2 + positionY2 + 15),
                     new XPoint(295 + horizontPosition, heightPosition2 + positionY2 + 15));
                 gfx.DrawLine(tableLine3,
-                    new XPoint(456 + horizontPosition, heightPosition2 + positionY2 + 15),
+                    new XPoint(436 + horizontPosition, heightPosition2 + positionY2 + 15),
                     new XPoint(685 + horizontPosition, heightPosition2 + positionY2 + 15));
                 // TOTAL
                 XRect lenderTable1FutureTotal = new XRect(630 + horizontPosition, heightPosition2 + positionY2 + 15 - 12, 150, 20);
                 tf.Alignment = SetAlignmentForCulture();
-                tf.DrawString("$" + CheckRTL(shortReportDataObject.LenderTable1FuturePaymentTotal.ToString("N0")), fontH6, XBrushes.Black, lenderTable1FutureTotal, XStringFormats.TopLeft);
+                tf.DrawString("$" + CheckRTL(SumOfOriginalFuturePayment.ToString("N0")), fontH6, XBrushes.Black, lenderTable1FutureTotal, XStringFormats.TopLeft);
                 XRect lenderTable1BalanceTotal = new XRect(560 + horizontPosition, heightPosition2 + positionY2 + 15 - 12, 150, 20);
                 tf.Alignment = SetAlignmentForCulture();
-                tf.DrawString("$" + CheckRTL(shortReportDataObject.LenderTable1BalanceToPayTotal.ToString("N0")), fontH6, XBrushes.Black, lenderTable1BalanceTotal, XStringFormats.TopLeft);
+                tf.DrawString("$" + CheckRTL(SumOfOriginalBalanceToPay.ToString("N0")), fontH6, XBrushes.Black, lenderTable1BalanceTotal, XStringFormats.TopLeft);
                 XRect lenderTable1PayTotal = new XRect(506 + horizontPosition, heightPosition2 + positionY2 + 15 - 12, 150, 20);
                 tf.Alignment = SetAlignmentForCulture();
-                tf.DrawString("$" + CheckRTL(shortReportDataObject.LenderTable1PaySoFarTotal.ToString("N0")), fontH6, XBrushes.Black, lenderTable1PayTotal, XStringFormats.TopLeft);
-                XRect lenderTable1ReturnTotal = new XRect(460 + horizontPosition, heightPosition2 + positionY2 + 15 - 12, 150, 20);
+                tf.DrawString("$" + CheckRTL(SumOfOriginalPaySoFar.ToString("N0")), fontH6, XBrushes.Black, lenderTable1PayTotal, XStringFormats.TopLeft);
+                XRect lenderTable1ReturnTotal = new XRect(456 + horizontPosition, heightPosition2 + positionY2 + 15 - 12, 150, 20);
                 tf.Alignment = SetAlignmentForCulture();
-                tf.DrawString("$" + CheckRTL(shortReportDataObject.LenderTable1ReturnValueTotal.ToString("N0")), fontH6, XBrushes.Black, lenderTable1ReturnTotal, XStringFormats.TopLeft);
+                tf.DrawString("$" + CheckRTL(SumOfOriginalMonthlyPayment.ToString("N0")), fontH6, XBrushes.Black, lenderTable1ReturnTotal, XStringFormats.TopLeft);
                 XRect lenderTable1AmountTotal = new XRect(247 + horizontPosition, heightPosition2 + positionY2 + 15 - 12, 100, 20);
                 tf.Alignment = SetAlignmentForCulture();
-                tf.DrawString("$" + CheckRTL(shortReportDataObject.LenderTable1AmountTotal.ToString("N0")), fontH6Bold, XBrushes.Black, lenderTable1AmountTotal, XStringFormats.TopLeft);
+                tf.DrawString("$" + CheckRTL(SumOfOriginalLoanAmountTotal.ToString("N0")), fontH6Bold, XBrushes.Black, lenderTable1AmountTotal, XStringFormats.TopLeft);
                 
                 
                 //
@@ -771,16 +781,20 @@ namespace WisorLibrary.ReportApplication
                     new XPoint(700 + horizontPosition2, heightPosition2 + PositionY3));
                     XRect lenderTable2FutureProfitPercentValue = new XRect(645 + horizontPosition2, heightPosition2 + PositionY3 - 20, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
-                    tf.DrawString(CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].EstimateFutureProfitPercantage.ToString("0.000") + "%"), fontH6, XBrushes.Black, lenderTable2FutureProfitPercentValue, XStringFormats.TopLeft);
+                    tf.DrawString(CheckRTL((shortReportDataObject.ShortOriginalLoanTableValues[i].EstimateFutureProfitPercantage * 100).ToString("0.000") + "%"), fontH6, XBrushes.Black, lenderTable2FutureProfitPercentValue, XStringFormats.TopLeft);
+                    SumOfEstimateFutureProfitPercantage += shortReportDataObject.ShortOriginalLoanTableValues[i].EstimateFutureProfitPercantage;
                     XRect lenderTable2FutureProfitValue = new XRect(580 + horizontPosition2, heightPosition2 + PositionY3 - 20, 100, 20);
                     tf.Alignment = SetAlignmentForCulture();
-                    tf.DrawString("$ " + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].EstimateFutureProfit.ToString("N0")), fontH6, XBrushes.Black, lenderTable2FutureProfitValue, XStringFormats.TopLeft);
+                    tf.DrawString("$" + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].EstimateFutureProfit.ToString("N0")), fontH6, XBrushes.Black, lenderTable2FutureProfitValue, XStringFormats.TopLeft);
+                    SumOfEstimateFutureProfit += shortReportDataObject.ShortOriginalLoanTableValues[i].EstimateFutureProfit;
                     XRect lenderTable2ProfitPercentValue = new XRect(530 + horizontPosition2, heightPosition2 + PositionY3 - 20, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
-                    tf.DrawString(CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].EstimateProfitPercantageSoFar.ToString("0.000") + "%"), fontH6, XBrushes.Black, lenderTable2ProfitPercentValue, XStringFormats.TopLeft);
+                    tf.DrawString(CheckRTL((shortReportDataObject.ShortOriginalLoanTableValues[i].EstimateProfitPercantageSoFar * 100).ToString("0.000") + "%"), fontH6, XBrushes.Black, lenderTable2ProfitPercentValue, XStringFormats.TopLeft);
+                    SumOfLenderProfitPercantage += shortReportDataObject.ShortOriginalLoanTableValues[i].EstimateProfitPercantageSoFar;
                     XRect lenderTable2ProfitValue = new XRect(465 + horizontPosition2, heightPosition2 + PositionY3 - 20, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
-                    tf.DrawString("$ " + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].EstimateProfitSoFar.ToString("N0")), fontH6, XBrushes.Black, lenderTable2ProfitValue, XStringFormats.TopLeft);
+                    tf.DrawString("$" + CheckRTL(shortReportDataObject.ShortOriginalLoanTableValues[i].EstimateProfitSoFar.ToString("N0")), fontH6, XBrushes.Black, lenderTable2ProfitValue, XStringFormats.TopLeft);
+                    SumOfLenderProfit += shortReportDataObject.ShortOriginalLoanTableValues[i].EstimateProfitSoFar;
                 }
                 // VERTICAL LINES FROM TOP TO BOTTOM (DRAW RIGHT TO LEFT)
                 gfx.DrawLine(tableLine3,
@@ -804,19 +818,19 @@ namespace WisorLibrary.ReportApplication
                     new XPoint(700 + horizontPosition2, heightPosition2 + PositionY3 + 15));
 
                 // TOTAL
-                //XRect lenderTable2FutureProfitPercentTotal = new XRect(645 + horizontPosition2, heightPosition2 + PositionY3 + 15 - 12, 150, 20);
-                //tf.Alignment = SetAlignmentForCulture();
-                //tf.DrawString(CheckRTL(shortReportDataObject.LenderTable2ExpectedFuturePercentTotal.ToString("0.000")) + "%", fontH6, XBrushes.Black, lenderTable2FutureProfitPercentTotal, XStringFormats.TopLeft);
-                //XRect lenderTable2FutureProfitTotal = new XRect(580 + horizontPosition2, heightPosition2 + PositionY3 + 15 - 12, 150, 20);
-                //tf.Alignment = SetAlignmentForCulture();
-                //tf.DrawString("$" + CheckRTL(shortReportDataObject.LenderTable2ExpectedFutureTotal.ToString("N0")), fontH6, XBrushes.Black, lenderTable2FutureProfitTotal, XStringFormats.TopLeft);
-                //XRect lenderTable2ProfitPercentTotal = new XRect(530 + horizontPosition2, heightPosition2 + PositionY3 + 15 - 12, 150, 20);
-                //tf.Alignment = SetAlignmentForCulture();
-                //tf.DrawString(CheckRTL(shortReportDataObject.LenderTable2ProfitPercentTotal.ToString("0.000")) + "%", fontH6, XBrushes.Black, lenderTable2ProfitPercentTotal, XStringFormats.TopLeft);
-                //XRect lenderTable2ProfitTotal = new XRect(461 + horizontPosition2, heightPosition2 + PositionY3 + 15 - 12, 150, 20);
-                //tf.Alignment = SetAlignmentForCulture();
-                //tf.DrawString("$" + CheckRTL(shortReportDataObject.LenderTable2ExpectedFutureTotal.ToString("N0")), fontH6, XBrushes.Black, lenderTable2ProfitTotal, XStringFormats.TopLeft);
-                //
+                XRect lenderTable2FutureProfitPercentTotal = new XRect(645 + horizontPosition2, heightPosition2 + PositionY3 + 15 - 12, 150, 20);
+                tf.Alignment = SetAlignmentForCulture();
+                tf.DrawString(CheckRTL((SumOfEstimateFutureProfitPercantage * 100).ToString("0.000")) + "%", fontH6, XBrushes.Black, lenderTable2FutureProfitPercentTotal, XStringFormats.TopLeft);
+                XRect lenderTable2FutureProfitTotal = new XRect(580 + horizontPosition2, heightPosition2 + PositionY3 + 15 - 12, 150, 20);
+                tf.Alignment = SetAlignmentForCulture();
+                tf.DrawString("$" + CheckRTL(SumOfEstimateFutureProfit.ToString("N0")), fontH6, XBrushes.Black, lenderTable2FutureProfitTotal, XStringFormats.TopLeft);
+                XRect lenderTable2ProfitPercentTotal = new XRect(530 + horizontPosition2, heightPosition2 + PositionY3 + 15 - 12, 150, 20);
+                tf.Alignment = SetAlignmentForCulture();
+                tf.DrawString(CheckRTL((SumOfLenderProfitPercantage * 100).ToString("0.000")) + "%", fontH6, XBrushes.Black, lenderTable2ProfitPercentTotal, XStringFormats.TopLeft);
+                XRect lenderTable2ProfitTotal = new XRect(465 + horizontPosition2, heightPosition2 + PositionY3 + 15 - 12, 150, 20);
+                tf.Alignment = SetAlignmentForCulture();
+                tf.DrawString("$" + CheckRTL(SumOfLenderProfit.ToString("N0")), fontH6, XBrushes.Black, lenderTable2ProfitTotal, XStringFormats.TopLeft);
+
                 // BOTTOM TABLE
                 //
                 int horizontPosition3 = -405;
@@ -901,7 +915,7 @@ namespace WisorLibrary.ReportApplication
                 tf.DrawString(CheckRTL(Properties.Resources.lenderRowsMonthly), fontH5, XBrushes.Black, lenderRowsMonthly, XStringFormats.TopLeft);
                 XRect lenderRowsMonthlyValue = new XRect(1110 + horizontPosition3, heightPosition3 + 237, 100, 20);
                 tf.Alignment = SetAlignmentForCulture();
-                tf.DrawString(CheckRTL("₪" + shortReportDataObject.GetIncome().ToString("N0")), fontH5, XBrushes.Black, lenderRowsMonthlyValue, XStringFormats.TopLeft);
+                tf.DrawString(CheckRTL("$" + shortReportDataObject.GetIncome().ToString("N0")), fontH5, XBrushes.Black, lenderRowsMonthlyValue, XStringFormats.TopLeft);
 
                 gfx.DrawLine(tableLine3,
                   new XPoint(1000 + horizontPosition3, heightPosition3 + 220),
@@ -970,10 +984,10 @@ namespace WisorLibrary.ReportApplication
                     tf.DrawString(CheckRTL(shortReportDataObject.ShortProductsUsedInAnalysisTableValuesUK[i].Rate.ToString("0.000") + "%"), fontH6, XBrushes.Black, lenderTable3RateValue, XStringFormats.TopLeft);
                     XRect lenderTable3InitialRateValue = new XRect(540 + horizontPosition3, heightPosition3 + PositionY4 - 12, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
-                    tf.DrawString(CheckRTL(shortReportDataObject.ShortProductsUsedInAnalysisTableValuesUK[i].InitialRate.ToString("0.000") + "%"), fontH6, XBrushes.Black, lenderTable3InitialRateValue, XStringFormats.TopLeft);
+                    tf.DrawString(CheckRTL(shortReportDataObject.ShortProductsUsedInAnalysisTableValuesUK[i].Rate2.ToString("0.000") + "%"), fontH6, XBrushes.Black, lenderTable3InitialRateValue, XStringFormats.TopLeft);
                     XRect lenderTable3InitialMarginValue = new XRect(600 + horizontPosition3, heightPosition3 + PositionY4 - 12, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
-                    tf.DrawString(CheckRTL(shortReportDataObject.ShortProductsUsedInAnalysisTableValuesUK[i].InitialMargin.ToString("0.000") + "%"), fontH6, XBrushes.Black, lenderTable3InitialMarginValue, XStringFormats.TopLeft);
+                    tf.DrawString(CheckRTL(shortReportDataObject.ShortProductsUsedInAnalysisTableValuesUK[i].Margin2.ToString("0.000") + "%"), fontH6, XBrushes.Black, lenderTable3InitialMarginValue, XStringFormats.TopLeft);
                     XRect lenderTable3ProductValue = new XRect(452 + horizontPosition3, heightPosition3 + PositionY4 - 12, 150, 20);
                     tf.Alignment = SetAlignmentForCulture();
                     tf.DrawString(CheckRTL(shortReportDataObject.ShortProductsUsedInAnalysisTableValuesUK[i].Product.ToString()), fontH6, XBrushes.Black, lenderTable3ProductValue, XStringFormats.TopLeft);
@@ -1233,7 +1247,7 @@ namespace WisorLibrary.ReportApplication
                             new XPoint(190 + horizontPosition, heightPosition2 + 260),
                             new XPoint(555 + horizontPosition, heightPosition2 + 260));
                         // TABLE TITLE
-                        XRect lenderTable4Title = new XRect(157 + horizontPosition, heightPosition2 + 210, 800, 20);
+                        XRect lenderTable4Title = new XRect(100 + horizontPosition, heightPosition2 + 210, 1800, 20);
                         tf.Alignment = SetAlignmentForCulture();
                         string compositionHeader = shortReportDataObject.GetCompositionHeader(j);
                         tf.DrawString(CheckRTL(compositionHeader), fontH5Bold, XBrushes.Black, lenderTable4Title, XStringFormats.TopLeft);
@@ -1273,10 +1287,10 @@ namespace WisorLibrary.ReportApplication
 
                             XRect lenderTable4TotalValue = new XRect(200 + horizontPosition, heightPosition2 + positionY2 - 12, 150, 20);
                             tf.Alignment = SetAlignmentForCulture();
-                            tf.DrawString("₪ " + CheckRTL(olt4su.TotalPayment.ToString("N0")), fontH6, XBrushes.Black, lenderTable4TotalValue, XStringFormats.TopLeft);
+                            tf.DrawString("₪" + CheckRTL(olt4su.TotalPayment.ToString("N0")), fontH6, XBrushes.Black, lenderTable4TotalValue, XStringFormats.TopLeft);
                             XRect lenderTable4MonthlyValue = new XRect(263 + horizontPosition, heightPosition2 + positionY2 - 12, 150, 20);
                             tf.Alignment = SetAlignmentForCulture();
-                            tf.DrawString("₪ " + CheckRTL(olt4su.Monthly.ToString("N0")), fontH6, XBrushes.Black, lenderTable4MonthlyValue, XStringFormats.TopLeft);
+                            tf.DrawString("₪" + CheckRTL(olt4su.Monthly.ToString("N0")), fontH6, XBrushes.Black, lenderTable4MonthlyValue, XStringFormats.TopLeft);
                             XRect lenderTable4IndexedValue = new XRect(308 + horizontPosition, heightPosition2 + positionY2 - 12, 150, 20);
                             tf.Alignment = SetAlignmentForCulture();
                             tf.DrawString(CheckRTL(MiscUtilities.TranslateBoolToYesOrNo(olt4su.Indexed)), fontH6, XBrushes.Black, lenderTable4IndexedValue, XStringFormats.TopLeft);
@@ -1291,7 +1305,7 @@ namespace WisorLibrary.ReportApplication
                             tf.DrawString(CheckRTL(olt4su.Product.ToString()), fontH6, XBrushes.Black, lenderTable4ProductValue, XStringFormats.TopLeft);
                             XRect lenderTable4AmountValue = new XRect(507 + horizontPosition, heightPosition2 + positionY2 - 12, 150, 20);
                             tf.Alignment = SetAlignmentForCulture();
-                            tf.DrawString("₪ " + CheckRTL(olt4su.Amount.ToString("N0")), fontH6, XBrushes.Black, lenderTable4AmountValue, XStringFormats.TopLeft);
+                            tf.DrawString("₪" + CheckRTL(olt4su.Amount.ToString("N0")), fontH6, XBrushes.Black, lenderTable4AmountValue, XStringFormats.TopLeft);
                         }
                         // VERTICAL LINES FROM TOP TO BOTTOM (DRAW RIGHT TO LEFT)
                         gfx.DrawLine(tableLine3,
@@ -1329,13 +1343,13 @@ namespace WisorLibrary.ReportApplication
                         OriginalLoanTable4Short olt4s = shortReportDataObject.GetProductSummaryInCompositionUSandIL(j);
                         XRect lenderTable4TotalTotal = new XRect(505 + horizontPosition, heightPosition2 + positionY2 + 15 - 12, 150, 20);
                         tf.Alignment = SetAlignmentForCulture();
-                        tf.DrawString("₪ " + CheckRTL(olt4s.Amount.ToString("N0")), fontH6Bold, XBrushes.Black, lenderTable4TotalTotal, XStringFormats.TopLeft);
+                        tf.DrawString("₪" + CheckRTL(olt4s.Amount.ToString("N0")), fontH6Bold, XBrushes.Black, lenderTable4TotalTotal, XStringFormats.TopLeft);
                         XRect lenderTable4MonthlyTotal = new XRect(200 + horizontPosition, heightPosition2 + positionY2 + 15 - 12, 150, 20);
                         tf.Alignment = SetAlignmentForCulture();
-                        tf.DrawString("₪ " + CheckRTL(olt4s.TotalPayment.ToString("N0")), fontH6Bold, XBrushes.Black, lenderTable4MonthlyTotal, XStringFormats.TopLeft);
+                        tf.DrawString("₪" + CheckRTL(olt4s.TotalPayment.ToString("N0")), fontH6Bold, XBrushes.Black, lenderTable4MonthlyTotal, XStringFormats.TopLeft);
                         XRect lenderTable4AmountTotal = new XRect(260 + horizontPosition, heightPosition2 + positionY2 + 15 - 12, 100, 20);
                         tf.Alignment = SetAlignmentForCulture();
-                        tf.DrawString("₪ " + CheckRTL(olt4s.Monthly.ToString("N0")), fontH6Bold, XBrushes.Black, lenderTable4AmountTotal, XStringFormats.TopLeft);
+                        tf.DrawString("₪" + CheckRTL(olt4s.Monthly.ToString("N0")), fontH6Bold, XBrushes.Black, lenderTable4AmountTotal, XStringFormats.TopLeft);
                         //
                         // LITTLE MIDDLE TABLE
                         //
@@ -1368,13 +1382,13 @@ namespace WisorLibrary.ReportApplication
                             new XPoint(456 + horizontPosition2, heightPosition2 + PositionY3),
                             new XPoint(574 + horizontPosition2, heightPosition2 + PositionY3));
 
-                            XRect lenderTable5ProfitPercentValue = new XRect(475 + horizontPosition2, heightPosition2 + PositionY3 - 12, 150, 20);
+                            XRect lenderTable5ProfitPercentValue = new XRect(463 + horizontPosition2, heightPosition2 + PositionY3 - 12, 150, 20);
                             tf.Alignment = SetAlignmentForCulture();
                             tf.DrawString(CheckRTL(LenderProfitPercantage.ToString("0.000") + "%"), fontH6, XBrushes.Black, lenderTable5ProfitPercentValue, XStringFormats.TopLeft);
 
-                            XRect lenderTable5ProfitValue = new XRect(530 + horizontPosition2, heightPosition2 + PositionY3 - 12, 150, 20);
+                            XRect lenderTable5ProfitValue = new XRect(521 + horizontPosition2, heightPosition2 + PositionY3 - 12, 150, 20);
                             tf.Alignment = SetAlignmentForCulture();
-                            tf.DrawString("₪ " + CheckRTL(LenderProfit.ToString("N0")), fontH6, XBrushes.Black, lenderTable5ProfitValue, XStringFormats.TopLeft);
+                            tf.DrawString("₪" + CheckRTL(LenderProfit.ToString("N0")), fontH6, XBrushes.Black, lenderTable5ProfitValue, XStringFormats.TopLeft);
                         }
                         // VERTICAL LINES FROM TOP TO BOTTOM (DRAW RIGHT TO LEFT)
                         gfx.DrawLine(tableLine3,
@@ -1391,12 +1405,12 @@ namespace WisorLibrary.ReportApplication
                             new XPoint(456 + horizontPosition2, heightPosition2 + PositionY3 + 15),
                             new XPoint(574 + horizontPosition2, heightPosition2 + PositionY3 + 15));
                         // TOTAL
-                        XRect lenderTable5ProfitPercentTotal = new XRect(459 + horizontPosition2, heightPosition2 + PositionY3 + 15 - 12, 150, 20);
+                        XRect lenderTable5ProfitPercentTotal = new XRect(463 + horizontPosition2, heightPosition2 + PositionY3 + 15 - 12, 150, 20);
                         tf.Alignment = SetAlignmentForCulture();
                         tf.DrawString(CheckRTL(SumOfLenderProfitPercantage.ToString("0.000") + "%"), fontH6Bold, XBrushes.Black, lenderTable5ProfitPercentTotal, XStringFormats.TopLeft);
-                        XRect lenderTable5ProfitTotal = new XRect(525 + horizontPosition2, heightPosition2 + PositionY3 + 15 - 12, 150, 20);
+                        XRect lenderTable5ProfitTotal = new XRect(521 + horizontPosition2, heightPosition2 + PositionY3 + 15 - 12, 150, 20);
                         tf.Alignment = SetAlignmentForCulture();
-                        tf.DrawString("₪ " + CheckRTL(SumOfLenderProfit.ToString("N0")), fontH6Bold, XBrushes.Black, lenderTable5ProfitTotal, XStringFormats.TopLeft);
+                        tf.DrawString("₪" + CheckRTL(SumOfLenderProfit.ToString("N0")), fontH6Bold, XBrushes.Black, lenderTable5ProfitTotal, XStringFormats.TopLeft);
                         //
                         // RIGHT ROWS
                         //
@@ -1462,7 +1476,7 @@ namespace WisorLibrary.ReportApplication
                 }
                 else
                 {
-
+                    int SumOfAmount = 0, SumOfMonthlyPayment = 0, SumOfExpectedPayment = 0;
                     for (int j = 0; j < shortReportDataObject.NumberOfCompositions(); j++)
                     {
                         //
@@ -1486,13 +1500,13 @@ namespace WisorLibrary.ReportApplication
                         XRect lenderTable4Total = new XRect(500 + horizontPosition, heightPosition2 + 240, 150, 20);
                         tf.Alignment = SetAlignmentForCulture();
                         tf.DrawString(CheckRTL(Properties.Resources.lenderTable4Total), fontH6Bold, XBrushes.Black, lenderTable4Total, XStringFormats.TopLeft);
-                        XRect lenderTable4Monthly = new XRect(457 + horizontPosition, heightPosition2 + 240, 150, 20);
+                        XRect lenderTable4Monthly = new XRect(452 + horizontPosition, heightPosition2 + 240, 150, 20);
                         tf.Alignment = SetAlignmentForCulture();
                         tf.DrawString(CheckRTL(Properties.Resources.lenderTable4Monthly), fontH6Bold, XBrushes.Black, lenderTable4Monthly, XStringFormats.TopLeft);
-                        XRect lenderTable4Indexed = new XRect(424 + horizontPosition, heightPosition2 + 240, 57, 20);
-                        tf.Alignment = SetAlignmentForCulture();
-                        tf.DrawString(CheckRTL(Properties.Resources.lenderTable4Indexed), fontH6Bold, XBrushes.Black, lenderTable4Indexed, XStringFormats.TopLeft);
-                        XRect lenderTable4Rate = new XRect(399 + horizontPosition, heightPosition2 + 240, 57, 20);
+                        //XRect lenderTable4Indexed = new XRect(424 + horizontPosition, heightPosition2 + 240, 57, 20);
+                        //tf.Alignment = SetAlignmentForCulture();
+                        //tf.DrawString(CheckRTL(Properties.Resources.lenderTable4Indexed), fontH6Bold, XBrushes.Black, lenderTable4Indexed, XStringFormats.TopLeft);
+                        XRect lenderTable4Rate = new XRect(409 + horizontPosition, heightPosition2 + 240, 57, 20);
                         tf.Alignment = SetAlignmentForCulture();
                         tf.DrawString(CheckRTL(Properties.Resources.lenderTable4Rate), fontH6Bold, XBrushes.Black, lenderTable4Rate, XStringFormats.TopLeft);
                         XRect lenderTable4Time = new XRect(369 + horizontPosition, heightPosition2 + 240, 57, 20);
@@ -1507,6 +1521,7 @@ namespace WisorLibrary.ReportApplication
                         // VALUES INSIDE TABLE
                         int positionY2 = 260;
                         int NumberOfProductsInCompositions = shortReportDataObject.NumberOfProductsInCompositions(j);
+
                         for (int p = 0; p < NumberOfProductsInCompositions; p++)
                         {
                             OriginalLoanTable4Short olt4su = shortReportDataObject.GetProductInCompositionUSandIL(j, p);
@@ -1518,25 +1533,28 @@ namespace WisorLibrary.ReportApplication
 
                             XRect lenderTable4TotalValue = new XRect(507 + horizontPosition, heightPosition2 + positionY2 - 12, 150, 20);
                             tf.Alignment = SetAlignmentForCulture();
-                            tf.DrawString("$ " + CheckRTL(olt4su.TotalPayment.ToString("N0")), fontH6, XBrushes.Black, lenderTable4TotalValue, XStringFormats.TopLeft);
-                            XRect lenderTable4MonthlyValue = new XRect(467 + horizontPosition, heightPosition2 + positionY2 - 12, 150, 20);
+                            tf.DrawString("$" + CheckRTL(olt4su.TotalPayment.ToString("N0")), fontH6, XBrushes.Black, lenderTable4TotalValue, XStringFormats.TopLeft);
+                            SumOfExpectedPayment += olt4su.TotalPayment;
+                            XRect lenderTable4MonthlyValue = new XRect(457 + horizontPosition, heightPosition2 + positionY2 - 12, 150, 20);
                             tf.Alignment = SetAlignmentForCulture();
-                            tf.DrawString("$ " + CheckRTL(olt4su.Monthly.ToString("N0")), fontH6, XBrushes.Black, lenderTable4MonthlyValue, XStringFormats.TopLeft);
-                            XRect lenderTable4IndexedValue = new XRect(425 + horizontPosition, heightPosition2 + positionY2 - 12, 150, 20);
+                            tf.DrawString("$" + CheckRTL(olt4su.Monthly.ToString("N0")), fontH6, XBrushes.Black, lenderTable4MonthlyValue, XStringFormats.TopLeft);
+                            SumOfMonthlyPayment += olt4su.Monthly;
+                            //XRect lenderTable4IndexedValue = new XRect(425 + horizontPosition, heightPosition2 + positionY2 - 12, 150, 20);
+                            //tf.Alignment = SetAlignmentForCulture();
+                            //tf.DrawString(CheckRTL(MiscUtilities.TranslateBoolToYesOrNo(olt4su.Indexed)), fontH6, XBrushes.Black, lenderTable4IndexedValue, XStringFormats.TopLeft);
+                            XRect lenderTable4RateValue = new XRect(405 + horizontPosition, heightPosition2 + positionY2 - 12, 150, 20);
                             tf.Alignment = SetAlignmentForCulture();
-                            tf.DrawString(CheckRTL(MiscUtilities.TranslateBoolToYesOrNo(olt4su.Indexed)), fontH6, XBrushes.Black, lenderTable4IndexedValue, XStringFormats.TopLeft);
-                            XRect lenderTable4RateValue = new XRect(395 + horizontPosition, heightPosition2 + positionY2 - 12, 150, 20);
-                            tf.Alignment = SetAlignmentForCulture();
-                            tf.DrawString(CheckRTL(olt4su.Rate.ToString("0.000") + "%"), fontH6, XBrushes.Black, lenderTable4RateValue, XStringFormats.TopLeft);
+                            tf.DrawString(CheckRTL((olt4su.Rate * 100).ToString("0.000") + "%"), fontH6, XBrushes.Black, lenderTable4RateValue, XStringFormats.TopLeft);
                             XRect lenderTable4TimeValue = new XRect(368 + horizontPosition, heightPosition2 + positionY2 - 12, 150, 20);
                             tf.Alignment = SetAlignmentForCulture();
                             tf.DrawString(CheckRTL(olt4su.Time.ToString("N0")), fontH6, XBrushes.Black, lenderTable4TimeValue, XStringFormats.TopLeft);
                             XRect lenderTable4ProductValue = new XRect(296 + horizontPosition, heightPosition2 + positionY2 - 12, 150, 20);
                             tf.Alignment = SetAlignmentForCulture();
                             tf.DrawString(CheckRTL(olt4su.Product.ToString()), fontH6, XBrushes.Black, lenderTable4ProductValue, XStringFormats.TopLeft);
-                            XRect lenderTable4AmountValue = new XRect(255 + horizontPosition, heightPosition2 + positionY2 - 12, 150, 20);
+                            XRect lenderTable4AmountValue = new XRect(252 + horizontPosition, heightPosition2 + positionY2 - 12, 150, 20);
                             tf.Alignment = SetAlignmentForCulture();
-                            tf.DrawString("$ " + CheckRTL(olt4su.Amount.ToString("N0")), fontH6, XBrushes.Black, lenderTable4AmountValue, XStringFormats.TopLeft);
+                            tf.DrawString("$" + CheckRTL(olt4su.Amount.ToString("N0")), fontH6, XBrushes.Black, lenderTable4AmountValue, XStringFormats.TopLeft);
+                            SumOfAmount += olt4su.Amount;
                         }
                         // VERTICAL LINES FROM TOP TO BOTTOM (DRAW RIGHT TO LEFT)
                         gfx.DrawLine(tableLine3,
@@ -1546,11 +1564,11 @@ namespace WisorLibrary.ReportApplication
                            new XPoint(496 + horizontPosition, heightPosition2 + positionY2 + 15),
                            new XPoint(496 + horizontPosition, heightPosition2 + 230));
                         gfx.DrawLine(tableLine3,
-                          new XPoint(456 + horizontPosition, heightPosition2 + positionY2 + 15),
-                          new XPoint(456 + horizontPosition, heightPosition2 + 230));
-                        gfx.DrawLine(tableLine3,
-                           new XPoint(422 + horizontPosition, heightPosition2 + positionY2),
-                           new XPoint(422 + horizontPosition, heightPosition2 + 230));
+                          new XPoint(446 + horizontPosition, heightPosition2 + positionY2 + 15),
+                          new XPoint(446 + horizontPosition, heightPosition2 + 230));
+                        //gfx.DrawLine(tableLine3,
+                        //   new XPoint(422 + horizontPosition, heightPosition2 + positionY2),
+                        //   new XPoint(422 + horizontPosition, heightPosition2 + 230));
                         gfx.DrawLine(tableLine3,
                            new XPoint(394 + horizontPosition, heightPosition2 + positionY2),
                            new XPoint(394 + horizontPosition, heightPosition2 + 230));
@@ -1568,18 +1586,18 @@ namespace WisorLibrary.ReportApplication
                             new XPoint(240 + horizontPosition, heightPosition2 + positionY2 + 15),
                             new XPoint(295 + horizontPosition, heightPosition2 + positionY2 + 15));
                         gfx.DrawLine(tableLine3,
-                            new XPoint(456 + horizontPosition, heightPosition2 + positionY2 + 15),
+                            new XPoint(446 + horizontPosition, heightPosition2 + positionY2 + 15),
                             new XPoint(555 + horizontPosition, heightPosition2 + positionY2 + 15));
                         // TOTAL
                         XRect lenderTable4TotalTotal = new XRect(505 + horizontPosition, heightPosition2 + positionY2 + 15 - 12, 150, 20);
                         tf.Alignment = SetAlignmentForCulture();
-                        tf.DrawString("$ " + CheckRTL(shortReportDataObject.LenderTable2ExpectedFutureTotal(j).ToString("N0")), fontH6, XBrushes.Black, lenderTable4TotalTotal, XStringFormats.TopLeft);
-                        XRect lenderTable4MonthlyTotal = new XRect(250 + horizontPosition, heightPosition2 + positionY2 + 15 - 12, 150, 20);
+                        tf.DrawString("$" + CheckRTL(SumOfExpectedPayment.ToString("N0")), fontH6, XBrushes.Black, lenderTable4TotalTotal, XStringFormats.TopLeft);
+                        XRect lenderTable4MonthlyTotal = new XRect(252 + horizontPosition, heightPosition2 + positionY2 + 15 - 12, 150, 20);
                         tf.Alignment = SetAlignmentForCulture();
-                        tf.DrawString("$ " + CheckRTL(shortReportDataObject.LenderTable2ExpectedFutureTotal(j).ToString("N0")), fontH6, XBrushes.Black, lenderTable4MonthlyTotal, XStringFormats.TopLeft);
-                        XRect lenderTable4AmountTotal = new XRect(459 + horizontPosition, heightPosition2 + positionY2 + 15 - 12, 100, 20);
+                        tf.DrawString("$" + CheckRTL(SumOfAmount .ToString("N0")), fontH6, XBrushes.Black, lenderTable4MonthlyTotal, XStringFormats.TopLeft);
+                        XRect lenderTable4AmountTotal = new XRect(457 + horizontPosition, heightPosition2 + positionY2 + 15 - 12, 100, 20);
                         tf.Alignment = SetAlignmentForCulture();
-                        tf.DrawString("$ " + CheckRTL(shortReportDataObject.LenderTable2ExpectedFutureTotal(j).ToString("N0")), fontH6Bold, XBrushes.Black, lenderTable4AmountTotal, XStringFormats.TopLeft);
+                        tf.DrawString("$" + CheckRTL(SumOfMonthlyPayment.ToString("N0")), fontH6Bold, XBrushes.Black, lenderTable4AmountTotal, XStringFormats.TopLeft);
                         //
                         // LITTLE RIGHT TABLE
                         //
@@ -1591,28 +1609,35 @@ namespace WisorLibrary.ReportApplication
                             new XPoint(456 + horizontPosition2, heightPosition2 + 260),
                             new XPoint(574 + horizontPosition2, heightPosition2 + 260));
                         // LABELS INSIDE TABLE
-                        XRect lenderTable5ProfitPercent = new XRect(527 + horizontPosition2, heightPosition2 + 240, 150, 20);
+                        XRect lenderTable5ProfitPercent = new XRect(520 + horizontPosition2, heightPosition2 + 240, 150, 20);
                         tf.Alignment = SetAlignmentForCulture();
                         tf.DrawString(CheckRTL(Properties.Resources.lenderTable5ProfitPercent), fontH6Bold, XBrushes.Black, lenderTable5ProfitPercent, XStringFormats.TopLeft);
-                        XRect lenderTable5Profit = new XRect(459 + horizontPosition2, heightPosition2 + 240, 57, 20);
+                        XRect lenderTable5Profit = new XRect(463 + horizontPosition2, heightPosition2 + 240, 57, 20);
                         tf.Alignment = SetAlignmentForCulture();
                         tf.DrawString(CheckRTL(Properties.Resources.lenderTable5Profit), fontH6Bold, XBrushes.Black, lenderTable5Profit, XStringFormats.TopLeft);
                         // VALUES INSIDE TABLE
                         int PositionY3 = 260;
-                        for (int i = 0; i < shortReportDataObject.ShortOriginalLoanTable4Values.Length; i++)
+                        int SumOfLenderProfit = 0;
+                        double SumOfLenderProfitPercantage = 0;
+                        for (int i = 0; i < NumberOfProductsInCompositions; i++)
                         {
                             PositionY3 += 15;
                             gfx.DrawLine(tableLine3,
                             new XPoint(456 + horizontPosition2, heightPosition2 + PositionY3),
                             new XPoint(574 + horizontPosition2, heightPosition2 + PositionY3));
 
-                            XRect lenderTable5ProfitPercentValue = new XRect(530 + horizontPosition2, heightPosition2 + PositionY3 - 12, 150, 20);
-                            tf.Alignment = SetAlignmentForCulture();
-                            tf.DrawString(CheckRTL(shortReportDataObject.ShortOriginalLoanTable4Values[i].Rate.ToString("0.000") + "%"), fontH6, XBrushes.Black, lenderTable5ProfitPercentValue, XStringFormats.TopLeft);
+                            int LenderProfit = shortReportDataObject.GetCompositionLenderProfit(j, i);
+                            double LenderProfitPercantage = shortReportDataObject.GetCompositionLenderProfitPercantage(j, i);
+                            SumOfLenderProfit += LenderProfit;
+                            SumOfLenderProfitPercantage += LenderProfitPercantage;
 
-                            XRect lenderTable5ProfitValue = new XRect(475 + horizontPosition2, heightPosition2 + PositionY3 - 12, 150, 20);
+                            XRect lenderTable5ProfitPercentValue = new XRect(527 + horizontPosition2, heightPosition2 + PositionY3 - 12, 150, 20);
                             tf.Alignment = SetAlignmentForCulture();
-                            tf.DrawString("$ " + CheckRTL(shortReportDataObject.ShortOriginalLoanTable4Values[i].Monthly.ToString("N0")), fontH6, XBrushes.Black, lenderTable5ProfitValue, XStringFormats.TopLeft);
+                            tf.DrawString(CheckRTL(LenderProfitPercantage.ToString("0.000") + "%"), fontH6, XBrushes.Black, lenderTable5ProfitPercentValue, XStringFormats.TopLeft);
+
+                            XRect lenderTable5ProfitValue = new XRect(466 + horizontPosition2, heightPosition2 + PositionY3 - 12, 150, 20);
+                            tf.Alignment = SetAlignmentForCulture();
+                            tf.DrawString("$ " + CheckRTL(LenderProfit.ToString("N0")), fontH6, XBrushes.Black, lenderTable5ProfitValue, XStringFormats.TopLeft);
                         }
                         // VERTICAL LINES FROM TOP TO BOTTOM (DRAW RIGHT TO LEFT)
                         gfx.DrawLine(tableLine3,
@@ -1629,12 +1654,12 @@ namespace WisorLibrary.ReportApplication
                             new XPoint(456 + horizontPosition2, heightPosition2 + PositionY3 + 15),
                             new XPoint(574 + horizontPosition2, heightPosition2 + PositionY3 + 15));
                         // TOTAL
-                        XRect lenderTable5ProfitPercentTotal = new XRect(516 + horizontPosition2, heightPosition2 + PositionY3 + 15 - 12, 150, 20);
+                        XRect lenderTable5ProfitPercentTotal = new XRect(527 + horizontPosition2, heightPosition2 + PositionY3 + 15 - 12, 150, 20);
                         tf.Alignment = SetAlignmentForCulture();
-                        tf.DrawString(CheckRTL(shortReportDataObject.LenderTable2ExpectedFutureTotal(j).ToString("0.000") + " %"), fontH6, XBrushes.Black, lenderTable5ProfitPercentTotal, XStringFormats.TopLeft);
-                        XRect lenderTable5ProfitTotal = new XRect(461 + horizontPosition2, heightPosition2 + PositionY3 + 15 - 12, 150, 20);
+                        tf.DrawString(CheckRTL(SumOfLenderProfitPercantage.ToString("0.000") + " %"), fontH6, XBrushes.Black, lenderTable5ProfitPercentTotal, XStringFormats.TopLeft);
+                        XRect lenderTable5ProfitTotal = new XRect(466 + horizontPosition2, heightPosition2 + PositionY3 + 15 - 12, 150, 20);
                         tf.Alignment = SetAlignmentForCulture();
-                        tf.DrawString("$ " + CheckRTL(shortReportDataObject.LenderTable2ExpectedFutureTotal(j).ToString("N0")), fontH6, XBrushes.Black, lenderTable5ProfitTotal, XStringFormats.TopLeft);
+                        tf.DrawString("$ " + CheckRTL(SumOfLenderProfit.ToString("N0")), fontH6, XBrushes.Black, lenderTable5ProfitTotal, XStringFormats.TopLeft);
                         //
                         // RIGHT ROWS
                         //
@@ -1756,6 +1781,7 @@ namespace WisorLibrary.ReportApplication
                         // each composition should reside in different table
 
 
+                        int SummeryTotalAmount = 0, SummeryFirstPMT = 0, SummerySecondPMT = 0, SummeryTotalPayment = 0;
                         int NumberOfProductsInCompositions = shortReportDataObject.NumberOfProductsInCompositions(j);
                         for (int p = 0; p < NumberOfProductsInCompositions; p++)
                         {
@@ -1769,13 +1795,16 @@ namespace WisorLibrary.ReportApplication
                             XRect lenderTable4TotalValue = new XRect(589 + horizontPosition, heightPosition2 + positionY2 - 12, 150, 20);
                             tf.Alignment = SetAlignmentForCulture();
                             // tf.DrawString("₤ " + CheckRTL(shortReportDataObject.ShortOriginalLoanTable4ValuesUK[i].TotalPayment.ToString("N0")), fontH6, XBrushes.Black, lenderTable4TotalValue, XStringFormats.TopLeft);
-                            tf.DrawString("₤ " + CheckRTL(olt4su.TotalPayment.ToString("N0")), fontH6, XBrushes.Black, lenderTable4TotalValue, XStringFormats.TopLeft);
+                            tf.DrawString("₤" + CheckRTL(olt4su.TotalPayment.ToString("N0")), fontH6, XBrushes.Black, lenderTable4TotalValue, XStringFormats.TopLeft);
+                            SummeryTotalPayment += olt4su.TotalPayment;
                             XRect lenderTable4MonthlyValue = new XRect(543 + horizontPosition, heightPosition2 + positionY2 - 12, 150, 20);
                             tf.Alignment = SetAlignmentForCulture();
-                            tf.DrawString("₤ " + CheckRTL(olt4su.Monthly.ToString("N0")), fontH6, XBrushes.Black, lenderTable4MonthlyValue, XStringFormats.TopLeft);
+                            tf.DrawString("₤" + CheckRTL(olt4su.Monthly.ToString("N0")), fontH6, XBrushes.Black, lenderTable4MonthlyValue, XStringFormats.TopLeft);
+                            SummerySecondPMT += olt4su.Monthly;
                             XRect lenderTable4MonthlyPMTValue = new XRect(491 + horizontPosition, heightPosition2 + positionY2 - 12, 150, 20);
                             tf.Alignment = SetAlignmentForCulture();
-                            tf.DrawString("₤ " + CheckRTL(olt4su.MonthlyPMT.ToString("N0")), fontH6, XBrushes.Black, lenderTable4MonthlyPMTValue, XStringFormats.TopLeft);
+                            tf.DrawString("₤" + CheckRTL(olt4su.MonthlyPMT.ToString("N0")), fontH6, XBrushes.Black, lenderTable4MonthlyPMTValue, XStringFormats.TopLeft);
+                            SummeryFirstPMT += olt4su.MonthlyPMT;
                             XRect lenderTable4FollowOnRateValue = new XRect(436 + horizontPosition, heightPosition2 + positionY2 - 12, 150, 20);
                             tf.Alignment = SetAlignmentForCulture();
                             tf.DrawString(CheckRTL(olt4su.FollowOnRate.ToString("0.000") + "%"), fontH6, XBrushes.Black, lenderTable4FollowOnRateValue, XStringFormats.TopLeft);
@@ -1787,7 +1816,8 @@ namespace WisorLibrary.ReportApplication
                             tf.DrawString(CheckRTL(olt4su.Rate.ToString("0.000") + "%"), fontH6, XBrushes.Black, lenderTable4RateValue, XStringFormats.TopLeft);
                             XRect lenderTable4AmountValue = new XRect(323 + horizontPosition, heightPosition2 + positionY2 - 12, 150, 20);
                             tf.Alignment = SetAlignmentForCulture();
-                            tf.DrawString("₤ " + CheckRTL(olt4su.Amount.ToString("N0")), fontH6, XBrushes.Black, lenderTable4AmountValue, XStringFormats.TopLeft);
+                            tf.DrawString("₤" + CheckRTL(olt4su.Amount.ToString("N0")), fontH6, XBrushes.Black, lenderTable4AmountValue, XStringFormats.TopLeft);
+                            SummeryTotalAmount += olt4su.Amount;
                             XRect lenderTable4ProductValue = new XRect(243 + horizontPosition, heightPosition2 + positionY2 - 12, 150, 20);
                             tf.Alignment = SetAlignmentForCulture();
                             tf.DrawString(CheckRTL(olt4su.Product.ToString()), fontH6, XBrushes.Black, lenderTable4ProductValue, XStringFormats.TopLeft);
@@ -1833,16 +1863,17 @@ namespace WisorLibrary.ReportApplication
                         // TOTAL
                         XRect lenderTable4TotalTotal = new XRect(589 + horizontPosition, heightPosition2 + positionY2 + 15 - 12, 150, 20);
                         tf.Alignment = SetAlignmentForCulture();
-                        tf.DrawString("₤ " + CheckRTL(shortReportDataObject.LenderTable2TotalPayment(j).ToString("N0")), fontH6, XBrushes.Black, lenderTable4TotalTotal, XStringFormats.TopLeft);
+                        tf.DrawString("₤" + CheckRTL(SummeryTotalPayment.ToString("N0")), fontH6, XBrushes.Black, lenderTable4TotalTotal, XStringFormats.TopLeft);
                         XRect lenderTable4AmountTotal = new XRect(543 + horizontPosition, heightPosition2 + positionY2 + 15 - 12, 100, 20);
                         tf.Alignment = SetAlignmentForCulture();
-                        tf.DrawString("₤ " + CheckRTL(shortReportDataObject.LenderTable2TotalPMT2(j).ToString("N0")), fontH6Bold, XBrushes.Black, lenderTable4AmountTotal, XStringFormats.TopLeft);
+                        tf.DrawString("₤" + CheckRTL(SummerySecondPMT.ToString("N0")), fontH6Bold, XBrushes.Black, lenderTable4AmountTotal, XStringFormats.TopLeft);
                         XRect lenderTable4MonthlyPMTTotal = new XRect(487 + horizontPosition, heightPosition2 + positionY2 + 15 - 12, 100, 20);
                         tf.Alignment = SetAlignmentForCulture();
-                        tf.DrawString("₤ " + CheckRTL(shortReportDataObject.LenderTable2TotalPMT(j).ToString("N0")), fontH6Bold, XBrushes.Black, lenderTable4MonthlyPMTTotal, XStringFormats.TopLeft);
+                        tf.DrawString("₤" + CheckRTL(SummeryFirstPMT.ToString("N0")), fontH6Bold, XBrushes.Black, lenderTable4MonthlyPMTTotal, XStringFormats.TopLeft);
                         XRect lenderTable4MonthlyTotal = new XRect(323 + horizontPosition, heightPosition2 + positionY2 + 15 - 12, 150, 20);
                         tf.Alignment = SetAlignmentForCulture();
-                        tf.DrawString("₤ " + CheckRTL(shortReportDataObject.LenderTable2TotalAmount(j).ToString("N0")), fontH6, XBrushes.Black, lenderTable4MonthlyTotal, XStringFormats.TopLeft);
+                        tf.DrawString("₤" + CheckRTL(SummeryTotalAmount.ToString("N0")), fontH6, XBrushes.Black, lenderTable4MonthlyTotal, XStringFormats.TopLeft);
+                        
                         //
                         // LITTLE RIGHT TABLE
                         //
@@ -1877,7 +1908,7 @@ namespace WisorLibrary.ReportApplication
                             tf.DrawString(CheckRTL(CompositionLenderProfitPercantage.ToString("0.000") + "%"), fontH6, XBrushes.Black, lenderTable5ProfitPercentValue, XStringFormats.TopLeft);
                             XRect lenderTable5ProfitValue = new XRect(475 + horizontPosition2, heightPosition2 + PositionY3 - 12, 150, 20);
                             tf.Alignment = SetAlignmentForCulture();
-                            tf.DrawString("₤ " + CheckRTL(CompositionLenderProfit.ToString("N0")), fontH6, XBrushes.Black, lenderTable5ProfitValue, XStringFormats.TopLeft);
+                            tf.DrawString("₤" + CheckRTL(CompositionLenderProfit.ToString("N0")), fontH6, XBrushes.Black, lenderTable5ProfitValue, XStringFormats.TopLeft);
                         }
                         // VERTICAL LINES FROM TOP TO BOTTOM (DRAW RIGHT TO LEFT)
                         gfx.DrawLine(tableLine3,
@@ -1902,7 +1933,7 @@ namespace WisorLibrary.ReportApplication
                         tf.DrawString(CheckRTL(LenderTable2LenderProfitPercantage.ToString("0.000") + " %"), fontH6, XBrushes.Black, lenderTable5ProfitPercentTotal, XStringFormats.TopLeft);
                         XRect lenderTable5ProfitTotal = new XRect(475 + horizontPosition2, heightPosition2 + PositionY3 + 15 - 12, 150, 20);
                         tf.Alignment = SetAlignmentForCulture();
-                        tf.DrawString("₤ " + CheckRTL(LenderProfitTotal.ToString("N0")), fontH6, XBrushes.Black, lenderTable5ProfitTotal, XStringFormats.TopLeft);
+                        tf.DrawString("₤" + CheckRTL(LenderProfitTotal.ToString("N0")), fontH6, XBrushes.Black, lenderTable5ProfitTotal, XStringFormats.TopLeft);
                         //
                         // RIGHT ROWS
                         //
@@ -1914,7 +1945,7 @@ namespace WisorLibrary.ReportApplication
                         tf.Alignment = SetAlignmentForCulture();
                         double borrowerCanSavePercantage;
                         int borrowerCanSave = shortReportDataObject.BorrwerCanSave(j, out borrowerCanSavePercantage);
-                        tf.DrawString("₤ " + CheckRTL(borrowerCanSave.ToString("N0")), fontH5, XBrushes.Black, lenderRows2BorrowerValue, XStringFormats.TopLeft);
+                        tf.DrawString("₤" + CheckRTL(borrowerCanSave.ToString("N0")), fontH5, XBrushes.Black, lenderRows2BorrowerValue, XStringFormats.TopLeft);
                         XRect lenderRows2BorrowerValue2 = new XRect(1160 + horizontPosition3, heightPosition3 + 209, 100, 20);
                         tf.Alignment = SetAlignmentForCulture();
                         tf.DrawString(CheckRTL(borrowerCanSavePercantage.ToString()) + " % ", fontH5, XBrushes.Black, lenderRows2BorrowerValue2, XStringFormats.TopLeft);
@@ -1926,7 +1957,7 @@ namespace WisorLibrary.ReportApplication
                         tf.Alignment = SetAlignmentForCulture();
                         double LenderCanIncreasePercantage;
                         int lenderCanIncrease = shortReportDataObject.LenderCanIncrease(j, out LenderCanIncreasePercantage);
-                        tf.DrawString("₤ " + CheckRTL(lenderCanIncrease.ToString("N0")), fontH5, XBrushes.Black, lenderRows2LenderValue, XStringFormats.TopLeft);
+                        tf.DrawString("₤" + CheckRTL(lenderCanIncrease.ToString("N0")), fontH5, XBrushes.Black, lenderRows2LenderValue, XStringFormats.TopLeft);
                         XRect lenderRows2LenderValue2 = new XRect(1160 + horizontPosition3, heightPosition3 + 223, 100, 20);
                         tf.Alignment = SetAlignmentForCulture();
                         tf.DrawString(CheckRTL(LenderCanIncreasePercantage.ToString()) + " % ", fontH5, XBrushes.Black, lenderRows2LenderValue2, XStringFormats.TopLeft);

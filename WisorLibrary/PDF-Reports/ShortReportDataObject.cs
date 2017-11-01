@@ -30,10 +30,10 @@ namespace WisorLibrary.ReportApplication
                     return 0;
             }
         }
-        public int LenderTable1BalanceToPayTotal { get { return 0; } }
-        public int LenderTable1PaySoFarTotal { get { return 0; } }
-        public int LenderTable1ReturnValueTotal { get { return 0; } }
-        public int LenderTable1AmountTotal { get { return 0; } }
+        //public int LenderTable1BalanceToPayTotal { get { return 0; } }
+        //public int LenderTable1PaySoFarTotal { get { return 0; } }
+        //public int LenderTable1ReturnValueTotal { get { return 0; } }
+        //public int LenderTable1AmountTotal { get { return 0; } }
 
         //public double LenderTable2ExpectedFuturePercentTotal {
         //    get
@@ -127,7 +127,7 @@ namespace WisorLibrary.ReportApplication
         {
             if (null != reportData)
             {
-                return reportData.ID;
+                return reportData.ID + MiscConstants.NAME_SEP_CHAR + Share.CustomerName;
             }
             else
                 return MiscConstants.UNDEFINED_STRING;
@@ -144,9 +144,9 @@ namespace WisorLibrary.ReportApplication
                     DateTime dateOfRateChange = reportData.OriginalDateTaken.AddMonths(reportData.firstTimePeriod);
                     OriginalLoanUKTableShort olus = new OriginalLoanUKTableShort(reportData.OriginalDateTaken, (int) reportData.OriginalLoanAmount,
                         reportData.ProductName, (int)reportData.OriginalTime, reportData.OriginalRate * 100, reportData.OriginalRate2 * 100,
-                        dateOfRateChange, (int)reportData.FirstMonthlyPMT, (int)reportData.FirstMonthlyPMT /*followOnPmt*/, (int)reportData.PayUntilToday,
-                        (int)reportData.EstimateFuturePay, (int)reportData.PayFuture, (int)reportData.YearlyIncome, reportData.PTI * 100,
-                        reportData.OriginalMargin * 100, reportData.OriginalMargin2 * 100, reportData.EstimateProfitPercantageSoFar * 100,
+                        dateOfRateChange, (int)reportData.FirstMonthlyPMT, (int)reportData.FirstMonthlyPMT2, (int)reportData.PayUntilToday,
+                        (int)reportData.RemaingLoanAmount, (int)reportData.PayFuture, (int)reportData.YearlyIncome, reportData.PTI * 100,
+                        reportData.PrintedOriginalMargin * 100, reportData.PrintedOriginalMargin2 * 100, reportData.EstimateProfitPercantageSoFar * 100,
                         (int)reportData.EstimateProfitSoFar, reportData.EstimateTotalProfitPercantage * 100,
                         (int)reportData.EstimateTotalProfit, (int)reportData.EstimateFutureProfit, reportData.EstimateFutureProfitPercantage * 100);
                     return olus;
@@ -178,16 +178,9 @@ namespace WisorLibrary.ReportApplication
                                 ll[i].OriginalRate,
                                 (int)ll[i].OriginalTime, MiscUtilities.IsProductTsamud(ll[i].indicesFirstTimePeriod),
                                 (int)ll[i].DesiredMonthlyPayment,
-                                (int)ll[i].resultReportData.PayUntilToday, (int)ll[i].resultReportData.LoanAmount, (int)ll[i].resultReportData.PayFuture,
+                                (int)ll[i].resultReportData.PayUntilToday, (int)ll[i].resultReportData.RemaingLoanAmount, (int)ll[i].resultReportData.PayFuture,
                                 (int) ll[i].resultReportData.EstimateProfitSoFar, ll[i].resultReportData.EstimateProfitPercantageSoFar,
                                 (int) ll[i].resultReportData.EstimateFutureProfit, ll[i].resultReportData.EstimateFutureProfitPercantage);
-                        //OriginalLoanTableShort olt4s = new OriginalLoanTableShort(
-                        //        (int) env.theLoan.OriginalLoanAmount, 
-                        //        Share.cultureInfo.Name.Equals("he-IL") ? MiscUtilities.GetProductHebrewName(env.theLoan.ProductID.stringTypeId) : env.theLoan.ProductID.stringTypeId, 
-                        //        env.theLoan.OriginalRate,
-                        //        (int) env.theLoan.OriginalTime, MiscUtilities.IsProductTsamud(env.theLoan.indicesFirstTimePeriod),
-                        //        (int) env.theLoan.DesiredMonthlyPayment, 
-                        //        (int) reportData.PayUntilToday, (int) reportData.LoanAmount, (int) reportData.PayFuture);
                         lolt4s.Add(olt4s);
                     }
                     return lolt4s.ToArray();
@@ -590,9 +583,8 @@ namespace WisorLibrary.ReportApplication
 
                      OriginalLoanTable4ShortUK olt4s = new OriginalLoanTable4ShortUK(
                         (int)c.opts[j].optAmt, c.opts[j].product.name,
-                        (int)c.opts[j].optTime, c.opts[j].optRateFirstPeriod * 100,
-                        c.opts[j].optRateSecondPeriod * 100, (int)c.opts[j].optPmt,
-                        (int)c.opts[j].optTtlPay,
+                        (int)c.opts[j].optTime, c.opts[j].optRateFirstPeriod * 100,  c.opts[j].optRateSecondPeriod * 100, 
+                        (int)c.opts[j].optPmt, (int)c.opts[j].optPmt2, 
                         (int)c.opts[j].optTtlPay);
                     lolt4s.Add(olt4s);
                 }
@@ -687,6 +679,7 @@ namespace WisorLibrary.ReportApplication
         //    }
         //}
 
+        // get the "products used in analysis"
         public ProductsUsedInAnalysisTableShort[] ShortProductsUsedInAnalysisTableValues
         {
             get
@@ -719,7 +712,7 @@ namespace WisorLibrary.ReportApplication
                 if (null != reportData) {
                     string[] products = reportData.GetProducts();
                     GenericProduct gp;
-                    int profile = 1, minRateIndex = 0, maxRateIndex = MiscConstants.NumberOfYearsFrProduct;
+                    int profile = 1, minRateIndex = 0, maxRateIndex = MiscConstants.NumberOfYearsFrProduct - 1;
                     List<ProductsUsedInAnalysisTableShortUK> lopuiats = new List<ProductsUsedInAnalysisTableShortUK>();
                     foreach (string p in products)
                     {
@@ -734,26 +727,28 @@ namespace WisorLibrary.ReportApplication
                             continue;
                         }
 
-                        double bankRateFrom = RateUtilities.Instance.GetBankRate(gp.productID.numberID, profile, minRateIndex);
-                        double bankRateTo = RateUtilities.Instance.GetBankRate(gp.productID.numberID, profile, maxRateIndex);
-                        double borrowerRateFrom = RateUtilities.Instance.GetBorrowerRate(gp.productID.numberID, profile, minRateIndex);
-                        double borrowerRateTo = RateUtilities.Instance.GetBorrowerRate(gp.productID.numberID, profile, maxRateIndex);
-                        bankRateFrom = borrowerRateFrom + bankRateFrom;
-                        bankRateTo = borrowerRateTo + bankRateTo;
-
-                        string productName;
+                        string productName = gp.name;
                         if (Share.cultureInfo.Name.Equals("he-IL"))
                         {
-                            if (null == gp.hebrewName)
-                                gp = GenericProduct.GetProductFromAllListByName(p);
-                            productName = (null != gp.hebrewName) ? gp.hebrewName : p;
+                            productName = (null != gp.hebrewName) ? gp.hebrewName : productName;
                         }
-                        else
+                    
+                        double bankRate1 = RateUtilities.Instance.GetBankRate(gp.productID.numberID, profile, maxRateIndex);
+                        double borrowerRate1 = RateUtilities.Instance.GetBorrowerRate(gp.productID.numberID, profile, maxRateIndex);
+                        
+                        bankRate1 = borrowerRate1 + bankRate1;
+                        // TBD: Omri, where should we get the lower and the higher rate && margin values
+                        double bankRate2 = bankRate1;
+                        double borrowerRate2 = borrowerRate1;
+                        if (MiscConstants.markets.UK == Share.theMarket)
                         {
-                            productName = p;
+                            bankRate2 = RateUtilities.Instance.GetBankRateSecondPeriod(gp.productID.numberID, profile, maxRateIndex);
+                            borrowerRate2 = RateUtilities.Instance.GetBorrowerRateSecondPeriod(gp.productID.numberID, profile, minRateIndex);
+                            bankRate2 = borrowerRate2 + bankRate2;
                         }
+
                         ProductsUsedInAnalysisTableShortUK puiats = new ProductsUsedInAnalysisTableShortUK(
-                            bankRateFrom * 100, borrowerRateFrom * 100, bankRateTo * 100, borrowerRateTo * 100, productName);
+                            bankRate1 * 100, borrowerRate1 * 100, bankRate2 * 100, borrowerRate2 * 100, productName);
                         lopuiats.Add(puiats);
                     }
                     return lopuiats.ToArray();
@@ -790,7 +785,7 @@ namespace WisorLibrary.ReportApplication
 
             if (null != reportData)
             {
-                Date = reportData.DateTaken;
+                Date = reportData.OriginalDateTaken;
             }
 
             return Date;
@@ -807,6 +802,21 @@ namespace WisorLibrary.ReportApplication
 
             return income;
         }
+
+        public AmortisationData GetAmortisationData(int index)
+        {
+             if (null != reportData && null != reportData.compositions && null != reportData.compositions[index] &&
+                null != reportData.compositions[index].opts)
+            {
+                Composition c = reportData.compositions[index];
+                return c.AmortisationData;
+            }
+            else
+            {
+                return null;
+            }
+        }
+      
 
     }
 
@@ -937,16 +947,16 @@ namespace WisorLibrary.ReportApplication
     {
         public double Margin { get; set; }
         public double Rate { get; set; }
-        public double InitialMargin { get; set; }
-        public double InitialRate { get; set; }
+        public double Margin2 { get; set; }
+        public double Rate2 { get; set; }
         public string Product { get; set; }
 
-        public ProductsUsedInAnalysisTableShortUK(double margin, double rate, double initialMargin, double initialRate,  string product)
+        public ProductsUsedInAnalysisTableShortUK(double margin, double rate, double margin2, double rate2,  string product)
         {
             Margin = margin;
             Rate = rate;
-            InitialMargin = initialMargin;
-            InitialRate = initialRate;
+            Margin2 = margin2;
+            Rate2 = rate2;
             Product = product;
         }
     }
