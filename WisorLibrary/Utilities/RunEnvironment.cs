@@ -134,7 +134,7 @@ namespace WisorLib
             //theMiscLogger = null;
             //Logger = null;
         }
-
+        
 
         public static bool SetMarket(markets market)
         {

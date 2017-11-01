@@ -307,6 +307,7 @@ namespace WisorLib
         public static bool ShouldCreateCombinationDynamickly { get; set; }
         public static bool ShouldPrintLog { get; internal set; }
         public static string DataDirectory { get; set; }
+        public static string ConfigurationFileName { get; set; }
         public static int NumberOfProductsInCombination { get; internal set; }
 
         public static bool ShouldCreateReportOnlyWhenWinWin { get; internal set; }
