@@ -627,6 +627,23 @@ namespace WisorLibrary.Utilities
             return true;
         }
 
+        public static void SetConfigurationFileName(string filename, bool isFullConfigFilename)
+        {
+            string fullFilename = MiscConstants.UNDEFINED_STRING, dir = MiscConstants.UNDEFINED_STRING;
+
+            if (isFullConfigFilename)
+            {
+                fullFilename = filename;
+                dir = System.IO.Path.GetDirectoryName(filename) + Path.DirectorySeparatorChar;
+            }
+            else
+            {
+                dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + Share.DataDirectory + Path.DirectorySeparatorChar;
+                fullFilename = dir + filename;
+            }
+            Share.ConfigurationFileName = fullFilename;
+        }
+
         public static bool LoadXMLConfigurationFile(string filename, bool isFullConfigFilename)
         {
             string fullFilename = MiscConstants.UNDEFINED_STRING, dir = MiscConstants.UNDEFINED_STRING;
@@ -641,6 +658,7 @@ namespace WisorLibrary.Utilities
                 dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + Share.DataDirectory + Path.DirectorySeparatorChar;
                 fullFilename = dir + filename;
             }
+            Share.ConfigurationFileName = fullFilename;
             bool rc = false;
 
             try
@@ -662,106 +680,7 @@ namespace WisorLibrary.Utilities
                     {
                         foreach (XmlNode node in child)
                         {
-                            switch (child.Name/*.ToLower()*/)
-                            {
-                                case MiscConstants.CUSTOMER_NAME:
-                                    Share.CustomerName = node.Value;
-                                    break;
-                                case MiscConstants.MARKET:
-                                    markets market = (markets)Enum.Parse(typeof(markets), node.Value, true);
-                                    RunEnvironment.SetMarket(market);
-                                    break;
-                                case MiscConstants.CRETIRIA_FILENAME:
-                                    Share.CriteriaFileName = dir + node.Value;
-                                    break;
-                                case MiscConstants.LOAN_FILENAME:
-                                    Share.LoansFileName = dir + node.Value;
-                                    break;
-                                case MiscConstants.RATES_FILENAME:
-                                    Share.RatesFileName = dir + node.Value;
-                                    break;
-                                case MiscConstants.BANK_RATES_FILENAME:
-                                    Share.BankRatesFileName = dir + node.Value;
-                                    break;
-                                case MiscConstants.SECOND_PERIOD_RATES_FILENAME:
-                                    Share.SecondPeriodFilename = dir + node.Value;
-                                    break;
-                                case MiscConstants.SECOND_PERIOD_BANK_RATES_FILENAME:
-                                    Share.SecondPeriodBankRatesFileName = dir + node.Value;
-                                    break;
-                                case MiscConstants.HISTORIC_FILENAME:
-                                    Share.HistoricFileName = dir + node.Value;
-                                    break;
-                                case MiscConstants.COMBINATIONS_FILE:
-                                    Share.CombinationFileName = dir + node.Value;
-                                    break;
-                                case MiscConstants.COMBINATIONS_FILE_2_PRODUCTS_IN_COMBINATION:
-                                    Share.Products2InCombinationFileName = dir + node.Value;
-                                    break;
-                                case MiscConstants.RISK_LIQUIDITY_FILENAME:
-                                    Share.RiskAndLiquidityFileName = dir + node.Value;
-                                    break;
-                                case MiscConstants.PRODUCTS_FILENAME:
-                                    Share.ProductsFileName = dir + node.Value;
-                                    break;
-                                case MiscConstants.RISK_FACTOR:
-                                    Share.RiskFactor = System.Convert.ToDouble(node.Value);
-                                    break;
-                                case MiscConstants.LIQUIDITY_FACTOR:
-                                    Share.LiquidityFactor = System.Convert.ToDouble(node.Value);
-                                    break;
-                                case MiscConstants.BENEFIT_FACTOR:
-                                    Share.BenefitFactor = System.Convert.ToDouble(node.Value);
-                                    break;
-                                case MiscConstants.BENEFIT_THRESHOLD:
-                                    Share.ProductBeneficialScoreCriteria = System.Convert.ToUInt32(node.Value);
-                                    break;
-                                case MiscConstants.MAX_COMBINATIONS:
-                                    Share.MaxCombinationNumber = System.Convert.ToUInt32(node.Value);
-                                    break;
-                                case MiscConstants.SHOULD_STORE_REPORT_AS_LONG_PDF:
-                                    Share.shouldCreateLongPDFReport = "yes" == node.Value ? true : false;
-                                    // ensure the directory realy exists
-                                    if (Share.shouldCreateLongPDFReport)
-                                    {
-                                        string fn = MiscUtilities.GetReportFileName("tempID", FileType.HTML);
-                                        if (!Directory.Exists(Path.GetDirectoryName(fn)))
-                                            Directory.CreateDirectory(Path.GetDirectoryName(fn));
-                                    }
-                                    break;
-                                case MiscConstants.SHOULD_STORE_REPORT_AS_SHORT_PDF:
-                                    Share.shouldCreateShortPDFReport = "yes" == node.Value ? true : false;
-                                    // ensure the directory realy exists
-                                    if (Share.shouldCreateShortPDFReport)
-                                    {
-                                        string fn = MiscUtilities.GetReportFileName("tempID", FileType.PDF);
-                                        if (!Directory.Exists(Path.GetDirectoryName(fn)))
-                                            Directory.CreateDirectory(Path.GetDirectoryName(fn));
-                                    }
-                                    break;
-                                case MiscConstants.SHOULD_STORE_REPORT_IN_DB:
-                                    Share.ShouldStoreInDB = "yes" == node.Value ? true : false;
-                                    break;
-                                case MiscConstants.FROM_TO_LINES_TO_LOAD_LOANS:
-                                    //<from_line>,<to_line>
-                                    string[] lines = node.Value.Split(MiscConstants.COMMA);
-                                    if (!String.IsNullOrEmpty(lines[0]))
-                                        Share.LoansLoadFromLine = System.Convert.ToUInt32(lines[0]) /*- 1*/; // the line index starts from zero
-                                    if (!String.IsNullOrEmpty(lines[1]))
-                                        Share.LoansLoadToLine = System.Convert.ToUInt32(lines[1]) /*- 1*/; // the line index starts from zero
-                                    break;
-                                case MiscConstants.FROM_IDS_LOAD_LOANS:
-                                    Share.LoansLoadIDsFromLine = node.Value;
-                                    break;
-                                case MiscConstants.NUMBER_OF_PRODUCTS_IN_COMBINATION:
-                                    Share.NumberOfProductsInCombination = System.Convert.ToInt32(node.Value);
-                                    break;
-
-                                default:
-                                    Console.WriteLine("LoadXMLConfigurationFile Illegal input: " + child.Name);
-                                    break;
-                            }
-
+                            AnalayzeConfiguration(child.Name, node.Value, dir);
                         }
                     }
                 }
@@ -777,6 +696,7 @@ namespace WisorLibrary.Utilities
             return rc;
         }
 
+ 
         // look if the file already set in the Shared object; if not - look for it
         public static string GetFilename(string file2look, string file2lookFef)
         {
@@ -942,6 +862,22 @@ namespace WisorLibrary.Utilities
             return fixOrAdjustableScore;
         }
 
+        internal static void PrintAmortisationData(AmortisationData amortisationData)
+        {
+            string remainingAmount = MiscConstants.UNDEFINED_STRING;
+            string paidSoFar = MiscConstants.UNDEFINED_STRING;
+            string monthlyPmt = MiscConstants.UNDEFINED_STRING;
+ 
+            for (int i = 0; i < amortisationData.AmortisationTable.Length; i++)
+            {
+                remainingAmount += amortisationData.AmortisationTable[i].RemainingAmount + ",";
+                paidSoFar += amortisationData.AmortisationTable[i].PaidSoFar + ",";
+                monthlyPmt += amortisationData.AmortisationTable[i].MonthlyPmt + ",";
+            }
+            WindowsUtilities.loggerMethod("AmortisationData remainingAmount: " + remainingAmount);
+            WindowsUtilities.loggerMethod("AmortisationData paidSoFar: " + paidSoFar);
+            WindowsUtilities.loggerMethod("AmortisationData monthlyPmt: " + monthlyPmt);
+        }
 
         public static string GetArray<T>(T[] data)
         {
@@ -1119,7 +1055,8 @@ namespace WisorLibrary.Utilities
         // start some log files for misc. logging
         public static void OpenMiscLogger()
         {
-            if (Share.shouldDebugLoansCalculation && Share.shouldDebugLoans && null == Share.theMiscLogger)
+            if ((Share.shouldDebugLoansCalculation || Share.shouldDebugLoans || Share.ShouldPrintLog) 
+                && null == Share.theMiscLogger)
                 Share.theMiscLogger = new LoggerFile(Share.tempLogFile /*+ OrderID*/ + MiscConstants.CSV_EXT /*".txt"*/,
                     MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
         }
@@ -1437,7 +1374,12 @@ namespace WisorLibrary.Utilities
                 string dataDirectory = MiscUtilities.GetDataDirectory();
                 Console.WriteLine("NOTICE: PrepareRunningFull RunSearch set data directory: " + dataDirectory);
 
-                MiscUtilities.SetupAllEnv(dataDirectory);
+                rc = MiscUtilities.SetupAllEnv(dataDirectory);
+                if (! rc)
+                {
+                    Console.WriteLine("ERROR: PrepareRunningFull failed in SetupAllEnv.");
+                    return rc;
+                }
 
                 rc = PrepareRuning();
                 firstTimeRun = false;
@@ -1597,7 +1539,7 @@ namespace WisorLibrary.Utilities
         {
             string ext = MiscUtilities.GetFileTypeExtension(fileType);
             string lenderOrBorrowerPrefix = (isLender ? MiscConstants.LENDER_REPORT_PREFIX : MiscConstants.BORROWER_REPORT_PREFIX);
-            string languagePrefix = Share.cultureInfo.Name;
+            string languagePrefix = (null != Share.cultureInfo) ? Share.cultureInfo.Name : markets.USA.ToString();
             string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.IMAGES_DIR + Path.DirectorySeparatorChar;
             string fn = AppDomain.CurrentDomain.BaseDirectory +
                 MiscConstants.REPORTS_DIR + Path.DirectorySeparatorChar +
@@ -1680,8 +1622,8 @@ namespace WisorLibrary.Utilities
             Share.LoansLoadFromLine = MiscConstants.UNDEFINED_UINT;
             Share.LoansLoadIDsFromLine = MiscConstants.UNDEFINED_STRING;
             Share.shouldDebugLoans = true;
-            Share.shouldDebugLoansCalculation = true; //  false;
-            Share.shouldDebugLoansOnlyWinWin = false;
+            Share.shouldDebugLoansCalculation = false;
+            Share.shouldDebugLoansOnlyWinWin = true;
             Share.shouldDebugLuchSilukin = false;
             Share.ShouldCreateCombinationDynamickly = false;
 
@@ -1724,7 +1666,21 @@ namespace WisorLibrary.Utilities
             {
                 SetLogger(LogFunction);
             }
-            rc = MiscUtilities.LoadXMLConfigurationFile(configFilename, isFullConfigFilename);
+
+            // in order to enable setting the market configuration by each API call, 
+            // don't read the configuration file until the set-market API was called
+            // rc = MiscUtilities.LoadXMLConfigurationFile(configFilename, isFullConfigFilename);
+            SetConfigurationFileName(configFilename, isFullConfigFilename);
+            rc = LoadXMLConfigurationFileToMemory(Share.ConfigurationFileName);
+            
+            // check that all configuration is set proprly
+            string msg;
+            rc = CheckConfigurationConsistancy(out msg);
+            if (!rc)
+            {
+                Console.WriteLine("ERROR: PrepareRunningFull failed in CheckConfigurationConsistancy: " + msg);
+                //return rc;
+            }
 
             return rc;
         }
@@ -1733,29 +1689,6 @@ namespace WisorLibrary.Utilities
         {
             Console.WriteLine(msg);
         }
-
-        // support languages...
-        //static public string GetStringByLanguage(CultureInfo culture, string name)
-        //{
-        //    string tmp = Properties.Resources.name;
-        //    if (!string.IsNullOrEmpty(tmp))
-        //    {
-        //        if (culture.Name.Equals("he-IL"))
-        //        {
-        //            tmp = new string(tmp.Reverse().ToArray());
-        //        }
-        //        else
-        //        {
-
-        //        }
-        //    }
-        //    else
-        //    {
-        //        tmp = name;
-        //    }
-
-        //    return tmp;
-        //}
 
         public static string GetDataDirectory()
         {
@@ -1794,8 +1727,9 @@ namespace WisorLibrary.Utilities
                 int len = Math.Min(Products.Length, Amount.Length);
                 // calculate the relations between tzamud and not in all the products which consist the composition
                 uint fix = MiscConstants.UNDEFINED_UINT, adjustable = MiscConstants.UNDEFINED_UINT;
+                uint adjustableNum = MiscConstants.UNDEFINED_UINT, fixNum = MiscConstants.UNDEFINED_UINT; 
                 uint tsamud = MiscConstants.UNDEFINED_UINT, notTsamud = MiscConstants.UNDEFINED_UINT;
-
+                uint tsamudNum = MiscConstants.UNDEFINED_UINT, notTsamudNum = MiscConstants.UNDEFINED_UINT;
                 bool isProductFix = false, isProductTsamud = false;
                 for (int j = 0; j < len; j++)
                 {
@@ -1813,39 +1747,39 @@ namespace WisorLibrary.Utilities
                         tsamud += (uint)Amount[j];
                     else
                         notTsamud += (uint)Amount[j];
-
-                    // calculate the fix and adjustable numbers
-                    uint entireFixSum = fix + adjustable;
-                    uint fixNum = MiscConstants.UNDEFINED_UINT, adjustableNum = MiscConstants.UNDEFINED_UINT;
-                    if (0 < entireFixSum)
-                    {
-                        fixNum = Convert.ToUInt32((double)fix / entireFixSum * 100);
-                        adjustableNum = 100 - fixNum;
-                    }
-
-                    // calculate the tsamud vs. not numbers
-                    uint entireTsamudSum = tsamud + notTsamud;
-                    uint tsamudNum = MiscConstants.UNDEFINED_UINT, notTsamudNum = MiscConstants.UNDEFINED_UINT;
-                    if (0 < entireTsamudSum)
-                    {
-                        tsamudNum = Convert.ToUInt32((double)tsamud / entireTsamudSum * 100);
-                        notTsamudNum = 100 - tsamudNum;
-                    }
-
-                    CalculateHeaders(adjustable, tsamudNum, out FixHeader, out IndexationHeader1,
-                        out IndexationHeader2, out IndexationHeader3);
-                    // set the right numbers to the header
-                    string brackets1 = ENG_BRACKETS1;
-                    string brackets2 = ENG_BRACKETS2;
-                    if (Share.cultureInfo.Name.Equals("he-IL"))
-                    {
-                        brackets1 = HEB_BRACKETS1;
-                        brackets2 = HEB_BRACKETS2;
-                    }
-                    structureTypeString = FixHeader + ", " + IndexationHeader1 + brackets1 + fixNum + "% "
-                        + IndexationHeader2 + " , " + adjustableNum + "% " + IndexationHeader3 + brackets2;
-
                 }
+
+                // calculate the fix and adjustable numbers
+                uint entireFixSum = fix + adjustable;
+                fixNum = MiscConstants.UNDEFINED_UINT;
+                adjustableNum = MiscConstants.UNDEFINED_UINT;
+                if (0 < entireFixSum)
+                {
+                    fixNum = Convert.ToUInt32((double)fix / entireFixSum * 100);
+                    adjustableNum = 100 - fixNum;
+                }
+
+                // calculate the tsamud vs. not numbers
+                uint entireTsamudSum = tsamud + notTsamud;
+                if (0 < entireTsamudSum)
+                {
+                    tsamudNum = Convert.ToUInt32((double)tsamud / entireTsamudSum * 100);
+                    notTsamudNum = 100 - tsamudNum;
+                }
+
+                CalculateHeaders(adjustableNum, tsamudNum, out FixHeader, out IndexationHeader1,
+                    out IndexationHeader2, out IndexationHeader3);
+                // set the right numbers to the header
+                string brackets1 = ENG_BRACKETS1;
+                string brackets2 = ENG_BRACKETS2;
+                if (Share.cultureInfo.Name.Equals("he-IL"))
+                {
+                    brackets1 = HEB_BRACKETS1;
+                    brackets2 = HEB_BRACKETS2;
+                }
+                structureTypeString = FixHeader + ", " + IndexationHeader1 + brackets1 + fixNum + "% "
+                    + IndexationHeader2 + " , " + adjustableNum + "% " + IndexationHeader3 + brackets2;
+
             }
         }
 
@@ -2029,8 +1963,8 @@ namespace WisorLibrary.Utilities
 
 
 
-
-        public static void CalculateHeaders(uint adjustable, uint tsamudNum, out string FixHeader,
+#if NO_NEED_ANY_MORE
+        public static void CalculateHeadersOLD(uint adjustable, uint tsamudNum, out string FixHeader,
              out string IndexationHeader1, out string IndexationHeader2, out string IndexationHeader3)
         {
             FixHeader = IndexationHeader1 = IndexationHeader2 = IndexationHeader3 = MiscConstants.UNDEFINED_STRING;
@@ -2077,6 +2011,71 @@ namespace WisorLibrary.Utilities
             else if (MiscConstants.UNDEFINED_UINT < tsamudNum && 50 < tsamudNum)
             {
                 IndexationHeader1 = Properties.Resources.stressTestMostMoneyTsamud;
+            }
+        }
+#endif
+
+        //MinProductPercantage MidProductPercantage MaxProductPercantage
+        public static void CalculateHeaders(uint adjustable, uint tsamudNum, out string FixHeader,
+             out string IndexationHeader1, out string IndexationHeader2, out string IndexationHeader3)
+        {
+            FixHeader = IndexationHeader1 = MiscConstants.UNDEFINED_STRING;
+            IndexationHeader2 = Properties.Resources.stressTestFixRate;
+            IndexationHeader3 = Properties.Resources.stressTestDynamicRate;
+
+            // The amount of money on Adjustable products = 100%" 
+            if (MiscConstants.MaxProductPercantage == adjustable)
+            {
+                FixHeader = Properties.Resources.stressTestMaxFlexible;
+            }
+            // The amount of money on Adjustable products > 50% and also < 100%
+            else if (MiscConstants.MaxProductPercantage > adjustable && MiscConstants.MidProductPercantage < adjustable)
+            {
+                FixHeader = Properties.Resources.stressTestMoreFlexible;
+            }
+            // The amount of money on Adjustable products = 50%
+            else if (MiscConstants.MidProductPercantage == adjustable)
+            {
+                FixHeader = Properties.Resources.stressTestBalanceFlexible;
+            }
+            // The amount of money on Adjustable products > 0% and also < 50%
+            else if (MiscConstants.MidProductPercantage > adjustable && MiscConstants.MinProductPercantage < adjustable)
+            {
+                FixHeader = Properties.Resources.stressTestMoreStable;
+            }
+            // The amount of money on Adjustable products = 0%
+            else if (MiscConstants.MinProductPercantage == adjustable)
+            {
+                FixHeader = Properties.Resources.stressTestMaxStable;
+            }
+
+            if (markets.ISRAEL == Share.theMarket)
+            {
+                // The amount of money with index Madad = 0%
+                if (MiscConstants.MinProductPercantage == tsamudNum)
+                {
+                    IndexationHeader1 = Properties.Resources.stressTestAllMoneyNotTsamud; // כאשר כל הכסף לא צמוד למדד
+                }
+                // The amount of money with index Madad > 0% and also < 50%
+                else if (MiscConstants.MinProductPercantage < tsamudNum && MiscConstants.MidProductPercantage > tsamudNum)
+                {
+                    IndexationHeader1 = Properties.Resources.stressTestPartMoneyTsamud; // כאשר רוב הכסף לא צמוד למדד
+                }
+                // The amount of money with index Madad = 50%
+                else if (MiscConstants.MidProductPercantage == tsamudNum)
+                {
+                    IndexationHeader1 = Properties.Resources.stressTestHalfMoneyTsamud; // כאשר חצי מהכסף צמוד למדד
+                }
+                // The amount of money with index Madad > 50% and also < 100%
+                else if (MiscConstants.MidProductPercantage < tsamudNum && MiscConstants.MaxProductPercantage > tsamudNum)
+                {
+                    IndexationHeader1 = Properties.Resources.stressTestMostMoneyTsamud; // כאשר רוב הכסף צמוד למדד
+                }
+                // The amount of money with index Madad = 100%
+                else if (MiscConstants.MaxProductPercantage == tsamudNum)
+                {
+                    IndexationHeader1 = Properties.Resources.stressTestAllMoneyTsamud; // כאשר כל הכסף צמוד למדד
+                }
             }
         }
 
@@ -2359,6 +2358,394 @@ namespace WisorLibrary.Utilities
 
             return translated;
         }
+
+
+
+        // enable the API to change the market in every call
+        public static bool SetMarketValue(string marketName) 
+        {
+            bool rc = false;
+            // read all the specific market config data
+            // read all the generic market config data
+            // ensure all the must data is defined
+            markets market = (markets)Enum.Parse(typeof(markets), marketName, true);
+            if (markets.NONE != market && markets.OTHER != market)
+            {
+                rc = true;
+
+                RunEnvironment.SetMarket(market);
+                foreach (KeyValuePair<string, string> config in AllMarketsConfigurationValues)
+                {
+                    if (config.Key.ToLower() == marketName.ToLower() || config.Key == MiscConstants.GENERIC_CONFIG)
+                    {
+                        // extract the setting
+                        string[] entities = config.Value.Split(MiscConstants.COMMA);
+                        AnalayzeConfiguration(entities[0], entities[1]);
+                    }
+                }
+            }
+
+            // check that all configuration is set proprly
+            string msg;
+            rc = CheckConfigurationConsistancy(out msg);
+            if (!rc)
+            {
+                Console.WriteLine("ERROR: SetMarketValue failed in CheckConfigurationConsistancy: " + msg);
+                //return rc;
+            }
+
+            return rc;
+        }
+
+        // read all the config file to memory in order to allow setting the market per call
+        static List<KeyValuePair<string, string>> AllMarketsConfigurationValues = new List<KeyValuePair<string, string>>();
+
+        static void AddEntryToList(string Market, string key, string value)
+        {
+            AllMarketsConfigurationValues.Add(new KeyValuePair<string, string>(Market, key + MiscConstants.COMMA + value));
+        }
+
+        public static bool LoadXMLConfigurationFileToMemory(string filename/*, bool isFullConfigFilename*/)
+        {
+            string fullFilename = filename;
+            string dir = Path.GetDirectoryName(filename) + Path.DirectorySeparatorChar;
+            
+            //Share.ConfigurationDataDirectory = dir;
+            bool rc = false;
+
+            try
+            {
+                if (File.Exists(fullFilename))
+                {
+                    WindowsUtilities.loggerMethod("LoadXMLConfigurationFileToMemory file: " + fullFilename);
+
+                    XmlDocument doc = new XmlDocument();
+
+                    //load up the xml from the location 
+                    doc.Load(fullFilename);
+
+                    if (0 < doc.DocumentElement.ChildNodes.Count)
+                        rc = true;
+
+                    string theCurrentMarket = MiscConstants.GENERIC_CONFIG;
+
+                    // cycle through each child noed 
+                    foreach (XmlNode child in doc.DocumentElement.ChildNodes)
+                    {
+                        foreach (XmlNode node in child)
+                        {
+                            switch (child.Name/*.ToLower()*/)
+                            {
+                                case MiscConstants.MARKET_SETUP:
+                                    /*rc =*/ MiscUtilities.SetMarketValue(node.Value);
+                                    break;
+                                case MiscConstants.MARKET_START:
+                                    theCurrentMarket = node.Value;
+                                    break;
+                                case MiscConstants.MARKET_END:
+                                    theCurrentMarket = MiscConstants.GENERIC_CONFIG;
+                                    break;
+                                case MiscConstants.CUSTOMER_NAME:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.CUSTOMER_NAME, node.Value);
+                                    break;
+                                // this should be set by the API
+                                //case MiscConstants.MARKET:
+                                //    markets market = (markets)Enum.Parse(typeof(markets), node.Value, true);
+                                //    RunEnvironment.SetMarket(market);
+                                //    break;
+                                case MiscConstants.CRETIRIA_FILENAME:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.CRETIRIA_FILENAME, dir + node.Value);
+                                    break;
+                                case MiscConstants.LOAN_FILENAME:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.LOAN_FILENAME, dir + node.Value);
+                                    break;
+                                case MiscConstants.RATES_FILENAME:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.RATES_FILENAME, dir + node.Value);
+                                    break;
+                                case MiscConstants.BANK_RATES_FILENAME:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.BANK_RATES_FILENAME, dir + node.Value);
+                                    break;
+                                case MiscConstants.SECOND_PERIOD_RATES_FILENAME:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.SECOND_PERIOD_RATES_FILENAME, dir + node.Value);
+                                    break;
+                                case MiscConstants.SECOND_PERIOD_BANK_RATES_FILENAME:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.SECOND_PERIOD_BANK_RATES_FILENAME, dir + node.Value);
+                                    break;
+                                case MiscConstants.HISTORIC_FILENAME:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.HISTORIC_FILENAME, dir + node.Value);
+                                    break;
+                                case MiscConstants.COMBINATIONS_FILE:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.COMBINATIONS_FILE, dir + node.Value);
+                                    break;
+                                case MiscConstants.COMBINATIONS_FILE_2_PRODUCTS_IN_COMBINATION:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.COMBINATIONS_FILE_2_PRODUCTS_IN_COMBINATION, dir + node.Value);
+                                    break;
+                                case MiscConstants.RISK_LIQUIDITY_FILENAME:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.RISK_LIQUIDITY_FILENAME, dir + node.Value);
+                                    break;
+                                case MiscConstants.PRODUCTS_FILENAME:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.PRODUCTS_FILENAME, dir + node.Value);
+                                    break;
+                                case MiscConstants.RISK_FACTOR:
+                                   AddEntryToList(theCurrentMarket, MiscConstants.RISK_FACTOR, node.Value);
+                                   break;
+                                case MiscConstants.LIQUIDITY_FACTOR:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.LIQUIDITY_FACTOR, node.Value);
+                                    break;
+                                case MiscConstants.BENEFIT_FACTOR:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.BENEFIT_FACTOR, node.Value);
+                                    break;
+                                case MiscConstants.BENEFIT_THRESHOLD:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.BENEFIT_THRESHOLD, node.Value);
+                                    break;
+                                case MiscConstants.MAX_COMBINATIONS:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.MAX_COMBINATIONS, node.Value);
+                                    break;
+                                case MiscConstants.SHOULD_STORE_REPORT_AS_LONG_PDF:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.SHOULD_STORE_REPORT_AS_LONG_PDF, node.Value);
+                                    // Share.shouldCreateLongPDFReport = "yes" == node.Value ? true : false;
+                                    // ensure the directory realy exists
+                                    if (Share.shouldCreateLongPDFReport)
+                                    {
+                                        string fn = MiscUtilities.GetReportFileName("tempID", FileType.HTML);
+                                        if (!Directory.Exists(Path.GetDirectoryName(fn)))
+                                            Directory.CreateDirectory(Path.GetDirectoryName(fn));
+                                    }
+                                    break;
+                                case MiscConstants.SHOULD_STORE_REPORT_AS_SHORT_PDF:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.SHOULD_STORE_REPORT_AS_SHORT_PDF, node.Value);
+                                    // Share.shouldCreateShortPDFReport = "yes" == node.Value ? true : false;
+                                    // ensure the directory realy exists
+                                    if (Share.shouldCreateShortPDFReport)
+                                    {
+                                        string fn = MiscUtilities.GetReportFileName("tempID", FileType.PDF);
+                                        if (!Directory.Exists(Path.GetDirectoryName(fn)))
+                                            Directory.CreateDirectory(Path.GetDirectoryName(fn));
+                                    }
+                                    break;
+                                case MiscConstants.SHOULD_STORE_REPORT_IN_DB:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.SHOULD_STORE_REPORT_IN_DB, node.Value);
+                                    // Share.ShouldStoreInDB = "yes" == node.Value ? true : false;
+                                    break;
+                                case MiscConstants.FROM_TO_LINES_TO_LOAD_LOANS:
+                                    
+                                    //<from_line>,<to_line>
+                                    string[] lines = node.Value.Split(MiscConstants.COMMA);
+                                    if (!String.IsNullOrEmpty(lines[0])) {
+                                        AddEntryToList(theCurrentMarket, MiscConstants.READ_LOANS_FROM_LINE, lines[0]);
+                                        // Share.LoansLoadFromLine = System.Convert.ToUInt32(lines[0]) /*- 1*/; // the line index starts from zero
+                                    }
+                                    if (!String.IsNullOrEmpty(lines[1])) {
+                                        AddEntryToList(theCurrentMarket, MiscConstants.READ_LOANS_TO_LINE, lines[1]);
+                                        // Share.LoansLoadToLine = System.Convert.ToUInt32(lines[1]) /*- 1*/; // the line index starts from zero
+                                    }
+                                    break;
+                                case MiscConstants.FROM_IDS_LOAD_LOANS:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.FROM_IDS_LOAD_LOANS, node.Value);
+                                    // Share.LoansLoadIDsFromLine = node.Value;
+                                    break;
+                                case MiscConstants.NUMBER_OF_PRODUCTS_IN_COMBINATION:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.NUMBER_OF_PRODUCTS_IN_COMBINATION, node.Value);
+                                    // Share.NumberOfProductsInCombination = System.Convert.ToInt32(node.Value);
+                                    break;
+
+                                default:
+                                    if (MiscConstants.MARKET != child.Name)
+                                        Console.WriteLine("LoadXMLConfigurationFileToMemory Illegal input: " + child.Name);
+                                    break;
+                            }
+
+                        }
+                    }
+                }
+                else
+                {
+                    WindowsUtilities.loggerMethod("LoadXMLConfigurationFileToMemory file: " + fullFilename + " does not exists!!!");
+                }
+            }
+            catch (Exception ex)
+            {
+                WindowsUtilities.loggerMethod("NOTICE: LoadXMLConfigurationFileToMemory Exception occured: " + ex.ToString());
+            }
+            return rc;
+        }
+
+
+        static bool CheckConfigurationConsistancy(out string msg)
+        {
+            bool rc = false;
+            msg = MiscConstants.UNDEFINED_STRING;
+            if (markets.NONE == WisorLib.Share.theMarket || null == WisorLib.Share.cultureInfo)
+            {
+                msg += "Undefined market. ";
+            }
+            if (String.IsNullOrEmpty(WisorLib.Share.CriteriaFileName))
+            {
+                msg += "Undefined CriteriaFileName. ";
+            }
+            if (String.IsNullOrEmpty(WisorLib.Share.LoansFileName))
+            {
+                msg += "Undefined LoansFileName. ";
+            }
+            if (String.IsNullOrEmpty(WisorLib.Share.RatesFileName))
+            {
+                msg += "Undefined RatesFileName. ";
+            }
+            if (String.IsNullOrEmpty(WisorLib.Share.BankRatesFileName))
+            {
+                msg += "Undefined BankRatesFileName. ";
+            }
+            if (String.IsNullOrEmpty(WisorLib.Share.CombinationFileName))
+            {
+                msg += "Undefined CombinationFileName. ";
+            }
+            if (MiscConstants.UNDEFINED_INT == WisorLib.Share.NumberOfProductsInCombination)
+            {
+                msg += "Undefined NumberOfProductsInCombination. ";
+            }
+            if (markets.UK == WisorLib.Share.theMarket) {
+                if (String.IsNullOrEmpty(WisorLib.Share.SecondPeriodFilename))
+                {
+                    msg += "Undefined SecondPeriodFilename. ";
+                }
+                if (String.IsNullOrEmpty(WisorLib.Share.SecondPeriodBankRatesFileName))
+                {
+                    msg += "Undefined SecondPeriodBankRatesFileName. ";
+                }
+            }
+            if (markets.ISRAEL == WisorLib.Share.theMarket)
+            {
+                if (String.IsNullOrEmpty(WisorLib.Share.HistoricFileName))
+                {
+                    msg += "Undefined HistoricFileName. ";
+                }
+            }
+            if (String.IsNullOrEmpty(WisorLib.Share.Products2InCombinationFileName))
+            {
+                msg += "Undefined Products2InCombinationFileName. ";
+            }
+            if (String.IsNullOrEmpty(WisorLib.Share.ProductsFileName))
+            {
+                msg += "Undefined ProductsFileName. ";
+            }
+
+            if (MiscConstants.UNDEFINED_STRING == msg)
+                rc = true;
+
+            if (rc)
+            {
+                Console.WriteLine("theMarket: " + WisorLib.Share.theMarket + 
+                    ", CriteriaFileName: " + WisorLib.Share.CriteriaFileName +
+                    ", LoansFileName: " + WisorLib.Share.LoansFileName +
+                    ", RatesFileName: " + WisorLib.Share.RatesFileName);
+            }
+
+            return rc;
+        }
+
+        static void AnalayzeConfiguration(string name, string value, string dir = MiscConstants.UNDEFINED_STRING)
+        {
+            switch (name/*.ToLower()*/)
+            {
+                case MiscConstants.CUSTOMER_NAME:
+                    Share.CustomerName = value;
+                    break;
+                case MiscConstants.MARKET:
+                    markets market = (markets)Enum.Parse(typeof(markets), value, true);
+                    RunEnvironment.SetMarket(market);
+                    break;
+                case MiscConstants.CRETIRIA_FILENAME:
+                    Share.CriteriaFileName = dir + value;
+                    break;
+                case MiscConstants.LOAN_FILENAME:
+                    Share.LoansFileName = dir + value;
+                    break;
+                case MiscConstants.RATES_FILENAME:
+                    Share.RatesFileName = dir + value;
+                    break;
+                case MiscConstants.BANK_RATES_FILENAME:
+                    Share.BankRatesFileName = dir + value;
+                    break;
+                case MiscConstants.SECOND_PERIOD_RATES_FILENAME:
+                    Share.SecondPeriodFilename = dir + value;
+                    break;
+                 case MiscConstants.SECOND_PERIOD_BANK_RATES_FILENAME:
+                    Share.SecondPeriodBankRatesFileName = dir + value;
+                    break;
+                case MiscConstants.HISTORIC_FILENAME:
+                    Share.HistoricFileName = dir + value;
+                    break;
+                case MiscConstants.COMBINATIONS_FILE:
+                    Share.CombinationFileName = dir + value;
+                    break;
+                case MiscConstants.COMBINATIONS_FILE_2_PRODUCTS_IN_COMBINATION:
+                    Share.Products2InCombinationFileName = dir + value;
+                    break;
+                case MiscConstants.RISK_LIQUIDITY_FILENAME:
+                    Share.RiskAndLiquidityFileName = dir + value;
+                    break;
+                case MiscConstants.PRODUCTS_FILENAME:
+                    Share.ProductsFileName = dir + value;
+                    break;
+                case MiscConstants.RISK_FACTOR:
+                    Share.RiskFactor = System.Convert.ToDouble(value);
+                    break;
+                case MiscConstants.LIQUIDITY_FACTOR:
+                    Share.LiquidityFactor = System.Convert.ToDouble(value);
+                    break;
+                case MiscConstants.BENEFIT_FACTOR:
+                    Share.BenefitFactor = System.Convert.ToDouble(value);
+                    break;
+                case MiscConstants.BENEFIT_THRESHOLD:
+                    Share.ProductBeneficialScoreCriteria = System.Convert.ToUInt32(value);
+                    break;
+                case MiscConstants.MAX_COMBINATIONS:
+                    Share.MaxCombinationNumber = System.Convert.ToUInt32(value);
+                    break;
+                case MiscConstants.SHOULD_STORE_REPORT_AS_LONG_PDF:
+                    Share.shouldCreateLongPDFReport = "yes" == value ? true : false;
+                    // ensure the directory realy exists
+                    if (Share.shouldCreateLongPDFReport)
+                    {
+                        string fn = MiscUtilities.GetReportFileName("tempID", FileType.HTML);
+                        if (!Directory.Exists(Path.GetDirectoryName(fn)))
+                            Directory.CreateDirectory(Path.GetDirectoryName(fn));
+                    }
+                    break;
+                case MiscConstants.SHOULD_STORE_REPORT_AS_SHORT_PDF:
+                    Share.shouldCreateShortPDFReport = "yes" == value ? true : false;
+                    // ensure the directory realy exists
+                    if (Share.shouldCreateShortPDFReport)
+                    {
+                        string fn = MiscUtilities.GetReportFileName("tempID", FileType.PDF);
+                        if (!Directory.Exists(Path.GetDirectoryName(fn)))
+                            Directory.CreateDirectory(Path.GetDirectoryName(fn));
+                    }
+                    break;
+                case MiscConstants.SHOULD_STORE_REPORT_IN_DB:
+                    Share.ShouldStoreInDB = "yes" == value ? true : false;
+                    break;
+                case MiscConstants.FROM_TO_LINES_TO_LOAD_LOANS:
+                    //<from_line>,<to_line>
+                    string[] lines = value.Split(MiscConstants.COMMA);
+                    if (!String.IsNullOrEmpty(lines[0]))
+                        Share.LoansLoadFromLine = System.Convert.ToUInt32(lines[0]) /*- 1*/; // the line index starts from zero
+                    if (!String.IsNullOrEmpty(lines[1]))
+                        Share.LoansLoadToLine = System.Convert.ToUInt32(lines[1]) /*- 1*/; // the line index starts from zero
+                    break;
+                case MiscConstants.FROM_IDS_LOAD_LOANS:
+                    Share.LoansLoadIDsFromLine = value;
+                    break;
+                case MiscConstants.NUMBER_OF_PRODUCTS_IN_COMBINATION:
+                    Share.NumberOfProductsInCombination = System.Convert.ToInt32(value);
+                    break;
+
+                default:
+                    Console.WriteLine("LoadXMLConfigurationFile Illegal input: " + name);
+                    break;
+            }
+        }
+
 
     }
 

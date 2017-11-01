@@ -164,6 +164,11 @@ namespace WisorLib
         public static double BANK_PRIME_RATE_FACTOR = 0.001;
         //public static double BANK_BBBR_RATE_FACTOR = 0.001;
 
+        // composition headers constants
+        public const int MinProductPercantage = 0;
+        public const int MidProductPercantage = 50;
+        public const int MaxProductPercantage = 100;
+
         // enable to select the right composition by name
         internal const string BEST_DIFF_COMPOSITION = "bestDiffComposition";
         internal const string BEST_BANK_COMPOSITION = "bestBankComposition";
@@ -189,7 +194,14 @@ namespace WisorLib
         public enum Liquidity { MinimumLiquidity1, LessLiquidity2, MediumLiquidity3, MoreLiquidity4, MaximumLiquidity5 , NONELiquidity};
         public const string RISK_LIQUIDITY_FILE = "RiskLiquidityCiti.xlsx";
 
-        public static object HEBREW_STR { get { return "he-IL"; }  }
+        public static string HEBREW_STR { get { return "he-IL"; }  }
+        public static string GENERIC_CONFIG { get { return "GENERIC_CONFIG"; } }
+        public const string MARKET_START = "MARKET_START";
+        public const string MARKET_END = "MARKET_END";
+        public const string MARKET_SETUP = "MARKET_SETUP";
+        public const string READ_LOANS_FROM_LINE = "READ_LOANS_FROM_LINE";
+        public const string READ_LOANS_TO_LINE = "READ_LOANS_TO_LINE";
+            
 
         public enum Benefit { Benefit1, Benefit2, Benefit3, Benefit4, Benefit5, NONEBenefit };
         public enum FixOrAdjustable { FIX, ADJUSTABLE };
