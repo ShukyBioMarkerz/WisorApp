@@ -11,6 +11,7 @@ using static WisorLib.MiscConstants;
 using System.Xml.Serialization;
 using System.Globalization;
 using WisorLibrary.ReportApplication;
+using WisorLibrary.Logic;
 
 namespace WisorLibrary.DataObjects
 {
@@ -60,6 +61,9 @@ namespace WisorLibrary.DataObjects
         public double OriginalRate2 { get; set; }
         public double OriginalMargin { get; set; }
         public double OriginalMargin2 { get; set; }
+        public double PrintedOriginalMargin { get; set; }
+        public double PrintedOriginalMargin2 { get; set; }
+      
         public uint OriginalTime { get; set; }
         public int firstTimePeriod { set; get; }
         //public indices indices { set; get; }
@@ -81,11 +85,11 @@ namespace WisorLibrary.DataObjects
         //public uint Left2Pay { get; set; }
         public uint EstimateFuturePay { get; set; }
         //public double EstimateMargin { get; set; }
-        public uint EstimateProfitSoFar { get; set; }
+        public int EstimateProfitSoFar { get; set; }
         public double EstimateProfitPercantageSoFar { get; set; }
-        public uint EstimateTotalProfit { get; set; }
+        public int EstimateTotalProfit { get; set; }
         public double EstimateTotalProfitPercantage { get; set; }
-        public uint EstimateFutureProfit { get; set; }
+        public int EstimateFutureProfit { get; set; }
         public double EstimateFutureProfitPercantage { get; set; }
         public uint RemaingLoanAmount { get; set; }
         public uint MonthlyPaymentCalc { get; set; }
@@ -178,6 +182,16 @@ namespace WisorLibrary.DataObjects
                     {
                         if (shouldCreateShortPDFReport)
                         {
+                            // get the entire composition luch silukin
+                            for (int i = 0; i < compositions.Length; i++)
+                            {
+                                AmortisationData amortisationData = new AmortisationData();
+                                Calculations.CalculateLuahSilukinAllResultsForComposition(compositions[i], ref amortisationData);
+                                compositions[i].AmortisationData = amortisationData;
+                                // debug - print the values
+                                MiscUtilities.PrintAmortisationData(amortisationData);
+                            }
+
                             // Reporter.LenderReport(env, ReportFilename, Share.cultureInfo, false /*isPrintCovers*/);
                             bool rc = MiscUtilities.RunShortPDFreport(ReportFilename, orderDataContainer2, env.theLoan.resultReportData,
                                 Share.cultureInfo, env);

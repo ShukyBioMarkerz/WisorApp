@@ -374,11 +374,73 @@ namespace WisorLibrary.Logic
             MiscUtilities.Log2File(msg);
         }
 
+        /*
+         * OriginalLoanTable4ShortUK olt4s = new OriginalLoanTable4ShortUK(
+                        (int)c.opts[j].optAmt, c.opts[j].product.name,
+                        (int)c.opts[j].optTime, c.opts[j].optRateFirstPeriod * 100,  c.opts[j].optRateSecondPeriod * 100, 
+                        (int)c.opts[j].optPmt, (int)c.opts[j].optPmt2, 
+                        (int)c.opts[j].optTtlPay);
+
+          public OriginalLoanTable4ShortUK(int amount, string product, int time, double rate, double followOnRate, 
+                    int monthlyPMT, int monthly, int totalPayment)
+
+        */
+
+#if NEED_2_COMPLETE
+
+#else
+        static void  AddAmortisationData(AmortisationData amortisationData, ref AmortisationData acculumaleAmortisationData)
+        {
+            if (null == acculumaleAmortisationData || null == acculumaleAmortisationData.AmortisationTable || 0 >= acculumaleAmortisationData.AmortisationTable.Length)
+            {
+                acculumaleAmortisationData = new AmortisationData();
+                acculumaleAmortisationData.AmortisationTable = amortisationData.AmortisationTable;
+            }
+            else
+            {
+                int length = Math.Min(amortisationData.AmortisationTable.Length, acculumaleAmortisationData.AmortisationTable.Length);
+            
+                for (int i = 0; i < length; i++)
+                {
+                    int currentYear = amortisationData.AmortisationTable[i].Year;
+                    // find the same year in the acculumaleAmortisationData
+                    // add the fields
+                    acculumaleAmortisationData.AmortisationTable[i].MonthlyPmt += amortisationData.AmortisationTable[i].MonthlyPmt;
+                    acculumaleAmortisationData.AmortisationTable[i].PaidSoFar += amortisationData.AmortisationTable[i].PaidSoFar;
+                    acculumaleAmortisationData.AmortisationTable[i].RemainingAmount += amortisationData.AmortisationTable[i].RemainingAmount;
+                    acculumaleAmortisationData.AmortisationTable[i].Year = amortisationData.AmortisationTable[i].Year;
+
+                }
+               
+            }
+        }
+
+        // Calculate the luach silukin and get the entire monthly data as well for the entire composition
+        public static void CalculateLuahSilukinAllResultsForComposition(Composition composition, ref AmortisationData amortisationData)
+        {
+            AmortisationData currentAmortisationData = new AmortisationData();
+
+            for (int i = 0; i < composition.opts.Length; i++) {
+                if (null != composition.opts[i])
+                {
+                    GenericProduct gp = composition.opts[i].product;
+                    CalculateLuahSilukinAllResults(gp.originalIndexUsedFirstTimePeriod, // indices 
+                       composition.opts[i].optRateFirstPeriod /* originalRate*/, gp.indexUsedFirstTimePeriod /*originalInflation*/,
+                       composition.opts[i].optAmt /*originalLoanAmount*/, composition.opts[i].optTime /*originalLoanTime*/,
+                       DateTime.Now /*dateLoanTaken*/, ref currentAmortisationData,
+                       null /*RunEnvironment env*/, false /*IsBank*/);
+
+                    AddAmortisationData(currentAmortisationData, ref amortisationData);
+                }
+            }
+        }
+#endif
+
         // Calculate the luach silukin and get the entire monthly data as well
         public static void CalculateLuahSilukinAllResults(indices indices,
            double originalRate, double originalInflation,
            double originalLoanAmount, uint originalLoanTime,
-           DateTime dateLoanTaken, ref AmortisationTable[] amortisationData,
+           DateTime dateLoanTaken, ref AmortisationData amortisationData,
            RunEnvironment env, bool IsBank)
         {
             List<AmortisationTable> amortisationTable = new List<AmortisationTable>();
@@ -438,7 +500,7 @@ namespace WisorLibrary.Logic
                 if (0 == m % 12)
                 {
                     amortisationTable.Add(new AmortisationTable(NumOfYears, startingAmount /*remaining amount*/,
-                        totalPaidSoFar /*accululate payment*/));
+                        totalPaidSoFar /*accululate payment*/, monthlyPmt));
                     NumOfYears++;
                 }
             }
@@ -466,12 +528,12 @@ namespace WisorLibrary.Logic
                 if (0 == m % 12)
                 {
                     amortisationTable.Add(new AmortisationTable(NumOfYears, startingAmountFuture /*remaining amount*/,
-                        totalPaidSoFar + totalPaidFuture /*accululate payment*/));
+                        totalPaidSoFar + totalPaidFuture /*accululate payment*/, monthlyPmtFuture));
                     NumOfYears++;
                 }
 
             }
-            amortisationData = amortisationTable.ToArray();
+            amortisationData.AmortisationTable = amortisationTable.ToArray();
         }
 
 
@@ -898,6 +960,7 @@ namespace WisorLibrary.Logic
             calculationData.RemaingLoanTime = calculationBorrowerData.RemaingLoanTime;
             calculationData.MonthlyPaymentCalc = calculationBorrowerData.MonthlyPaymentCalc;
             calculationData.FirstMonthlyPMT = calculationBorrowerData.FirstMonthlyPMT;
+            calculationData.FirstMonthlyPMT2 = calculationBorrowerData.FirstMonthlyPMT2;
 
             // return the bank data
             calculationData.BankPayUntilToday = calculationBankData.PayUntilToday;
@@ -907,7 +970,7 @@ namespace WisorLibrary.Logic
             calculationData.EstimateFuturePay = calculationBorrowerData.PayFuture;
 
             // the bank pay - the borrower pay is the profit
-            calculationData.EstimateProfitSoFar = calculationBorrowerData.PayUntilToday - calculationBankData.PayUntilToday;
+            calculationData.EstimateProfitSoFar = (int) (calculationBorrowerData.PayUntilToday - calculationBankData.PayUntilToday);
             // EstimateProfitSoFar / loan amount
             if (0 < originalLoanAmount)
                 calculationData.EstimateProfitPercantageSoFar = calculationData.EstimateProfitSoFar / originalLoanAmount;
@@ -919,8 +982,8 @@ namespace WisorLibrary.Logic
             if (totalBorowerPay >= totalBankPay)
             {
                 calculationData.EstimateTotalProfit =
-                    calculationBorrowerData.PayUntilToday + calculationBorrowerData.PayFuture -
-                    calculationBankData.PayUntilToday - calculationBankData.PayFuture;
+                    (int) (calculationBorrowerData.PayUntilToday + calculationBorrowerData.PayFuture -
+                    calculationBankData.PayUntilToday - calculationBankData.PayFuture);
             }
             else
             {
@@ -934,14 +997,14 @@ namespace WisorLibrary.Logic
                 calculationData.EstimateTotalProfitPercantage = calculationData.EstimateTotalProfit / originalLoanAmount;
 
             // 
-            calculationData.EstimateFutureProfit = calculationBorrowerData.PayFuture - calculationBankData.PayFuture;
+            calculationData.EstimateFutureProfit = (int) (calculationBorrowerData.PayFuture - calculationBankData.PayFuture);
             if (0 < originalLoanAmount)
                 calculationData.EstimateFutureProfitPercantage = calculationData.EstimateFutureProfit / originalLoanAmount;
         }
 
         private static void CopyResultRepportData(double originalLoanAmount, ResultReportData calculationData,
             ResultReportData calculationData1, ResultReportData calculationData2,
-            double finalRemaingLoanAmount, double finalFirstMonthlyPMT, double finalRemaingLoanTime, bool isBank)
+            double finalRemaingLoanAmount, double finalFirstMonthlyPMT1, double finalFirstMonthlyPMT2, double finalRemaingLoanTime, bool isBank)
         {
             // return the borrower data
             calculationData.PayUntilToday = 
@@ -954,7 +1017,8 @@ namespace WisorLibrary.Logic
                 // calculationBorrowerData1.RemaingLoanTime + calculationBorrowerData2.RemaingLoanTime;
             calculationData.MonthlyPaymentCalc = 
                 calculationData1.MonthlyPaymentCalc + calculationData2.MonthlyPaymentCalc;
-            calculationData.FirstMonthlyPMT = (uint) finalFirstMonthlyPMT;
+            calculationData.FirstMonthlyPMT = (uint) finalFirstMonthlyPMT1;
+            calculationData.FirstMonthlyPMT2 = (uint)finalFirstMonthlyPMT2;
             //    calculationBorrowerData1.FirstMonthlyPMT + calculationBorrowerData2.FirstMonthlyPMT;
             //calculationData.EstimateFuturePay = 
             //    calculationBorrowerData1.PayFuture + calculationBorrowerData2.PayFuture;
@@ -1160,6 +1224,7 @@ namespace WisorLibrary.Logic
                 calculationBankData3 = new ResultReportData();
             bool needToAccumulateResults = true;
             double finalRemaingLoanAmount, finalRemaingLoanTime, finalFirstMonthlyPMT;
+            double finalFirstMonthlyPMT1 = MiscConstants.UNDEFINED_DOUBLE, finalFirstMonthlyPMT2 = MiscConstants.UNDEFINED_DOUBLE;
             finalRemaingLoanAmount = finalFirstMonthlyPMT = finalRemaingLoanTime = MiscConstants.UNDEFINED_DOUBLE;
             double finalBankRemaingLoanAmount, finalBankFirstMonthlyPMT, finalBankRemaingLoanTime;
             finalBankRemaingLoanAmount = finalBankFirstMonthlyPMT = finalBankRemaingLoanTime = MiscConstants.UNDEFINED_DOUBLE;
@@ -1209,6 +1274,7 @@ namespace WisorLibrary.Logic
                     dateLoanTaken, ref calculationBorrowerData1, env, false /*IsBank*/, true /*useConstantRate*/, 
                     out lastRate, accululateTime, ref finalRemaingLoanAmount, ref finalFirstMonthlyPMT, ref finalRemaingLoanTime);
 
+                finalFirstMonthlyPMT1 = calculationBorrowerData1.FirstMonthlyPMT;
                 accululateTime += newLoanTime;
 
                 // 2. From first time period -> today -> borrower interest rate is changing each month -> taken from historic DB file
@@ -1225,6 +1291,7 @@ namespace WisorLibrary.Logic
                     originalLoanTime, newLoanTime,
                     newLoanDate2, ref calculationBorrowerData2, env, false /*IsBank*/, false /*useConstantRate*/, 
                     out lastRate, accululateTime, ref finalRemaingLoanAmount, ref finalFirstMonthlyPMT, ref finalRemaingLoanTime);
+                finalFirstMonthlyPMT2 = calculationBorrowerData2.FirstMonthlyPMT;
                 accululateTime += newLoanTime;
 
                 // 3. From today until the end -> borrower interest rate is constant -> uses the last value of the last loop and doesnt change
@@ -1320,6 +1387,7 @@ namespace WisorLibrary.Logic
                     originalLoanTime, newLoanTime,
                     newLoanDate2, ref calculationBorrowerData2, env, false /*IsBank*/, true /*useConstantRate*/, 
                     out lastRate, accululateTime, ref finalRemaingLoanAmount, ref finalFirstMonthlyPMT, ref finalRemaingLoanTime);
+                finalFirstMonthlyPMT1 = calculationBorrowerData1.FirstMonthlyPMT; // TBD - omri. is it the first or second???
                 accululateTime += newLoanTime;
 
                 // 3. From first time period until the end -> borrower interest rate is constant -> taken from input file -> original rate second period
@@ -1331,6 +1399,7 @@ namespace WisorLibrary.Logic
                     originalLoanTime, newLoanTime,
                     newLoanDate2, ref calculationBorrowerData3, env, false /*IsBank*/, true /*useConstantRate*/, 
                     out lastRate, accululateTime, ref finalRemaingLoanAmount, ref finalFirstMonthlyPMT, ref finalRemaingLoanTime);
+                finalFirstMonthlyPMT2 = calculationBorrowerData3.FirstMonthlyPMT;
 
                 // the bank side
                 newLoanAmount = originalLoanAmount;
@@ -1338,7 +1407,7 @@ namespace WisorLibrary.Logic
                 newLoanTime = (uint)numOfMonthsUntilToday;
                 // 	1. From date taken -> today -> borrower interest rate is constant -> taken from input file -> original rate first period
                 Log("\nCalculate Luah Silukin for Bank first step for firstTimePeriod > numOfMonthsUntilToday:\n");
-                // the borrower side
+                // the bank side
                 CalculateLuahSilukinFullUK(indicesFirstTimePeriod, originalbankRate, originalInflation, newLoanAmount,
                     originalLoanTime, newLoanTime,
                     dateLoanTaken, ref calculationBankData1, env, true /*IsBank*/, true /*useConstantRate*/, 
@@ -1415,14 +1484,14 @@ namespace WisorLibrary.Logic
                 // accululate the borrower results
                 // now we have 3 result records
                 CopyResultRepportData(originalLoanAmount, calculationBorrowerData, calculationBorrowerData1, 
-                    calculationBorrowerData2, finalRemaingLoanAmount, finalFirstMonthlyPMT, finalRemaingLoanTime, false /*isBanke*/);
+                    calculationBorrowerData2, finalRemaingLoanAmount, finalFirstMonthlyPMT1, finalFirstMonthlyPMT2, finalRemaingLoanTime, false /*isBanke*/);
                 CopyResultRepportData(originalLoanAmount, calculationBorrowerData, calculationBorrowerData, 
-                    calculationBorrowerData3, finalRemaingLoanAmount, finalFirstMonthlyPMT, finalRemaingLoanTime, false /*isBanke*/);
+                    calculationBorrowerData3, finalRemaingLoanAmount, finalFirstMonthlyPMT1, finalFirstMonthlyPMT2, finalRemaingLoanTime, false /*isBanke*/);
 
                 CopyResultRepportData(originalLoanAmount, calculationBankData, calculationBankData1, calculationBankData2, 
-                    finalBankRemaingLoanAmount, finalBankFirstMonthlyPMT, finalBankRemaingLoanTime, true /*isBanke*/);
+                    finalBankRemaingLoanAmount, finalBankFirstMonthlyPMT, finalBankFirstMonthlyPMT, finalBankRemaingLoanTime, true /*isBanke*/);
                 CopyResultRepportData(originalLoanAmount, calculationBankData, calculationBankData, calculationBankData3, 
-                    finalBankRemaingLoanAmount, finalBankFirstMonthlyPMT, finalBankRemaingLoanTime, true /*isBanke*/);
+                    finalBankRemaingLoanAmount, finalBankFirstMonthlyPMT, finalBankFirstMonthlyPMT, finalBankRemaingLoanTime, true /*isBanke*/);
 
                 MiscUtilities.PrintResultReportData("calculationBorrowerData total", calculationBorrowerData);
                 MiscUtilities.PrintResultReportData("calculationBankData total", calculationBankData);

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using WisorLibrary.Logic;
+using WisorLibrary.ReportApplication;
 using WisorLibrary.Utilities;
 
 namespace WisorLib
@@ -37,6 +38,9 @@ namespace WisorLib
         public int TotalBenefit { get; set; }
         public int BankOriginalProfit { get; set; }
         public bool IsWinWin { get; internal set; }
+
+        // luch silukin
+        public AmortisationData AmortisationData { get; set; }
 
         // for the sake of serialization.....
         public Composition()
