@@ -238,6 +238,21 @@ namespace WisorLib
         }
 
         
+        private static string _BBBR_HistoricFileName;
+        public static string BBBRHistoricFileName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_BBBR_HistoricFileName))
+                    return MiscConstants.HISTORIC_FILE;
+                return _BBBR_HistoricFileName;
+            }
+            set
+            {
+                //if (File.Exists(value))
+                _BBBR_HistoricFileName = value;
+            }
+        }
 
         private static string historicFileName;
         public static string HistoricFileName

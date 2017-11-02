@@ -26,11 +26,16 @@ namespace WisorLibrary.DataObjects
         {
             get
             {
-                if (null == instance)
+                if (markets.ISRAEL == Share.theMarket)
                 {
-                    instance = new HistoricRate(MiscUtilities.GetHistoricRatesFilename());
+                    if (null == instance)
+                    {
+                        instance = new HistoricRate(MiscUtilities.GetHistoricRatesFilename());
+                    }
+                    return instance;
                 }
-                return instance;
+                else
+                    return null;
             }
         }
 
@@ -42,6 +47,11 @@ namespace WisorLibrary.DataObjects
         public static double GetHistoricIndex(indices indic, DateTime dateLoanTaken)
         {
             double index = 0;
+
+            if (null == instance || null == Instance.historicData)
+            {
+                instance = new HistoricRate(MiscUtilities.GetHistoricRatesFilename());
+            }
 
             if (null != Instance.historicData)
             {

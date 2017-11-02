@@ -82,17 +82,21 @@ namespace WisorLibrary.Utilities
 
         public static string GetHistoricRatesFilename()
         {
-            //string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
-            //string filename = dir + MiscConstants.HISTORIC_FILE;
-            string dir = GetDataDirectory() + Path.DirectorySeparatorChar;
-            string filename = MiscUtilities.GetFilename(dir + Share.HistoricFileName, dir + MiscConstants.HISTORIC_FILE);
-            return filename;
-            //bool rc = HistoricRate.SetFilename(filename);
-            //return rc;
+            return Share.HistoricFileName; 
+
+            ////string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
+            ////string filename = dir + MiscConstants.HISTORIC_FILE;
+            //string dir = GetDataDirectory() + Path.DirectorySeparatorChar;
+            //string filename = MiscUtilities.GetFilename(dir + Share.HistoricFileName, dir + MiscConstants.HISTORIC_FILE);
+            //return filename;
+            ////bool rc = HistoricRate.SetFilename(filename);
+            ////return rc;
         }
 
         public static string GetHistoricRatesBBBRFilename()
         {
+            return Share.BBBRHistoricFileName;
+
             string dir = GetDataDirectory() + Path.DirectorySeparatorChar;
             string filename = MiscUtilities.GetFilename(dir + MiscConstants.HISTORIC_BBBR_FILE, MiscConstants.UNDEFINED_STRING);
             return filename;
@@ -1435,8 +1439,7 @@ namespace WisorLibrary.Utilities
                         return rc;
                     }
                 }
-
-            }
+           }
 
             return rc;
         }
@@ -1622,7 +1625,7 @@ namespace WisorLibrary.Utilities
             Share.LoansLoadFromLine = MiscConstants.UNDEFINED_UINT;
             Share.LoansLoadIDsFromLine = MiscConstants.UNDEFINED_STRING;
             Share.shouldDebugLoans = true;
-            Share.shouldDebugLoansCalculation = false;
+            Share.shouldDebugLoansCalculation = true; //  false;
             Share.shouldDebugLoansOnlyWinWin = true;
             Share.shouldDebugLuchSilukin = false;
             Share.ShouldCreateCombinationDynamickly = false;
@@ -2474,6 +2477,9 @@ namespace WisorLibrary.Utilities
                                 case MiscConstants.HISTORIC_FILENAME:
                                     AddEntryToList(theCurrentMarket, MiscConstants.HISTORIC_FILENAME, dir + node.Value);
                                     break;
+                                case MiscConstants.BBBR_HISTORIC_FILENAME:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.BBBR_HISTORIC_FILENAME, dir + node.Value);
+                                    break;
                                 case MiscConstants.COMBINATIONS_FILE:
                                     AddEntryToList(theCurrentMarket, MiscConstants.COMBINATIONS_FILE, dir + node.Value);
                                     break;
@@ -2674,6 +2680,9 @@ namespace WisorLibrary.Utilities
                     break;
                 case MiscConstants.HISTORIC_FILENAME:
                     Share.HistoricFileName = dir + value;
+                    break;
+                case MiscConstants.BBBR_HISTORIC_FILENAME:
+                    Share.BBBRHistoricFileName = dir + value;
                     break;
                 case MiscConstants.COMBINATIONS_FILE:
                     Share.CombinationFileName = dir + value;
