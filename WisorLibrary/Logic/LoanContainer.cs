@@ -213,7 +213,7 @@ namespace WisorLibrary.Logic
         {
             //ld.LoanAmount = originalAmount;
             ld.ProductID = loan.ProductID;
-            ld.resultReportData.ProductName = loan.ProductID.stringTypeId;
+            ld.resultReportData.ProductName = (null != loan.ProductID) ? loan.ProductID.stringTypeId : MiscConstants.UNDEFINED_STRING;
             ld.resultReportData.BankName = Share.CustomerName;
             ld.resultReportData.ID = ld.ID = loan.ID;
             // the age is passing...
