@@ -154,7 +154,7 @@ namespace WisorLibrary.DataObjects
                 // for the sake of storing as XML
                 this.compositions = compositions;
             }
-            
+
         }
 
         public void Activate(RunEnvironment env, bool shouldStoreInDB, bool shouldCreateShortPDFReport, 
@@ -189,7 +189,16 @@ namespace WisorLibrary.DataObjects
                                 Calculations.CalculateLuahSilukinAllResultsForComposition(compositions[i], ref amortisationData);
                                 compositions[i].AmortisationData = amortisationData;
                                 // debug - print the values
-                                MiscUtilities.PrintAmortisationData(amortisationData);
+                                // MiscUtilities.PrintAmortisationData(amortisationData);
+
+                                uint adjustableNum, tsamudNum;
+                                // set the composition AdjustablePercantage and TsamudPercantage
+                                MiscUtilities.CalculateTypeOfProductsInComposition(compositions[i], out adjustableNum, out tsamudNum);
+                                compositions[i].AdjustablePercantage = adjustableNum;
+                                compositions[i].TsamudPercantage = tsamudNum;
+                                string structureTypeString;
+                                MiscUtilities.CalculateTypeOfProductsHeader(adjustableNum, tsamudNum, out structureTypeString);
+                                compositions[i].HeaderSummary = structureTypeString;
                             }
 
                             // Reporter.LenderReport(env, ReportFilename, Share.cultureInfo, false /*isPrintCovers*/);
