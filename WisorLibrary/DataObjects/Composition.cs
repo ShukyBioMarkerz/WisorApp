@@ -42,6 +42,10 @@ namespace WisorLib
         // luch silukin
         public AmortisationData AmortisationData { get; set; }
 
+        // Adjustable and Tsamud data
+        public uint AdjustablePercantage { get; set; }
+        public uint TsamudPercantage { get; set; }
+
         // for the sake of serialization.....
         public Composition()
         {
