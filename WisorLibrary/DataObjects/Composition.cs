@@ -45,6 +45,7 @@ namespace WisorLib
         // Adjustable and Tsamud data
         public uint AdjustablePercantage { get; set; }
         public uint TsamudPercantage { get; set; }
+        public string HeaderSummary { get; internal set; }
 
         // for the sake of serialization.....
         public Composition()
@@ -165,6 +166,7 @@ namespace WisorLib
             {
                 s += 
                 "X:optType" + "," + "X:optAmt" + "," + "X:optTime" + "," + "X:RateFirstPeriod" + "," +
+                "X:BankRateFirstPeriod" + "," +
                 "Y:optType" + "," + "Y:optAmt" + "," + "Y:optTime" + "," + "Y:RateFirstPeriod" + "," +
                 "Z:optType" + "," + "Z:optAmt" + "," + "Z:optTime" + "," + "Z:RateFirstPeriod" + "," +
                 "OPTXPmt" + "," + "OPTYPmt" + "," + "OPTZPmt" + "," + "ttlPmt" + "," +
@@ -177,6 +179,7 @@ namespace WisorLib
             {
                s +=
               "X:optType" + "," + "X:optAmt" + "," + "X:optTime" + "," + "X:RateFirstPeriod" + "," +
+              "X:BankRateFirstPeriod" + "," +
               "Y:optType" + "," + "Y:optAmt" + "," + "Y:optTime" + "," + "Y:RateFirstPeriod" + "," +
               "OPTXPmt" + "," + "OPTYPmt"  + "," + "ttlPmt" + "," +
               "OPTXTtlPay" + "," + "OPTYTtlPay" +  "," +
