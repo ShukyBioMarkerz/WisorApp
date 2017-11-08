@@ -696,7 +696,7 @@ namespace WisorLibrary.Logic
             //  calculate the remaining time with the second time rates
             //  accululate the number, for the borrower and the bank
 
-            if (0 < firstTimePeriod)
+            if (markets.UK == Share.theMarket)
             {
                 DriveCalculateLuahSilukinFullUK(indicesFirstTimePeriod, indicesSecondTimePeriod,
                     originalBorrowerRate, originalBorrowerRate2,
@@ -708,7 +708,6 @@ namespace WisorLibrary.Logic
             }
             else
             {
-
                 // write to log file
                 Log("\nCalculate Luah Silukin for Borrower:\n");
                 // the borrower side
