@@ -28,6 +28,8 @@ namespace WisorLib
         [XmlIgnoreAttribute]
         public double score = 0; // enable to sort the composition by scoring
 
+        public double FeePayment { get; set; }
+
         public uint optXBankTtlPay, optYBankTtlPay, optZBankTtlPay;
         [XmlIgnoreAttribute]
         public bool calcTtlPayOrNo = false;
@@ -44,8 +46,14 @@ namespace WisorLib
 
         // Adjustable and Tsamud data
         public uint AdjustablePercantage { get; set; }
+        public uint NoAdjustablePercantage { get; set; }
         public uint TsamudPercantage { get; set; }
+        public uint NoTsamudPercantage { get; set; }
         public string HeaderSummary { get; internal set; }
+        public string AdjustablePercantageString { get; internal set; }
+        public string NoAdjustablePercantageString { get; internal set; }
+        public string TsamudPercantageString { get; internal set; }
+        public string NoTsamudPercantageString { get; internal set; }
 
         // for the sake of serialization.....
         public Composition()
@@ -165,27 +173,36 @@ namespace WisorLib
             if (MiscUtilities.Use3ProductsInComposition())
             {
                 s += 
-                "X:optType" + "," + "X:optAmt" + "," + "X:optTime" + "," + "X:RateFirstPeriod" + "," +
-                "X:BankRateFirstPeriod" + "," +
-                "Y:optType" + "," + "Y:optAmt" + "," + "Y:optTime" + "," + "Y:RateFirstPeriod" + "," +
-                "Z:optType" + "," + "Z:optAmt" + "," + "Z:optTime" + "," + "Z:RateFirstPeriod" + "," +
+                "X:optType" + "," + "X:optAmt" + "," + "X:optTime" + "," 
+                + "X:RateFirstPeriod" + "," +  "X:BankRateFirstPeriod" + "," +
+                "Y:optType" + "," + "Y:optAmt" + "," + "Y:optTime" + "," 
+                + "Y:RateFirstPeriod" + "," +  "Y:BankRateFirstPeriod" + "," +
+                "Z:optType" + "," + "Z:optAmt" + "," + "Z:optTime" + "," 
+                + "Z:RateFirstPeriod" + "," + "Z:BankRateFirstPeriod" + "," +
                 "OPTXPmt" + "," + "OPTYPmt" + "," + "OPTZPmt" + "," + "ttlPmt" + "," +
                 "OPTXTtlPay" + "," + "OPTYTtlPay" + "," + "OPTZTtlPay" + "," +
                 // bank profit data
                 "X:BankTtlPay" + "," + "Y:BankTtlPay" + "," + "Z:BankTtlPay" + "," +
-                "ttlBorrowerPay" + "," + "TtlBankPay" + "," + "TtlBankProfit";
+                "ttlBorrowerPay" + "," + "TtlBankPay" + "," + "TtlBankProfit" +
+                "," + "IsWinWin" +
+                // add fee calculation
+                "," + "FeePayment";
             }
             else
             {
                s +=
-              "X:optType" + "," + "X:optAmt" + "," + "X:optTime" + "," + "X:RateFirstPeriod" + "," +
-              "X:BankRateFirstPeriod" + "," +
-              "Y:optType" + "," + "Y:optAmt" + "," + "Y:optTime" + "," + "Y:RateFirstPeriod" + "," +
+              "X:optType" + "," + "X:optAmt" + "," + "X:optTime" + "," 
+              + "X:RateFirstPeriod" + "," +  "X:BankRateFirstPeriod" + "," +
+              "Y:optType" + "," + "Y:optAmt" + "," + "Y:optTime" + "," 
+              + "Y:RateFirstPeriod" + "," + "Y:BankRateFirstPeriod" + "," +
               "OPTXPmt" + "," + "OPTYPmt"  + "," + "ttlPmt" + "," +
               "OPTXTtlPay" + "," + "OPTYTtlPay" +  "," +
               // bank profit data
               "X:BankTtlPay" + "," + "Y:BankTtlPay"  + "," +
-              "ttlBorrowerPay" + "," + "TtlBankPay" + "," + "TtlBankProfit";
+              "ttlBorrowerPay" + "," + "TtlBankPay" + "," + "TtlBankProfit" +
+              "," + "IsWinWin" +
+              // add fee calculation
+              "," + "FeePayment";
             }
 
             return s;
@@ -195,7 +212,7 @@ namespace WisorLib
         {
             int ttlBankPayPayk = Convert.ToInt32(optXBankTtlPay + optYBankTtlPay + optZBankTtlPay);
             string s = MiscConstants.UNDEFINED_STRING;
-
+      
             if (MiscUtilities.Use3ProductsInComposition())
             {
                 if (null != opts && null != opts[(int)Options.options.OPTX] && null != opts[(int)Options.options.OPTY] &&
@@ -219,7 +236,7 @@ namespace WisorLib
                                 + "," + Convert.ToInt32(ttlBankPayPayk).ToString()
                                 + "," + Convert.ToInt32(ttlPay - ttlBankPayPayk).ToString()
                                 /*+ "," + score*/
-                                /* is win-win */ + "," + IsWinWin;
+                                /* is win-win */ + "," + IsWinWin + "," + FeePayment;
                 }
             }
             else
@@ -240,7 +257,7 @@ namespace WisorLib
                                 + "," + Convert.ToInt32(ttlBankPayPayk).ToString()
                                 + "," + Convert.ToInt32(ttlPay - ttlBankPayPayk).ToString()
                                 /*+ "," + score*/
-                                /* is win-win */ + "," + IsWinWin;
+                                /* is win-win */ + "," + IsWinWin + "," + FeePayment;
                 }
 
             }
