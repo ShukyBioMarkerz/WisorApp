@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -11,7 +12,7 @@ using WisorLibrary.Logic;
 using WisorLibrary.Utilities;
 using static WisorLib.MiscConstants;
 
-  
+
 namespace WisorLib
 {
     //[Serializable]
@@ -309,27 +310,30 @@ namespace WisorLib
          
         private void CalculateLuahSilukin(double rateFirstPeriod, double rateSecondPeriod, out double ttlPay, RunEnvironment env)
         {
+            //if (Share.ShouldPrintLog)
+            //    MiscUtilities.PrintMiscLogger("Borrower. amt= " + optAmt + ", m= " + optTime + ", r1= " + optRateFirstPeriod + ", r2= " 
+            //        + optRateSecondPeriod);
+
             //Console.WriteLine("CalculateLuahSilukin product type: " + product.name);
             ttlPay = 0;
             // double ttlPayTmp = 0;
             bool shouldCalculateSecondPMT = true;
 
-            Interlocked.Add(ref Share.CalculateLuahSilukinCounter, 1);
-            //env.CalculateLuahSilukinCounter++;
+            Interlocked.Add(ref Share.Option_CalculateLuahSilukinCounter, 1);
 
             if (product.firstTimePeriod == 0)
             {
-                Interlocked.Add(ref Share.CalculateLuahSilukinCounterInFirstTimePeriod, 1);
+                // Interlocked.Add(ref Share.CalculateLuahSilukinCounterInFirstTimePeriod, 1);
                 if (product.indexUsedFirstTimePeriod == 0)
                 {
                     optTtlPrincipalPay = optAmt;
                     ttlPay = optTime * Math.Round(optPmt, 2);
                     optTtlRatePay = ttlPay - optTtlPrincipalPay;
-                    Interlocked.Add(ref Share.CalculateLuahSilukinCounterIndexUsedFirstTimePeriod, 1);
-                    // debug - print to file
-                    if (Share.ShouldPrintLog)
-                        MiscUtilities.PrintMiscLogger("case1: indexUsedFirstTimePeriod == 0. ttlPayTmp: " + ttlPay +
-                            ", optTtlRatePay: " + optTtlRatePay);
+                    // Interlocked.Add(ref Share.CalculateLuahSilukinCounterIndexUsedFirstTimePeriod, 1);
+                    //// debug - print to file
+                    //if (Share.ShouldPrintLog)
+                    //    MiscUtilities.PrintMiscLogger("case1: indexUsedFirstTimePeriod == 0. ttlPayTmp: " + ttlPay +
+                    //        ", optTtlRatePay: " + optTtlRatePay);
                 }
                 else
                 {
@@ -347,17 +351,17 @@ namespace WisorLib
                         optTtlRatePay += ratePmt;
                         ttlPay += monthlyPmt;
 
-                        // debug - print to file
-                        if (Share.ShouldPrintLog)
-                            MiscUtilities.PrintMiscLogger("case2: " + months + " - " + startingAmount.ToString() + " - " + r.ToString() + " - " +
-                                            i.ToString() + " - " + ratePmt.ToString() + " - " +
-                                            principalPmt.ToString() + " - " + monthlyPmt + " - " +
-                                            ttlPay.ToString());
+                        //// debug - print to file
+                        //if (Share.ShouldPrintLog)
+                        //    MiscUtilities.PrintMiscLogger("case2: " + months + " - " + startingAmount.ToString() + " - r= " + r.ToString() + " - i= " +
+                        //                    i.ToString() + " - intPaid= " + ratePmt.ToString() + " - prinPaid= " +
+                        //                    principalPmt.ToString() + " - pmt= " + monthlyPmt + " - ttlPay= " +
+                        //                    ttlPay.ToString());
 
                         startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
                         if (months < optTime)
                         {
-                            Interlocked.Add(ref Share.CalculatePmtFromCalculateLuahSilukinCounter, 1);
+                            // Interlocked.Add(ref Share.CalculatePmtFromCalculateLuahSilukinCounter, 1);
                             monthlyPmt = CalculatePmt(startingAmount, (optTime - months), rateFirstPeriod, env);
                         }
                     }
@@ -365,7 +369,7 @@ namespace WisorLib
             }
             else
             {
-                Interlocked.Add(ref Share.CalculateLuahSilukinCounterNOTInFirstTimePeriod, 1);
+                // Interlocked.Add(ref Share.CalculateLuahSilukinCounterNOTInFirstTimePeriod, 1);
 
                 double r = ((rateFirstPeriod / 12 * 100000000) - ((rateFirstPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
                 double i = ((indexFirstPeriod / 12 * 100000000) - ((indexFirstPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
@@ -384,20 +388,24 @@ namespace WisorLib
                     optTtlRatePay += ratePmt;
                     ttlPay += monthlyPmt;
 
-                    // debug - print to file
-                    if (Share.ShouldPrintLog)
-                        MiscUtilities.PrintMiscLogger("case3: " + months + " - " + startingAmount.ToString() + " - " + r.ToString() + " - " +
-                                        i.ToString() + " - " + ratePmt.ToString() + " - " +
-                                        principalPmt.ToString() + " - " + monthlyPmt + " - " +
-                                        ttlPay.ToString());
+                    //// debug - print to file
+                    //if (Share.ShouldPrintLog)
+                    //    MiscUtilities.PrintMiscLogger("case3: " + months + " - " + startingAmount.ToString() + " - r= " + r.ToString() + " - i= " +
+                    //                    i.ToString() + " - intPaid= " + ratePmt.ToString() + " - prinPaid= " +
+                    //                    principalPmt.ToString() + " - pmt= " + monthlyPmt + " - ttlPay= " +
+                    //                    ttlPay.ToString());
 
                     startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
                     if (months < optTime)
                     {
-                        Interlocked.Add(ref Share.CalculatePmtFromCalculateLuahSilukinCounter, 1);
+                        // Interlocked.Add(ref Share.CalculatePmtFromCalculateLuahSilukinCounter, 1);
                         monthlyPmt = CalculatePmt(startingAmount, (optTime - months), rateFirstPeriod, env);
                     }
                 }
+
+                // calculate again...
+                monthlyPmt = CalculatePmt(startingAmount, (optTime - product.firstTimePeriod + 1), rateSecondPeriod, env);
+
                 r = ((rateSecondPeriod / 12 * 100000000) - ((rateSecondPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
                 i = ((indexSecondPeriod / 12 * 100000000) - ((indexSecondPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
                 for (uint months = product.firstTimePeriod + 1; months <= optTime; months++)
@@ -409,17 +417,17 @@ namespace WisorLib
                     optTtlRatePay += ratePmt;
                     ttlPay += monthlyPmt;
 
-                    // debug - print to file
-                    if (Share.ShouldPrintLog)
-                        MiscUtilities.PrintMiscLogger("case4: " + months + " - " + startingAmount.ToString() + " - " + r.ToString() + " - " +
-                                        i.ToString() + " - " + ratePmt.ToString() + " - " +
-                                        principalPmt.ToString() + " - " + monthlyPmt + " - " +
-                                        ttlPay.ToString());
+                    //// debug - print to file
+                    //if (Share.ShouldPrintLog)
+                    //    MiscUtilities.PrintMiscLogger("case4: " + months + " - " + startingAmount.ToString() + " - r= " + r.ToString() + " - i= " +
+                    //                    i.ToString() + " - intPaid= " + ratePmt.ToString() + " - prinPaid= " +
+                    //                    principalPmt.ToString() + " - pmt= " + monthlyPmt + " - ttlPay= " +
+                    //                    ttlPay.ToString());
 
                     startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
                     if (months < optTime)
                     {
-                        Interlocked.Add(ref Share.CalculatePmtFromCalculateLuahSilukinCounter, 1);
+                        // Interlocked.Add(ref Share.CalculatePmtFromCalculateLuahSilukinCounter, 1);
                         monthlyPmt = CalculatePmt(startingAmount, (optTime - months), rateSecondPeriod, env);
                         if (shouldCalculateSecondPMT)
                         {
@@ -453,11 +461,16 @@ namespace WisorLib
                 return (uint)Math.Round(optTtlPay);
             }
         }
-         
+
+        public void SetBankRate2(double margin)
+        {
+            optBankRateSecondPeriod = optRateSecondPeriod + margin;
+        }
+
         public void SetBankRate(double margin)
         {
             optBankRateFirstPeriod = optRateFirstPeriod + margin;
-            optBankRateSecondPeriod = optRateSecondPeriod + margin;
+            
   
             //if (-1 == optRateSecondPeriod)
             //{
@@ -501,7 +514,7 @@ namespace WisorLib
             //return (optType + 4).ToString() + "," + optAmt + "," + optTime + "," + inflationStr + "," + optRate
             //            + "," + (int)optPmt + "," + (int)optTtlPay;
             string name = GenericProduct.GetProductName(optType);
-            return name + "," + optAmt + "," + optTime + "," + optRateFirstPeriod /*+ "," + optBankRateFirstPeriod*/;
+            return name + "," + optAmt + "," + optTime + "," + optRateFirstPeriod + "," + optBankRateFirstPeriod;
             // return (optType + 4).ToString() + "," + optAmt + "," + optTime + "," + optRateFirstPeriod;
         }
 
