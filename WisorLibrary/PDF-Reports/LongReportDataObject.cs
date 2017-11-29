@@ -1819,7 +1819,7 @@ namespace WisorLibrary.ReportApplication
             AmortisationTable = new AmortisationTable[MiscConstants.MAX_LOAN_TIME / 12];
             for (int i = 0; i < AmortisationTable.Length; i++)
             {
-                AmortisationTable[i] = new AmortisationTable();
+                AmortisationTable[i] = new AmortisationTable(i);
             }
         }
 

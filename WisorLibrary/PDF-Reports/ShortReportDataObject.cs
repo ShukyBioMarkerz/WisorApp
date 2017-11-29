@@ -112,12 +112,17 @@ namespace WisorLibrary.ReportApplication
         public string GetCompositionHeader(int compositionIndex)
         {
             string structureTypeString = MiscConstants.UNDEFINED_STRING;
-            GenericProduct[] ProductsArray;
-            int[] AmountArray;
+            uint adjustableNum, tsamudNum;
 
-            if (GetCompositionProducts(compositionIndex, out ProductsArray, out AmountArray))
-            {
-                MiscUtilities.CalculateTypeOfProducts3(ProductsArray, AmountArray, out structureTypeString);
+            Composition comp = GetTheComposition(compositionIndex);
+            if (null != comp) {
+                string AdjustablePercantageString, NoAdjustablePercantageString,
+                                    TsamudPercantageString, NoTsamudPercantageString;
+                // set the composition AdjustablePercantage and TsamudPercantage
+                MiscUtilities.CalculateTypeOfProductsInComposition(comp, out adjustableNum, out tsamudNum,
+                    out AdjustablePercantageString, out NoAdjustablePercantageString,
+                    out TsamudPercantageString, out NoTsamudPercantageString);
+                MiscUtilities.CalculateTypeOfProductsHeader(adjustableNum, tsamudNum, out structureTypeString);
             }
 
             return structureTypeString;
@@ -127,7 +132,7 @@ namespace WisorLibrary.ReportApplication
         {
             if (null != reportData)
             {
-                return reportData.ID + MiscConstants.NAME_SEP_CHAR + Share.CustomerName;
+                return reportData.ID + " " /*MiscConstants.NAME_SEP_CHAR*/ + Share.CustomerName;
             }
             else
                 return MiscConstants.UNDEFINED_STRING;
@@ -141,9 +146,16 @@ namespace WisorLibrary.ReportApplication
                 // LoanList ll = env.theLoan.OriginalLoanDetaild;
                 if (null != reportData)
                 {
+                    string productName = MiscConstants.UNDEFINED_STRING;
+                    if (!String.IsNullOrEmpty(reportData.ProductName))
+                    {
+                        GenericProduct product = GenericProduct.GetProductByName(reportData.ProductName);
+                        productName = product.name;
+                    }
+                    
                     DateTime dateOfRateChange = reportData.OriginalDateTaken.AddMonths(reportData.firstTimePeriod);
                     OriginalLoanUKTableShort olus = new OriginalLoanUKTableShort(reportData.OriginalDateTaken, (int) reportData.OriginalLoanAmount,
-                        reportData.ProductName, (int)reportData.OriginalTime, reportData.OriginalRate * 100, reportData.OriginalRate2 * 100,
+                        productName, (int)reportData.OriginalTime, reportData.OriginalRate * 100, reportData.OriginalRate2 * 100,
                         dateOfRateChange, (int)reportData.FirstMonthlyPMT, (int)reportData.FirstMonthlyPMT2, (int)reportData.PayUntilToday,
                         (int)reportData.RemaingLoanAmount, (int)reportData.PayFuture, (int)reportData.YearlyIncome, reportData.PTI * 100,
                         reportData.PrintedOriginalMargin * 100, reportData.PrintedOriginalMargin2 * 100, reportData.EstimateProfitPercantageSoFar * 100,
@@ -174,10 +186,12 @@ namespace WisorLibrary.ReportApplication
                     {
                         OriginalLoanTableShort olt4s = new OriginalLoanTableShort(
                                 (int)ll[i].OriginalLoanAmount,
-                                Share.cultureInfo.Name.Equals("he-IL") ? MiscUtilities.GetProductHebrewName(ll[i].ProductID.stringTypeId) : ll[i].ProductID.stringTypeId,
+                                (null != ll[i].ProductID) ?
+                                    (Share.cultureInfo.Name.Equals("he-IL") ? MiscUtilities.GetProductHebrewName(ll[i].ProductID.stringTypeId) : ll[i].ProductID.stringTypeId) :
+                                    MiscConstants.UNDEFINED_STRING,
                                 ll[i].OriginalRate,
                                 (int)ll[i].OriginalTime, MiscUtilities.IsProductTsamud(ll[i].indicesFirstTimePeriod),
-                                (int)ll[i].DesiredMonthlyPayment,
+                                /*(int)ll[i].DesiredMonthlyPayment,*/ (int) ll[i].resultReportData.FirstMonthlyPMT,
                                 (int)ll[i].resultReportData.PayUntilToday, (int)ll[i].resultReportData.RemaingLoanAmount, (int)ll[i].resultReportData.PayFuture,
                                 (int) ll[i].resultReportData.EstimateProfitSoFar, ll[i].resultReportData.EstimateProfitPercantageSoFar,
                                 (int) ll[i].resultReportData.EstimateFutureProfit, ll[i].resultReportData.EstimateFutureProfitPercantage);
@@ -736,7 +750,9 @@ namespace WisorLibrary.ReportApplication
                         double bankRate1 = RateUtilities.Instance.GetBankRate(gp.productID.numberID, profile, maxRateIndex);
                         double borrowerRate1 = RateUtilities.Instance.GetBorrowerRate(gp.productID.numberID, profile, maxRateIndex);
                         
-                        bankRate1 = borrowerRate1 + bankRate1;
+                        // bankRate1 = borrowerRate1 + bankRate1;
+                        // keep the original bank margin and not the calculation
+
                         // TBD: Omri, where should we get the lower and the higher rate && margin values
                         double bankRate2 = bankRate1;
                         double borrowerRate2 = borrowerRate1;
@@ -744,7 +760,7 @@ namespace WisorLibrary.ReportApplication
                         {
                             bankRate2 = RateUtilities.Instance.GetBankRateSecondPeriod(gp.productID.numberID, profile, maxRateIndex);
                             borrowerRate2 = RateUtilities.Instance.GetBorrowerRateSecondPeriod(gp.productID.numberID, profile, minRateIndex);
-                            bankRate2 = borrowerRate2 + bankRate2;
+                            // bankRate2 = borrowerRate2 + bankRate2;
                         }
 
                         ProductsUsedInAnalysisTableShortUK puiats = new ProductsUsedInAnalysisTableShortUK(
