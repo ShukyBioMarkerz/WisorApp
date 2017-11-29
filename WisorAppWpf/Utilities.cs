@@ -282,7 +282,10 @@ namespace WisorAppWpf
         public static void Ask4Input()
         {
             // bool rc = Utilities.PrepareRun();
-            bool rc = MiscUtilities.PrepareRunningFull();
+            string reasoning;
+            bool rc = MiscUtilities.PrepareRunningFull(out reasoning);
+            if (!rc)
+                WindowsUtilities.loggerMethod("NOTICE Ask4Input failed in PrepareRunningFull. reasoning: " + reasoning);
 
             if (rc)
             {

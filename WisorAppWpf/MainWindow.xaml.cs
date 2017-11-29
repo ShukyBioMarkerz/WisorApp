@@ -124,7 +124,10 @@ namespace WisorAppWpf
 
         private void InitSettings()
         {
-            bool rc = MiscUtilities.PrepareRunningFull();
+            string reasoning;
+            bool rc = MiscUtilities.PrepareRunningFull(out reasoning);
+            if (!rc)
+                WindowsUtilities.loggerMethod("NOTICE InitSettings failed in PrepareRunningFull. reasoning: " + reasoning);
             // bool rc = MiscUtilities.SetupAllEnv();
 
             // testing area
@@ -139,7 +142,7 @@ namespace WisorAppWpf
             //Tests.TestHistoricIndexRate();
             //Tests.TestHistoricIndexRateFromDB();
             //Tests.TestRatesLoading();
-            //Tests.TestCombinations();
+            // Tests.TestCombinations();
             // Tests.SendSimpleEmailMessage();
             //Tests.SendTestSimpleEmailMessageByMailgun();
             //Tests.TestRiskLiquidity();
@@ -148,6 +151,9 @@ namespace WisorAppWpf
             // Tests.TestLongReportCreation();
             // Tests.TestDatedCalculation();
             //Tests.TestSetMarketValue();
+            // Tests.TestCombination();
+            // Tests.TestCalculateFee();
+            Tests.TestSetJumpBetweenAmounts();
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
