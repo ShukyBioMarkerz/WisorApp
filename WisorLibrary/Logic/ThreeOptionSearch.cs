@@ -136,7 +136,7 @@ namespace WisorLib
                             {
                                 searchOneDivisionOfAmounts = new OneDivisionOfAmounts(opt1Amt, opt2Amt, opt3Amt, env);
                             }
-                            catch (ArgumentOutOfRangeException aoore)
+                            catch (ArgumentOutOfRangeException /*aoore*/)
                             {
                                 Console.WriteLine("NOTICE: PerformFullThreeOptionSearch ArgumentOutOfRangeException occured: " /* + aoore.ToString() */ +
                                     " for opt1Amt: " + opt1Amt + ", opt2Amt: " + opt2Amt + ", opt3Amt: " + opt3Amt);
@@ -151,10 +151,24 @@ namespace WisorLib
                         }
                         else
                         {
-                            ManageASync(opt1Amt, opt2Amt, opt3Amt, env);
+                            try
+                            {
+                                ManageASync(opt1Amt, opt2Amt, opt3Amt, env);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine("NOTICE: PerformFullThreeOptionSearch loopCount: " + 
+                                    loopCount + ", numOfCalculations: " + numOfCalculations);
+                            }
                             //Console.WriteLine("RETURN DoComputeASync searchOneDivisionOfAmounts: " + searchOneDivisionOfAmounts.plane.totalColumnSearchChecks);
                         }
-             
+
+                        // stop the printing
+#if SHOULD_DEBUG_LUCHSILUKIN
+                        //// TBD debug - should remove from here
+                        Share.ShouldPrintLog = false;
+                        // debug should remove till here
+#endif
                     }
                 }
             }
@@ -182,10 +196,11 @@ namespace WisorLib
 
         private async Task DoComputeASync2(double opt1Amt, double opt2Amt, double opt3Amt, RunEnvironment env)
         {
-            //Console.WriteLine("BEFORE DoComputeASync2 ");
-            var result =  await Task.Run(() => /*searchOneDivisionOfAmounts = */new OneDivisionOfAmounts(opt1Amt, opt2Amt, opt3Amt, env));
-            //return searchOneDivisionOfAmounts;
-            //Console.WriteLine("AFTER DoComputeASync2 ");
+            //string debugStr = opt1Amt + ":" + opt2Amt + ":" + opt3Amt;
+            //Console.WriteLine("++++ BEFORE DoComputeASync2: " + debugStr);
+            var result =  await Task.Run(() => new OneDivisionOfAmounts(opt1Amt, opt2Amt, opt3Amt, env));
+            // Console.WriteLine("**** GetCurrentProcess" + Process.GetCurrentProcess().Threads.Count);
+            //Console.WriteLine("**** AFTER DoComputeASync2: " + debugStr);
         }
 
    

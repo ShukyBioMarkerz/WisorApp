@@ -37,8 +37,12 @@ namespace WisorLibrary.Logic
             // TBD - print log . Should be removed
             //PrintOriginalLoanLuahSilukin(loans);
 
+            WindowsUtilities.loggerMethod("NOTICE: GroupLoansByID collectedLoans size is: " + _loans.Count);
+ 
             for (int i = 0; i < _loans.Count; i++, failedInCalculation = false)
             {
+                WindowsUtilities.loggerMethod("NOTICE: calculating the: " + i + " loan out of: " + _loans.Count + ", amount: " + _loans[i].LoanAmount + " , date: " + _loans[i].DateTaken);
+
                 // is it the same ID
                 if (MiscConstants.UNDEFINED_STRING == id || id == _loans[i].ID)
                 {
@@ -50,7 +54,7 @@ namespace WisorLibrary.Logic
                     {
                         calcLoan = AccumulaLoanData(originalLoans);
                     }
-                    catch (ArgumentOutOfRangeException aoore)
+                    catch (ArgumentOutOfRangeException /*aoore*/)
                     {
                         WindowsUtilities.loggerMethod("NOTICE: GroupLoansByID ArgumentOutOfRangeException occured: " /*+ aoore.ToString()*/ +
                             ". Skiping Loan id: " + id);
@@ -211,7 +215,7 @@ namespace WisorLibrary.Logic
                         uint RemaingLoanAmount, uint MonthlyPaymentCalc, uint BankPayUntilToday, uint BankPayFuture,
                         uint yearlyIncome, uint originalAmount, uint FirstMonthlyPMT, uint FirstMonthlyPMT2, uint desiredMonthlyPayment)
         {
-            //ld.LoanAmount = originalAmount;
+            // ld.LoanAmount = loan.LoanAmount;
             ld.ProductID = loan.ProductID;
             ld.resultReportData.ProductName = (null != loan.ProductID) ? loan.ProductID.stringTypeId : MiscConstants.UNDEFINED_STRING;
             ld.resultReportData.BankName = Share.CustomerName;

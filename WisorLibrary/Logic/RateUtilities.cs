@@ -99,8 +99,9 @@ namespace WisorLibrary.Logic
                     filename.Substring(filename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
             }
 
-            if (markets.UK == Share.theMarket)
-            {
+            // load the second period always since the API can change the market at any time
+            //if (markets.UK == Share.theMarket)
+            //{
                 if (null == Share.theProductsRatesSecondPeriod || 0 >= Share.theProductsRatesSecondPeriod.Length)
                     Share.theProductsRatesSecondPeriod = LoadRatesCSVFile(secondPeriodFilename);
                 if (null == Share.theProductsRatesSecondPeriod || 0 >= Share.theProductsRatesSecondPeriod.Length)
@@ -112,7 +113,7 @@ namespace WisorLibrary.Logic
                     WindowsUtilities.loggerMethod("NOTICE theProductsRatesSecondPeriod succesfully load: " + Share.theProductsRatesSecondPeriod.Length + " entries from file: " +
                         filename.Substring(filename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
                 }
-            }
+            //}
             
             return (null != Share.theProductsRates && 0 < Share.theProductsRates.Length);
         }
@@ -126,8 +127,9 @@ namespace WisorLibrary.Logic
             WindowsUtilities.loggerMethod("NOTICE LoadBankRates succesfully load: " + numOfRates + " entries from file: " +
                 bankFilename.Substring(bankFilename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
 
-            if (markets.UK == Share.theMarket)
-            {
+            // load the second period always since the API can change the market at any time
+            //if (markets.UK == Share.theMarket)
+            //{
                 if (null == Share.theProductsBankRatesSecondPeriod || 0 >= Share.theProductsBankRatesSecondPeriod.Length)
                     Share.theProductsBankRatesSecondPeriod = LoadRatesCSVFile(secondPeriodBankFilename);
                 if (null == Share.theProductsBankRatesSecondPeriod || 0 >= Share.theProductsBankRatesSecondPeriod.Length)
@@ -139,7 +141,7 @@ namespace WisorLibrary.Logic
                     WindowsUtilities.loggerMethod("NOTICE theProductsBankRatesSecondPeriod succesfully load: " + Share.theProductsBankRatesSecondPeriod.Length + " entries from file: " +
                         filename.Substring(filename.LastIndexOf(Path.DirectorySeparatorChar) + 1));
                 }
-            }
+            //}
 
             return (null != Share.theBankRates && 0 < Share.theBankRates.Length);
         }
@@ -221,23 +223,23 @@ namespace WisorLibrary.Logic
             return result;
         }
 
-        private string[] GetProductsFromCombinations()
-        {
-            // load only the needed rates
-            HashSet<string> products = new HashSet<string>();
-            int numOfOptions2Check = Share.numberOfOption; //Enum.GetValues(typeof(options)).Length;
-            string[,] combinations = Combinations.GetCombination(Share.theMarket);
-            int combinationsUpperBound = combinations.GetUpperBound(0);
-            for (int i = 0; i <= combinationsUpperBound; i++)
-            {
-                for (int o = 0; o < numOfOptions2Check; o++)
-                {
-                    products.Add(combinations[i, o].Trim());
-                }
-            }
+        //private string[] GetProductsFromCombinations()
+        //{
+        //    // load only the needed rates
+        //    HashSet<string> products = new HashSet<string>();
+        //    int numOfOptions2Check = Share.numberOfOption; //Enum.GetValues(typeof(options)).Length;
+        //    string[,] combinations = Combinations.GetCombination(Share.theMarket);
+        //    int combinationsUpperBound = combinations.GetUpperBound(0);
+        //    for (int i = 0; i <= combinationsUpperBound; i++)
+        //    {
+        //        for (int o = 0; o < numOfOptions2Check; o++)
+        //        {
+        //            products.Add(combinations[i, o].Trim());
+        //        }
+        //    }
 
-            return products.ToArray();
-        }
+        //    return products.ToArray();
+        //}
         
 
         
@@ -337,9 +339,22 @@ namespace WisorLibrary.Logic
 
         private static int CalculateIndexInTable(int productID, int profile)
         {
-            return productID * MiscConstants.NumberOfProfiles
-                 * MiscConstants.NumberOfYearsFrProduct +
-                 (profile - 1) * MiscConstants.NumberOfYearsFrProduct;
+            int ret = 0;
+
+            if (0 > productID)
+            {
+                WindowsUtilities.loggerMethod("ERROR: CalculateIndexInTable. illegal productID: " + productID);
+            }
+            else
+            {
+                // ensure it is not negative number...
+                ret = productID * MiscConstants.NumberOfProfiles
+                     * MiscConstants.NumberOfYearsFrProduct +
+                     (profile - 1) * MiscConstants.NumberOfYearsFrProduct;
+            }
+            if (0 > ret)
+                ret = 0;
+            return ret;
         }
 
         /// <summary>
@@ -389,14 +404,21 @@ namespace WisorLibrary.Logic
             double result = MiscConstants.UNDEFINED_DOUBLE;
             if (markets.UK == Share.theMarket)
             {
-                int indexInRatesArray = CalculateIndexInTable(productID, profile) + index;
-                if (Share.theProductsBankRatesSecondPeriod.Length > indexInRatesArray)
+                if (null == Share.theProductsBankRatesSecondPeriod || 0 >= Share.theProductsBankRatesSecondPeriod.Length)
                 {
-                    result = Share.theProductsBankRatesSecondPeriod[indexInRatesArray];
+                    WindowsUtilities.loggerMethod("ERROR: GetBankRateSecondPeriod. theProductsBankRatesSecondPeriod is empty.");
                 }
                 else
                 {
-                    Console.WriteLine("ERROR: GetBankRateSecondPeriod illegal indexInRatesArray: " + indexInRatesArray + " while theProductsRates include: " + Share.theProductsRates.Length);
+                    int indexInRatesArray = CalculateIndexInTable(productID, profile) + index;
+                    if (Share.theProductsBankRatesSecondPeriod.Length > indexInRatesArray)
+                    {
+                        result = Share.theProductsBankRatesSecondPeriod[indexInRatesArray];
+                    }
+                    else
+                    {
+                        WindowsUtilities.loggerMethod("ERROR: GetBankRateSecondPeriod illegal indexInRatesArray: " + indexInRatesArray + " while theProductsRates include: " + Share.theProductsRates.Length);
+                    }
                 }
             }
             
