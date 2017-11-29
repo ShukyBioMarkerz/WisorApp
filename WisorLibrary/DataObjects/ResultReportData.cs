@@ -185,17 +185,32 @@ namespace WisorLibrary.DataObjects
                             // get the entire composition luch silukin
                             for (int i = 0; i < compositions.Length; i++)
                             {
+                                // now is the time to calculate the fee from the loanAmount and the chosen composition
+
                                 AmortisationData amortisationData = new AmortisationData();
                                 Calculations.CalculateLuahSilukinAllResultsForComposition(compositions[i], ref amortisationData);
                                 compositions[i].AmortisationData = amortisationData;
+                                
                                 // debug - print the values
-                                // MiscUtilities.PrintAmortisationData(amortisationData);
+                                //bool shouldDebugAmortisationData = true;
+                                //if (shouldDebugAmortisationData)
+                                //    MiscUtilities.PrintAmortisationData(amortisationData, true /*print2file*/);
 
                                 uint adjustableNum, tsamudNum;
+                                string AdjustablePercantageString, NoAdjustablePercantageString,
+                                    TsamudPercantageString, NoTsamudPercantageString;
                                 // set the composition AdjustablePercantage and TsamudPercantage
-                                MiscUtilities.CalculateTypeOfProductsInComposition(compositions[i], out adjustableNum, out tsamudNum);
+                                MiscUtilities.CalculateTypeOfProductsInComposition(compositions[i], out adjustableNum, out tsamudNum,
+                                    out AdjustablePercantageString, out NoAdjustablePercantageString,
+                                    out TsamudPercantageString, out NoTsamudPercantageString);
                                 compositions[i].AdjustablePercantage = adjustableNum;
+                                compositions[i].NoAdjustablePercantage = 100 - adjustableNum;
+                                compositions[i].AdjustablePercantageString = AdjustablePercantageString;
+                                compositions[i].NoAdjustablePercantageString = NoAdjustablePercantageString;
                                 compositions[i].TsamudPercantage = tsamudNum;
+                                compositions[i].NoTsamudPercantage = 100 - tsamudNum;
+                                compositions[i].TsamudPercantageString = TsamudPercantageString;
+                                compositions[i].NoTsamudPercantageString = NoTsamudPercantageString;
                                 string structureTypeString;
                                 MiscUtilities.CalculateTypeOfProductsHeader(adjustableNum, tsamudNum, out structureTypeString);
                                 compositions[i].HeaderSummary = structureTypeString;
@@ -260,10 +275,11 @@ namespace WisorLibrary.DataObjects
             bool totalBenefitPerLoan = false;
             bool noCompositionFounded = true;
             shouldThisLoanReFinance = false;
+            bool shouldThisLoanReFinanceWithFee = false;
             // if the loan is new, always mark it as should refinance
             int numOfMonths = MiscUtilities.CalculateMonthBetweenDates(env.theLoan.OriginalDateTaken, DateTime.Now);
             if (numOfMonths <= 0)
-                shouldThisLoanReFinance = IsItNewLoan = true;
+                shouldThisLoanReFinanceWithFee = shouldThisLoanReFinance = IsItNewLoan = true;
             int maxBorrowerPayment, maxBorrowerPayment_corrspondLenderPayment, maxBorrowerPayment_corrspondBorrowerSaving,
                 maxBorrowerPayment_corrspondLenderProfit;
             string maxBorrowerPayment_corrspondName;
@@ -290,27 +306,47 @@ namespace WisorLibrary.DataObjects
             {
                 if (null != comp)
                 {
+                    // calculate the fee 
+                    uint remainingLoanAmount = env.theLoan.LoanAmount;
+                    uint feePayment = MiscUtilities.CalculateFee(remainingLoanAmount,
+                         comp.opts[(int)Options.options.OPTX].product,
+                         comp.opts[(int)Options.options.OPTY].product,
+                         (null == comp.opts[(int)Options.options.OPTZ] ? null : comp.opts[(int)Options.options.OPTZ].product));
+                    comp.FeePayment = feePayment;
+
                     noCompositionFounded = false;
                     int ttlBankPay, ttlBorrowerPay, ttlProfit;
-                    MiscUtilities.CalcaulateProfit(comp, out ttlBankPay, out ttlBorrowerPay, out ttlProfit);
-                    int borrowerProfitCalc, bankProfitCalc, totalBenefit, bankOriginalProfit;
-                    MiscUtilities.CalcaulateProfitAll(comp, env.theLoan, 
-                        out borrowerProfitCalc, out bankProfitCalc, out totalBenefit, out bankOriginalProfit);
+                    int borrowerProfitCalc, bankProfitCalc, totalBenefit, bankOriginalProfit, borrowerProfitCalcWithFee;
+
+                    // MiscUtilities.CalcaulateProfit(comp, out ttlBankPay, out ttlBorrowerPay, out ttlProfit);
+                    MiscUtilities.CalcaulateProfitAll(comp, env.theLoan, feePayment, 
+                        out borrowerProfitCalc, out bankProfitCalc, out totalBenefit, out bankOriginalProfit,
+                        out ttlBankPay, out ttlBorrowerPay, out ttlProfit);
+
                     comp.BorrowerProfitCalc = borrowerProfitCalc;
+                    borrowerProfitCalcWithFee = borrowerProfitCalc - (int) feePayment;
                     comp.BankProfitCalc = bankProfitCalc;
                     comp.TotalBenefit = totalBenefit;
                     comp.BankOriginalProfit = bankOriginalProfit;
 
                     bool shouldReFinance, canBorrowerSave, canLenderProfit, canIncreaseTotalProfit;
+                    bool shouldReFinanceWithFee, canBorrowerSaveWithFee, canLenderProfitWithFee;
                     double totalProfitPercantage;
-                    canBorrowerSave = (0 < borrowerProfitCalc); // (theLoan.resultReportData.PayFuture >= ttlBorrowerPay);
-                    canLenderProfit = (0 < bankProfitCalc); // (bankOptionProfit <= ttlProfit);
+                    canBorrowerSave = (0 < borrowerProfitCalc);
+                    canBorrowerSaveWithFee = (0 < borrowerProfitCalcWithFee);
+                    canLenderProfit = (0 < bankProfitCalc);
                     // is it a new loan? so should refinince
                     if (IsItNewLoan)
-                        shouldReFinance = true;
+                    {
+                        shouldReFinance = shouldReFinanceWithFee = true;
+                    }
                     else
+                    {
                         shouldReFinance = canBorrowerSave && canLenderProfit;
+                        shouldReFinanceWithFee = canBorrowerSaveWithFee && canLenderProfit;
+                    }
                     shouldThisLoanReFinance = shouldThisLoanReFinance || shouldReFinance;
+                    shouldThisLoanReFinanceWithFee = shouldThisLoanReFinanceWithFee || shouldReFinanceWithFee;
                     totalBenefitPerLoan = totalBenefitPerLoan || (0 < totalBenefit);
                     totalProfitPercantage = ((double) totalBenefit / env.theLoan.LoanAmount * 100);
                     canIncreaseTotalProfit = (0 < totalBenefit);
@@ -347,7 +383,11 @@ namespace WisorLibrary.DataObjects
                         env.theLoan.resultReportData.LTV.ToString(), //"LTV",
                         env.theLoan.resultReportData.PTI.ToString(), // "PTI",
                         env.theLoan.YearlyIncome.ToString(), //"Income"
-                        env.theLoan.fico.ToString() // fico
+                        env.theLoan.fico.ToString(), // fico
+                        feePayment.ToString(),
+                        (shouldReFinanceWithFee ? "Yes" : "No" ), // "With Fee: Refinance Or No"
+                        (canBorrowerSaveWithFee ? "Yes" : "No" ), // "With Fee: Can Save Borrower Money"
+                        borrowerProfitCalcWithFee.ToString() // "With Fee: borrower saving"
                     };
 
                     MiscUtilities.PrintSummaryFile(msg);
@@ -420,11 +460,14 @@ namespace WisorLibrary.DataObjects
            {
                 string[] ms = { env.theLoan.ID, "No composition founded for load id: " + env.theLoan.ID };
                 MiscUtilities.PrintSummaryFile(ms);
+                Share.NumberOfNoCompositionFound++;
            }
 
             // count the refinince 
             if (shouldThisLoanReFinance)
                 Share.NumberOfCanRefininceLoans++;
+            if (shouldThisLoanReFinanceWithFee)
+                Share.NumberOfCanRefininceLoansWithFee++;
             if (totalBenefitPerLoan)
                 Share.NumberOfPositiveBeneficialLoans++;
 
