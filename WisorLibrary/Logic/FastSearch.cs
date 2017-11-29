@@ -38,7 +38,8 @@ namespace WisorLib
         {
             //long elapsedMs = 0;
             // ensure there are any combinations
-            string[,] combinations = Combinations.GetCombination(Share.theMarket);
+            string[,] combinations = MiscUtilities.GetCombinationsNames(env.theLoan.LoanAmount, env.CalculationParameters.ltv);
+            // Combinations.GetCombinationByAmount(Share.theMarket, env.theLoan.LoanAmount);
 
             if (CanRunCalculation && null != combinations)
             {
@@ -65,24 +66,24 @@ namespace WisorLib
                 if (env.PrintOptions.printMainInConsole == true)
                 {
                     Console.WriteLine("\nLoan Amount = " + env.CalculationParameters.loanAmtWanted + "\nTarget monthly payment = "
-                                        + env.CalculationParameters.monthlyPmtWanted + "\n\nThere are " + (Combinations.GetCombination(Share.theMarket).GetUpperBound(0) + 1)
+                                        + env.CalculationParameters.monthlyPmtWanted + "\n\nThere are " + (combinations.GetUpperBound(0) + 1)
                                         + " combinations possible :");
 
-                    CalculationConstants.PrintCombination(Share.theMarket);
+                    CalculationConstants.PrintCombination(combinations /*Share.theMarket*/);
                         
                 }
                 
                 env.CheckInfo.searchStartTime = DateTime.Now;
-                    
+
                 // Run through each combination possible for three options
-                for (uint combinationCounter = 0; combinationCounter <= Combinations.GetCombination(Share.theMarket).GetUpperBound(0); combinationCounter++)
+                for (uint combinationCounter = 0; combinationCounter <= combinations.GetUpperBound(0); combinationCounter++)
                 {
                     // should each combination write a different file
                     if (Share.ShouldEachCombinationRunSeparetly)
                     {
-                        string com0 = Regex.Replace(Combinations.GetCombination(Share.theMarket)[combinationCounter, 0], "[^0-9]", ""); 
-                        string com1 = Regex.Replace(Combinations.GetCombination(Share.theMarket)[combinationCounter, 1], "[^0-9]", "");
-                        string com2 = Regex.Replace(Combinations.GetCombination(Share.theMarket)[combinationCounter, 2], "[^0-9]", "");
+                        string com0 = Regex.Replace(combinations[combinationCounter, 0], "[^0-9]", ""); 
+                        string com1 = Regex.Replace(combinations[combinationCounter, 1], "[^0-9]", "");
+                        string com2 = Regex.Replace(combinations[combinationCounter, 2], "[^0-9]", "");
                         // make the name shorten - keep only the numbers
                         string additionalName = MiscConstants.NAME_SEP_CHAR + com0 + MiscConstants.NAME_SEP_CHAR + 
                             com1 + MiscConstants.NAME_SEP_CHAR + com2 + MiscConstants.NAME_SEP_CHAR;
@@ -94,7 +95,12 @@ namespace WisorLib
                     env.CheckInfo.calculationStartTime = DateTime.Now;
 
                     // Set the search range by the user' Risk and Liquidity
-                    DefineOptionTypes(combinationCounter, env);
+                    bool rc = DefineOptionTypes(combinationCounter, env.theLoan.LoanAmount, env);
+                    if (! rc)
+                    {
+                        WindowsUtilities.loggerMethod("NOTICE runSearch::DefineOptionTypes failed.");
+                        continue;
+                    }
                     Console.WriteLine();
 
 #if SHOULD_DEBUG_LUCHSILUKIN
@@ -163,36 +169,106 @@ namespace WisorLib
 
         // ************************************** Define option types according to combination chosen ********************************* //
 
-        private void DefineOptionTypes(uint combinationToDefine, RunEnvironment env)
+        private bool DefineOptionTypes(uint combinationToDefine, uint amount, RunEnvironment env)
         {
-            if (MiscUtilities.Use3ProductsInComposition())
+            int[,] combinations = MiscUtilities.GetCombinations(amount, env.CalculationParameters.ltv);
+            bool rc = false;
+
+            if (null != combinations)
             {
-                env.CalculationParameters.optTypes = new OptionTypes(
-                    Share.combinations4market[combinationToDefine, 0],
-                    Share.combinations4market[combinationToDefine, 1],
-                    Share.combinations4market[combinationToDefine, 2], env);
+                int size1 = combinations.GetUpperBound(0);
+                int size2 = combinations.GetUpperBound(1);
+
+
+                if (MiscUtilities.Use3ProductsInComposition())
+                {
+                    env.CalculationParameters.optTypes = new OptionTypes(
+                        combinations[combinationToDefine, 0],
+                        combinations[combinationToDefine, 1],
+                        combinations[combinationToDefine, 2],
+                        env);
+                }
+                else
+                {
+                    env.CalculationParameters.optTypes = new OptionTypes(
+                        combinations[combinationToDefine, 0],
+                        combinations[combinationToDefine, 1],
+                        MiscConstants.UNDEFINED_INT,
+                        env);
+                }
+
+                rc = env.CalculationParameters.optTypes.Status;
+            }
+
+#if _OLD_CODE_
+            if (MiscConstants.markets.UK == Share.theMarket)
+            {
+                int[,] combinations = Combinations.GetCombinationByAmountI(Share.theMarket, amount);
+
+                if (MiscUtilities.Use3ProductsInComposition())
+                {
+                    env.CalculationParameters.optTypes = new OptionTypes(
+                        combinations[combinationToDefine, 0],
+                        combinations[combinationToDefine, 1],
+                        combinations[combinationToDefine, 2],
+                        env);
+                }
+                else
+                {
+                    env.CalculationParameters.optTypes = new OptionTypes(
+                        combinations[combinationToDefine, 0],
+                        combinations[combinationToDefine, 1],
+                        MiscConstants.UNDEFINED_INT, 
+                        env);
+                }
+
             }
             else
             {
-                env.CalculationParameters.optTypes = new OptionTypes(
-                    Share.combinations4market[combinationToDefine, 0],
-                    Share.combinations4market[combinationToDefine, 1],
-                    MiscConstants.UNDEFINED_INT, env);
-            }
-
-            if (env.PrintOptions.printFunctionsInConsole == true)
-            {
                 if (MiscUtilities.Use3ProductsInComposition())
-                    Console.WriteLine("\nDefining combination for check - "  
-                        + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].product.productID.numberID + " "
-                        + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].product.productID.numberID + " "
-                        + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.productID.numberID + " :\n");
+                {
+                    env.CalculationParameters.optTypes = new OptionTypes(
+                        Share.combinations4market[combinationToDefine, 0],
+                        Share.combinations4market[combinationToDefine, 1],
+                        Share.combinations4market[combinationToDefine, 2],
+                        env);
+                }
                 else
-                    Console.WriteLine("\nDefining combination for check - "
-                         + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].product.productID.numberID + " "
-                         + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].product.productID.numberID + " :\n");
+                {
+                    env.CalculationParameters.optTypes = new OptionTypes(
+                        Share.combinations4market[combinationToDefine, 0],
+                        Share.combinations4market[combinationToDefine, 1],
+                        MiscConstants.UNDEFINED_INT, env);
+                }
 
             }
+#endif
+
+            if (!rc)
+            {
+                WindowsUtilities.loggerMethod("NOTICE DefineOptionTypes failed for combination: " + combinations[combinationToDefine, 0] +
+                    ", " + combinations[combinationToDefine, 1] + ", " +
+                    (MiscUtilities.Use3ProductsInComposition() ? combinations[combinationToDefine, 2].ToString() : MiscConstants.UNDEFINED_STRING));
+              
+            }
+            else
+            {
+                if (rc && env.PrintOptions.printFunctionsInConsole == true)
+                {
+                    if (MiscUtilities.Use3ProductsInComposition())
+                        Console.WriteLine("\nDefining combination for check - "
+                            + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].product.productID.numberID + " "
+                            + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].product.productID.numberID + " "
+                            + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTZ].product.productID.numberID + " :\n");
+                    else
+                        Console.WriteLine("\nDefining combination for check - "
+                             + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTX].product.productID.numberID + " "
+                             + env.CalculationParameters.optTypes.optionTypes[(int)Options.options.OPTY].product.productID.numberID + " :\n");
+
+                }
+            }
+   
+            return rc;
         }
 
 
@@ -230,7 +306,7 @@ namespace WisorLib
             if (Share.shouldPrintCounters)
             {
                 Console.WriteLine("\nSavedCompositionsCounter: " + String.Format("{0:#,###,###}", Share.SavedCompositionsCounter) +
-                    "\n, CalculateLuahSilukinCounter: " + String.Format("{0:#,###,###}", Share.CalculateLuahSilukinCounter) +
+                    "\n, CalculateLuahSilukinCounter: " + String.Format("{0:#,###,###}", Share.Option_CalculateLuahSilukinCounter) +
                     "\n, CalculatePmtCounter: " + String.Format("{0:#,###,###}", Share.CalculatePmtCounter) +
                     "\n, CalculatePmtFromCalculateLuahSilukinCounter: " + String.Format("{0:#,###,###}", Share.CalculatePmtFromCalculateLuahSilukinCounter) +
                     "\n, CalculateLuahSilukinCounterNOTInFirstTimePeriod: " + String.Format("{0:#,###,###}", Share.CalculateLuahSilukinCounterNOTInFirstTimePeriod) +
@@ -244,18 +320,25 @@ namespace WisorLib
 
         void PrintSummary(uint numOfCalculations, uint combinationCounter)
         {
+            string[,] comb = Combinations.GetCombination(Share.theMarket);
             // Print summary to console
             if (env.PrintOptions.printMainInConsole == true)
             {
                 Console.WriteLine("\nDone checking combination - " + (combinationCounter + 1).ToString() + " out of: " +
-                    (Combinations.GetCombination(Share.theMarket).GetUpperBound(0) + 1) + " : " +
-                    Combinations.GetCombination(Share.theMarket)[combinationCounter, 0] + " " +
-                    Combinations.GetCombination(Share.theMarket)[combinationCounter, 1] + " " +
-                    (MiscUtilities.Use3ProductsInComposition() ? 
-                        Combinations.GetCombination(Share.theMarket)[combinationCounter, 2] : MiscConstants.UNDEFINED_STRING)
+                    (comb.GetUpperBound(0) + 1) + " : " +
+                    comb[combinationCounter, 0] + " " +
+                    comb[combinationCounter, 1] + " " +
+                    (MiscUtilities.Use3ProductsInComposition() ?
+                        comb[combinationCounter, 2] : MiscConstants.UNDEFINED_STRING)
                         + " :");
 
                 Console.WriteLine("\nnumOfCalculations: " + numOfCalculations);
+                Console.WriteLine("\n OptionCalculateLuahSilukinCounter: " + String.Format("{0:#,###,###}", Share.Option_CalculateLuahSilukinCounter +
+                    ", CalculateLuahSilukinBorrowerCounter: " + Share.Calculation_CalculateLuahSilukinCounter +
+                    ", CalculateLuahSilukinBankCounter: " + Share.Calculation_CalculateLuahSilukinBankCounter +
+                    ", CalculateLuahSilukinUKCounter: " + Share.Calculation_CalculateLuahSilukinUKCounter));
+
+
                 if (env.resultsOutput.bestCompositionSoFar != null)
                 {
                     Console.WriteLine("\nBest composition so far :\n" + env.resultsOutput.bestCompositionSoFar.ToString());
@@ -276,10 +359,10 @@ namespace WisorLib
                 }
                 else
                 {
-                    summaryToFile += (Combinations.GetCombination(Share.theMarket)[combinationCounter, 0])
-                                        + "," + "," + "," + "," + (Combinations.GetCombination(Share.theMarket)[combinationCounter, 1])
+                    summaryToFile += (comb[combinationCounter, 0])
+                                        + "," + "," + "," + "," + (comb[combinationCounter, 1])
                                         + "," + "," + "," + "," +
-                                        (MiscUtilities.Use3ProductsInComposition() ? (Combinations.GetCombination(Share.theMarket)[combinationCounter, 2]) : "");
+                                        (MiscUtilities.Use3ProductsInComposition() ? (comb[combinationCounter, 2]) : "");
                 }
                 env.WriteToOutputFile(summaryToFile);
             }
