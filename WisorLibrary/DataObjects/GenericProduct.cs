@@ -80,6 +80,7 @@ namespace WisorLib
         public double maxPercentageOfLoan;
 
         public uint Score { get; set; }
+        public string fee { get; set; }
 
         public GenericProduct(ProductID productID, markets localMarket = markets.NONE, // USA, UK, ISRAEL, OTHER
             string name = MiscConstants.UNDEFINED_STRING, string hebrewName = MiscConstants.UNDEFINED_STRING,
@@ -90,7 +91,7 @@ namespace WisorLib
             double maxPercentageOfLoan = MiscConstants.UNDEFINED_DOUBLE,
             /*Risk*/ double risk = MiscConstants.UNDEFINED_DOUBLE, /*Liquidity*/ double liquidity = MiscConstants.UNDEFINED_DOUBLE,
             FixOrAdjustable fixOrAdjustable = FixOrAdjustable.ADJUSTABLE, /*Benefit*/ double benefit = MiscConstants.UNDEFINED_DOUBLE,
-            bool mustBeUsed = MiscConstants.UNDEFINED_BOOL, bool shouldBeUsed = MiscConstants.UNDEFINED_BOOL) 
+            bool mustBeUsed = MiscConstants.UNDEFINED_BOOL, bool shouldBeUsed = MiscConstants.UNDEFINED_BOOL, string fee = MiscConstants.UNDEFINED_STRING) 
         {
             this.productID = productID;
             this.localMarket = localMarket;
@@ -113,6 +114,7 @@ namespace WisorLib
             this.liquidity = liquidity;
             this.mustBeUsed = mustBeUsed;
             this.shouldConsider = shouldBeUsed;
+            this.fee = fee;
 
             CheckCorrectness();
 
@@ -164,6 +166,7 @@ namespace WisorLib
         {
             ProductsList products = new ProductsList();
             ProductsList productsAll = new ProductsList();
+            ProductsList productsAllInFile = new ProductsList();
             XElement currProduct = null;
             markets market;
             string name, typeId, hebrewName = MiscConstants.UNDEFINED_STRING;
@@ -171,7 +174,7 @@ namespace WisorLib
             indexJumps ijftp, ijstp;
             uint minTime, maxTime, timeJump, firstTimePeriod;
             double maxPercentageLoan = MiscConstants.UNDEFINED_DOUBLE;
-            int index = 0, productsAllIndex = 0;
+            int index = 0, productsAllIndex = 0, productsAllInFileIndex = 0;
             /*Benefit*/ double benefit;
             FixOrAdjustable fixOrAdjustable;
             /*Risk*/ double risk;
@@ -180,6 +183,7 @@ namespace WisorLib
             bool mustBeUsed, shouldConsider;
             uint score;
             bool beneficial;
+            string fee;
 
             // Load only th nneded products according to the combination definition
             try
@@ -198,6 +202,7 @@ namespace WisorLib
 
                         // check if the product should be loaded
                         shouldConsider = MiscConstants.UNDEFINED_BOOL;
+                        fee = MiscConstants.UNDEFINED_STRING;
                         if (null != product.Element(MiscConstants.shouldConsider) && MiscConstants.UNDEFINED_STRING != product.Element(MiscConstants.shouldConsider).Value)
                             shouldConsider = MiscUtilities.IsTrue(product.Element(MiscConstants.shouldConsider).Value);
                                 // Convert.ToBoolean(product.Element(MiscConstants.shouldConsider).Value);
@@ -213,9 +218,7 @@ namespace WisorLib
                         }
 
                         market = (markets)Enum.Parse(typeof(markets), product.Element(MiscConstants.market).Value, true);
-                        // ensure its the needed market
-                        if (market != Share.theMarket)
-                            continue;
+                       
                         name = product.Element(MiscConstants.name).Value;
                         if (null != product.Element(MiscConstants.hebrewName))
                             hebrewName = product.Element(MiscConstants.hebrewName).Value;
@@ -246,6 +249,8 @@ namespace WisorLib
                         mustBeUsed = MiscConstants.UNDEFINED_BOOL;
                         if (null != product.Element(MiscConstants.mustBeUsed) && MiscConstants.UNDEFINED_STRING != product.Element(MiscConstants.mustBeUsed).Value)
                             mustBeUsed = MiscUtilities.IsTrue(product.Element(MiscConstants.mustBeUsed).Value);
+                        if (null != product.Element(MiscConstants.fee))
+                            fee = product.Element(MiscConstants.fee).Value;
                         //mustBeUsed = Convert.ToBoolean(product.Element(MiscConstants.mustBeUsed).Value);
 
                         // ensure the product is needed
@@ -254,11 +259,25 @@ namespace WisorLib
                         // ensure the beneficial score is above the threshold
                         score = MiscUtilities.CalculateProductScore(risk, liquidity, benefit);
                         beneficial = MiscUtilities.CheckBeneficialProducts(score);
-                        
+
                         //// debug the score calculation
                         //WindowsUtilities.loggerMethod("LoadXMLProductsFile producs: " + typeId +
                         //    ", risk: " + risk + ", liquidity: " + liquidity + ", benefit: " + benefit + 
                         //    " , score: " + score + ", is beneficial: " + beneficial);
+
+                        // anyway add the product to the all-list in order to enable using all 
+                        // the products that the bank uses in the report
+                        ProductID productIDAllInFile = new ProductID(productsAllInFileIndex, typeId);
+                        productsAllInFile.Add(productsAllInFileIndex++, new GenericProduct(productIDAllInFile, market, name, hebrewName,
+                               iftp /*indices*/, istp /*indices*/,
+                               ijftp /*indexJumps*/, ijstp /*indexJumps*/,
+                               minTime, maxTime, timeJump, firstTimePeriod, maxPercentageLoan,
+                               risk, liquidity, fixOrAdjustable, benefit, mustBeUsed, shouldConsider, fee));
+                        // ensure its the needed market
+                        if (market != Share.theMarket)
+                        {
+                            continue;
+                        }
 
                         if (/*MiscConstants.UNDEFINED_INT < index &&*/ beneficial)
                         {
@@ -270,7 +289,7 @@ namespace WisorLib
                                    iftp /*indices*/, istp /*indices*/,
                                    ijftp /*indexJumps*/, ijstp /*indexJumps*/,
                                    minTime, maxTime, timeJump, firstTimePeriod, maxPercentageLoan,
-                                   risk, liquidity, fixOrAdjustable, benefit, mustBeUsed, shouldConsider));
+                                   risk, liquidity, fixOrAdjustable, benefit, mustBeUsed, shouldConsider, fee));
 
                             if (shouldConsider)
                             {
@@ -324,6 +343,7 @@ namespace WisorLib
             Share.theProductsNames = productNames;
             Share.theLoadedProducts = products;
             Share.theAllLoadedProducts = productsAll;
+            Share.theAllLoadedProductsFromFile = productsAllInFile;
             return products;
         }
 
@@ -413,6 +433,29 @@ namespace WisorLib
 
             return product;
         }
+
+
+        // get the product by the name. Look at the entire loaded products, including those which shoiuld not be used in the combinations
+        public static GenericProduct GetProductFromAllLoadedFromFileByName(string productName)
+        {
+            GenericProduct product = null;
+            if (null != Share.theAllLoadedProductsFromFile)
+            {
+                foreach (KeyValuePair<int, GenericProduct> p in Share.theAllLoadedProductsFromFile)
+                {
+                    if (p.Value.productID.stringTypeId.ToLower() == productName.ToLower())
+                    {
+                        product = p.Value;
+                        break;
+                    }
+                }
+            }
+            else
+                WindowsUtilities.loggerMethod("GetProductFromAllLoadedFromFileByName: Share.theAllLoadedProductsFromFile in null!!! ");
+
+            return product;
+        }
+        
 
         public static string GetProductHebrewName(string productName)
         {
