@@ -82,7 +82,7 @@ namespace WisorLibrary.Utilities
 
         public static string GetHistoricRatesFilename()
         {
-            return Share.HistoricFileName; 
+            return Share.HistoricFileName;
 
             ////string dir = System.IO.Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + MiscConstants.DATA_DIR + Path.DirectorySeparatorChar;
             ////string filename = dir + MiscConstants.HISTORIC_FILE;
@@ -515,7 +515,8 @@ namespace WisorLibrary.Utilities
             string formatedDate;
 
             // dirty change still simpler...
-            return ConvertDate2(str, out formatedDate);
+            DateTime dt = ConvertDate2(str, out formatedDate);
+            return dt;
 
             //CultureInfo provider = CultureInfo.InvariantCulture;
             //DateTime dt = default(DateTime);
@@ -700,7 +701,7 @@ namespace WisorLibrary.Utilities
             return rc;
         }
 
- 
+
         // look if the file already set in the Shared object; if not - look for it
         public static string GetFilename(string file2look, string file2lookFef)
         {
@@ -866,21 +867,32 @@ namespace WisorLibrary.Utilities
             return fixOrAdjustableScore;
         }
 
-        internal static void PrintAmortisationData(AmortisationData amortisationData)
+        internal static void PrintAmortisationData(AmortisationData amortisationData, bool print2file)
         {
             string remainingAmount = MiscConstants.UNDEFINED_STRING;
             string paidSoFar = MiscConstants.UNDEFINED_STRING;
             string monthlyPmt = MiscConstants.UNDEFINED_STRING;
- 
+
             for (int i = 0; i < amortisationData.AmortisationTable.Length; i++)
             {
                 remainingAmount += amortisationData.AmortisationTable[i].RemainingAmount + ",";
                 paidSoFar += amortisationData.AmortisationTable[i].PaidSoFar + ",";
                 monthlyPmt += amortisationData.AmortisationTable[i].MonthlyPmt + ",";
             }
-            WindowsUtilities.loggerMethod("AmortisationData remainingAmount: " + remainingAmount);
-            WindowsUtilities.loggerMethod("AmortisationData paidSoFar: " + paidSoFar);
-            WindowsUtilities.loggerMethod("AmortisationData monthlyPmt: " + monthlyPmt);
+            if (print2file)
+            {
+                MiscUtilities.PrintMiscLogger("PrintAmortisationData:");
+                MiscUtilities.PrintMiscLogger("remainingAmount: " + "," + remainingAmount);
+                MiscUtilities.PrintMiscLogger("paidSoFar: " + "," + paidSoFar);
+                MiscUtilities.PrintMiscLogger("monthlyPmt: " + "," + monthlyPmt);
+            }
+            else
+            {
+                WindowsUtilities.loggerMethod("\nPrintAmortisationData:");
+                WindowsUtilities.loggerMethod("remainingAmount: " + remainingAmount);
+                WindowsUtilities.loggerMethod("paidSoFar: " + paidSoFar);
+                WindowsUtilities.loggerMethod("monthlyPmt: " + monthlyPmt);
+            }
         }
 
         public static string GetArray<T>(T[] data)
@@ -992,10 +1004,17 @@ namespace WisorLibrary.Utilities
             }
         }
 
-        public static void CalcaulateProfitAll(Composition comp, loanDetails loan,
-                        out int borrowerProfit, out int bankProfit, out int totalProfit, out int bankOriginalProfit)
+        public static void CalcaulateProfitAll(Composition comp, loanDetails loan, uint feePayment,
+                        out int borrowerProfit, out int bankProfit, out int totalProfit, out int bankOriginalProfit,
+                        out int ttlBankPay, out int ttlBorrowerPay, out int ttlProfit)
         {
-            int ttlBankPay, ttlBorrowerPay, ttlProfit;
+            //int ttlBankPay, ttlBorrowerPay, ttlProfit;
+            // consider the fee
+            if (MiscConstants.UNDEFINED_UINT < feePayment)
+            {
+
+            }
+
             CalcaulateProfit(comp, out ttlBankPay, out ttlBorrowerPay, out ttlProfit);
             // borrower benefit = diff between wisor composition and the original bank
             borrowerProfit = (int)loan.resultReportData.PayFuture - (int)ttlBorrowerPay;
@@ -1059,7 +1078,7 @@ namespace WisorLibrary.Utilities
         // start some log files for misc. logging
         public static void OpenMiscLogger()
         {
-            if ((Share.shouldDebugLoansCalculation || Share.shouldDebugLoans || Share.ShouldPrintLog) 
+            if ((Share.shouldDebugLoansCalculation || Share.shouldDebugLoans || Share.ShouldPrintLog)
                 && null == Share.theMiscLogger)
                 Share.theMiscLogger = new LoggerFile(Share.tempLogFile /*+ OrderID*/ + MiscConstants.CSV_EXT /*".txt"*/,
                     MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
@@ -1111,7 +1130,11 @@ namespace WisorLibrary.Utilities
                         "LTV",
                         "PTI",
                         "Income",
-                        "FICO"
+                        "FICO",
+                        "FeePayment",
+                        "With Fee: Refinance Or No",
+                        "With Fee: Can Save Borrower Money",
+                        "With Fee: Borrower beneficial"
                         };
             return msg;
         }
@@ -1163,8 +1186,8 @@ namespace WisorLibrary.Utilities
             if (Share.shouldDebugLoans)
             {
                 Share.theSummaryFile = new LoggerFile(Share.summaryLogFile +
-                DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT,
-               MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
+                    DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.CSV_EXT,
+                    MiscConstants.UNDEFINED_STRING, true /*mustCreate*/, false /*append*/);
 
                 // add the header
                 string[] msg = summaryHeader();
@@ -1178,13 +1201,10 @@ namespace WisorLibrary.Utilities
         public static void CloseSummaryFile()
         {
             string[] msg = {
-                "\nRun bulk with TotalNumberOfLoans: " + Share.TotalNumberOfLoans +
-                    " can re-finince: " + Share.NumberOfCanRefininceLoans + " which means: " +
-                    (double) Share.NumberOfCanRefininceLoans / Share.TotalNumberOfLoans * 100 +
-                    " and NumberOfPositiveBeneficialLoans: " + Share.NumberOfPositiveBeneficialLoans +
-                    " (" + (double) Share.NumberOfPositiveBeneficialLoans / Share.TotalNumberOfLoans * 100 +
-                    "%)"
-            };
+                GetSummaryMessage()
+             };
+
+
             // print the total numbers
             PrintSummaryFile(msg);
 
@@ -1245,12 +1265,7 @@ namespace WisorLibrary.Utilities
         public static void CloseSummaryFileS()
         {
             string[] msg = {
-                "\nRun bulk with TotalNumberOfLoans: " + Share.TotalNumberOfLoans +
-                    " can re-finince: " + Share.NumberOfCanRefininceLoans + " which means: " +
-                    (double) Share.NumberOfCanRefininceLoans / Share.TotalNumberOfLoans * 100 +
-                    " and NumberOfPositiveBeneficialLoans: " + Share.NumberOfPositiveBeneficialLoans +
-                    " (" + (double) Share.NumberOfPositiveBeneficialLoans / Share.TotalNumberOfLoans * 100 +
-                    "%)"
+                GetSummaryMessage()
             };
             // print the total numbers
             PrintSummaryFileS(Share.theWinWinSummaryFile, msg);
@@ -1352,50 +1367,82 @@ namespace WisorLibrary.Utilities
             string shouldRedirectOutput2File = System.Configuration.ConfigurationManager.AppSettings["ShouldRedirectOutput2File"];
             if (!String.IsNullOrEmpty(shouldRedirectOutput2File) && MiscConstants._YES_KEY == shouldRedirectOutput2File.ToLower())
             {
-                string dd = MiscUtilities.GetOutputDirectory2();
-                dd = dd + Path.DirectorySeparatorChar + "outLog.txt";
+                string od = MiscUtilities.GetOutputDirectory2();
+                // check the directory existance
+                if (!Directory.Exists(od))
+                    Directory.CreateDirectory(od);
 
-                FileStream filestream = new FileStream(dd, FileMode.Create);
-                var streamwriter = new StreamWriter(filestream);
-                streamwriter.AutoFlush = true;
-                Console.SetOut(streamwriter);
-                Console.SetError(streamwriter);
-                Console.WriteLine("NOTICE: PrepareRunningFull RunSearch set output file: " + dd);
+                od = od + Path.DirectorySeparatorChar + "outLog_" + DateTime.Now.ToString("MM-dd-yyyy-h-mm-tt") + MiscConstants.TEXT_EXT;
+                if (File.Exists(od))
+                {
+                    Console.WriteLine("NOTICE: RedirectOutput2File already exists output file: " + od);
+                }
+                else
+                {
+                    FileStream filestream = new FileStream(od, FileMode.Create);
+                    var streamwriter = new StreamWriter(filestream);
+                    streamwriter.AutoFlush = true;
+                    Console.SetOut(streamwriter);
+                    Console.SetError(streamwriter);
+                    Console.WriteLine("NOTICE: RedirectOutput2File set output file: " + od);
+                }
             }
         }
 
         static bool firstTimeRun = true;
-        public static bool PrepareRunningFull()
+        public static bool PrepareRunningFull(out string reasoning)
         {
             bool rc = true;
+            reasoning = MiscConstants.UNDEFINED_STRING;
 
-            if (firstTimeRun)
-            {
-                // redirect the console output to a file
-                RedirectOutput2File();
-
-                // set the data directory
-                string dataDirectory = MiscUtilities.GetDataDirectory();
-                Console.WriteLine("NOTICE: PrepareRunningFull RunSearch set data directory: " + dataDirectory);
-
-                rc = MiscUtilities.SetupAllEnv(dataDirectory);
-                if (! rc)
+            try { 
+                if (firstTimeRun)
                 {
-                    Console.WriteLine("ERROR: PrepareRunningFull failed in SetupAllEnv.");
-                    return rc;
+                    // redirect the console output to a file
+                    RedirectOutput2File();
+
+                    // set the data directory
+                    string dataDirectory = MiscUtilities.GetDataDirectory();
+                    Console.WriteLine("NOTICE: PrepareRunningFull RunSearch set data directory: " + dataDirectory);
+
+                    rc = MiscUtilities.SetupAllEnv(ref reasoning, dataDirectory);
+                    if (!rc)
+                    {
+                        Console.WriteLine("ERROR: PrepareRunningFull failed in SetupAllEnv.");
+                        reasoning += "ERROR: PrepareRunningFull failed in SetupAllEnv.";
+                        return rc;
+                    }
+                    else
+                    {
+                        rc = PrepareRuning(ref reasoning);
+                        if (!rc)
+                        {
+                            Console.WriteLine("ERROR: PrepareRunningFull failed in PrepareRuning with reasoning: " + reasoning);
+                            reasoning += "ERROR: PrepareRunningFull failed in PrepareRuningwith reasoning: " + reasoning;
+                            return rc;
+                        }
+                    }
+                    firstTimeRun = false;
                 }
 
-                rc = PrepareRuning();
-                firstTimeRun = false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("ERROR: PrepareRuning Exception: " + ex.Message);
+                reasoning += ex.Message;
+                rc = false;
             }
 
             return rc;
         }
 
 
-        static bool PrepareRuning()
+        public static bool PrepareRuning(ref string reasoning)
         {
             bool rc = true;
+
+            // since each time the market has change the entire startup is running, close the previous files
+            CleanUp();
 
             // enable log debug
             MiscUtilities.OpenMiscLogger();
@@ -1405,6 +1452,7 @@ namespace WisorLibrary.Utilities
             if (null == Share.theLoadedProducts)
             {
                 WindowsUtilities.loggerMethod("NOTICE: PrepareRuning Failed to upload products definitions.");
+                reasoning += "NOTICE: PrepareRuning Failed to upload products definitions.";
             }
             else
             {
@@ -1412,6 +1460,7 @@ namespace WisorLibrary.Utilities
                 if (!rc)
                 {
                     WindowsUtilities.loggerMethod("NOTICE: PrepareRuning Failed to load combination file.");
+                    reasoning += "NOTICE: PrepareRuning Failed to load combination file.";
                     return rc;
                 }
 
@@ -1420,15 +1469,18 @@ namespace WisorLibrary.Utilities
                 if (!rc)
                 {
                     WindowsUtilities.loggerMethod("NOTICE: PrepareRuning Failed to load rates file.");
+                    reasoning += "NOTICE: PrepareRuning Failed to load rates file.";
                     return rc;
                 }
 
                 // Build the input controls from the xml file
                 // Load the loan' parameters from a file
                 FieldList fields = GetCriteriaFromFile();
-                if (null == Share.theSelectedCriteriaFields)
+                if (null == Share.theSelectedCriteriaFields || 0 >= Share.theSelectedCriteriaFields.Count)
                 {
                     WindowsUtilities.loggerMethod("NOTICE: PrepareRuning Failed to upload criteria definitions.");
+                    reasoning += "NOTICE: PrepareRuning Failed to load criteria definitions.";
+                    rc = false;
                 }
                 else
                 {
@@ -1436,11 +1488,13 @@ namespace WisorLibrary.Utilities
                     if (!rc)
                     {
                         WindowsUtilities.loggerMethod("NOTICE: PrepareRuning Failed in SetRiskAndLiquidityFilename.");
+                        reasoning += "NOTICE: PrepareRuning Failed in SetRiskAndLiquidityFilename.";
                         return rc;
                     }
                 }
-           }
-
+            }
+           
+            
             return rc;
         }
 
@@ -1452,7 +1506,8 @@ namespace WisorLibrary.Utilities
             {
                 if (shouldCallPrepare)
                 {
-                    rc = PrepareRunningFull();
+                    string reasoning;
+                    rc = PrepareRunningFull(out reasoning);
                 }
 
                 if (rc)
@@ -1555,7 +1610,7 @@ namespace WisorLibrary.Utilities
 
         static public bool IsTrue(string str)
         {
-            if (!string.IsNullOrEmpty(str) && ("true" == str || "yes" == str))
+            if (!string.IsNullOrEmpty(str) && ("true" == str || "yes" == str || "1" == str))
                 return true;
             return false;
         }
@@ -1585,7 +1640,7 @@ namespace WisorLibrary.Utilities
         }
 
 
-        static public bool SetupAllEnv(string dataDirectory = null)
+        static public bool SetupAllEnv(ref string reasoning, string dataDirectory = null)
         {
             bool rc = false;
 
@@ -1607,13 +1662,6 @@ namespace WisorLibrary.Utilities
             Share.numberOfOption = 3;
 
             Share.shouldPrintCounters = false;
-            Share.CalculatePmtCounter = Share.CalculateLuahSilukinCounter = Share.RateCounter =
-                Share.counterOfOneDivisionOfAmounts = Share.CalculatePmtFromCalculateLuahSilukinCounter =
-                Share.OptionObjectCounter = Share.SavedCompositionsCounter =
-                Share.CalculateLuahSilukinCounterNOTInFirstTimePeriod =
-                Share.CalculateLuahSilukinCounterInFirstTimePeriod =
-                Share.CalculateLuahSilukinCounterIndexUsedFirstTimePeriod = 0;
-
             //Share.ShouldCalcTheBankProfit = true;
             Share.numberOfPrintResultsInList = 1; //  100;
 
@@ -1625,8 +1673,8 @@ namespace WisorLibrary.Utilities
             Share.LoansLoadFromLine = MiscConstants.UNDEFINED_UINT;
             Share.LoansLoadIDsFromLine = MiscConstants.UNDEFINED_STRING;
             Share.shouldDebugLoans = true;
-            Share.shouldDebugLoansCalculation = true; //  false;
-            Share.shouldDebugLoansOnlyWinWin = true;
+            Share.shouldDebugLoansCalculation = false; // true  
+            Share.shouldDebugLoansOnlyWinWin = false;
             Share.shouldDebugLuchSilukin = false;
             Share.ShouldCreateCombinationDynamickly = false;
 
@@ -1637,14 +1685,32 @@ namespace WisorLibrary.Utilities
             Share.printFunctionsInConsole = false;
             Share.printSubFunctionsInConsole = false;
             Share.printPercentageDone = false;
-            Share.NumberOfCanRefininceLoans = 0;
-            Share.NumberOfPositiveBeneficialLoans = 0;
-
+ 
             // important settings
             Share.shouldRunSync = true;
-            Share.shouldRunLogicSync = true;
+            Share.shouldRunLogicSync = false; //  true;
             Share.shouldCreateShortPDFReport = false; //true;
-            Share.shouldCreateLongPDFReport = true;
+            Share.shouldCreateLongPDFReport = false;
+            Share.ShouldDisplayReportOnline = true;
+
+            // should recycle for each loan batch
+            Share.NumberOfCanRefininceLoansWithFee = Share.NumberOfCanRefininceLoans = 0;
+            Share.NumberOfPositiveBeneficialLoans = 0;
+
+            Share.CalculatePmtCounter = Share.Option_CalculateLuahSilukinCounter = Share.RateCounter =
+                Share.counterOfOneDivisionOfAmounts = Share.CalculatePmtFromCalculateLuahSilukinCounter =
+                Share.OptionObjectCounter = Share.SavedCompositionsCounter =
+                Share.CalculateLuahSilukinCounterNOTInFirstTimePeriod =
+                Share.CalculateLuahSilukinCounterInFirstTimePeriod =
+                Share.CalculateLuahSilukinCounterIndexUsedFirstTimePeriod =
+                Share.Calculation_CalculateLuahSilukinCounter =
+                Share.Calculation_CalculateLuahSilukinUKCounter =
+                Share.Calculation_CalculateLuahSilukinBankCounter = 0;
+
+            if (null == WindowsUtilities.loggerMethod)
+            {
+                SetLogger(LogFunction);
+            }
 
             bool isFullConfigFilename = false;
             string configFilename = MiscConstants.CONFIGURATION_FILE;
@@ -1665,23 +1731,25 @@ namespace WisorLibrary.Utilities
             configFilename = Share.DataDirectory + Path.DirectorySeparatorChar + MiscConstants.CONFIGURATION_FILE;
 
             // load the configuration file
-            if (null == WindowsUtilities.loggerMethod)
-            {
-                SetLogger(LogFunction);
-            }
-
             // in order to enable setting the market configuration by each API call, 
             // don't read the configuration file until the set-market API was called
             // rc = MiscUtilities.LoadXMLConfigurationFile(configFilename, isFullConfigFilename);
             SetConfigurationFileName(configFilename, isFullConfigFilename);
             rc = LoadXMLConfigurationFileToMemory(Share.ConfigurationFileName);
-            
+            if (! rc)
+            {
+                reasoning += "ERROR: SetupAllEnv failed in LoadXMLConfigurationFileToMemory";
+                Console.WriteLine("ERROR: SetupAllEnv failed in LoadXMLConfigurationFileToMemory");
+                return rc;
+            }
+
             // check that all configuration is set proprly
             string msg;
             rc = CheckConfigurationConsistancy(out msg);
             if (!rc)
             {
-                Console.WriteLine("ERROR: PrepareRunningFull failed in CheckConfigurationConsistancy: " + msg);
+                reasoning += "ERROR: SetupAllEnv failed in CheckConfigurationConsistancy: " + msg;
+                Console.WriteLine("ERROR: SetupAllEnv failed in CheckConfigurationConsistancy: " + msg);
                 //return rc;
             }
 
@@ -1719,20 +1787,44 @@ namespace WisorLibrary.Utilities
             return outputDir;
         }
 
-        public static void CalculateTypeOfProducts3(GenericProduct[] Products, int[] Amount,
-            out string structureTypeString)
+        public static void CalculateTypeOfProductsInComposition(Composition comp, out uint adjustableNum, out uint tsamudNum,
+            out string AdjustablePercantageString, out string NoAdjustablePercantageString,
+            out string TsamudPercantageString, out string NoTsamudPercantageString)
         {
-            string FixHeader, IndexationHeader1, IndexationHeader2, IndexationHeader3;
-            structureTypeString = MiscConstants.UNDEFINED_STRING;
+            List<GenericProduct> lgp = new List<GenericProduct>();
+            List<int> lamount = new List<int>();
+            System.Threading.Thread.CurrentThread.CurrentUICulture = Share.cultureInfo;
 
-            if (null != Products && 0 < Products.Length && null != Amount && 0 < Amount.Length)
+            AdjustablePercantageString = Properties.Resources.AdjustablePercantageString; // Adjastable ריבית משתנה
+            NoAdjustablePercantageString = Properties.Resources.NoAdjustablePercantageString;  // Fix ריבית קבועה 
+            // Only for Israel
+            TsamudPercantageString = Properties.Resources.TsamudPercantageString; // צמוד למדד
+            NoTsamudPercantageString = Properties.Resources.NoTsamudPercantageString;  // לא צמוד למדד
+
+            for (int j = 0; j < comp.opts.Length; j++)
             {
-                int len = Math.Min(Products.Length, Amount.Length);
+                if (null == comp.opts[j])
+                    continue;
+                lgp.Add(comp.opts[j].product);
+                lamount.Add((int)comp.opts[j].optAmt);
+            }
+
+            CalculateTypeOfProducts3(lgp.ToArray(), lamount.ToArray(), out adjustableNum, out tsamudNum);
+        }
+
+        public static void CalculateTypeOfProducts3(GenericProduct[] Products, int[] Amounts,
+            out uint adjustableNum, out uint tsamudNum)
+        {
+            tsamudNum = adjustableNum = MiscConstants.UNDEFINED_UINT;
+
+            if (null != Products && 0 < Products.Length && null != Amounts && 0 < Amounts.Length)
+            {
+                int len = Math.Min(Products.Length, Amounts.Length);
                 // calculate the relations between tzamud and not in all the products which consist the composition
                 uint fix = MiscConstants.UNDEFINED_UINT, adjustable = MiscConstants.UNDEFINED_UINT;
-                uint adjustableNum = MiscConstants.UNDEFINED_UINT, fixNum = MiscConstants.UNDEFINED_UINT; 
+                uint fixNum = MiscConstants.UNDEFINED_UINT;
                 uint tsamud = MiscConstants.UNDEFINED_UINT, notTsamud = MiscConstants.UNDEFINED_UINT;
-                uint tsamudNum = MiscConstants.UNDEFINED_UINT, notTsamudNum = MiscConstants.UNDEFINED_UINT;
+                uint notTsamudNum = MiscConstants.UNDEFINED_UINT;
                 bool isProductFix = false, isProductTsamud = false;
                 for (int j = 0; j < len; j++)
                 {
@@ -1741,15 +1833,15 @@ namespace WisorLibrary.Utilities
 
                     // accumulate the fix or adjustable
                     if (isProductFix)
-                        fix += (uint)Amount[j];
+                        fix += (uint)Amounts[j];
                     else
-                        adjustable += (uint)Amount[j];
+                        adjustable += (uint)Amounts[j];
 
                     // accululate Tsamud or not
                     if (isProductTsamud)
-                        tsamud += (uint)Amount[j];
+                        tsamud += (uint)Amounts[j];
                     else
-                        notTsamud += (uint)Amount[j];
+                        notTsamud += (uint)Amounts[j];
                 }
 
                 // calculate the fix and adjustable numbers
@@ -1769,22 +1861,30 @@ namespace WisorLibrary.Utilities
                     tsamudNum = Convert.ToUInt32((double)tsamud / entireTsamudSum * 100);
                     notTsamudNum = 100 - tsamudNum;
                 }
-
-                CalculateHeaders(adjustableNum, tsamudNum, out FixHeader, out IndexationHeader1,
-                    out IndexationHeader2, out IndexationHeader3);
-                // set the right numbers to the header
-                string brackets1 = ENG_BRACKETS1;
-                string brackets2 = ENG_BRACKETS2;
-                if (Share.cultureInfo.Name.Equals("he-IL"))
-                {
-                    brackets1 = HEB_BRACKETS1;
-                    brackets2 = HEB_BRACKETS2;
-                }
-                structureTypeString = FixHeader + ", " + IndexationHeader1 + brackets1 + fixNum + "% "
-                    + IndexationHeader2 + " , " + adjustableNum + "% " + IndexationHeader3 + brackets2;
-
             }
         }
+
+        public static void CalculateTypeOfProductsHeader(uint adjustableNum, uint tsamudNum, out string structureTypeString)
+        {
+            string FixHeader, IndexationHeader1, IndexationHeader2, IndexationHeader3;
+            structureTypeString = MiscConstants.UNDEFINED_STRING;
+            uint fixNum = 100 - adjustableNum;
+
+            CalculateHeaders(adjustableNum, tsamudNum, out FixHeader, out IndexationHeader1,
+                    out IndexationHeader2, out IndexationHeader3);
+            // set the right numbers to the header
+            string brackets1 = MiscConstants.ENG_BRACKETS1;
+            string brackets2 = MiscConstants.ENG_BRACKETS2;
+            if (Share.cultureInfo.Name.Equals("he-IL"))
+            {
+                brackets1 = MiscConstants.HEB_BRACKETS1;
+                brackets2 = MiscConstants.HEB_BRACKETS2;
+            }
+            structureTypeString = FixHeader /*+ ", "*/ + IndexationHeader1 + brackets1 + fixNum + "% "
+                + IndexationHeader2 + " , " + adjustableNum + "% " + IndexationHeader3 + brackets2;
+
+        }
+
 
 
         public static void CalculateTypeOfProducts2(RecommendedStructure[] compData, out string structureTypeString)
@@ -1792,14 +1892,18 @@ namespace WisorLibrary.Utilities
             structureTypeString = MiscConstants.UNDEFINED_STRING;
             List<GenericProduct> lgp = new List<GenericProduct>();
             List<int> lamount = new List<int>();
+            uint adjustableNum, tsamudNum;
 
             for (int j = 0; j < compData.Length; j++)
             {
                 lgp.Add(compData[j].Product);
                 lamount.Add(compData[j].Amount);
 
-                CalculateTypeOfProducts3(lgp.ToArray(), lamount.ToArray(), out structureTypeString);
             }
+            CalculateTypeOfProducts3(lgp.ToArray(), lamount.ToArray(), out adjustableNum, out tsamudNum);
+
+            CalculateTypeOfProductsHeader(adjustableNum, tsamudNum, out structureTypeString);
+
 
 #if NO_NEED_ANY_MORE
             string FixHeader, IndexationHeader1, IndexationHeader2, IndexationHeader3;
@@ -2022,6 +2126,9 @@ namespace WisorLibrary.Utilities
         public static void CalculateHeaders(uint adjustable, uint tsamudNum, out string FixHeader,
              out string IndexationHeader1, out string IndexationHeader2, out string IndexationHeader3)
         {
+            // set the culture
+            System.Threading.Thread.CurrentThread.CurrentUICulture = Share.cultureInfo;
+
             FixHeader = IndexationHeader1 = MiscConstants.UNDEFINED_STRING;
             IndexationHeader2 = Properties.Resources.stressTestFixRate;
             IndexationHeader3 = Properties.Resources.stressTestDynamicRate;
@@ -2079,6 +2186,8 @@ namespace WisorLibrary.Utilities
                 {
                     IndexationHeader1 = Properties.Resources.stressTestAllMoneyTsamud; // כאשר כל הכסף צמוד למדד
                 }
+
+                IndexationHeader1 = " ," + IndexationHeader1;
             }
         }
 
@@ -2327,7 +2436,7 @@ namespace WisorLibrary.Utilities
         public static string TranslateBoolToYesOrNo(bool value)
         {
             string translated = MiscConstants.UNDEFINED_STRING;
-            
+
             switch (value)
             {
                 case true:
@@ -2365,7 +2474,7 @@ namespace WisorLibrary.Utilities
 
 
         // enable the API to change the market in every call
-        public static bool SetMarketValue(string marketName) 
+        public static bool SetMarketValue(string marketName)
         {
             bool rc = false;
             // read all the specific market config data
@@ -2375,8 +2484,7 @@ namespace WisorLibrary.Utilities
             if (markets.NONE != market && markets.OTHER != market)
             {
                 rc = true;
-
-                RunEnvironment.SetMarket(market);
+                
                 foreach (KeyValuePair<string, string> config in AllMarketsConfigurationValues)
                 {
                     if (config.Key.ToLower() == marketName.ToLower() || config.Key == MiscConstants.GENERIC_CONFIG)
@@ -2412,7 +2520,7 @@ namespace WisorLibrary.Utilities
         {
             string fullFilename = filename;
             string dir = Path.GetDirectoryName(filename) + Path.DirectorySeparatorChar;
-            
+
             //Share.ConfigurationDataDirectory = dir;
             bool rc = false;
 
@@ -2440,7 +2548,9 @@ namespace WisorLibrary.Utilities
                             switch (child.Name/*.ToLower()*/)
                             {
                                 case MiscConstants.MARKET_SETUP:
-                                    /*rc =*/ MiscUtilities.SetMarketValue(node.Value);
+                                    /*rc =*/
+                                    // MiscUtilities.SetMarketValue(node.Value);
+                                    RunEnvironment.SetMarket(node.Value);
                                     break;
                                 case MiscConstants.MARKET_START:
                                     theCurrentMarket = node.Value;
@@ -2493,8 +2603,8 @@ namespace WisorLibrary.Utilities
                                     AddEntryToList(theCurrentMarket, MiscConstants.PRODUCTS_FILENAME, dir + node.Value);
                                     break;
                                 case MiscConstants.RISK_FACTOR:
-                                   AddEntryToList(theCurrentMarket, MiscConstants.RISK_FACTOR, node.Value);
-                                   break;
+                                    AddEntryToList(theCurrentMarket, MiscConstants.RISK_FACTOR, node.Value);
+                                    break;
                                 case MiscConstants.LIQUIDITY_FACTOR:
                                     AddEntryToList(theCurrentMarket, MiscConstants.LIQUIDITY_FACTOR, node.Value);
                                     break;
@@ -2534,14 +2644,16 @@ namespace WisorLibrary.Utilities
                                     // Share.ShouldStoreInDB = "yes" == node.Value ? true : false;
                                     break;
                                 case MiscConstants.FROM_TO_LINES_TO_LOAD_LOANS:
-                                    
+
                                     //<from_line>,<to_line>
                                     string[] lines = node.Value.Split(MiscConstants.COMMA);
-                                    if (!String.IsNullOrEmpty(lines[0])) {
+                                    if (!String.IsNullOrEmpty(lines[0]))
+                                    {
                                         AddEntryToList(theCurrentMarket, MiscConstants.READ_LOANS_FROM_LINE, lines[0]);
                                         // Share.LoansLoadFromLine = System.Convert.ToUInt32(lines[0]) /*- 1*/; // the line index starts from zero
                                     }
-                                    if (!String.IsNullOrEmpty(lines[1])) {
+                                    if (!String.IsNullOrEmpty(lines[1]))
+                                    {
                                         AddEntryToList(theCurrentMarket, MiscConstants.READ_LOANS_TO_LINE, lines[1]);
                                         // Share.LoansLoadToLine = System.Convert.ToUInt32(lines[1]) /*- 1*/; // the line index starts from zero
                                     }
@@ -2554,7 +2666,9 @@ namespace WisorLibrary.Utilities
                                     AddEntryToList(theCurrentMarket, MiscConstants.NUMBER_OF_PRODUCTS_IN_COMBINATION, node.Value);
                                     // Share.NumberOfProductsInCombination = System.Convert.ToInt32(node.Value);
                                     break;
-
+                                case MiscConstants.SHOULD_DISPLAY_REPORT_ONLINE:
+                                    AddEntryToList(theCurrentMarket, MiscConstants.SHOULD_DISPLAY_REPORT_ONLINE, node.Value);
+                                    break;
                                 default:
                                     if (MiscConstants.MARKET != child.Name)
                                         Console.WriteLine("LoadXMLConfigurationFileToMemory Illegal input: " + child.Name);
@@ -2609,7 +2723,8 @@ namespace WisorLibrary.Utilities
             {
                 msg += "Undefined NumberOfProductsInCombination. ";
             }
-            if (markets.UK == WisorLib.Share.theMarket) {
+            if (markets.UK == WisorLib.Share.theMarket)
+            {
                 if (String.IsNullOrEmpty(WisorLib.Share.SecondPeriodFilename))
                 {
                     msg += "Undefined SecondPeriodFilename. ";
@@ -2640,7 +2755,7 @@ namespace WisorLibrary.Utilities
 
             if (rc)
             {
-                Console.WriteLine("theMarket: " + WisorLib.Share.theMarket + 
+                Console.WriteLine("theMarket: " + WisorLib.Share.theMarket +
                     ", CriteriaFileName: " + WisorLib.Share.CriteriaFileName +
                     ", LoansFileName: " + WisorLib.Share.LoansFileName +
                     ", RatesFileName: " + WisorLib.Share.RatesFileName);
@@ -2675,7 +2790,7 @@ namespace WisorLibrary.Utilities
                 case MiscConstants.SECOND_PERIOD_RATES_FILENAME:
                     Share.SecondPeriodFilename = dir + value;
                     break;
-                 case MiscConstants.SECOND_PERIOD_BANK_RATES_FILENAME:
+                case MiscConstants.SECOND_PERIOD_BANK_RATES_FILENAME:
                     Share.SecondPeriodBankRatesFileName = dir + value;
                     break;
                 case MiscConstants.HISTORIC_FILENAME:
@@ -2742,20 +2857,223 @@ namespace WisorLibrary.Utilities
                     if (!String.IsNullOrEmpty(lines[1]))
                         Share.LoansLoadToLine = System.Convert.ToUInt32(lines[1]) /*- 1*/; // the line index starts from zero
                     break;
+                case READ_LOANS_FROM_LINE:
+                    Share.LoansLoadFromLine = System.Convert.ToUInt32(value);
+                    break;
+                case READ_LOANS_TO_LINE:
+                    Share.LoansLoadToLine = System.Convert.ToUInt32(value);
+                    break;
                 case MiscConstants.FROM_IDS_LOAD_LOANS:
                     Share.LoansLoadIDsFromLine = value;
                     break;
                 case MiscConstants.NUMBER_OF_PRODUCTS_IN_COMBINATION:
                     Share.NumberOfProductsInCombination = System.Convert.ToInt32(value);
                     break;
-
+                case MiscConstants.SHOULD_DISPLAY_REPORT_ONLINE:
+                    Share.ShouldDisplayReportOnline = "yes" == value ? true : false;
+                    break;
                 default:
                     Console.WriteLine("LoadXMLConfigurationFile Illegal input: " + name);
                     break;
             }
         }
 
+        public static int[] GetCombinationsByIndex(uint indexInCombination, uint amount, double LTV)
+        {
+            int[] combinations = new int[GetNumberOfProductsInCombination()];
 
+            if (MiscConstants.markets.UK == Share.theMarket)
+            {
+                int[,] currCombinations = Combinations.GetCombinationByAmountI(Share.theMarket, amount, LTV);
+
+                for (int i = 0; i < GetNumberOfProductsInCombination(); i++)
+                {
+                    combinations[i] = currCombinations[indexInCombination, i];
+                }
+            }
+            else
+            {
+                for (int i = 0; i < GetNumberOfProductsInCombination(); i++)
+                {
+                    combinations[i] = Share.combinations4market[indexInCombination, i];
+                }
+            }
+
+            return combinations;
+        }
+
+        static bool CheckCombinationConsistancy(int[,] combination)
+        {
+            bool rc = true;
+
+            for (int i = 0; i <= combination.GetUpperBound(0); i++)
+            {
+                for (int j = 0; j <= combination.GetUpperBound(1); j++)
+                {
+                    if (0 > combination[i, j])
+                    {
+                        WindowsUtilities.loggerMethod("ERROR Combinations::CheckCombinationConsistancy un-defined entry: " + combination[i, j]);
+                        return false;
+                    }
+                    
+                }
+            }
+
+            return rc;
+        }
+
+        public static int[,] GetCombinations(uint amount, double LTV)
+        {
+            int[,] combinations = null;  // new int[GetNumberOfProductsInCombination()];
+
+            if (MiscConstants.markets.UK == Share.theMarket)
+            {
+                combinations = Combinations.GetCombinationByAmountI(Share.theMarket, amount, LTV);
+            }
+
+            if (null == combinations || ! CheckCombinationConsistancy(combinations))
+            {
+                combinations = Share.combinations4market;
+            }
+
+            if (null == combinations)
+            {
+                WindowsUtilities.loggerMethod("ERROR: GetCombinations null combinations for amount: " + amount);
+            }
+            return combinations;
+        }
+
+        public static string[,] GetCombinationsNames(uint amount, double LTV)
+        {
+            string[,] combinations = null;  
+
+            if (MiscConstants.markets.UK == Share.theMarket)
+            {
+                int[,] combinationsNumbers = Combinations.GetCombinationByAmountI(Share.theMarket, amount, LTV);
+                if (null == combinationsNumbers || !CheckCombinationConsistancy(combinationsNumbers))
+                {
+                    combinations = Share.combinationsAsString;
+                }
+                else
+                {
+                    combinations = Combinations.GetCombinationByAmount(Share.theMarket, amount, LTV);
+                }
+            }
+            else
+            {
+                combinations = Share.combinationsAsString;
+            }
+
+            if (null == combinations)
+            {
+                WindowsUtilities.loggerMethod("ERROR: GetCombinations null combinations for amount: " + amount);
+            }
+            return combinations;
+        }
+
+
+        public static string GetSummaryMessage()
+        {
+            string msg = "\nRun bulk with TotalNumberOfLoans: " + Share.TotalNumberOfLoans +
+                    " can re-finince: " + Share.NumberOfCanRefininceLoans + " which means: " +
+                    (double)Share.NumberOfCanRefininceLoans / Share.TotalNumberOfLoans * 100 +
+                    " and NumberOfPositiveBeneficialLoans: " + Share.NumberOfPositiveBeneficialLoans +
+                    " (" + (double)Share.NumberOfPositiveBeneficialLoans / Share.TotalNumberOfLoans * 100 +
+                    "%)" + " while NumberOfNoCompositionFound: " + Share.NumberOfNoCompositionFound +
+                    ". NumberOfCanRefininceLoansWithFee: " + Share.NumberOfCanRefininceLoansWithFee;
+            return msg;
+        }
+
+        // Fee calculation:
+        // Fee can be a constant or percantage from the amount
+        public static uint CalculateFee(uint loanAmount, GenericProduct productX, GenericProduct productY, GenericProduct productZ)
+        {
+            // what is the logic:
+            // combine all fees or select the higher / lower /else
+            string feeXs = (null == productX) ? MiscConstants.UNDEFINED_STRING : productX.fee;
+            string feeYs = (null == productY) ? MiscConstants.UNDEFINED_STRING : productY.fee;
+            string feeZs = (null == productZ) ? MiscConstants.UNDEFINED_STRING : productZ.fee;
+
+            // is the fee constant or percantage?
+            uint feeX = MiscConstants.UNDEFINED_UINT, feeY = MiscConstants.UNDEFINED_UINT, feeZ = MiscConstants.UNDEFINED_UINT;
+
+            feeX = GetFeeNumber(loanAmount, feeXs);
+            feeY = GetFeeNumber(loanAmount, feeYs);
+            feeZ = GetFeeNumber(loanAmount, feeZs);
+
+            // lets get the maximum for now
+            uint maxFee = Math.Max(feeZ, Math.Max(feeX, feeY));
+
+            return maxFee;
+        }
+
+        static uint GetFeeNumber(uint loanAmount, string feeString)
+        {
+            uint feeNumber = MiscConstants.UNDEFINED_UINT;
+
+            if (MiscConstants.UNDEFINED_STRING != feeString)
+            {
+                int index = feeString.IndexOf(MiscConstants.PERCANTAGE_STR);
+                if (-1 == index)
+                {
+                    feeNumber = Convert.ToUInt32(feeString);
+                }
+                else
+                {
+                    string trimed = feeString.Remove(index).Trim();
+                    feeNumber = (uint)(loanAmount * Convert.ToInt32(trimed) / 100);
+                }
+            }
+
+            return feeNumber;
+        }
+
+        public static void ChooseCombination(double amtForCalc, double originalRate, double originalInflation, GenericProduct product)
+        {
+            uint timeForCalc;
+
+            // choose time - Omri???
+            timeForCalc = 360;
+
+            // loop the optional combination
+            string feeString = product.fee;
+            uint fee = GetFeeNumber((uint) amtForCalc, feeString);
+
+            // calculate PMT for each compbination
+            double pmt1 = Calculations.CalculateMonthlyPmt(amtForCalc, timeForCalc, originalRate, originalInflation);
+            double pmt2 = Calculations.CalculateMonthlyPmt(amtForCalc, timeForCalc, originalRate, originalInflation);
+
+            // calculate the difference in the total payment
+            double totalPaymentDifference = (pmt1 - pmt2) * timeForCalc;
+            if (totalPaymentDifference < fee)
+            {
+
+            }
+            else
+            {
+
+            }
+
+        }
+
+        // for performance reasons 
+        //// TBD: should be defined by:
+        //// 1. the loan amount (percantage)
+        //if (3 == numberOfProductsInCombination)
+        //    Share.jumpBetweenAmounts = 3000;
+        //else
+        //    Share.jumpBetweenAmounts = 1000;
+
+        public static double SetJumpBetweenAmounts(int loanAmount)
+        {
+            double jump = MiscConstants.UNDEFINED_DOUBLE;
+            jump = loanAmount * MiscConstants.JUMP_PERCANTAGE_PER_LOAN_AMOUNT;
+            jump = Math.Max(Math.Round(jump), MiscConstants.MIN_JUMP_BETWEEN_AMOUNTS);
+
+            Share.jumpBetweenAmounts = jump;
+            return jump;
+        }
     }
-
 }
+
+

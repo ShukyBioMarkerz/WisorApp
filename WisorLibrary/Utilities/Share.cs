@@ -24,7 +24,9 @@ namespace WisorLib
 
         public static ProductsList theLoadedProducts { get; set; }
         public static ProductsList theSelectedProducts { get; set; }
-        public static ProductsList theAllLoadedProducts { get; set; }  
+        public static ProductsList theAllLoadedProducts { get; set; }
+        public static ProductsList theAllLoadedProductsFromFile { get; set; }
+        
 
         public static string theProductsFilename { get; set; }
         public static bool shouldShowProductSelectionWindow { get; set; }
@@ -90,7 +92,10 @@ namespace WisorLib
         public static long counterOfOneDivisionOfAmounts;
         public static long SavedCompositionsCounter;
         public static long CalculatePmtCounter;
-        public static long CalculateLuahSilukinCounter;
+        public static long Option_CalculateLuahSilukinCounter;
+        public static long Calculation_CalculateLuahSilukinCounter;
+        public static long Calculation_CalculateLuahSilukinBankCounter;
+        public static long Calculation_CalculateLuahSilukinUKCounter;
         public static long RateCounter;
         public static long OptionObjectCounter;
         public static long CalculatePmtFromCalculateLuahSilukinCounter;
@@ -100,7 +105,10 @@ namespace WisorLib
 
         public static int TotalNumberOfLoans { get; set; }
         public static int NumberOfCanRefininceLoans { get; set; }
+        public static int NumberOfCanRefininceLoansWithFee { get; set; }
+        
         public static int NumberOfPositiveBeneficialLoans { get; set; }
+        public static int NumberOfNoCompositionFound { get; set; }
 
         public static string CustomerName { get; set; }
 
@@ -323,9 +331,29 @@ namespace WisorLib
         public static bool ShouldPrintLog { get; internal set; }
         public static string DataDirectory { get; set; }
         public static string ConfigurationFileName { get; set; }
-        public static int NumberOfProductsInCombination { get; internal set; }
+
+        static int numberOfProductsInCombination;
+        public static int NumberOfProductsInCombination {
+            get
+            {
+                return numberOfProductsInCombination;
+            }
+            set
+            {
+                numberOfProductsInCombination = value;
+                // for performance reasons 
+
+                //// TBD: should be defined by:
+                //// 1. the loan amount (percantage)
+                //if (3 == numberOfProductsInCombination)
+                //    Share.jumpBetweenAmounts = 3000;
+                //else
+                //    Share.jumpBetweenAmounts = 1000;
+            }
+        }
 
         public static bool ShouldCreateReportOnlyWhenWinWin { get; internal set; }
+        public static bool ShouldDisplayReportOnline { get; internal set; }
 
 
 
@@ -369,7 +397,7 @@ namespace WisorLib
         // Loan settings
         internal static uint maximumTimeForLoan = 360;
         internal const double optionMinimumAmount = 30000;
-        internal const double jumpBetweenAmounts = 1000;
+        public static double jumpBetweenAmounts = 1000;
         internal const uint minimumTimeForLoan = 48;
         public const double largeDev = 20;
         internal const double smallDev = 1;

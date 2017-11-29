@@ -294,7 +294,8 @@ namespace WisorLibrary.Utilities
                 string infoStrs = " .Can re-finince: " + Share.NumberOfCanRefininceLoans + " which means: " +
                     ((double)Share.NumberOfCanRefininceLoans / GlobalCompletedLoansCounter * 100).ToString() +
                     " and NumberOfPositiveBeneficialLoans: " + Share.NumberOfPositiveBeneficialLoans.ToString() +
-                    " (" + ((double)Share.NumberOfPositiveBeneficialLoans / GlobalCompletedLoansCounter * 100).ToString() + "%)";
+                    " (" + ((double)Share.NumberOfPositiveBeneficialLoans / GlobalCompletedLoansCounter * 100).ToString() + "%)" +
+                    ". NumberOfCanRefininceLoansWithFee: " + Share.NumberOfCanRefininceLoansWithFee;
 
                 WindowsUtilities.loggerMethod("--- Complete running the engine with loan ID: " + loan.ID +
                     //+ loan.ToString() + ", result: " + result.ToString() + ", Task.CurrentId: " + Task.CurrentId + 

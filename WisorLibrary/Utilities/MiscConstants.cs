@@ -37,6 +37,7 @@ namespace WisorLib
         public static string    IMAGES_DIR = @"..\images";
         public static char      NAME_SEP_CHAR = '-';
         public static string    CSV_EXT = ".csv";
+        public static string    TEXT_EXT = ".txt";
         public static string    XML_EXT = ".xml";
         public static string    PDF_EXT = ".PDF";
         public static string    HTML_EXT = ".html";
@@ -123,6 +124,8 @@ namespace WisorLib
         public const string FROM_TO_LINES_TO_LOAD_LOANS = "FROM_TO_LINES_TO_LOAD_LOANS";
         public const string FROM_IDS_LOAD_LOANS = "FROM_IDS_LOAD_LOANS";
         public const string NUMBER_OF_PRODUCTS_IN_COMBINATION = "NUMBER_OF_PRODUCTS_IN_COMBINATION";
+        public const string SHOULD_DISPLAY_REPORT_ONLINE = "SHOULD_DISPLAY_REPORT_ONLINE";
+        
 
         internal static string LENDER_REPORT_PREFIX = "LenderReport";
         internal static string BORROWER_REPORT_PREFIX = "BorrowerReport";
@@ -150,6 +153,7 @@ namespace WisorLib
         internal static string risk = "risk";
         internal static string liquidity = "liquidity";
         internal static string mustBeUsed = "mustBeUsed";
+        internal static string fee = "fee";
 
         public static uint DEFAULT_PERCANTAGE_OF_MONTHLY_PAYMENT = 30;
         public static uint MAX_LOAN_TIME = 360;
@@ -177,7 +181,13 @@ namespace WisorLib
         internal const string BEST_ALL_PROFIT_COMPOSITION = "allProfitComposition";
         internal const string BEST_ALL_PROFIT_COMPOSITION_BORROWER = "allProfitCompositionBorrower";
         internal const string BEST_ALL_PROFIT_COMPOSITION_BANK = "allProfitCompositionBank";
-        
+
+        // default API parameters
+        public static uint DEAFULT_FICO_VALUE = 234;
+        public static uint DEAFULT_AGE_VALUE = 34;
+        public static double DEAFULT_BORROWER_RATE_VALUE = 0.03625;
+        public static double DEAFULT_BANK_RATE_VALUE = -0.015;
+        public static uint DEAFULT_LOAN_TIME_VALUE = 240;
 
         // type of the selection window
         public enum SelectionType { ReadCretiria = 0, ReadProducts , ReadRates , ReadLoansFile};
@@ -197,6 +207,14 @@ namespace WisorLib
 
         public static string HEBREW_STR { get { return "he-IL"; }  }
         public static string GENERIC_CONFIG { get { return "GENERIC_CONFIG"; } }
+
+        public static double JUMP_PERCANTAGE_PER_LOAN_AMOUNT = 0.005;
+        public static double MIN_JUMP_BETWEEN_AMOUNTS = 1000;
+
+        public const string COMBINATION_PER_AMOUNT = "AmountCombinations";
+        public const string GENERIC_COMBINATION = "Combinations";
+        
+
         public const string MARKET_START = "MARKET_START";
         public const string MARKET_END = "MARKET_END";
         public const string MARKET_SETUP = "MARKET_SETUP";

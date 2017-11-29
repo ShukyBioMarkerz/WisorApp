@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WisorLibrary.DataObjects;
+using WisorLibrary.Logic;
+using WisorLibrary.Utilities;
 using static WisorLib.GenericProduct;
 using static WisorLib.MiscConstants;
 
@@ -58,7 +60,7 @@ namespace WisorLib
             OrderID = loan.ID;
             //OutputFilename = CreateOutputFilename(orderid, loanAmtWanted, monthlyPmtWanted);
             CheckInfo = new CheckInfo(OrderID);
-            CalculationParameters = new CalculationParameters(loan.LoanAmount, loan.DesiredMonthlyPayment,
+            CalculationParameters = new CalculationParameters(loan.OriginalLoanAmount, loan.DesiredMonthlyPayment,
                     loan.PropertyValue, loan.YearlyIncome, loan.BorrowerAge, loan.fico);
 
             // Set borrower risk profile for choosing interest rates
@@ -134,29 +136,56 @@ namespace WisorLib
             //theMiscLogger = null;
             //Logger = null;
         }
-        
+
+
+        public static bool SetMarket(string marketName)
+        {
+            markets market = (markets)Enum.Parse(typeof(markets), marketName, true);
+            return SetMarket(market);
+        }
 
         public static bool SetMarket(markets market)
         {
             bool rc = true;
-            Share.theMarket = market;
+            // did the market has been changed from previous call? should the market configuration be loaded?
+            if (null == Share.theMarket || Share.theMarket != market || null == Share.cultureInfo)
+            {
+                // clear the previous combination array
+                Combinations.Instance = null;
 
-            // create the culture for the pdf reports
-            if (markets.ISRAEL == market)
-            {
-                Share.cultureInfo = CultureInfo.CreateSpecificCulture("he-IL");
-            }
-            else if (markets.UK == market)
-            {
-                Share.cultureInfo = CultureInfo.CreateSpecificCulture("en-GB");
-            }
-            else 
-            {
-                Share.cultureInfo = CultureInfo.CreateSpecificCulture("en-US");
+                Share.theMarket = market;
+
+                // create the culture for the pdf reports
+                if (markets.ISRAEL == market)
+                {
+                    Share.cultureInfo = CultureInfo.CreateSpecificCulture("he-IL");
+                }
+                else if (markets.UK == market)
+                {
+                    Share.cultureInfo = CultureInfo.CreateSpecificCulture("en-GB");
+                }
+                else
+                {
+                    Share.cultureInfo = CultureInfo.CreateSpecificCulture("en-US");
+                }
+
+                rc = MiscUtilities.SetMarketValue(market.ToString());
+                if (!rc)
+                {
+                    WindowsUtilities.loggerMethod("ERROR RunEnvironment SetMarket failed in MiscUtilities.SetMarketValue");
+                }
+                else {
+                    string reasoning = MiscConstants.UNDEFINED_STRING;
+                    // reload all configuration
+                    rc = MiscUtilities.PrepareRuning(ref reasoning);
+                    if (!rc)
+                    {
+                        WindowsUtilities.loggerMethod("ERROR RunEnvironment SetMarket failed in MiscUtilities.PrepareRunningFull with reasoning: " + reasoning);
+                    }
+                }
+               
             }
             
-
-
             return rc;
         }
 
@@ -189,11 +218,19 @@ namespace WisorLib
             // check if should create the report
             if (Share.shouldCreateShortPDFReport || Share.shouldCreateLongPDFReport || Share.ShouldStoreInDB)
             {
-                theLoan.CompleteCalculation(new Composition[] 
-                    { bestDiffComposition, bestBankComposition, bestBorrowerComposition,
-                        bestAllProfitComposition, bestAllProfitCompositionBank, bestAllProfitCompositionBorrower }, 
-                    Share.ShouldStoreInDB, Share.shouldCreateShortPDFReport, Share.shouldCreateLongPDFReport,
-                    this /* enable to print in the output file*/);
+                if (null != bestDiffComposition || null != bestBankComposition || null != bestBorrowerComposition ||
+                    null != bestAllProfitComposition || null != bestAllProfitCompositionBank || null != bestAllProfitCompositionBorrower) {
+                    theLoan.CompleteCalculation(new Composition[]
+                        { bestDiffComposition, bestBankComposition, bestBorrowerComposition,
+                        bestAllProfitComposition, bestAllProfitCompositionBank, bestAllProfitCompositionBorrower },
+                        Share.ShouldStoreInDB, Share.shouldCreateShortPDFReport, Share.shouldCreateLongPDFReport,
+                        this /* enable to print in the output file*/);
+                }
+                else
+                {
+                    // no composition was found
+                    Console.WriteLine("NOTICE: CompleteCalculation no composition was found");
+                }
             }
             
         }

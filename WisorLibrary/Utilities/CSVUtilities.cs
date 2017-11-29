@@ -11,7 +11,7 @@ namespace WisorLibrary.Utilities
     class CSVUtilities
     {
  
-        private static string[] OpenCSVFile(string filename)
+        private static string[] OpenCSVFile(string filename, bool skipTheHeader = true)
         {
             List<string> lines = new List<string>();
             string line = MiscConstants.UNDEFINED_STRING;
@@ -22,14 +22,14 @@ namespace WisorLibrary.Utilities
                 if (File.Exists(filename))
                 {
                     var file = new FileInfo(filename);
-                    StreamReader fileReader = new System.IO.StreamReader(filename);
+                    StreamReader fileReader = new System.IO.StreamReader(filename, Encoding.ASCII);
                     int lineNumber = 1;
 
                     do
                     {
                         line = fileReader.ReadLine();
                         // skip the header
-                        if (1 == lineNumber++)
+                        if (skipTheHeader && 1 == lineNumber++)
                             continue;
 
                         if (!System.String.IsNullOrEmpty(line))
@@ -55,9 +55,9 @@ namespace WisorLibrary.Utilities
             return csvLines;
         }
 
-        public static string[] GetLinesFromFile(string filename)
+        public static string[] GetLinesFromFile(string filename, bool skipTheHeader = true)
         {
-            string[] lines = OpenCSVFile(filename);
+            string[] lines = OpenCSVFile(filename, skipTheHeader);
             return lines;
         }
         
