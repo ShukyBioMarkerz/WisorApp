@@ -1,4 +1,5 @@
 ﻿
+
 using CommonObjects;
 using System;
 using System.Collections.Generic;
@@ -107,10 +108,10 @@ namespace WisorLib
                 OriginalRate = originalRate;
                 OriginalRate2 = originalRate2;
                 OriginalTime = originalTime;
-                if (0 >= originalMargin)
-                {
-                    Console.WriteLine("NOTICE: loanDetails got zero originalMargin ");
-                }
+                //if (0 >= originalMargin)
+                //{
+                //    Console.WriteLine("NOTICE: loanDetails got zero originalMargin ");
+                //}
                 OriginalMargin = originalRate + originalMargin;
                 OriginalMargin2 = originalRate2 + originalMargin2;
                 // need to save the originals to display in the report
@@ -193,12 +194,13 @@ namespace WisorLib
 
         void UpdateResultReportData()
         {
+            resultReportData.ProductName = MiscConstants.UNDEFINED_STRING;
+            resultReportData.OriginalTime = MiscConstants.UNDEFINED_UINT;
+            resultReportData.OriginalRate = MiscConstants.UNDEFINED_DOUBLE;
+
             if (markets.ISRAEL == Share.theMarket)
             // those values are not uniqie since the original loan is constructed from several options
             {
-                resultReportData.ProductName = MiscConstants.UNDEFINED_STRING;
-                resultReportData.OriginalTime = MiscConstants.UNDEFINED_UINT;
-                resultReportData.OriginalRate = MiscConstants.UNDEFINED_DOUBLE;
             }
             else
             {

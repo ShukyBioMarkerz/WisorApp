@@ -52,7 +52,7 @@ namespace WisorLibrary.DataObjects
         {
             lineElemntsNum = (Enum.GetNames(typeof(Risk)).Length - 1) * 2;
 
-            if (!String.IsNullOrEmpty(filename))
+            if (!String.IsNullOrEmpty(filename) && null == Share.riskAndLiquidity)
             {
                 double[] riskAndLiquidity = LoadRiskLiquidityFile(filename);
                 if (null == riskAndLiquidity || 0 >= riskAndLiquidity.Length)
