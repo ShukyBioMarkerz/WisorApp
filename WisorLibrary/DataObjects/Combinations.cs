@@ -12,9 +12,12 @@ using static WisorLib.Options;
 
 namespace WisorLibrary.DataObjects
 {
+
     public class Combinations
     {
         string[,] allCombination; // { { } };
+
+        CombinationsPerAmount[] allCombinationsPerAmount;
 
         // make the class singltone
         private static Combinations instance;
@@ -27,10 +30,8 @@ namespace WisorLibrary.DataObjects
             if (null == instance)
             {
                 instance = new Combinations(filename);
-                if (null != instance)
-                    rc = true;
             }
-            if (null != instance)
+            if (null != instance && null != instance.allCombination)
                 rc = true;
             return rc;
          }
@@ -44,6 +45,11 @@ namespace WisorLibrary.DataObjects
                     instance = new Combinations();
                 }
                 return instance;
+            }
+            set
+            {
+                // clear the previous array and ask to reload from different file
+                instance = null;
             }
         }
 
@@ -64,36 +70,116 @@ namespace WisorLibrary.DataObjects
                     filename = Combinations.GetCombinationsFilename();
                 }
 
+                int fromLineNumber = 0;
+                string[] entities;
+                int fromAmount, toAmount, numberOfEntires, startLine;
+                double fromLTV, toLTV;
+                bool genericCombination;
+
                 if (!String.IsNullOrEmpty(filename))
                 {
-                    string[] comb = LoadCombinationsFileData(filename);
+                    string[] comb = LoadCombinationsFileData(filename, false /*skipTheHeader*/);
                     if (null == comb || 0 >= comb.Length)
                     {
                         WindowsUtilities.loggerMethod("ERROR Combinations failed to load from file: " + filename);
+                        return;
                         //Console.WriteLine("ERROR Combinations failed to load from file: " + filename);
                     }
                     else
                     {
-                        //string[] oneCombination = new string[MiscConstants.NUM_OF_PRODUCTS_IN_COMBINATION];
+                        // TBD - now we have also combination per amount...
+                        // so check if there are generic combination or only per amount
 
-                        allCombination = new string[comb.Length, MiscUtilities.GetNumberOfProductsInCombination()]; // { { } };
-                        string[] entities;
-                        string line = null;
+                        fromLineNumber = GetAmountSeperationBlockIndex(comb, fromLineNumber, out fromAmount, out toAmount,
+                            out fromLTV, out toLTV, out numberOfEntires, out genericCombination, out startLine);
 
-                        for (int i = 0; i < comb.Length; i++)
+                        if (genericCombination)
                         {
-                            line = comb[i];
+                            allCombination = new string[/*comb.Length*/ numberOfEntires, MiscUtilities.GetNumberOfProductsInCombination()];
+                            string line = null;
+                            int counter = 0;
+
+                            // for (int i = startLine; i < numberOfEntires; i++)
+                            while (counter < numberOfEntires)
+                            {
+                                line = comb[startLine++];
+                                if (String.IsNullOrEmpty(line))
+                                    continue;
+
+                                entities = line.Split(MiscConstants.COMMA);
+                                if (String.IsNullOrEmpty(entities[0]))
+                                    continue;
+
+                                // skip the header
+                                if (MiscConstants.COMBINATION_PER_AMOUNT == entities[0] || MiscConstants.GENERIC_COMBINATION == entities[0])
+                                    continue;
+
+                                for (int j = 0; j < MiscUtilities.GetNumberOfProductsInCombination(); j++)
+                                {
+                                    allCombination[counter, j] = entities[j].Trim();
+                                }
+                                counter++;
+                            }
+                        }
+                        else
+                        {
+                            // read the specific combination from the start
+                            fromLineNumber = 0;
+                        }
+                    }
+
+                    int amountSeperationBlockIndex = 0;
+                    List <CombinationsPerAmount> listOfCombinationsPerAmount = new List<CombinationsPerAmount>();
+                    // load the per amount combination
+                    while (comb.Length > amountSeperationBlockIndex) {
+                        
+                        amountSeperationBlockIndex = GetAmountSeperationBlockIndex(comb, fromLineNumber, out fromAmount, out toAmount,
+                            out fromLTV, out toLTV, out numberOfEntires, out genericCombination, out startLine);
+                        if (0 >= numberOfEntires)
+                            break;
+
+                        CombinationsPerAmount combinationsPerAmount = new CombinationsPerAmount(fromAmount, toAmount, fromLTV, toLTV);
+                        string[,] currentCombinations = new string[numberOfEntires , MiscUtilities.GetNumberOfProductsInCombination()];
+                        int counter = 0;
+
+                        // for (int i = 0; i < numberOfEntires; i++)
+                        while (counter < numberOfEntires)
+                        {
+                            if (fromLineNumber >= comb.Length)
+                                break;
+
+                            string line = comb[startLine++];
                             if (String.IsNullOrEmpty(line))
                                 continue;
 
                             entities = line.Split(MiscConstants.COMMA);
+                            if (String.IsNullOrEmpty(entities[0]))
+                                continue;
+                          
+                            // skip the header
+                            if (MiscConstants.COMBINATION_PER_AMOUNT == entities[0] || MiscConstants.GENERIC_COMBINATION == entities[0])
+                                continue;
+
                             for (int j = 0; j < MiscUtilities.GetNumberOfProductsInCombination(); j++)
                             {
-                                allCombination[i, j] = entities[j].Trim();
+                                currentCombinations[counter, j] = entities[j].Trim();
                             }
+                            counter++;
                         }
-                        //Share.combinations = allCombination;
+
+                        combinationsPerAmount.SetCombinationsPerAmount(currentCombinations);
+
+                        // check that this combination not already exists
+                        listOfCombinationsPerAmount.Add(combinationsPerAmount);
+
+                        fromLineNumber = amountSeperationBlockIndex; // get the next block
                     }
+
+                    if (null != listOfCombinationsPerAmount && 0 < listOfCombinationsPerAmount.Capacity)
+                        allCombinationsPerAmount = listOfCombinationsPerAmount.ToArray();
+                    else
+                        allCombinationsPerAmount = null;
+
                 }
                 else
                 {
@@ -102,7 +188,7 @@ namespace WisorLibrary.DataObjects
             }
         }
 
-        private string[] LoadCombinationsFileData(string filename)
+        private string[] LoadCombinationsFileData(string filename, bool skipTheHeader = true)
         {
             int lineElemntsNum = MiscUtilities.GetNumberOfProductsInCombination();
             string[] lines = null;
@@ -119,7 +205,7 @@ namespace WisorLibrary.DataObjects
                     }
                     else if (".csv" == ext)
                     {
-                        lines = CSVUtilities.GetLinesFromFile(filename);
+                        lines = CSVUtilities.GetLinesFromFile(filename, skipTheHeader);
                     }
                 }
                 else
@@ -153,10 +239,15 @@ namespace WisorLibrary.DataObjects
             bool rc = Combinations.SetFilename(filename);
 
             if (rc)
-            // number all the combination 
+            {
+                // number all the combination 
                 rc = ConvertProductsNaming();
-            WindowsUtilities.loggerMethod("NOTICE SetCombinationsFilename filename: " + filename + ", combinations4market.Length: " + Share.combinations4market.Length);
-
+                WindowsUtilities.loggerMethod("NOTICE SetCombinationsFilename filename: " + filename + ", combinations4market.Length: " + Share.combinations4market.Length);
+            }
+            else
+            {
+                WindowsUtilities.loggerMethod("NOTICE ERROR SetCombinationsFilename filename: " + filename + ", no composition was found");
+            }
             return rc;
         }
 
@@ -172,12 +263,75 @@ namespace WisorLibrary.DataObjects
 
             return filename;
         }
-       
+
 
         public static string[,] GetCombination(markets market)
         {
             return Instance.allCombination;
         }
+
+        // TBD - should make it optimized for performance
+        public static string[,] GetCombinationByAmount(markets market, uint amount, double LTV)
+        {
+            int i;
+            string[,] ret = null;
+
+            if (null != Instance && null != Instance.allCombinationsPerAmount)
+            {
+                for (i = 0; i < Instance.allCombinationsPerAmount.Length; i++)
+                {
+                    if (amount >= Instance.allCombinationsPerAmount[i].fromAmount && amount <= Instance.allCombinationsPerAmount[i].toAmount &&
+                        LTV >= Instance.allCombinationsPerAmount[i].fromLTV && LTV <= Instance.allCombinationsPerAmount[i].toLTV)
+                        break;
+                }
+                if (i < Instance.allCombinationsPerAmount.Length)
+                    ret = Instance.allCombinationsPerAmount[i].combinationPerAmount;
+            }
+            
+            // to be on the safe side...
+            if (null == ret)
+            {
+                WindowsUtilities.loggerMethod("NOTICE GetCombinationByAmount (UK) : didn't find entry for amount: " + amount + ". Set the generic combination instead.");
+                if (null != Instance && null != Instance.allCombination)
+                {
+                    ret = Instance.allCombination;
+                }
+            }
+            return ret;
+        }
+
+        public static int[,] GetCombinationByAmountI(markets market, uint amount, double LTV)
+        {
+            int i;
+            int[,] ret = null;
+
+            if (null != Instance && null != Instance.allCombinationsPerAmount)
+            {
+                for (i = 0; i < Instance.allCombinationsPerAmount.Length; i++)
+                {
+                    if (amount >= Instance.allCombinationsPerAmount[i].fromAmount && amount <= Instance.allCombinationsPerAmount[i].toAmount &&
+                        LTV >= Instance.allCombinationsPerAmount[i].fromLTV && LTV <= Instance.allCombinationsPerAmount[i].toLTV)
+                        break;
+                }
+                if (i < Instance.allCombinationsPerAmount.Length)
+                    ret = Instance.allCombinationsPerAmount[i].combinationPerAmountI;
+            }
+
+
+            // to be on the safe side...
+            if (null == ret)
+            {
+                WindowsUtilities.loggerMethod("NOTICE GetCombinationByAmount (UK) : didn't find entry for amount: " + amount + ". Set the generic combination instead.");
+                if (null != Instance && null != Instance.allCombination)
+                {
+                    ret = Share.combinations4market;
+                }
+            }
+
+            return ret;
+        }
+
+    
 
 
         /*
@@ -375,25 +529,25 @@ namespace WisorLibrary.DataObjects
             if (null != comb)
             {
                 int[,] combinationsAsNumbers = new int[
-                    GetCombination(Share.theMarket).GetUpperBound(0) + 1,
-                    GetCombination(Share.theMarket).GetUpperBound(1) + 1];
+                    comb.GetUpperBound(0) + 1,
+                    comb.GetUpperBound(1) + 1];
                 string[,] combinationsAsString = new string[
-                    GetCombination(Share.theMarket).GetUpperBound(0) + 1,
-                    GetCombination(Share.theMarket).GetUpperBound(1) + 1];
+                    comb.GetUpperBound(0) + 1,
+                    comb.GetUpperBound(1) + 1];
 
-                for (int i = 0; i <= GetCombination(Share.theMarket).GetUpperBound(0); i++)
+                for (int i = 0; i <= comb.GetUpperBound(0); i++)
                 {
-                    for (int o = 0; o <= GetCombination(Share.theMarket).GetUpperBound(1); o++)
+                    for (int o = 0; o <= comb.GetUpperBound(1); o++)
                     {
                         //string item = GetCombination(Share.theMarket)[i, o];
                         //int ind = Array.IndexOf(Share.theProductsNames, item);
-                        index = Array.IndexOf(Share.theProductsNames, GetCombination(Share.theMarket)[i, o]);
+                        index = Array.IndexOf(Share.theProductsNames, comb[i, o]);
                         if (0 > index)
                         {
-                            WindowsUtilities.loggerMethod("ERROR Combinations::ConvertProductsNaming un-defined product: " + GetCombination(Share.theMarket)[i, o]);
+                            WindowsUtilities.loggerMethod("ERROR Combinations::ConvertProductsNaming un-defined product: " + comb[i, o]);
                         }
                         combinationsAsNumbers[i, o] = index;
-                        combinationsAsString[i, o] = GetCombination(Share.theMarket)[i, o];
+                        combinationsAsString[i, o] = comb[i, o];
                     }
                 }
                 Share.combinations4market = combinationsAsNumbers;
@@ -408,5 +562,128 @@ namespace WisorLibrary.DataObjects
             return rc;
         }
 
+        int GetAmountSeperationBlockIndex(string[] combLines, int fromLineNumber, out int fromAmount, out int toAmount,
+            out double fromLTV, out double toLTV, out int numberOfEntires, out bool genericCombination, out int startLine)
+        {
+            int i;
+            string[] entities;
+            fromAmount = toAmount = numberOfEntires = (int) MiscConstants.UNDEFINED_UINT;
+            fromLTV = toLTV = MiscConstants.UNDEFINED_DOUBLE;
+            genericCombination = false;
+            bool findStart = false, findStartGeneric = false;
+            startLine = 0;
+
+            for (i = fromLineNumber; i < combLines.Length; i++)
+            {
+                if (!String.IsNullOrEmpty(combLines[i]))
+                {
+                    entities = combLines[i].Split(MiscConstants.COMMA);
+                    if (!String.IsNullOrEmpty(entities[0]))
+                    {
+                        if (MiscConstants.COMBINATION_PER_AMOUNT == entities[0] || MiscConstants.GENERIC_COMBINATION == entities[0])
+                        {
+                            if (!findStart)
+                            {
+                                genericCombination = MiscConstants.GENERIC_COMBINATION == entities[0];
+                                findStart = true;
+                                startLine = i+1;
+                                if (MiscConstants.GENERIC_COMBINATION == entities[0])
+                                    findStartGeneric = true;
+                                else // found COMBINATION_PER_AMOUNT
+                                {
+                                    if (5 == entities.Length)
+                                    {
+                                        if (!String.IsNullOrEmpty(entities[1]))
+                                            fromAmount = Convert.ToInt32(entities[1]);
+                                        if (!String.IsNullOrEmpty(entities[2]))
+                                            toAmount = Convert.ToInt32(entities[2]);
+                                        if (!String.IsNullOrEmpty(entities[3]))
+                                            fromLTV = Convert.ToDouble(entities[3]);
+                                        if (!String.IsNullOrEmpty(entities[4]))
+                                            toLTV = Convert.ToDouble(entities[4]);
+                                    }
+                                    else
+                                    {
+                                        WindowsUtilities.loggerMethod("ERROR Combinations::GetAmountSeperationBlockIndex illegal fields number on line: " + combLines[i]);
+                                    }
+                                }
+                            }
+                            else // recognize the EOF or the stop
+                            {
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            if (findStart)
+                                numberOfEntires++;
+                        }
+                    }
+                 
+                }
+            }
+
+            if (findStartGeneric)
+            {
+                fromAmount = toAmount = -1;
+            }
+
+            // EOF
+            if (i != combLines.Length)
+                i -= 1; // next time start in this line
+
+             return  i;
+        }
+
+
+    }
+
+    public class CombinationsPerAmount
+    {
+        public int fromAmount { get; }
+        public int toAmount { get; }
+        public double fromLTV { get; }
+        public double toLTV { get; }
+        public string[,] combinationPerAmount { get; set; }
+        public int[,] combinationPerAmountI { get; set; }
+
+        public CombinationsPerAmount(int fromAmount, int toAmount, double fromLTV, double toLTV, string[,] combination = null)
+        {
+            this.fromAmount = fromAmount;
+            this.toAmount = toAmount;
+            this.fromLTV = fromLTV;
+            this.toLTV = toLTV;
+
+            SetCombinationsPerAmount(combination);
+        }
+
+        public void SetCombinationsPerAmount(string[,] combination)
+        {
+            if (null != combination)
+            {
+                combinationPerAmount = combination;
+
+                combinationPerAmountI = new int[
+                    combination.GetUpperBound(0) + 1,
+                    combination.GetUpperBound(1) + 1];
+
+                for (int i = 0; i <= combination.GetUpperBound(0); i++)
+                {
+                    for (int o = 0; o <= combination.GetUpperBound(1); o++)
+                    {
+                        int index = Array.IndexOf(Share.theProductsNames, combination[i, o]);
+                        if (0 > index)
+                        {
+                            WindowsUtilities.loggerMethod("ERROR Combinations::CombinationsPerAmount un-defined product: " + combination[i, o]);
+                        }
+                        combinationPerAmountI[i, o] = index;
+                    }
+                }
+
+            }
+       
+        }
+
+     
     }
 }
