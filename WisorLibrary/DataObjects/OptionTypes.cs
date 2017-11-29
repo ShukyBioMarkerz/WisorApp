@@ -49,11 +49,16 @@ namespace WisorLib
         // Omri: define the other markets
         // TBD - all arrive from the xml product file
 
+        public bool Status { get; set; }
+
         public OneOptType(int optionType)
         {
+            Status = false;
             product = GenericProduct.GetProduct(optionType);
             if (null == product)
                 WindowsUtilities.loggerMethod("ERROR OneOptType can't find product id: " + optionType);
+            else
+                Status = true;
         }
 
         //public OneOptType(uint optionType)
@@ -149,16 +154,33 @@ namespace WisorLib
     public class OptionTypes
     {
         public OneOptType[] optionTypes = { null, null, null };
-  
+        public bool Status { get; set; }
 
         public OptionTypes(int optXType, int optYType, int optZType, RunEnvironment env)
         {
+            Status = false;
             optionTypes[(int)Options.options.OPTX] = new OneOptType(optXType);
+            if (!optionTypes[(int)Options.options.OPTX].Status)
+                WindowsUtilities.loggerMethod("NOTICE OptionTypes unrecognized optXType: " + optXType);
             optionTypes[(int)Options.options.OPTY] = new OneOptType(optYType);
+            if (!optionTypes[(int)Options.options.OPTY].Status)
+                WindowsUtilities.loggerMethod("NOTICE OptionTypes unrecognized optYType: " + optYType);
             if (MiscUtilities.Use3ProductsInComposition())
+            {
                 optionTypes[(int)Options.options.OPTZ] = new OneOptType(optZType);
-            GetAgeRestriction(env);
-            GetMinMaxAmountsForThreeOptions(env);
+                if (!optionTypes[(int)Options.options.OPTZ].Status)
+                    WindowsUtilities.loggerMethod("NOTICE OptionTypes unrecognized optZType: " + optZType);
+            }
+      
+            Status = optionTypes[(int)Options.options.OPTX].Status && optionTypes[(int)Options.options.OPTY].Status;
+            if (MiscUtilities.Use3ProductsInComposition())
+                Status = Status && optionTypes[(int)Options.options.OPTZ].Status;
+
+            if (Status)
+            {
+                GetAgeRestriction(env);
+                GetMinMaxAmountsForThreeOptions(env);
+            }
          }
 
 
