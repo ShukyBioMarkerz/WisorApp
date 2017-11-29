@@ -138,7 +138,7 @@ namespace WisorLib
         public const double optionMinimumAmount = Share.optionMinimumAmount; // 30000; // 40000;
 
         // Jump between amounts for check
-        public const double jumpBetweenAmounts = Share.jumpBetweenAmounts; // 1000;
+        public static double jumpBetweenAmounts = Share.jumpBetweenAmounts; // 1000;
 
         // Minimum Time to take a loan
         public const uint minimumTimeForLoan = Share.minimumTimeForLoan; // 48;
@@ -166,10 +166,10 @@ namespace WisorLib
         //    return combination;
         //}
 
-        public static void PrintCombination(markets theMarket)
+        public static void PrintCombination(string[,] com)
         {
             string msg = MiscConstants.UNDEFINED_STRING;
-            string[,] com = Combinations.GetCombination(theMarket);
+            // string[,] com = Combinations.GetCombination(theMarket);
 
             for (int i = 0; i <= com.GetUpperBound(0); i++)
             {
