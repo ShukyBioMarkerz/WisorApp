@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using WisorLib;
 using WisorLibrary.DataObjects;
@@ -20,8 +22,14 @@ namespace WisorLibrary.Logic
             //,out double ttlPay
             )
         {
-            double optTtlPrincipalPay = MiscConstants.UNDEFINED_DOUBLE,
-                    optTtlRatePay = MiscConstants.UNDEFINED_DOUBLE;
+            Interlocked.Add(ref Share.Calculation_CalculateLuahSilukinBankCounter, 1);
+            // printOrNo = true;
+
+            double optTtlPrincipalPay = MiscConstants.UNDEFINED_DOUBLE, optTtlRatePay = MiscConstants.UNDEFINED_DOUBLE;
+
+            if (Share.ShouldPrintLog && printOrNo)
+                MiscUtilities.PrintMiscLogger("Bank. amt= " + optAmt + ", m= " + optTime + ", r1= " + rateFirstPeriod + ", r2= "
+                    + rateSecondPeriod);
 
             //Console.WriteLine("CalculateLuahSilukin product.firstTimePeriod: " + product.firstTimePeriod);
             double ttlPay = MiscConstants.UNDEFINED_DOUBLE;
@@ -35,6 +43,10 @@ namespace WisorLibrary.Logic
                     optTtlPrincipalPay = optAmt;
                     ttlPay = optTime * Math.Round(bankPmt, 2);
                     optTtlRatePay = ttlPay - optTtlPrincipalPay;
+                    // debug - print to file
+                    if (Share.ShouldPrintLog && printOrNo)
+                        MiscUtilities.PrintMiscLogger("bank case1: indexUsedFirstTimePeriod == 0. ttlPayTmp: " + ttlPay +
+                            ", optTtlRatePay: " + optTtlRatePay);
                 }
                 else
                 {
@@ -52,6 +64,14 @@ namespace WisorLibrary.Logic
                         optTtlPrincipalPay += principalPmt;
                         optTtlRatePay += ratePmt;
                         ttlPay += monthlyPmt;
+
+                        // debug - print to file
+                        if (Share.ShouldPrintLog && printOrNo)
+                            MiscUtilities.PrintMiscLogger("Bank case2: " + months + " - " + startingAmount.ToString() + " - r= " + r.ToString() + " - i= " +
+                                            i.ToString() + " - intPaid= " + ratePmt.ToString() + " - prinPaid= " +
+                                            principalPmt.ToString() + " - pmt= " + monthlyPmt + " - ttlPay= " +
+                                            ttlPay.ToString());
+
                         startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
                         if (months < optTime)
                         {
@@ -74,7 +94,7 @@ namespace WisorLibrary.Logic
                 double monthlyPmt = Math.Round(bankPmt, 2);
                 double startingAmount = optAmt;
                 // need to update second period rate
-                rateSecondPeriod = rateFirstPeriod;
+                // rateSecondPeriod = rateFirstPeriod;
                 // TBD Omri
                 //optRateSecondPeriod = CalculateInterestRate4SecondPeriod()
 
@@ -85,6 +105,14 @@ namespace WisorLibrary.Logic
                     optTtlPrincipalPay += principalPmt;
                     optTtlRatePay += ratePmt;
                     ttlPay += monthlyPmt;
+
+                    // debug - print to file
+                    if (Share.ShouldPrintLog && printOrNo)
+                        MiscUtilities.PrintMiscLogger("Bank case3: " + months + " - " + startingAmount.ToString() + " - r= " + r.ToString() + " - i= " +
+                                        i.ToString() + " - intPaid= " + ratePmt.ToString() + " - prinPaid= " +
+                                        principalPmt.ToString() + " - pmt= " + monthlyPmt + " - ttlPay= " +
+                                        ttlPay.ToString());
+
                     startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
                     if (months < optTime)
                     {
@@ -96,6 +124,14 @@ namespace WisorLibrary.Logic
                             2);
                     }
                 }
+
+                // calculate again...
+                monthlyPmt = // CalculatePmt2(startingAmount, (optTime - productFirstTimePeriod + 1), rateSecondPeriod, env);
+                    CalculatePmt2(startingAmount, (optTime - productFirstTimePeriod + 1), rateSecondPeriod,
+                            optType, productFirstTimePeriod,
+                            rateFirstPeriod, rateSecondPeriod,
+                            indexFirstPeriod, indexSecondPeriod, printOrNo);
+
                 r = ((rateSecondPeriod / 12 * 100000000) - ((rateSecondPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
                 i = ((indexSecondPeriod / 12 * 100000000) - ((indexSecondPeriod / 12 * 100000000) % 1)) / 100000000; // Instead of Math.Round
                 for (int months = productFirstTimePeriod + 1; months <= optTime; months++)
@@ -105,6 +141,14 @@ namespace WisorLibrary.Logic
                     optTtlPrincipalPay += principalPmt;
                     optTtlRatePay += ratePmt;
                     ttlPay += monthlyPmt;
+
+                    // debug - print to file
+                    if (Share.ShouldPrintLog)
+                        MiscUtilities.PrintMiscLogger("Bank case4: " + months + " - " + startingAmount.ToString() + " - r= " + r.ToString() + " - i= " +
+                                        i.ToString() + " - intPaid= " + ratePmt.ToString() + " - prinPaid= " +
+                                        principalPmt.ToString() + " - pmt= " + monthlyPmt + " - ttlPay= " +
+                                        ttlPay.ToString());
+
                     startingAmount = Math.Round((((startingAmount) * (1 + i)) - principalPmt), 2);
                     if (months < optTime)
                     {
@@ -127,7 +171,7 @@ namespace WisorLibrary.Logic
             double rateFirstPeriod, double rateSecondPeriod,
             double indexFirstPeriod, double indexSecondPeriod,  bool printOrNo)
         {
-            double currInterest = MiscConstants.UNDEFINED_DOUBLE;
+             double currInterest = MiscConstants.UNDEFINED_DOUBLE;
 
             //Console.WriteLine("CalculatePmt amtForCalc: " + amtForCalc + ", timeForCalc: " + timeForCalc + ", interestRateForCalc: " + interestRateForCalc);
             if ((MiscConstants.UNDEFINED_INT != optType) && (amtForCalc > 0) && (timeForCalc > 0))
@@ -399,7 +443,7 @@ namespace WisorLibrary.Logic
             else
             {
                 int length = Math.Min(amortisationData.AmortisationTable.Length, acculumaleAmortisationData.AmortisationTable.Length);
-            
+         
                 for (int i = 0; i < length; i++)
                 {
                     int currentYear = amortisationData.AmortisationTable[i].Year;
@@ -409,7 +453,6 @@ namespace WisorLibrary.Logic
                     acculumaleAmortisationData.AmortisationTable[i].PaidSoFar += amortisationData.AmortisationTable[i].PaidSoFar;
                     acculumaleAmortisationData.AmortisationTable[i].RemainingAmount += amortisationData.AmortisationTable[i].RemainingAmount;
                     acculumaleAmortisationData.AmortisationTable[i].Year = amortisationData.AmortisationTable[i].Year;
-
                 }
                
             }
@@ -420,17 +463,26 @@ namespace WisorLibrary.Logic
         {
             AmortisationData currentAmortisationData = new AmortisationData();
 
-            for (int i = 0; i < composition.opts.Length; i++) {
-                if (null != composition.opts[i])
+            MiscUtilities.PrintMiscLogger("\nPrint accumulate AmortisationData for new composition");
+            if (null != composition && null != composition.opts)
+            {
+                for (int i = 0; i < composition.opts.Length; i++)
                 {
-                    GenericProduct gp = composition.opts[i].product;
-                    CalculateLuahSilukinAllResults(gp.originalIndexUsedFirstTimePeriod, // indices 
-                       composition.opts[i].optRateFirstPeriod /* originalRate*/, gp.indexUsedFirstTimePeriod /*originalInflation*/,
-                       composition.opts[i].optAmt /*originalLoanAmount*/, composition.opts[i].optTime /*originalLoanTime*/,
-                       DateTime.Now /*dateLoanTaken*/, ref currentAmortisationData,
-                       null /*RunEnvironment env*/, false /*IsBank*/);
+                    if (null != composition.opts[i])
+                    {
+                        GenericProduct gp = composition.opts[i].product;
+                        CalculateLuahSilukinAllResults(gp.originalIndexUsedFirstTimePeriod, // indices 
+                           composition.opts[i].optRateFirstPeriod /* originalRate*/, gp.indexUsedFirstTimePeriod /*originalInflation*/,
+                           composition.opts[i].optAmt /*originalLoanAmount*/, composition.opts[i].optTime /*originalLoanTime*/,
+                           DateTime.Now /*dateLoanTaken*/, ref currentAmortisationData,
+                           null /*RunEnvironment env*/, false /*IsBank*/);
 
-                    AddAmortisationData(currentAmortisationData, ref amortisationData);
+                        AddAmortisationData(currentAmortisationData, ref amortisationData);
+
+                        // debug
+                        MiscUtilities.PrintMiscLogger("\nPrint accumulate AmortisationData while adding product: " + gp.name);
+                        MiscUtilities.PrintAmortisationData(amortisationData, true /*2file*/);
+                    }
                 }
             }
         }
@@ -579,10 +631,12 @@ namespace WisorLibrary.Logic
             string msg;
             int m;
 
+            Interlocked.Add(ref Share.Calculation_CalculateLuahSilukinCounter, 1);
+
             //try
             //{
             // calculate till now
-            bool shouldLog = true;
+            bool shouldLog = false; //  true;
             double monthlyPmtCalc;
             for (m = 1; m <= loopCounter /*numOfMonths*/; m++)
             {
@@ -629,7 +683,7 @@ namespace WisorLibrary.Logic
             monthlyPmtFuture = monthlyPmt;
 
             Log("\nAnd now for the futur\n");
-            shouldLog = true;
+            shouldLog = false; //  true;
 
             // calculate from now till the end loan' time
             for (/*m = numOfMonths*/; m <= originalLoanTime; m++)
@@ -821,85 +875,93 @@ namespace WisorLibrary.Logic
         {
             MinMax minmax = new MinMax();
 
-            if (MiscUtilities.Use3ProductsInComposition())
+            if (null == optType.product)
             {
-                // TBD: should check if this is the case when the interest is low 
-                if (indices.PRIME == optType.product.originalIndexUsedFirstTimePeriod)
+                WindowsUtilities.loggerMethod("ERROR FindMinMaxAmount null product.");
+            }
+            else
+            {
+                if (MiscUtilities.Use3ProductsInComposition())
                 {
-                    minmax.max = (int)(Calculations.FindMaxAmount(loanAmtWanted, optType) / 100 * 100);
-                    minmax.min = minmax.max;
-                }
-                else
-                {
-                    if (Risk.NONERisk == risk || Liquidity.NONELiquidity == liquidity)
+                    // TBD: should check if this is the case when the interest is low 
+                    if (indices.PRIME == optType.product.originalIndexUsedFirstTimePeriod)
                     {
-                        // keep the old good stuff...
                         minmax.max = (int)(Calculations.FindMaxAmount(loanAmtWanted, optType) / 100 * 100);
-                        minmax.min = (int)prevMin; // ... don't touch
+                        minmax.min = minmax.max;
                     }
                     else
                     {
-                        RiskLiquidityValue riskLiquidityValue = new RiskLiquidityValue();
-                        riskLiquidityValue.liquidity = liquidity;
-                        riskLiquidityValue.risk = risk;
-                        riskLiquidityValue.productID = optType.product.productID;
-                        bool rc = MiscUtilities.FindRiskLiquidity(riskLiquidityValue);
-                        if (rc)
+                        if (Risk.NONERisk == risk || Liquidity.NONELiquidity == liquidity)
                         {
-                            // should calculate the loan values according to the percantage
-                            minmax.min = (int)(loanAmtWanted * riskLiquidityValue.min / 100 * 100);
-                            minmax.max = (int)(loanAmtWanted * riskLiquidityValue.max / 100 * 100);
-                        }
-                        else
-                        {
-                            Console.WriteLine("FindMinMaxAmount failed for: " + riskLiquidityValue.ToString());
                             // keep the old good stuff...
                             minmax.max = (int)(Calculations.FindMaxAmount(loanAmtWanted, optType) / 100 * 100);
                             minmax.min = (int)prevMin; // ... don't touch
                         }
+                        else
+                        {
+                            RiskLiquidityValue riskLiquidityValue = new RiskLiquidityValue();
+                            riskLiquidityValue.liquidity = liquidity;
+                            riskLiquidityValue.risk = risk;
+                            riskLiquidityValue.productID = optType.product.productID;
+                            bool rc = MiscUtilities.FindRiskLiquidity(riskLiquidityValue);
+                            if (rc)
+                            {
+                                // should calculate the loan values according to the percantage
+                                minmax.min = (int)(loanAmtWanted * riskLiquidityValue.min / 100 * 100);
+                                minmax.max = (int)(loanAmtWanted * riskLiquidityValue.max / 100 * 100);
+                            }
+                            else
+                            {
+                                Console.WriteLine("FindMinMaxAmount failed for: " + riskLiquidityValue.ToString());
+                                // keep the old good stuff...
+                                minmax.max = (int)(Calculations.FindMaxAmount(loanAmtWanted, optType) / 100 * 100);
+                                minmax.min = (int)prevMin; // ... don't touch
+                            }
+                        }
                     }
                 }
-            }
-            else // 2 products in a combination
-            {
-                if (indices.PRIME == optType.product.originalIndexUsedFirstTimePeriod)
+                else // 2 products in a combination
                 {
-                    minmax.max = (int)(Calculations.FindMaxAmount(loanAmtWanted, optType) / 100 * 100);
-                    minmax.min = (int)prevMin;
-                }
-                else
-                {
-                    if (Risk.NONERisk == risk || Liquidity.NONELiquidity == liquidity)
+                    if (indices.PRIME == optType.product.originalIndexUsedFirstTimePeriod)
                     {
-                        // keep the old good stuff...
                         minmax.max = (int)(Calculations.FindMaxAmount(loanAmtWanted, optType) / 100 * 100);
-                        minmax.min = (int)prevMin; // ... don't touch
+                        minmax.min = (int)prevMin;
                     }
                     else
                     {
-                        RiskLiquidityValue riskLiquidityValue = new RiskLiquidityValue();
-                        riskLiquidityValue.liquidity = liquidity;
-                        riskLiquidityValue.risk = risk;
-                        riskLiquidityValue.productID = optType.product.productID;
-                        bool rc = MiscUtilities.FindRiskLiquidity(riskLiquidityValue);
-                        if (rc)
+                        if (Risk.NONERisk == risk || Liquidity.NONELiquidity == liquidity)
                         {
-                            // should calculate the loan values according to the percantage
-                            minmax.min = (int)(loanAmtWanted * riskLiquidityValue.min / 100 * 100);
-                            minmax.max = (int)(loanAmtWanted * riskLiquidityValue.max / 100 * 100);
-                        }
-                        else
-                        {
-                            Console.WriteLine("FindMinMaxAmount failed for: " + riskLiquidityValue.ToString());
                             // keep the old good stuff...
                             minmax.max = (int)(Calculations.FindMaxAmount(loanAmtWanted, optType) / 100 * 100);
                             minmax.min = (int)prevMin; // ... don't touch
                         }
+                        else
+                        {
+                            RiskLiquidityValue riskLiquidityValue = new RiskLiquidityValue();
+                            riskLiquidityValue.liquidity = liquidity;
+                            riskLiquidityValue.risk = risk;
+                            riskLiquidityValue.productID = optType.product.productID;
+                            bool rc = MiscUtilities.FindRiskLiquidity(riskLiquidityValue);
+                            if (rc)
+                            {
+                                // should calculate the loan values according to the percantage
+                                minmax.min = (int)(loanAmtWanted * riskLiquidityValue.min / 100 * 100);
+                                minmax.max = (int)(loanAmtWanted * riskLiquidityValue.max / 100 * 100);
+                            }
+                            else
+                            {
+                                Console.WriteLine("FindMinMaxAmount failed for: " + riskLiquidityValue.ToString());
+                                // keep the old good stuff...
+                                minmax.max = (int)(Calculations.FindMaxAmount(loanAmtWanted, optType) / 100 * 100);
+                                minmax.min = (int)prevMin; // ... don't touch
+                            }
+                        }
                     }
                 }
+                Console.WriteLine("FindMinMaxAmount for product: " + optType.product.name + " ,loanAmtWanted: " + loanAmtWanted
+                    + ", return min: " + minmax.min + ", max: " + minmax.max);
+
             }
-            Console.WriteLine("FindMinMaxAmount for product: " + optType.product.name + " ,loanAmtWanted: " + loanAmtWanted 
-                + ", return min: " + minmax.min + ", max: " + minmax.max);
             return minmax;
         }
 
@@ -938,14 +1000,27 @@ namespace WisorLibrary.Logic
             double bankRate = RateUtilities.Instance.GetBankRate(optionX.product.productID.numberID,
                 profile, (int)optionX.optTime / 12 - 4);
             optionX.SetBankRate(bankRate);
+            // second period
+            bankRate = RateUtilities.Instance.GetBankRateSecondPeriod(optionX.product.productID.numberID,
+                profile, (int)optionX.optTime / 12 - 4);
+            optionX.SetBankRate2(bankRate);
+            
             bankRate = RateUtilities.Instance.GetBankRate(optionY.product.productID.numberID,
                 profile, (int)optionY.optTime / 12 - 4);
             optionY.SetBankRate(bankRate);
+            // second period
+            bankRate = RateUtilities.Instance.GetBankRateSecondPeriod(optionY.product.productID.numberID,
+                profile, (int)optionY.optTime / 12 - 4);
+            optionY.SetBankRate2(bankRate);
             if (MiscUtilities.Use3ProductsInComposition())
             {
                 bankRate = RateUtilities.Instance.GetBankRate(optionZ.product.productID.numberID,
-                profile, (int)optionZ.optTime / 12 - 4);
+                    profile, (int)optionZ.optTime / 12 - 4);
                 optionZ.SetBankRate(bankRate);
+                // second period
+                bankRate = RateUtilities.Instance.GetBankRateSecondPeriod(optionZ.product.productID.numberID,
+                   profile, (int)optionZ.optTime / 12 - 4);
+                optionZ.SetBankRate2(bankRate);
             }
         }
 
@@ -1061,6 +1136,15 @@ namespace WisorLibrary.Logic
             RunEnvironment env, bool IsBank, bool useConstantRate, out double lastRate, uint accululateTime,
             ref double finalRemaingLoanAmount, ref double finalFirstMonthlyPMT, ref double finalRemaingLoanTime)
         {
+            if (MiscConstants.UNDEFINED_DOUBLE >= originalLoanAmount)
+            {
+                WindowsUtilities.loggerMethod("NOTICE: CalculateLuahSilukinFullUK illegal originalLoanAmount: " + originalLoanAmount);
+                lastRate = MiscConstants.UNDEFINED_DOUBLE;
+                return;
+            }
+
+            Interlocked.Add(ref Share.Calculation_CalculateLuahSilukinUKCounter, 1);
+
             double interestPaidSoFar = MiscConstants.UNDEFINED_DOUBLE,
                 totalPaidSoFar = MiscConstants.UNDEFINED_DOUBLE,
                 principalPaidSoFar = MiscConstants.UNDEFINED_DOUBLE;
@@ -1110,7 +1194,7 @@ namespace WisorLibrary.Logic
             }
 
             // calculate till now
-            bool shouldLog = true;
+            bool shouldLog = false; //  true;
             double monthlyPmtCalc;
             uint counter;
             for (m = 1; m <= loopCounter /*numOfMonths*/; m++)
@@ -1253,7 +1337,7 @@ namespace WisorLibrary.Logic
             */
             double lastRate = MiscConstants.UNDEFINED_DOUBLE;
             double newLoanAmount = MiscConstants.UNDEFINED_DOUBLE;
-
+            DateTime newLoanDate2;
 
             if (numOfMonthsUntilToday > firstTimePeriod)
             {
@@ -1279,34 +1363,48 @@ namespace WisorLibrary.Logic
                 // 2. From first time period -> today -> borrower interest rate is changing each month -> taken from historic DB file
                 Log("\nCalculate Luah Silukin for Borrower second step for numOfMonthsUntilToday > firstTimePeriod:\n");
                 newLoanAmount = calculationBorrowerData1.RemaingLoanAmount;
-                newLoanTime = (uint) (numOfMonthsUntilToday - firstTimePeriod);
-                DateTime newLoanDate2 = dateLoanTaken.AddMonths(firstTimePeriod);
-                Log("\nindicesForPeriod: " + indicesSecondTimePeriod + ", originalRate: " + originalBorrowerRate2 +
-                     ", originalInflation: " + originalInflation +
-                     ", originalLoanAmount: " + newLoanAmount + ", originalLoanTime: " + originalLoanTime +
-                     ", currentPeriodTime: " + newLoanTime + ", dateLoanTaken: " + newLoanDate2 +
-                     ", accululateTime: " + accululateTime + ", IsBank: " + false + ",  useConstantRate: " + false + "\n");
-                CalculateLuahSilukinFullUK(indicesSecondTimePeriod, originalBorrowerRate2, originalInflation, newLoanAmount,
-                    originalLoanTime, newLoanTime,
-                    newLoanDate2, ref calculationBorrowerData2, env, false /*IsBank*/, false /*useConstantRate*/, 
-                    out lastRate, accululateTime, ref finalRemaingLoanAmount, ref finalFirstMonthlyPMT, ref finalRemaingLoanTime);
-                finalFirstMonthlyPMT2 = calculationBorrowerData2.FirstMonthlyPMT;
-                accululateTime += newLoanTime;
+                if (firstTimePeriod > numOfMonthsUntilToday)
+                {
+                    WindowsUtilities.loggerMethod("NOTICE: DriveCalculateLuahSilukinFullUK firstTimePeriod : " + firstTimePeriod + " is greater than numOfMonthsUntilToday: " + numOfMonthsUntilToday);
+                }
+                else
+                {
+                    newLoanTime = (uint)(numOfMonthsUntilToday - firstTimePeriod);
+                    newLoanDate2 = dateLoanTaken.AddMonths(firstTimePeriod);
+                    Log("\nindicesForPeriod: " + indicesSecondTimePeriod + ", originalRate: " + originalBorrowerRate2 +
+                         ", originalInflation: " + originalInflation +
+                         ", originalLoanAmount: " + newLoanAmount + ", originalLoanTime: " + originalLoanTime +
+                         ", currentPeriodTime: " + newLoanTime + ", dateLoanTaken: " + newLoanDate2 +
+                         ", accululateTime: " + accululateTime + ", IsBank: " + false + ",  useConstantRate: " + false + "\n");
+                    CalculateLuahSilukinFullUK(indicesSecondTimePeriod, originalBorrowerRate2, originalInflation, newLoanAmount,
+                        originalLoanTime, newLoanTime,
+                        newLoanDate2, ref calculationBorrowerData2, env, false /*IsBank*/, false /*useConstantRate*/,
+                        out lastRate, accululateTime, ref finalRemaingLoanAmount, ref finalFirstMonthlyPMT, ref finalRemaingLoanTime);
+                    finalFirstMonthlyPMT2 = calculationBorrowerData2.FirstMonthlyPMT;
+                    accululateTime += newLoanTime;
+                }
 
                 // 3. From today until the end -> borrower interest rate is constant -> uses the last value of the last loop and doesnt change
                 Log("\nCalculate Luah Silukin for Borrower third step for numOfMonthsUntilToday > firstTimePeriod:\n");
                 newLoanAmount = calculationBorrowerData2.RemaingLoanAmount;
-                newLoanTime = (uint)(originalLoanTime - numOfMonthsUntilToday);
-                newLoanDate2 = DateTime.Now;
-                Log("\nindicesForPeriod: " + indicesSecondTimePeriod + ", originalRate: " + lastRate +
-                    ", originalInflation: " + originalInflation +
-                    ", originalLoanAmount: " + newLoanAmount + ", originalLoanTime: " + originalLoanTime +
-                    ", currentPeriodTime: " + newLoanTime + ", dateLoanTaken: " + newLoanDate2 +
-                    ", accululateTime: " + accululateTime + ", IsBank: " + false + ",  useConstantRate: " + true + "\n");
-                CalculateLuahSilukinFullUK(indicesSecondTimePeriod, lastRate, originalInflation, newLoanAmount,
-                    originalLoanTime, newLoanTime,
-                    newLoanDate2, ref calculationBorrowerData3, env, false /*IsBank*/, true /*useConstantRate*/, 
-                    out lastRate, accululateTime, ref finalRemaingLoanAmount, ref finalFirstMonthlyPMT, ref finalRemaingLoanTime);
+                if (numOfMonthsUntilToday > originalLoanTime)
+                {
+                    WindowsUtilities.loggerMethod("NOTICE: DriveCalculateLuahSilukinFullUK numOfMonthsUntilToday : " + numOfMonthsUntilToday + " is greater than originalLoanTime: " + originalLoanTime);
+                }
+                else
+                {
+                    newLoanTime = (uint)(originalLoanTime - numOfMonthsUntilToday);
+                    newLoanDate2 = DateTime.Now;
+                    Log("\nindicesForPeriod: " + indicesSecondTimePeriod + ", originalRate: " + lastRate +
+                        ", originalInflation: " + originalInflation +
+                        ", originalLoanAmount: " + newLoanAmount + ", originalLoanTime: " + originalLoanTime +
+                        ", currentPeriodTime: " + newLoanTime + ", dateLoanTaken: " + newLoanDate2 +
+                        ", accululateTime: " + accululateTime + ", IsBank: " + false + ",  useConstantRate: " + true + "\n");
+                    CalculateLuahSilukinFullUK(indicesSecondTimePeriod, lastRate, originalInflation, newLoanAmount,
+                        originalLoanTime, newLoanTime,
+                        newLoanDate2, ref calculationBorrowerData3, env, false /*IsBank*/, true /*useConstantRate*/,
+                        out lastRate, accululateTime, ref finalRemaingLoanAmount, ref finalFirstMonthlyPMT, ref finalRemaingLoanTime);
+                }
 
                 // the bank side
                 newLoanAmount = originalLoanAmount;
@@ -1326,33 +1424,48 @@ namespace WisorLibrary.Logic
 
                 Log("\nCalculate Luah Silukin for Bank second step for numOfMonthsUntilToday > firstTimePeriod:\n");
                 newLoanAmount = calculationBankData1.RemaingLoanAmount;
-                newLoanTime = (uint)(numOfMonthsUntilToday - firstTimePeriod);
-                newLoanDate2 = dateLoanTaken.AddMonths(firstTimePeriod);
-                Log("\nindicesForPeriod: " + indicesSecondTimePeriod + ", originalRate: " + originalbankRate2 +
-                    ", originalInflation: " + originalInflation +
-                    ", originalLoanAmount: " + newLoanAmount + ", originalLoanTime: " + originalLoanTime +
-                    ", currentPeriodTime: " + newLoanTime + ", dateLoanTaken: " + newLoanDate2 +
-                    ", accululateTime: " + accululateTime + ", IsBank: " + true + ",  useConstantRate: " + false + "\n");
-                CalculateLuahSilukinFullUK(indicesSecondTimePeriod, originalbankRate2, originalInflation, newLoanAmount,
-                    originalLoanTime, newLoanTime,
-                    newLoanDate2, ref calculationBankData2, env, true /*IsBank*/, false /*useConstantRate*/, 
-                    out lastRate, accululateTime, ref finalBankRemaingLoanAmount, ref finalBankFirstMonthlyPMT, ref finalBankRemaingLoanTime);
-                accululateTime += newLoanTime;
+                if (firstTimePeriod > numOfMonthsUntilToday)
+                {
+                    WindowsUtilities.loggerMethod("NOTICE: DriveCalculateLuahSilukinFullUK Bank firstTimePeriod : " + firstTimePeriod + " is greater than numOfMonthsUntilToday: " + numOfMonthsUntilToday);
+                }
+                else
+                {
+                    newLoanTime = (uint)(numOfMonthsUntilToday - firstTimePeriod);
+                    newLoanDate2 = dateLoanTaken.AddMonths(firstTimePeriod);
+                    Log("\nindicesForPeriod: " + indicesSecondTimePeriod + ", originalRate: " + originalbankRate2 +
+                        ", originalInflation: " + originalInflation +
+                        ", originalLoanAmount: " + newLoanAmount + ", originalLoanTime: " + originalLoanTime +
+                        ", currentPeriodTime: " + newLoanTime + ", dateLoanTaken: " + newLoanDate2 +
+                        ", accululateTime: " + accululateTime + ", IsBank: " + true + ",  useConstantRate: " + false + "\n");
+                    CalculateLuahSilukinFullUK(indicesSecondTimePeriod, originalbankRate2, originalInflation, newLoanAmount,
+                        originalLoanTime, newLoanTime,
+                        newLoanDate2, ref calculationBankData2, env, true /*IsBank*/, false /*useConstantRate*/,
+                        out lastRate, accululateTime, ref finalBankRemaingLoanAmount, ref finalBankFirstMonthlyPMT, ref finalBankRemaingLoanTime);
+                    accululateTime += newLoanTime;
+                }
 
                 // 3. From today until the end -> borrower interest rate is constant -> uses the last value of the last loop and doesnt change
                 Log("\nCalculate Luah Silukin for Bank third step for numOfMonthsUntilToday > firstTimePeriod:\n");
                 newLoanAmount = calculationBankData2.RemaingLoanAmount;
-                newLoanTime = (uint)(originalLoanTime - numOfMonthsUntilToday);
-                newLoanDate2 = DateTime.Now;
-                Log("\nindicesForPeriod: " + indicesSecondTimePeriod + ", originalRate: " + lastRate +
-                     ", originalInflation: " + originalInflation +
-                     ", originalLoanAmount: " + newLoanAmount + ", originalLoanTime: " + originalLoanTime +
-                     ", currentPeriodTime: " + newLoanTime + ", dateLoanTaken: " + newLoanDate2 +
-                     ", accululateTime: " + accululateTime + ", IsBank: " + true + ",  useConstantRate: " + true + "\n");
-                CalculateLuahSilukinFullUK(indicesSecondTimePeriod, lastRate, originalInflation, newLoanAmount,
-                    originalLoanTime, newLoanTime,
-                    newLoanDate2, ref calculationBankData3, env, true /*IsBank*/, true /*useConstantRate*/, 
-                    out lastRate, accululateTime, ref finalBankRemaingLoanAmount, ref finalBankFirstMonthlyPMT, ref finalBankRemaingLoanTime);
+                if (numOfMonthsUntilToday > originalLoanTime)
+                {
+                    WindowsUtilities.loggerMethod("NOTICE: DriveCalculateLuahSilukinFullUK numOfMonthsUntilToday : " + numOfMonthsUntilToday + " is greater than originalLoanTime: " + originalLoanTime);
+                }
+                else
+                {
+                    newLoanTime = (uint)(originalLoanTime - numOfMonthsUntilToday);
+                    newLoanDate2 = DateTime.Now;
+                    Log("\nindicesForPeriod: " + indicesSecondTimePeriod + ", originalRate: " + lastRate +
+                         ", originalInflation: " + originalInflation +
+                         ", originalLoanAmount: " + newLoanAmount + ", originalLoanTime: " + originalLoanTime +
+                         ", currentPeriodTime: " + newLoanTime + ", dateLoanTaken: " + newLoanDate2 +
+                         ", accululateTime: " + accululateTime + ", IsBank: " + true + ",  useConstantRate: " + true + "\n");
+                    CalculateLuahSilukinFullUK(indicesSecondTimePeriod, lastRate, originalInflation, newLoanAmount,
+                        originalLoanTime, newLoanTime,
+                        newLoanDate2, ref calculationBankData3, env, true /*IsBank*/, true /*useConstantRate*/,
+                        out lastRate, accululateTime, ref finalBankRemaingLoanAmount, ref finalBankFirstMonthlyPMT, ref finalBankRemaingLoanTime);
+                }
+
             } // (numOfMonthsUntilToday > firstTimePeriod)
             else if (firstTimePeriod > numOfMonthsUntilToday)
             {
@@ -1381,7 +1494,7 @@ namespace WisorLibrary.Logic
                 Log("\nCalculate Luah Silukin for Borrower second step for firstTimePeriod > numOfMonthsUntilToday:\n");
                 newLoanAmount = calculationBorrowerData1.RemaingLoanAmount;
                 newLoanTime = (uint)(firstTimePeriod - numOfMonthsUntilToday);
-                DateTime newLoanDate2 = DateTime.Now;
+                newLoanDate2 = DateTime.Now;
                 CalculateLuahSilukinFullUK(indicesFirstTimePeriod, originalBorrowerRate, originalInflation, newLoanAmount,
                     originalLoanTime, newLoanTime,
                     newLoanDate2, ref calculationBorrowerData2, env, false /*IsBank*/, true /*useConstantRate*/, 
