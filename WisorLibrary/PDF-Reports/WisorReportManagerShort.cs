@@ -203,13 +203,16 @@ namespace WisorLibrary.ReportApplication
         {
             try
             {
-                CreateFirstLenderPage();
-                CreateSecondLenderPage();
-                // Save and start View 
-                document.Save(documentFileName);
-                if (Share.ShouldDisplayReportOnline)
-                    Process.Start(documentFileName);
-                return true;
+                if (CreateFirstLenderPage())
+                {
+                    CreateSecondLenderPage();
+                    // Save and start View 
+                    document.Save(documentFileName);
+                    if (Share.ShouldDisplayReportOnline)
+                        Process.Start(documentFileName);
+                    return true;
+                }
+                return false;
             }
             catch (Exception ex)
             {
@@ -239,7 +242,7 @@ namespace WisorLibrary.ReportApplication
             }
         }
 
-        public void CreateFirstLenderPage()
+        public bool CreateFirstLenderPage()
         {
             // Create an empty page and set view
             page = document.AddPage();
@@ -930,6 +933,12 @@ namespace WisorLibrary.ReportApplication
             //
             if (System.Threading.Thread.CurrentThread.CurrentUICulture.Name == new CultureInfo("en-GB").Name)
             {
+                if (null == shortReportDataObject.OriginalLoanUKTableShortValue)
+                {
+                    Console.WriteLine("NOTICE: CreateFirstLenderPage found null  OriginalLoanUKTableShortValue.");
+                    return false;
+                }
+
                 // PAGE TITLE
                 XRect lenderCase = new XRect(335, 60, 300, 20);
                 tf.Alignment = SetAlignmentForCulture();
@@ -1202,6 +1211,8 @@ namespace WisorLibrary.ReportApplication
                 tf.DrawString(CheckRTL(shortReportDataObject.OriginalLoanUKTableShortValue.EstimateFuturePercentProfit.ToString("0.000")) + "%", fontH5Bold, XBrushes.Black, lenderTable1ExpectedProfitPercentValue, XStringFormats.TopLeft);
                 #endregion
             }
+
+            return true;
         }
 
         public void CreateSecondLenderPage()
@@ -1922,7 +1933,7 @@ namespace WisorLibrary.ReportApplication
                             SumOfLenderProfitPercantage += CompositionLenderProfitPercantage;
                             tf.DrawString(CheckRTL(CompositionLenderProfitPercantage.ToString("0.000") + "%"), fontH6, XBrushes.Black, lenderTable5ProfitPercentValue, XStringFormats.TopLeft);
                             // tf.DrawString(CheckRTL(Math.Round(CompositionLenderProfitPercantage,3) + "%"), fontH6, XBrushes.Black, lenderTable5ProfitPercentValue, XStringFormats.TopLeft);
-                            XRect lenderTable5ProfitValue = new XRect(475 + horizontPosition2, heightPosition2 + PositionY3 - 12, 150, 20);
+                            XRect lenderTable5ProfitValue = new XRect(465 + horizontPosition2, heightPosition2 + PositionY3 - 12, 150, 20);
                             tf.Alignment = SetAlignmentForCulture();
                             tf.DrawString("₤" + CheckRTL(CompositionLenderProfit.ToString("N0")), fontH6, XBrushes.Black, lenderTable5ProfitValue, XStringFormats.TopLeft);
                         }
