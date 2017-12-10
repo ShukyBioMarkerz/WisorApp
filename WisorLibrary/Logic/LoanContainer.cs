@@ -41,7 +41,7 @@ namespace WisorLibrary.Logic
  
             for (int i = 0; i < _loans.Count; i++, failedInCalculation = false)
             {
-                WindowsUtilities.loggerMethod("NOTICE: calculating the: " + i + " loan out of: " + _loans.Count + ", amount: " + _loans[i].LoanAmount + " , date: " + _loans[i].DateTaken);
+                WindowsUtilities.loggerMethod("NOTICE: calculating the: " + (i + 1).ToString() + " loan out of: " + _loans.Count + ", amount: " + _loans[i].LoanAmount + " , date: " + _loans[i].DateTaken);
 
                 // is it the same ID
                 if (MiscConstants.UNDEFINED_STRING == id || id == _loans[i].ID)
