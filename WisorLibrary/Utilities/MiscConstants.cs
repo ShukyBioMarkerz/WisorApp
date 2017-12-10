@@ -125,7 +125,8 @@ namespace WisorLib
         public const string FROM_IDS_LOAD_LOANS = "FROM_IDS_LOAD_LOANS";
         public const string NUMBER_OF_PRODUCTS_IN_COMBINATION = "NUMBER_OF_PRODUCTS_IN_COMBINATION";
         public const string SHOULD_DISPLAY_REPORT_ONLINE = "SHOULD_DISPLAY_REPORT_ONLINE";
-        
+        public const string SHOULD_RUN_THE_LOGIC_SYNC = "SHOULD_RUN_THE_LOGIC_SYNC";
+
 
         internal static string LENDER_REPORT_PREFIX = "LenderReport";
         internal static string BORROWER_REPORT_PREFIX = "BorrowerReport";
@@ -162,7 +163,7 @@ namespace WisorLib
         public static uint MAX_NUM_OF_COMBINATION_TO_SELECT = 3;
 
         public const int NumberOfProfiles = 6;
-        public const int NumberOfYearsFrProduct = 27;
+        public const int NumberOfYearsFrProduct = 32; // 27;
 
         //public static double BANK_RATE = 0.005;
         public static double MADAD_Inflation = 0.005; /*0.018;*/
@@ -207,6 +208,9 @@ namespace WisorLib
 
         public static string HEBREW_STR { get { return "he-IL"; }  }
         public static string GENERIC_CONFIG { get { return "GENERIC_CONFIG"; } }
+
+        public static double FIX_PRODUCT_CLOSING_FEE_PERCANTAGE { get { return 0.01; } }
+        public static double NOTFIX_PRODUCT_CLOSING_FEE_PERCANTAGE { get { return 0.03; } }
 
         public static double JUMP_PERCANTAGE_PER_LOAN_AMOUNT = 0.005;
         public static double MIN_JUMP_BETWEEN_AMOUNTS = 1000;
