@@ -128,7 +128,10 @@ namespace WisorLibrary.DataObjects
 
         public string[] GetProducts()
         {
-            return Share.theProductsNames;
+            // TBD - should use only the products which defined in the combination file
+            // return Share.theProductsNames;
+            string[] response = MiscUtilities.GetCombinationsUniqueNames(LoanAmount, LTV);
+            return response;
         }
 
         //public CompositionReportData[] GetCompositionData()
@@ -301,6 +304,10 @@ namespace WisorLibrary.DataObjects
                 minLenderProfit_corrspondBorrowerSaving = minLenderProfit_corrspondLenderPayment = MiscConstants.UNDEFINED_INT;
             maxBorrowerPayment_corrspondName = minBorrowerPayment_corrspondName = maxLenderProfit_corrspondName =
                 minLenderProfit_corrspondName = MiscConstants.UNDEFINED_STRING;
+            double compFeePayment = MiscConstants.UNDEFINED_DOUBLE;
+            bool shouldReFinanceWithFee, canBorrowerSaveWithFee, canLenderProfitWithFee;
+            shouldReFinanceWithFee = canBorrowerSaveWithFee = canLenderProfitWithFee = MiscConstants.UNDEFINED_BOOL;
+            int borrowerProfitCalcWithFee = MiscConstants.UNDEFINED_INT;
 
             foreach (Composition comp in compositions)
             {
@@ -308,29 +315,28 @@ namespace WisorLibrary.DataObjects
                 {
                     // calculate the fee 
                     uint remainingLoanAmount = env.theLoan.LoanAmount;
-                    uint feePayment = MiscUtilities.CalculateFee(remainingLoanAmount,
+                    compFeePayment = comp.FeePayment = MiscUtilities.CalculateFees(remainingLoanAmount, IsItNewLoan,
                          comp.opts[(int)Options.options.OPTX].product,
                          comp.opts[(int)Options.options.OPTY].product,
-                         (null == comp.opts[(int)Options.options.OPTZ] ? null : comp.opts[(int)Options.options.OPTZ].product));
-                    comp.FeePayment = feePayment;
+                         (null == comp.opts[(int)Options.options.OPTZ] ? null : comp.opts[(int)Options.options.OPTZ].product),
+                         env.theLoan.ProductID.numberID);
 
                     noCompositionFounded = false;
                     int ttlBankPay, ttlBorrowerPay, ttlProfit;
-                    int borrowerProfitCalc, bankProfitCalc, totalBenefit, bankOriginalProfit, borrowerProfitCalcWithFee;
+                    int borrowerProfitCalc, bankProfitCalc, totalBenefit, bankOriginalProfit;
 
                     // MiscUtilities.CalcaulateProfit(comp, out ttlBankPay, out ttlBorrowerPay, out ttlProfit);
-                    MiscUtilities.CalcaulateProfitAll(comp, env.theLoan, feePayment, 
+                    MiscUtilities.CalcaulateProfitAll(comp, env.theLoan, (uint) comp.FeePayment, 
                         out borrowerProfitCalc, out bankProfitCalc, out totalBenefit, out bankOriginalProfit,
                         out ttlBankPay, out ttlBorrowerPay, out ttlProfit);
 
                     comp.BorrowerProfitCalc = borrowerProfitCalc;
-                    borrowerProfitCalcWithFee = borrowerProfitCalc - (int) feePayment;
+                    borrowerProfitCalcWithFee = borrowerProfitCalc - (int)comp.FeePayment;
                     comp.BankProfitCalc = bankProfitCalc;
                     comp.TotalBenefit = totalBenefit;
                     comp.BankOriginalProfit = bankOriginalProfit;
 
                     bool shouldReFinance, canBorrowerSave, canLenderProfit, canIncreaseTotalProfit;
-                    bool shouldReFinanceWithFee, canBorrowerSaveWithFee, canLenderProfitWithFee;
                     double totalProfitPercantage;
                     canBorrowerSave = (0 < borrowerProfitCalc);
                     canBorrowerSaveWithFee = (0 < borrowerProfitCalcWithFee);
@@ -374,7 +380,7 @@ namespace WisorLibrary.DataObjects
                         ((double) borrowerProfitCalc / env.theLoan.LoanAmount * 100).ToString(),// Borrower beneficial%
                         bankProfitCalc.ToString(), // diff of Bank Future between the 2 options
                         // bank benefit % = difference in the bank benefit / original benefit
-                        (0 != bankOriginalProfit) ? ((double) (bankProfitCalc - bankOriginalProfit) / bankOriginalProfit * 100).ToString() : 0.ToString(),
+                        (0 != bankOriginalProfit) ? ((double) (bankProfitCalc /*- bankOriginalProfit*/) / bankOriginalProfit * 100).ToString() : 0.ToString(),
                         // ((double) bankProfitCalc / theLoan.LoanAmount * 100).ToString(),// Bank beneficial%
                         totalBenefit.ToString(), // total benefit
                         totalProfitPercantage.ToString(), // total benefit percantage
@@ -384,7 +390,7 @@ namespace WisorLibrary.DataObjects
                         env.theLoan.resultReportData.PTI.ToString(), // "PTI",
                         env.theLoan.YearlyIncome.ToString(), //"Income"
                         env.theLoan.fico.ToString(), // fico
-                        feePayment.ToString(),
+                        comp.FeePayment.ToString(),
                         (shouldReFinanceWithFee ? "Yes" : "No" ), // "With Fee: Refinance Or No"
                         (canBorrowerSaveWithFee ? "Yes" : "No" ), // "With Fee: Can Save Borrower Money"
                         borrowerProfitCalcWithFee.ToString() // "With Fee: borrower saving"
@@ -507,6 +513,11 @@ namespace WisorLibrary.DataObjects
                         minLenderProfit_corrspondBorrowerSaving.ToString(),
                         minLenderProfit_corrspondLenderPayment.ToString(),
                         minLenderProfit_corrspondName
+                        // add the fee consideration
+                        ,compFeePayment.ToString(),
+                        (shouldReFinanceWithFee ? "Yes" : "No" ), // "With Fee: Refinance Or No"
+                        (canBorrowerSaveWithFee ? "Yes" : "No" ), // "With Fee: Can Save Borrower Money"
+                        borrowerProfitCalcWithFee.ToString() // "With Fee: borrower saving"
                     };
                 MiscUtilities.PrintSummaryFileS(Share.theWinWinSummaryFile, msgn);
             }
