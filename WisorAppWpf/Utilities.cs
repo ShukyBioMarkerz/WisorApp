@@ -298,11 +298,11 @@ namespace WisorAppWpf
 
         public static void RunTheLogic()
         {
-            MiscUtilities.RunTheLogic();
+            MiscUtilities.RunTheLogic(null, true);
         }
 
 
-  
+
 
         //private static void RunTheLoansSync2(LoanList loans/*, FieldList fields*/)
         //{
@@ -349,8 +349,8 @@ namespace WisorAppWpf
         //}
 
 
- 
-    
+
+
 
     }
 
