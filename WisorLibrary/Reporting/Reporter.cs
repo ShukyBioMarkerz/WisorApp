@@ -105,20 +105,23 @@ namespace WisorLibrary.Reporting
 
             // get the products
             string[] products = reportData.GetProducts();
-            GenericProduct gp;
-            int profile = 1, minRateIndex = 0, maxRateIndex = MiscConstants.NumberOfYearsFrProduct;
-            foreach (string p in products)
+            if (null != products)
             {
-                // TBD - Omri. which rate and margin should be get
-                gp = GenericProduct.GetProductByName(p);
-                double bankRateFrom = RateUtilities.Instance.GetBankRate(gp.productID.numberID, profile, minRateIndex);
-                double bankRateTo = RateUtilities.Instance.GetBankRate(gp.productID.numberID, profile, maxRateIndex);
-                double borrowerRateFrom = RateUtilities.Instance.GetBorrowerRate(gp.productID.numberID, profile, minRateIndex);
-                double borrowerRateTo = RateUtilities.Instance.GetBorrowerRate(gp.productID.numberID, profile, maxRateIndex);
-                Console.WriteLine(
-                    " Product: " + p + " Rate: " + borrowerRateFrom + "-" + borrowerRateTo + 
-                    " Margin: " + bankRateFrom + "-" + bankRateTo
-                    );
+                GenericProduct gp;
+                int profile = 1, minRateIndex = 0, maxRateIndex = MiscConstants.NumberOfYearsFrProduct;
+                foreach (string p in products)
+                {
+                    // TBD - Omri. which rate and margin should be get
+                    gp = GenericProduct.GetProductByName(p);
+                    double bankRateFrom = RateUtilities.Instance.GetBankRate(gp.productID.numberID, profile, minRateIndex);
+                    double bankRateTo = RateUtilities.Instance.GetBankRate(gp.productID.numberID, profile, maxRateIndex);
+                    double borrowerRateFrom = RateUtilities.Instance.GetBorrowerRate(gp.productID.numberID, profile, minRateIndex);
+                    double borrowerRateTo = RateUtilities.Instance.GetBorrowerRate(gp.productID.numberID, profile, maxRateIndex);
+                    Console.WriteLine(
+                        " Product: " + p + " Rate: " + borrowerRateFrom + "-" + borrowerRateTo +
+                        " Margin: " + bankRateFrom + "-" + bankRateTo
+                        );
+                }
             }
 
             // get the 3 compositions
