@@ -172,37 +172,41 @@ namespace WisorLib
 
             if (MiscUtilities.Use3ProductsInComposition())
             {
-                s += 
-                "X:optType" + "," + "X:optAmt" + "," + "X:optTime" + "," 
-                + "X:RateFirstPeriod" + "," +  "X:BankRateFirstPeriod" + "," +
-                "Y:optType" + "," + "Y:optAmt" + "," + "Y:optTime" + "," 
-                + "Y:RateFirstPeriod" + "," +  "Y:BankRateFirstPeriod" + "," +
-                "Z:optType" + "," + "Z:optAmt" + "," + "Z:optTime" + "," 
+                s +=
+                "X:optType" + "," + "X:optAmt" + "," + "X:optTime" + ","
+                + "X:RateFirstPeriod" + "," + "X:BankRateFirstPeriod" + "," +
+                "Y:optType" + "," + "Y:optAmt" + "," + "Y:optTime" + ","
+                + "Y:RateFirstPeriod" + "," + "Y:BankRateFirstPeriod" + "," +
+                "Z:optType" + "," + "Z:optAmt" + "," + "Z:optTime" + ","
                 + "Z:RateFirstPeriod" + "," + "Z:BankRateFirstPeriod" + "," +
                 "OPTXPmt" + "," + "OPTYPmt" + "," + "OPTZPmt" + "," + "ttlPmt" + "," +
                 "OPTXTtlPay" + "," + "OPTYTtlPay" + "," + "OPTZTtlPay" + "," +
                 // bank profit data
                 "X:BankTtlPay" + "," + "Y:BankTtlPay" + "," + "Z:BankTtlPay" + "," +
-                "ttlBorrowerPay" + "," + "TtlBankPay" + "," + "TtlBankProfit" +
+                "ttlBorrowerPay" + "," + "TtlBankPay" + "," + "TtlBankProfit";
+                /* we don't know yet this data
+                 +
                 "," + "IsWinWin" +
                 // add fee calculation
-                "," + "FeePayment";
+                "," + "FeePayment"; */
             }
             else
             {
-               s +=
-              "X:optType" + "," + "X:optAmt" + "," + "X:optTime" + "," 
-              + "X:RateFirstPeriod" + "," +  "X:BankRateFirstPeriod" + "," +
-              "Y:optType" + "," + "Y:optAmt" + "," + "Y:optTime" + "," 
-              + "Y:RateFirstPeriod" + "," + "Y:BankRateFirstPeriod" + "," +
-              "OPTXPmt" + "," + "OPTYPmt"  + "," + "ttlPmt" + "," +
-              "OPTXTtlPay" + "," + "OPTYTtlPay" +  "," +
-              // bank profit data
-              "X:BankTtlPay" + "," + "Y:BankTtlPay"  + "," +
-              "ttlBorrowerPay" + "," + "TtlBankPay" + "," + "TtlBankProfit" +
-              "," + "IsWinWin" +
-              // add fee calculation
-              "," + "FeePayment";
+                s +=
+               "X:optType" + "," + "X:optAmt" + "," + "X:optTime" + ","
+               + "X:RateFirstPeriod" + "," + "X:BankRateFirstPeriod" + "," +
+               "Y:optType" + "," + "Y:optAmt" + "," + "Y:optTime" + ","
+               + "Y:RateFirstPeriod" + "," + "Y:BankRateFirstPeriod" + "," +
+               "OPTXPmt" + "," + "OPTYPmt" + "," + "ttlPmt" + "," +
+               "OPTXTtlPay" + "," + "OPTYTtlPay" + "," +
+               // bank profit data
+               "X:BankTtlPay" + "," + "Y:BankTtlPay" + "," +
+               "ttlBorrowerPay" + "," + "TtlBankPay" + "," + "TtlBankProfit";
+              /* we don't know yet this data
+                 +
+                "," + "IsWinWin" +
+                // add fee calculation
+                "," + "FeePayment"; */
             }
 
             return s;
@@ -234,9 +238,9 @@ namespace WisorLib
                                 + "," + Convert.ToInt32(optZBankTtlPay).ToString()
                                 + "," + (int)ttlPay
                                 + "," + Convert.ToInt32(ttlBankPayPayk).ToString()
-                                + "," + Convert.ToInt32(ttlPay - ttlBankPayPayk).ToString()
-                                /*+ "," + score*/
-                                /* is win-win */ + "," + IsWinWin + "," + FeePayment;
+                                + "," + Convert.ToInt32(ttlPay - ttlBankPayPayk).ToString();
+                                /* we don't know yet this data
+                                + "," + IsWinWin + "," + FeePayment; */
                 }
             }
             else
@@ -255,9 +259,9 @@ namespace WisorLib
                                 + "," + Convert.ToInt32(optYBankTtlPay).ToString()
                                 + "," + (int)ttlPay
                                 + "," + Convert.ToInt32(ttlBankPayPayk).ToString()
-                                + "," + Convert.ToInt32(ttlPay - ttlBankPayPayk).ToString()
-                                /*+ "," + score*/
-                                /* is win-win */ + "," + IsWinWin + "," + FeePayment;
+                                + "," + Convert.ToInt32(ttlPay - ttlBankPayPayk).ToString();
+                                /* we don't know yet this data
+                                + "," + IsWinWin + "," + FeePayment; */
                 }
 
             }
