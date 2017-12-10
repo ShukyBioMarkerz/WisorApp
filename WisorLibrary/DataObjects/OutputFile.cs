@@ -42,7 +42,7 @@ namespace WisorLib
             WriteToOutputFile("Wisor: The next best practice in mortgage lending");
             WriteToOutputFile("\nLoan information:");
             //WriteToOutputFile("Order ID : " + loan.ID);
-            WriteToOutputFile("Original loan date : " + loan.DateTaken.ToString());
+            WriteToOutputFile("Original loan date : " + loan.OriginalDateTaken.ToString());
             WriteToOutputFile("Original loan amount : " + loan.OriginalLoanAmount);
             uint amount = loan.OriginalLoanAmount - loan.LoanAmount;
             WriteToOutputFile("Prinsipal paid so far: " + amount);
