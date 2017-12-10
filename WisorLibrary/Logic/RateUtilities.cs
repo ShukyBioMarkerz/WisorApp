@@ -184,6 +184,7 @@ namespace WisorLibrary.Logic
             }
             //Console.WriteLine("--- FindRateForKeyAsNumber key: " + productID.ToString() + ", profile: " 
             //    + profile + ", index: " + index + ", result: " + result);
+
             return result;
         }
 
@@ -299,17 +300,21 @@ namespace WisorLibrary.Logic
                 int productIndex = Array.IndexOf(uniqueProducts4market, entities[0].Trim());
                 if (0 > productIndex)
                 {
+                    WindowsUtilities.loggerMethod("NOTICE: LoadRatesCSVFile ignore illegal productIndex: " + productIndex);
                     continue;
                 }
                         
                 // ensure the line correctness. 2 are the product name and the profile
                 if (MiscConstants.NumberOfYearsFrProduct + 2 != entities.Length)
                 {
+                    WindowsUtilities.loggerMethod("NOTICE: LoadRatesCSVFile ignore illegal line with: " + entities.Length + " entries instead of: " + (MiscConstants.NumberOfYearsFrProduct + 2).ToString());
                     continue;
                 }
 
                 int userProfile = Int32.Parse(entities[1]);
                 int indexInRatesArray = CalculateIndexInTable(productIndex, userProfile);
+                bool rc;
+                double value;
 
                 // clean all redundant chars e.g. %
                 for (int i = 2, j = 0; i < entities.Length; i++, j++)
@@ -317,7 +322,11 @@ namespace WisorLibrary.Logic
                     int index = entities[i].IndexOf(MiscConstants.PERCANTAGE_STR);
                     string trimed = (0 < index) ? entities[i].Remove(index).Trim() : entities[i].Trim();
                     entities[i] = trimed;
-                    currentRates[j] = Double.Parse(trimed);
+                    rc = Double.TryParse(trimed, out value);
+                    if (rc)
+                        currentRates[j] = value;
+                    else
+                        currentRates[j] = MiscConstants.UNDEFINED_DOUBLE;
                 }
 
                 // TBD: should define properly the index with no hard coding...
