@@ -31,7 +31,7 @@ namespace WisorLibrary.DataObjects
             {
                 instance = new Combinations(filename);
             }
-            if (null != instance && null != instance.allCombination)
+            if (null != instance && (null != instance.allCombination || null != instance.allCombinationsPerAmount))
                 rc = true;
             return rc;
          }
@@ -129,7 +129,8 @@ namespace WisorLibrary.DataObjects
                     }
 
                     int amountSeperationBlockIndex = 0;
-                    List <CombinationsPerAmount> listOfCombinationsPerAmount = new List<CombinationsPerAmount>();
+                    HashSet<string> combinationsAsUniqueStringList = new HashSet<string>(); 
+                    List<CombinationsPerAmount> listOfCombinationsPerAmount = new List<CombinationsPerAmount>();
                     // load the per amount combination
                     while (comb.Length > amountSeperationBlockIndex) {
                         
@@ -160,9 +161,16 @@ namespace WisorLibrary.DataObjects
                             if (MiscConstants.COMBINATION_PER_AMOUNT == entities[0] || MiscConstants.GENERIC_COMBINATION == entities[0])
                                 continue;
 
+                            if (entities.Length != MiscUtilities.GetNumberOfProductsInCombination())
+                            {
+                                WindowsUtilities.loggerMethod("ERROR Combinations file with: " + entities.Length + " entries while NumberOfProductsInCombination: " + MiscUtilities.GetNumberOfProductsInCombination());
+                                continue;
+                            }
+
                             for (int j = 0; j < MiscUtilities.GetNumberOfProductsInCombination(); j++)
                             {
                                 currentCombinations[counter, j] = entities[j].Trim();
+                                combinationsAsUniqueStringList.Add(currentCombinations[counter, j]);
                             }
                             counter++;
                         }
@@ -176,7 +184,10 @@ namespace WisorLibrary.DataObjects
                     }
 
                     if (null != listOfCombinationsPerAmount && 0 < listOfCombinationsPerAmount.Capacity)
+                    {
                         allCombinationsPerAmount = listOfCombinationsPerAmount.ToArray();
+                        Share.combinationsAsUniqueString = combinationsAsUniqueStringList.ToArray();
+                    }
                     else
                         allCombinationsPerAmount = null;
 
@@ -242,7 +253,7 @@ namespace WisorLibrary.DataObjects
             {
                 // number all the combination 
                 rc = ConvertProductsNaming();
-                WindowsUtilities.loggerMethod("NOTICE SetCombinationsFilename filename: " + filename + ", combinations4market.Length: " + Share.combinations4market.Length);
+                WindowsUtilities.loggerMethod("NOTICE SetCombinationsFilename filename: " + filename); //  + ", combinations4market.Length: " + Share.combinations4market.Length);
             }
             else
             {
@@ -534,6 +545,7 @@ namespace WisorLibrary.DataObjects
                 string[,] combinationsAsString = new string[
                     comb.GetUpperBound(0) + 1,
                     comb.GetUpperBound(1) + 1];
+                List<string> combinationsAsUniqueStringList = new List<string>();
 
                 for (int i = 0; i <= comb.GetUpperBound(0); i++)
                 {
@@ -548,10 +560,17 @@ namespace WisorLibrary.DataObjects
                         }
                         combinationsAsNumbers[i, o] = index;
                         combinationsAsString[i, o] = comb[i, o];
+                        combinationsAsUniqueStringList.Add(comb[i, o]);
                     }
                 }
                 Share.combinations4market = combinationsAsNumbers;
                 Share.combinationsAsString = combinationsAsString;
+                Share.combinationsAsUniqueString = combinationsAsUniqueStringList.ToArray();
+                rc = true;
+            }
+            // maybe there are combination by amount only
+            else if (null != Instance.allCombinationsPerAmount)
+            {
                 rc = true;
             }
             else
