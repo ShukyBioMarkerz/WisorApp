@@ -146,21 +146,42 @@ namespace WisorLibrary.ReportApplication
                 // LoanList ll = env.theLoan.OriginalLoanDetaild;
                 if (null != reportData)
                 {
+                    OriginalLoanUKTableShort olus = null;
                     string productName = MiscConstants.UNDEFINED_STRING;
                     if (!String.IsNullOrEmpty(reportData.ProductName))
                     {
                         GenericProduct product = GenericProduct.GetProductByName(reportData.ProductName);
-                        productName = product.name;
+                        if (null != product)
+                        {
+                            productName = product.name;
+
+                            if (!String.IsNullOrEmpty(productName))
+                            {
+                                DateTime dateOfRateChange = reportData.OriginalDateTaken.AddMonths(reportData.firstTimePeriod);
+                                olus = new OriginalLoanUKTableShort(reportData.OriginalDateTaken, (int)reportData.OriginalLoanAmount,
+                                    productName, (int)reportData.OriginalTime, reportData.OriginalRate * 100, reportData.OriginalRate2 * 100,
+                                    dateOfRateChange, (int)reportData.FirstMonthlyPMT, (int)reportData.FirstMonthlyPMT2, (int)reportData.PayUntilToday,
+                                    (int)reportData.RemaingLoanAmount, (int)reportData.PayFuture, (int)reportData.YearlyIncome, reportData.PTI * 100,
+                                    reportData.PrintedOriginalMargin * 100, reportData.PrintedOriginalMargin2 * 100, reportData.EstimateProfitPercantageSoFar * 100,
+                                    (int)reportData.EstimateProfitSoFar, reportData.EstimateTotalProfitPercantage * 100,
+                                    (int)reportData.EstimateTotalProfit, (int)reportData.EstimateFutureProfit, reportData.EstimateFutureProfitPercantage * 100);
+                            }
+                            else
+                            {
+                                WindowsUtilities.loggerMethod("ERROR OriginalLoanUKTableShortValue failed to get product by name: " + reportData.ProductName);
+                            }
+                        }
+                        else
+                        {
+                            WindowsUtilities.loggerMethod("ERROR OriginalLoanUKTableShortValue failed to get product by name: " + reportData.ProductName);
+                        }
                     }
-                    
-                    DateTime dateOfRateChange = reportData.OriginalDateTaken.AddMonths(reportData.firstTimePeriod);
-                    OriginalLoanUKTableShort olus = new OriginalLoanUKTableShort(reportData.OriginalDateTaken, (int) reportData.OriginalLoanAmount,
-                        productName, (int)reportData.OriginalTime, reportData.OriginalRate * 100, reportData.OriginalRate2 * 100,
-                        dateOfRateChange, (int)reportData.FirstMonthlyPMT, (int)reportData.FirstMonthlyPMT2, (int)reportData.PayUntilToday,
-                        (int)reportData.RemaingLoanAmount, (int)reportData.PayFuture, (int)reportData.YearlyIncome, reportData.PTI * 100,
-                        reportData.PrintedOriginalMargin * 100, reportData.PrintedOriginalMargin2 * 100, reportData.EstimateProfitPercantageSoFar * 100,
-                        (int)reportData.EstimateProfitSoFar, reportData.EstimateTotalProfitPercantage * 100,
-                        (int)reportData.EstimateTotalProfit, (int)reportData.EstimateFutureProfit, reportData.EstimateFutureProfitPercantage * 100);
+                    else
+                    {
+                        
+                        WindowsUtilities.loggerMethod("ERROR OriginalLoanUKTableShortValue reportData.ProductName is empty.");
+                    }
+
                     return olus;
                 }
                 else
@@ -725,47 +746,51 @@ namespace WisorLibrary.ReportApplication
             {
                 if (null != reportData) {
                     string[] products = reportData.GetProducts();
-                    GenericProduct gp;
-                    int profile = 1, minRateIndex = 0, maxRateIndex = MiscConstants.NumberOfYearsFrProduct - 1;
-                    List<ProductsUsedInAnalysisTableShortUK> lopuiats = new List<ProductsUsedInAnalysisTableShortUK>();
-                    foreach (string p in products)
+                    List<ProductsUsedInAnalysisTableShortUK> lopuiats = null;
+                    if (null != products)
                     {
-                        gp = GenericProduct.GetProductByName(p);
-                        if (null == gp)
+                        GenericProduct gp;
+                        int profile = 1, minRateIndex = 0, maxRateIndex = MiscConstants.NumberOfYearsFrProduct - 1;
+                        lopuiats = new List<ProductsUsedInAnalysisTableShortUK>(); 
+                        foreach (string p in products)
                         {
-                            gp = GenericProduct.GetProductFromAllListByName(p);
-                        }
-                        if (null == gp)
-                        {
-                            WindowsUtilities.loggerMethod("ERROR: ShortProductsUsedInAnalysisTableValuesUK unrecognized product: " + p);
-                            continue;
-                        }
+                            gp = GenericProduct.GetProductByName(p);
+                            if (null == gp)
+                            {
+                                gp = GenericProduct.GetProductFromAllListByName(p);
+                            }
+                            if (null == gp)
+                            {
+                                WindowsUtilities.loggerMethod("ERROR: ShortProductsUsedInAnalysisTableValuesUK unrecognized product: " + p);
+                                continue;
+                            }
 
-                        string productName = gp.name;
-                        if (Share.cultureInfo.Name.Equals("he-IL"))
-                        {
-                            productName = (null != gp.hebrewName) ? gp.hebrewName : productName;
-                        }
-                    
-                        double bankRate1 = RateUtilities.Instance.GetBankRate(gp.productID.numberID, profile, maxRateIndex);
-                        double borrowerRate1 = RateUtilities.Instance.GetBorrowerRate(gp.productID.numberID, profile, maxRateIndex);
-                        
-                        // bankRate1 = borrowerRate1 + bankRate1;
-                        // keep the original bank margin and not the calculation
+                            string productName = gp.name;
+                            if (Share.cultureInfo.Name.Equals("he-IL"))
+                            {
+                                productName = (null != gp.hebrewName) ? gp.hebrewName : productName;
+                            }
 
-                        // TBD: Omri, where should we get the lower and the higher rate && margin values
-                        double bankRate2 = bankRate1;
-                        double borrowerRate2 = borrowerRate1;
-                        if (MiscConstants.markets.UK == Share.theMarket)
-                        {
-                            bankRate2 = RateUtilities.Instance.GetBankRateSecondPeriod(gp.productID.numberID, profile, maxRateIndex);
-                            borrowerRate2 = RateUtilities.Instance.GetBorrowerRateSecondPeriod(gp.productID.numberID, profile, minRateIndex);
-                            // bankRate2 = borrowerRate2 + bankRate2;
-                        }
+                            double bankRate1 = RateUtilities.Instance.GetBankRate(gp.productID.numberID, profile, maxRateIndex);
+                            double borrowerRate1 = RateUtilities.Instance.GetBorrowerRate(gp.productID.numberID, profile, maxRateIndex);
 
-                        ProductsUsedInAnalysisTableShortUK puiats = new ProductsUsedInAnalysisTableShortUK(
-                            bankRate1 * 100, borrowerRate1 * 100, bankRate2 * 100, borrowerRate2 * 100, productName);
-                        lopuiats.Add(puiats);
+                            // bankRate1 = borrowerRate1 + bankRate1;
+                            // keep the original bank margin and not the calculation
+
+                            // TBD: Omri, where should we get the lower and the higher rate && margin values
+                            double bankRate2 = bankRate1;
+                            double borrowerRate2 = borrowerRate1;
+                            if (MiscConstants.markets.UK == Share.theMarket)
+                            {
+                                bankRate2 = RateUtilities.Instance.GetBankRateSecondPeriod(gp.productID.numberID, profile, maxRateIndex);
+                                borrowerRate2 = RateUtilities.Instance.GetBorrowerRateSecondPeriod(gp.productID.numberID, profile, minRateIndex);
+                                // bankRate2 = borrowerRate2 + bankRate2;
+                            }
+
+                            ProductsUsedInAnalysisTableShortUK puiats = new ProductsUsedInAnalysisTableShortUK(
+                                bankRate1 * 100, borrowerRate1 * 100, bankRate2 * 100, borrowerRate2 * 100, productName);
+                            lopuiats.Add(puiats);
+                        }
                     }
                     return lopuiats.ToArray();
 
