@@ -298,7 +298,7 @@ namespace WisorLib
                                     iftp /*indices*/, istp /*indices*/,
                                     ijftp /*indexJumps*/, ijstp /*indexJumps*/,
                                     minTime, maxTime, timeJump, firstTimePeriod, maxPercentageLoan,
-                                    risk, liquidity, fixOrAdjustable, benefit, mustBeUsed, shouldConsider));
+                                    risk, liquidity, fixOrAdjustable, benefit, mustBeUsed, shouldConsider, fee));
 
                                 // add the product name to the indexed list
                                 productsHash.Add(typeId);
