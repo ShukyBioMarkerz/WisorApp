@@ -51,6 +51,7 @@ namespace WisorLib
 
         public static int[,] combinations4market;
         public static string[,] combinationsAsString;
+        public static string[] combinationsAsUniqueString;
         public static string[] theProductsNames { get; set; }
         public static double[] theProductsRates;
         public static double[] theProductsRatesSecondPeriod;
@@ -102,6 +103,8 @@ namespace WisorLib
         public static long CalculateLuahSilukinCounterNOTInFirstTimePeriod;
         public static long CalculateLuahSilukinCounterInFirstTimePeriod;
         public static long CalculateLuahSilukinCounterIndexUsedFirstTimePeriod;
+        public static long OneDivisionOfAmountsCounter;
+        public static long Calculation_CalculatePmtCounter;
 
         public static int TotalNumberOfLoans { get; set; }
         public static int NumberOfCanRefininceLoans { get; set; }
@@ -354,6 +357,7 @@ namespace WisorLib
 
         public static bool ShouldCreateReportOnlyWhenWinWin { get; internal set; }
         public static bool ShouldDisplayReportOnline { get; internal set; }
+        public static bool CheckPerformanceBySkippingCalculation { get; internal set; }
 
 
 
@@ -401,6 +405,6 @@ namespace WisorLib
         internal const uint minimumTimeForLoan = 48;
         public const double largeDev = 20;
         internal const double smallDev = 1;
-  
+ 
     }
 }
