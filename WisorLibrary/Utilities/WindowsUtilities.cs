@@ -12,7 +12,7 @@ namespace WisorLib
     public delegate void MyDelegate(string s, bool write2console = true, bool shouldColor = false);
 
     public delegate RunLoanDetails MyRunDelegate(loanDetails loan);
-    public delegate void MyRunDelegateListOfLoans(LoanList loan);
+    public delegate void MyRunDelegateListOfLoans(LoanList loan, List<Task> perLoanTasks = null);
 
 
     public class WindowsUtilities
