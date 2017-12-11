@@ -147,7 +147,7 @@ namespace WisorLib
                 ttlPayForCheck = Convert.ToInt32(optX.optTtlPay + optY.optTtlPay + optZ.optTtlPay);
             else
                 ttlPayForCheck = Convert.ToInt32(optX.optTtlPay + optY.optTtlPay);
-            int diff = Convert.ToInt32(ttlPayForCheck - ttlBankPayPayk);
+            //int diff = Convert.ToInt32(ttlPayForCheck - ttlBankPayPayk);
 
             // for debug only - print the luch silukin results to a file
             if (Share.shouldDebugLuchSilukin)
@@ -181,7 +181,7 @@ namespace WisorLib
                 }
              
                 ChosenComposition comp = new ChosenComposition()
-                    { resultX, resultY, resultZ, ttlPayForCheck.ToString(), ttlBankPayPayk.ToString(), diff.ToString() };
+                    { resultX, resultY, resultZ, ttlPayForCheck.ToString(), ttlBankPayPayk.ToString()/*, diff.ToString()*/ };
                 comp.SetBorrowerPay(ttlPayForCheck);
                 comp.SetBankPay(ttlBankPayPayk);
                 comp.SetBankProfit(Convert.ToInt32(ttlPayForCheck - ttlBankPayPayk));
@@ -190,12 +190,13 @@ namespace WisorLib
             }
             
             // now, the bank rate may be negative and the diff as well
-            int absDiff = Math.Abs(diff);
-            if (env.MaxProfit < absDiff /*Convert.ToInt32(diff)*/)
-            {
-                env.MaxProfit = absDiff /*Convert.ToInt32(diff)*/;
-                env.bestDiffComposition = new Composition(optX, optY, optZ, env, MiscConstants.BEST_DIFF_COMPOSITION);
-            }
+            // no use for thre best diff now since it doesnot point to any valid compositiob
+            //int absDiff = Math.Abs(diff);
+            //if (env.MaxProfit < absDiff /*Convert.ToInt32(diff)*/)
+            //{
+            //    env.MaxProfit = absDiff /*Convert.ToInt32(diff)*/;
+            //    env.bestDiffComposition = new Composition(optX, optY, optZ, env, MiscConstants.BEST_DIFF_COMPOSITION);
+            //}
             if (env.MaxBankPay < ttlBankPayPayk)
             {
                 env.MaxBankPay = ttlBankPayPayk;
@@ -216,8 +217,12 @@ namespace WisorLib
             // by the factor to each of them
             // UPON the actuall known data from the loan' calculation
             int borrowerProfitCalc, bankProfitCalc, totalBenefit;
-            MiscUtilities.CalcaulateProfitAll(ttlBankPayPayk, Convert.ToInt32(ttlPayForCheck), diff, env.theLoan,
+            int bankWinWinProfitCalc, borrowerWinWinProfitCalc, totalWinWinBenefit;
+            int feePayment = 0;
+
+            MiscUtilities.CalcaulateProfitAll(ttlBankPayPayk, Convert.ToInt32(ttlPayForCheck), feePayment, env.theLoan,
                 out borrowerProfitCalc, out bankProfitCalc, out totalBenefit);
+
             if (0 < borrowerProfitCalc && 0 < bankProfitCalc && 0 < totalBenefit)
             {
                 //if (0 >= env.MaxBorrowerProfitCalc)
@@ -244,15 +249,17 @@ namespace WisorLib
                     env.MaxBorrowerProfitCalc = borrowerProfitCalc;
                     env.bestAllProfitCompositionBorrower = new Composition(optX, optY, optZ, env, MiscConstants.BEST_ALL_PROFIT_COMPOSITION_BORROWER);
                 }
-                //if (env.MaxBankProfitCalc < bankProfitCalc &&
-                //    env.MaxBorrowerProfitCalc >= borrowerProfitCalc
-                //    /*env.MaxTotalBenefit < totalBenefit &&*/)
-                //{
-                //    env.MaxBankProfitCalc = bankProfitCalc;
-                //    env.MaxTotalBenefit = totalBenefit;
-                //    env.MaxBorrowerProfitCalc = borrowerProfitCalc;
-                //    env.bestAllProfitComposition = new Composition(optX, optY, optZ, env, MiscConstants.BEST_ALL_PROFIT_COMPOSITION);
-                //}
+                
+                // look for the Win-Win cases
+                if (env.MaxWinWinBankProfitCalc < bankProfitCalc &&
+                    env.MaxWinWinBorrowerProfitCalc >= borrowerProfitCalc
+                    /*env.MaxTotalBenefit < totalBenefit &&*/)
+                {
+                    env.MaxWinWinBankProfitCalc = bankProfitCalc;
+                    env.MaxWinWinBorrowerProfitCalc = borrowerProfitCalc;
+                    env.MaxWinWinTotalBenefit = bankProfitCalc + borrowerProfitCalc;
+                    env.bestAllProfitComposition = new Composition(optX, optY, optZ, env, MiscConstants.BEST_ALL_PROFIT_COMPOSITION);
+                }
 
             }
 
