@@ -308,9 +308,14 @@ namespace WisorLibrary.DataObjects
             bool shouldReFinanceWithFee, canBorrowerSaveWithFee, canLenderProfitWithFee;
             shouldReFinanceWithFee = canBorrowerSaveWithFee = canLenderProfitWithFee = MiscConstants.UNDEFINED_BOOL;
             int borrowerProfitCalcWithFee = MiscConstants.UNDEFINED_INT;
+            bool isFirstPeriod;
 
             foreach (Composition comp in compositions)
             {
+                int firstTimePeriod = env.theLoan.firstTimePeriod;
+                int numOfMonthsUntilToday = MiscUtilities.CalculateMonthBetweenDates(env.theLoan.OriginalDateTaken, DateTime.Now);
+                isFirstPeriod = (numOfMonthsUntilToday <= firstTimePeriod);
+
                 if (null != comp)
                 {
                     // calculate the fee 
@@ -351,6 +356,7 @@ namespace WisorLibrary.DataObjects
                         shouldReFinance = canBorrowerSave && canLenderProfit;
                         shouldReFinanceWithFee = canBorrowerSaveWithFee && canLenderProfit;
                     }
+                    
                     shouldThisLoanReFinance = shouldThisLoanReFinance || shouldReFinance;
                     shouldThisLoanReFinanceWithFee = shouldThisLoanReFinanceWithFee || shouldReFinanceWithFee;
                     totalBenefitPerLoan = totalBenefitPerLoan || (0 < totalBenefit);
@@ -363,6 +369,7 @@ namespace WisorLibrary.DataObjects
                         env.theLoan.OriginalLoanAmount.ToString(), // "Original Loan Amount",
                         env.theLoan.DesiredMonthlyPayment.ToString(), // "Monthly payment",
                         env.theLoan.OriginalDateTaken.ToString(DATE_FORMAT), // "Date Taken",
+                        env.theLoan.ProductID.stringTypeId, // original product
                         env.theLoan.LoanAmount.ToString(), // "Remaining Amount",
                         env.theLoan.resultReportData.PayUntilToday.ToString(), // "Borrower Paid So Far",
                         env.theLoan.resultReportData.BankPayUntilToday.ToString(), // "Bank Profit So Far",
@@ -390,6 +397,7 @@ namespace WisorLibrary.DataObjects
                         env.theLoan.resultReportData.PTI.ToString(), // "PTI",
                         env.theLoan.YearlyIncome.ToString(), //"Income"
                         env.theLoan.fico.ToString(), // fico
+                        (isFirstPeriod ? "Yes" : "No" ), // Is first period"
                         comp.FeePayment.ToString(),
                         (shouldReFinanceWithFee ? "Yes" : "No" ), // "With Fee: Refinance Or No"
                         (canBorrowerSaveWithFee ? "Yes" : "No" ), // "With Fee: Can Save Borrower Money"
@@ -456,6 +464,17 @@ namespace WisorLibrary.DataObjects
                         //        MiscUtilities.PrintSummaryFileS(Share.theTotalWinSummaryFile, msg);
                         //        break;
                         //}
+                    }
+
+                    if (canBorrowerSave)
+                    {
+                        // if (MiscConstants.BEST_BORROWER_COMPOSITION == comp.name)
+                            MiscUtilities.PrintSummaryFileS(Share.theBorrowerWinSummaryFile, msg);
+                    }
+
+                    if (canLenderProfit)
+                    {
+                        MiscUtilities.PrintSummaryFileS(Share.theBankWinSummaryFile, msg);
                     }
                   
                 }
