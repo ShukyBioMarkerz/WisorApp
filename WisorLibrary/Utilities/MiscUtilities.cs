@@ -272,10 +272,13 @@ namespace WisorLibrary.Utilities
 
             foreach (Composition comp in composition)
             {
-                if (!compL.Exists(Composition.CompositionPredicate(comp)))
-                    // ensure its a win-win composition
-                    //if (comp.IsWinWin)           leave it for debug purpose
-                    compL.Add(comp);
+                if (null != comp)
+                {
+                    if (!compL.Exists(Composition.CompositionPredicate(comp)))
+                        // ensure its a win-win composition
+                        //if (comp.IsWinWin)           leave it for debug purpose
+                        compL.Add(comp);
+                }
             }
 
             // ensure the composition number is obeyed
@@ -1012,7 +1015,8 @@ namespace WisorLibrary.Utilities
             // consider the fee
             if (MiscConstants.UNDEFINED_UINT < feePayment)
             {
-
+                // TBD - Omri how shpould we consider this: 
+                // should we add the fee to the bank payment, should we add to borrower payment
             }
 
             CalcaulateProfit(comp, out ttlBankPay, out ttlBorrowerPay, out ttlProfit);
@@ -1106,6 +1110,7 @@ namespace WisorLibrary.Utilities
                         "Original Loan Amount",
                         "Monthly payment",
                         "Date Taken",
+                        "Original product",
                         "Remaining Amount",
                         "Borrower Paid So Far",
                         "Bank Payment So Far",
@@ -1131,6 +1136,7 @@ namespace WisorLibrary.Utilities
                         "PTI",
                         "Income",
                         "FICO",
+                        "Is first period",
                         "FeePayment",
                         "With Fee: Refinance Or No",
                         "With Fee: Can Save Borrower Money",
@@ -1177,6 +1183,12 @@ namespace WisorLibrary.Utilities
                         "Min lender profit Bor save" ,
                         "Min lender profit Lender pay",
                         "Min lender profit name"
+
+                        // fee calculation
+                        , "FeePayment",
+                        "With Fee: Refinance Or No",
+                        "With Fee: Can Save Borrower Money",
+                        "With Fee: Borrower beneficial"
                     };
             return msg;
         }
@@ -1498,7 +1510,7 @@ namespace WisorLibrary.Utilities
             return rc;
         }
 
-        public static void RunTheLogic(LoanList listOfLoans = null, bool shouldCallPrepare = true)
+        public static void RunTheLogic(LoanList listOfLoans/* = null*/, bool shouldCallPrepare/* = true*/, List<Task> perLoanTasks = null)
         {
             LoanList loans;
             bool rc = false;
@@ -1532,7 +1544,9 @@ namespace WisorLibrary.Utilities
                         WindowsUtilities.runLoanMethodSync(loans);
                     //Utilities.RunTheLoansWraperSync(loans);
                     else
-                        WindowsUtilities.runLoanMethodASync(loans);
+                    {
+                        WindowsUtilities.runLoanMethodASync(loans, perLoanTasks);
+                    }
                     //Utilities.RunTheLoansWraperASync(loans);
                 }
                 else
@@ -1681,14 +1695,13 @@ namespace WisorLibrary.Utilities
             // output log level settings
             Share.printMainInConsole = true;
             Share.printToOutputFile = true;
-
             Share.printFunctionsInConsole = false;
             Share.printSubFunctionsInConsole = false;
             Share.printPercentageDone = false;
  
             // important settings
             Share.shouldRunSync = true;
-            Share.shouldRunLogicSync = false; //  true;
+            Share.shouldRunLogicSync = false; //  true
             Share.shouldCreateShortPDFReport = false; //true;
             Share.shouldCreateLongPDFReport = false;
             Share.ShouldDisplayReportOnline = true;
@@ -1705,7 +1718,9 @@ namespace WisorLibrary.Utilities
                 Share.CalculateLuahSilukinCounterIndexUsedFirstTimePeriod =
                 Share.Calculation_CalculateLuahSilukinCounter =
                 Share.Calculation_CalculateLuahSilukinUKCounter =
-                Share.Calculation_CalculateLuahSilukinBankCounter = 0;
+                Share.Calculation_CalculateLuahSilukinBankCounter =
+                Share.OneDivisionOfAmountsCounter =
+                Share.Calculation_CalculatePmtCounter = 0;
 
             if (null == WindowsUtilities.loggerMethod)
             {
@@ -1740,6 +1755,7 @@ namespace WisorLibrary.Utilities
             {
                 reasoning += "ERROR: SetupAllEnv failed in LoadXMLConfigurationFileToMemory";
                 Console.WriteLine("ERROR: SetupAllEnv failed in LoadXMLConfigurationFileToMemory");
+                WindowsUtilities.loggerMethod(reasoning, true, true);
                 return rc;
             }
 
@@ -1750,8 +1766,15 @@ namespace WisorLibrary.Utilities
             {
                 reasoning += "ERROR: SetupAllEnv failed in CheckConfigurationConsistancy: " + msg;
                 Console.WriteLine("ERROR: SetupAllEnv failed in CheckConfigurationConsistancy: " + msg);
+                WindowsUtilities.loggerMethod(reasoning, true, true);
                 //return rc;
             }
+
+            // performance tests
+            Share.CheckPerformanceBySkippingCalculation = true; //  false;
+            // for 2 products, always skip the performance enhancments
+            if (2 == GetNumberOfProductsInCombination())
+                Share.CheckPerformanceBySkippingCalculation = false;
 
             return rc;
         }
@@ -2669,6 +2692,9 @@ namespace WisorLibrary.Utilities
                                 case MiscConstants.SHOULD_DISPLAY_REPORT_ONLINE:
                                     AddEntryToList(theCurrentMarket, MiscConstants.SHOULD_DISPLAY_REPORT_ONLINE, node.Value);
                                     break;
+                                case MiscConstants.SHOULD_RUN_THE_LOGIC_SYNC:
+                                    Share.shouldRunLogicSync = "yes" == node.Value ? true : false;
+                                    break;
                                 default:
                                     if (MiscConstants.MARKET != child.Name)
                                         Console.WriteLine("LoadXMLConfigurationFileToMemory Illegal input: " + child.Name);
@@ -2943,6 +2969,15 @@ namespace WisorLibrary.Utilities
             return combinations;
         }
 
+        public static string[] GetCombinationsUniqueNames(uint amount, double LTV)
+        {
+            string[] combinations = null;
+
+            combinations = Share.combinationsAsUniqueString;
+
+            return combinations;
+        }
+
         public static string[,] GetCombinationsNames(uint amount, double LTV)
         {
             string[,] combinations = null;  
@@ -2986,7 +3021,22 @@ namespace WisorLibrary.Utilities
 
         // Fee calculation:
         // Fee can be a constant or percantage from the amount
-        public static uint CalculateFee(uint loanAmount, GenericProduct productX, GenericProduct productY, GenericProduct productZ)
+        public static uint CalculateFees(uint loanAmount, bool IsItNewLoan, 
+            GenericProduct productX, GenericProduct productY, GenericProduct productZ, int productID)
+        {
+            uint openingFeePayment = MiscUtilities.CalculateOpeningFee(loanAmount,
+                         productX, productY, productZ);
+            uint closingFeePayment = MiscConstants.UNDEFINED_UINT;
+
+            if (!IsItNewLoan)
+            {
+                closingFeePayment = MiscUtilities.CalculateClosingFee(loanAmount, productID);
+            }
+            openingFeePayment += closingFeePayment;
+            return openingFeePayment;
+        }
+
+        public static uint CalculateOpeningFee(uint loanAmount, GenericProduct productX, GenericProduct productY, GenericProduct productZ)
         {
             // what is the logic:
             // combine all fees or select the higher / lower /else
@@ -2997,9 +3047,9 @@ namespace WisorLibrary.Utilities
             // is the fee constant or percantage?
             uint feeX = MiscConstants.UNDEFINED_UINT, feeY = MiscConstants.UNDEFINED_UINT, feeZ = MiscConstants.UNDEFINED_UINT;
 
-            feeX = GetFeeNumber(loanAmount, feeXs);
-            feeY = GetFeeNumber(loanAmount, feeYs);
-            feeZ = GetFeeNumber(loanAmount, feeZs);
+            feeX = GetOpeninFeeNumber(loanAmount, feeXs);
+            feeY = GetOpeninFeeNumber(loanAmount, feeYs);
+            feeZ = GetOpeninFeeNumber(loanAmount, feeZs);
 
             // lets get the maximum for now
             uint maxFee = Math.Max(feeZ, Math.Max(feeX, feeY));
@@ -3007,7 +3057,7 @@ namespace WisorLibrary.Utilities
             return maxFee;
         }
 
-        static uint GetFeeNumber(uint loanAmount, string feeString)
+        static uint GetOpeninFeeNumber(uint loanAmount, string feeString)
         {
             uint feeNumber = MiscConstants.UNDEFINED_UINT;
 
@@ -3028,6 +3078,48 @@ namespace WisorLibrary.Utilities
             return feeNumber;
         }
 
+        public static uint CalculateClosingFee(uint loanRemainingAmount, int productID)
+        {
+            uint closingFee = MiscConstants.UNDEFINED_UINT;
+
+            // for UK only
+            // if product is fixed -> 1% of remining amount
+            // if product is not-fixed -> 3% of remining amount
+            if (markets.UK == Share.theMarket)
+            {
+                GenericProduct product = GenericProduct.GetProduct(productID);
+                if (null != product)
+                {
+                    if (MiscUtilities.IsProductFix(product.fixOrAdjustable))
+                    {
+                        closingFee = (uint)(MiscConstants.FIX_PRODUCT_CLOSING_FEE_PERCANTAGE * loanRemainingAmount);
+                    }
+                    else
+                    {
+                        closingFee = (uint)(MiscConstants.NOTFIX_PRODUCT_CLOSING_FEE_PERCANTAGE * loanRemainingAmount);
+                    }
+                }
+                else
+                {
+                    WindowsUtilities.loggerMethod("ERROR CalculateClosingFee failed to get product for id: " + productID);
+                }
+            }
+            // For Israel 
+            // TBD : return 0
+            else if (markets.UK == Share.theMarket)
+            {
+
+            }
+            // For US -> return 0
+            else if (markets.UK == Share.theMarket)
+            {
+
+            }
+
+            return closingFee;
+        }
+
+#if _SHOULD_CHOOSE_COMBINATION_BY_FEE
         public static void ChooseCombination(double amtForCalc, double originalRate, double originalInflation, GenericProduct product)
         {
             uint timeForCalc;
@@ -3037,7 +3129,7 @@ namespace WisorLibrary.Utilities
 
             // loop the optional combination
             string feeString = product.fee;
-            uint fee = GetFeeNumber((uint) amtForCalc, feeString);
+            uint fee = GetOpeninFeeNumber((uint) amtForCalc, feeString);
 
             // calculate PMT for each compbination
             double pmt1 = Calculations.CalculateMonthlyPmt(amtForCalc, timeForCalc, originalRate, originalInflation);
@@ -3055,6 +3147,7 @@ namespace WisorLibrary.Utilities
             }
 
         }
+#endif
 
         // for performance reasons 
         //// TBD: should be defined by:
