@@ -44,11 +44,11 @@ namespace WisorLib
             if (CanRunCalculation && null != combinations)
             {
                 // for debug
-                if (Share.shouldDebugLoans)
-                {
-                    MiscUtilities.PrintMiscLogger("\nRuning calculation with loan:");
-                    MiscUtilities.PrintMiscLogger(env.theLoan.ToString());
-                }
+                //if (Share.shouldDebugLoans)
+                //{
+                //    MiscUtilities.PrintMiscLogger("\nRuning calculation with loan:");
+                //    MiscUtilities.PrintMiscLogger(env.theLoan.ToString());
+                //}
 
                 // Get start time for software
                 env.CheckInfo.softwareOpenTime = DateTime.Now;
@@ -126,7 +126,7 @@ namespace WisorLib
                     // End of three option search for one combination of option types
 
                     // Print summary to file
-                    PrintSummary(search.numOfCalculations, combinationCounter);
+                    PrintSummary(search.numOfCalculations, combinations, combinationCounter);
                   }
 
                 // Get end time for software
@@ -318,9 +318,8 @@ namespace WisorLib
             }
         }
 
-        void PrintSummary(uint numOfCalculations, uint combinationCounter)
+        void PrintSummary(uint numOfCalculations, string[,] comb, uint combinationCounter)
         {
-            string[,] comb = Combinations.GetCombination(Share.theMarket);
             // Print summary to console
             if (env.PrintOptions.printMainInConsole == true)
             {
